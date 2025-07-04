@@ -1,13 +1,17 @@
-import express  from 'express'
-import dotenv from 'dotenv'
+import dotenv from 'dotenv';
+dotenv.config();
 
-dotenv.config()
+import { app } from './app';
 
-const app = express()
-const port = process.env.PORT || 8000
+const PORT = process.env.PORT || 8000;
 
-app.use(express.json())
-
-app.listen(port, () => {
-  console.log(`Server running on http://localhost:${port}`)
-})
+(async () => {
+    try {
+        app.listen(PORT, () => {
+            console.log(`Server running on http://localhost:${PORT}`);
+        });
+    } catch (error) {
+        console.error(`Failed to connect to DB`, error);
+        process.exit();
+    }
+})();
