@@ -2103,17 +2103,17 @@ export namespace Prisma {
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
     id?: number
+    username?: string
     email?: string
     AND?: UserWhereInput | UserWhereInput[]
     OR?: UserWhereInput[]
     NOT?: UserWhereInput | UserWhereInput[]
-    username?: StringFilter<"User"> | string
     name?: StringFilter<"User"> | string
     password?: StringFilter<"User"> | string
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     role?: EnumRoleFilter<"User"> | $Enums.Role
-  }, "id" | "email">
+  }, "id" | "username" | "email">
 
   export type UserOrderByWithAggregationInput = {
     id?: SortOrder
