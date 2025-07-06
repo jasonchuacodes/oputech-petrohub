@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 
-import { BadInputError, ConflictError } from '~/errors';
+import { BadInputError, ConflictError, NotFoundError } from '~/errors';
 import { createSchemaValidator } from '~/utils/schema-validator';
 
 import * as userService from '../services/user.service';
@@ -49,11 +49,12 @@ const getUserById = async (req: Request, res: Response) => {
         const user = await userService.getUserById(id);
 
         res.status(201).json(user);
-    } catch (error) {
-        res.status(500).json({
-            message: 'Failed to get users',
-            error,
-        });
+    } catch (err) {
+        if (err instanceof NotFoundError) {
+            res.status(404).json({ message: err.message });
+        }
+
+        res.status(500).json({ message: 'Something went wrong' });
     }
 };
 

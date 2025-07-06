@@ -1,5 +1,5 @@
 import { prisma } from '~/db/index';
-import { ConflictError } from '~/errors/confict.error';
+import { ConflictError, NotFoundError } from '~/errors';
 
 import { CreateUserInput } from '../schema/createUserSchema';
 
@@ -30,7 +30,13 @@ const getAllUsers = async () => {
 };
 
 const getUserById = async (id: number) => {
-    return await prisma.user.findFirst({ where: { id } });
+    const user = await prisma.user.findFirst({ where: { id } });
+
+    if (!user) {
+        throw new NotFoundError('User not found');
+    }
+    
+    return user;
 };
 
 export { createUser, getAllUsers, getUserById };
