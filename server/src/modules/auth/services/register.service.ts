@@ -6,7 +6,7 @@ import { UserRegisterInput } from '../schema/registerSchema';
 
 const validatePassword = (password: string, confirmation: string) => {
     if (password !== confirmation) {
-        throw new Error('Passwords do not match');
+        throw new ConflictError('Passwords do not match');
     }
 };
 
