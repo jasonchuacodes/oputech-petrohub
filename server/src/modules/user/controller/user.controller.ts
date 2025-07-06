@@ -1,16 +1,30 @@
 import { Request, Response } from 'express';
+
+import { BadInputError, ConflictError } from '~/errors';
+import { createSchemaValidator } from '~/utils/schema-validator';
+
 import * as userService from '../services/user.service';
+import { createUserSchema } from '../schema/createUserSchema';
+
+const validateCreateUser = createSchemaValidator(createUserSchema);
 
 const createUser = async (req: Request, res: Response) => {
     try {
-        const { name, email, role } = req.body;
+        const data = await validateCreateUser(req.body);
 
-        const user = await userService.createUser({ name, email, role });
-        res.status(201).json(user);
-    } catch (error) {
+        await userService.createUser(data);
+
+        res.status(201).json({ message: 'User created successfully' });
+    } catch (err) {
+        if (err instanceof BadInputError) {
+            return res.status(400).json({ errors: err.fieldErrors });
+        }
+
+        if (err instanceof ConflictError) {
+            return res.status(409).json({ message: err.message });
+        }
         res.status(500).json({
-            message: 'Failed to create user',
-            error,
+            message: 'Something went wrong',
         });
     }
 };
@@ -18,6 +32,7 @@ const createUser = async (req: Request, res: Response) => {
 const getAllUsers = async (req: Request, res: Response) => {
     try {
         const allUsers = await userService.getAllUsers();
+
         res.status(201).json(allUsers);
     } catch (error) {
         res.status(500).json({
@@ -32,6 +47,7 @@ const getUserById = async (req: Request, res: Response) => {
         const { id } = req.body;
 
         const user = await userService.getUserById(id);
+
         res.status(201).json(user);
     } catch (error) {
         res.status(500).json({
