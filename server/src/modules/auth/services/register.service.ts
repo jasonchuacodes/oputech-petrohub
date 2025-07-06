@@ -1,5 +1,6 @@
 import { prisma } from '~/db';
 import { ConflictError } from '~/errors';
+import { generateHash } from '~/utils/bcrypt';
 
 import { UserRegisterInput } from '../schema/registerSchema';
 
@@ -14,6 +15,8 @@ const registerUser = async (data: UserRegisterInput) => {
 
     validatePassword(password, confirmPassword);
 
+    const hash = await generateHash(password);
+
     const existingUser = await prisma.user.findUnique({
         where: { email },
     });
@@ -26,7 +29,7 @@ const registerUser = async (data: UserRegisterInput) => {
         data: {
             email,
             name,
-            password,
+            password: hash,
             username,
             role,
         },
