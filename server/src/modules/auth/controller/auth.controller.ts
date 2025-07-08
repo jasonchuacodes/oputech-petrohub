@@ -18,8 +18,6 @@ const getMe = (req: AuthenticatedRequest, res: Response, next: NextFunction) => 
   try {
     const user = req.user;
 
-    console.log('Request: ', req);
-
     if (!user) {
       throw new NotFoundError('User not found');
     }

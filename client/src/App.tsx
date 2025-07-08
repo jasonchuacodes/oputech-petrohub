@@ -1,13 +1,21 @@
-import { Outlet } from 'react-router-dom'
-import { Stack, Typography } from '@mui/material'
+import { CssBaseline, ThemeProvider } from '@mui/material';
+import { Outlet } from 'react-router-dom';
 
-function App() {
-    return (
-        <Stack>
-            <Typography>Welcome to BuzHub</Typography>
-            <Outlet />
-        </Stack>
-    )
-}
+import theme from './theme';
 
-export default App
+export const AppLayout = () => {
+  return (
+    <>
+      <CssBaseline />
+      <Outlet />
+    </>
+  );
+};
+
+export const App = () => {
+  return (
+    <ThemeProvider theme={theme}>
+      <AppLayout />
+    </ThemeProvider>
+  );
+};
