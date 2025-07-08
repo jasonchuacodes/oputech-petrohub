@@ -1,6 +1,6 @@
 import { prisma } from '~/db';
 import { ConflictError } from '~/errors';
-import { generateHash } from '~/utils/bcrypt';
+import { generateHash } from '~/utils';
 
 import { UserRegisterInput } from '../schema/registerSchema';
 

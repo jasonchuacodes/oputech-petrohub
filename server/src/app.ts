@@ -1,6 +1,8 @@
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express from 'express';
+
+import { errorHandler } from './middlewares/errorHandler';
 import userRoutes from './modules/user/routes';
 import authRoutes from './modules/auth/routes';
 
@@ -12,5 +14,6 @@ app.use(cookieParser());
 
 app.use('/users', userRoutes);
 app.use('/auth', authRoutes);
+app.use(errorHandler)
 
 export { app };

@@ -1,7 +1,6 @@
 import { prisma } from '~/db';
 import { UnauthenticatedError } from '~/errors/unauthenticated.error';
-import { verify } from '~/utils/bcrypt';
-import { signJwt } from '~/utils/jwt';
+import { verify, signJwt } from '~/utils';
 
 import { UserLoginInput } from '../schema/loginSchema';
 
