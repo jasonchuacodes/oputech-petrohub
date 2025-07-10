@@ -1,11 +1,11 @@
-import { alpha, Box, IconButton, Link, OutlinedInput, Stack, Typography } from '@mui/material';
+import { alpha, Box, IconButton, OutlinedInput, Stack, Typography } from '@mui/material';
 import { VisibilityOffOutlined, VisibilityOutlined } from '@mui/icons-material';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { PageLayout } from '~/components/layouts';
-import { Button, Form, TextField } from '~/components/ui';
+import { Button, Form, Link, TextField } from '~/components/ui';
 import { LoginUserSchema, type LoginUserInput } from '~/schema/LoginUserSchema';
 import theme from '~/theme';
 
@@ -90,7 +90,11 @@ const HomePage = () => {
               />
             </Stack>
 
-            <Link href="/reset-password" fontWeight="bold" fontSize="small" alignSelf="end">
+            <Link
+              to="/forgot-password"
+              alignSelf="flex-end"
+              sx={{ fontSize: 'small', color: 'text.main' }}
+            >
               Forgot password?
             </Link>
           </Stack>
@@ -100,7 +104,7 @@ const HomePage = () => {
         </Stack>
         <Stack direction="row" spacing={1}>
           <Typography>New here?</Typography>
-          <Link href="/register" color="info" fontWeight="bold" sx={{ cursor: 'pointer' }}>
+          <Link to="/register" color="info">
             Create an account
           </Link>
         </Stack>

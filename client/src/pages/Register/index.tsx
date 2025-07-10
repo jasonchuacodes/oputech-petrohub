@@ -1,21 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { VisibilityOutlined, VisibilityOffOutlined } from '@mui/icons-material';
-import {
-  alpha,
-  Box,
-  Button,
-  Card,
-  IconButton,
-  Link,
-  OutlinedInput,
-  Stack,
-  Typography,
-} from '@mui/material';
+import { alpha, Box, Card, IconButton, OutlinedInput, Stack, Typography } from '@mui/material';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { PageLayout } from '~/components/layouts';
-import { Form, TextField } from '~/components/ui';
+import { Button, Form, Link, TextField } from '~/components/ui';
 import { RegisterUserSchema, type RegisterUserInput } from '~/schema/RegisterUserSchema';
 import theme from '~/theme';
 
@@ -138,17 +128,12 @@ const Register = () => {
                 />
               </Stack>
             </Stack>
-            <Button
-              fullWidth={true}
-              variant="contained"
-              type="submit"
-              size="large"
-            >
+            <Button fullWidth={true} variant="contained" type="submit" size="large">
               Create Account
             </Button>
             <Stack direction="row" spacing={1} alignSelf="center">
               <Typography>Already have an account?</Typography>
-              <Link href="/" color="info" fontWeight="bold" sx={{ cursor: 'pointer' }}>
+              <Link to="/" color="info">
                 Go to Login
               </Link>
             </Stack>
