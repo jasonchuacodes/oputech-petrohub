@@ -28,7 +28,7 @@ Built with:
 | Backend        | Express + TypeScript      |
 | Database       | PostgreSQL                |
 | Communication  | REST API                  |
-| Dev Tools      | pnpm, Nodemon, Prisma or pg |
+| Dev Tools      | graphql-client, pnpm, Nodemon, Prisma |
 
 ---
 

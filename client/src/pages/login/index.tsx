@@ -9,7 +9,7 @@ import { Button, Form, Link, TextField } from '~/components/ui';
 import { LoginUserSchema, type LoginUserInput } from '~/schema/LoginUserSchema';
 import theme from '~/theme';
 
-const HomePage = () => {
+const Login = () => {
   const [isShowPassword, setIsShowPassword] = useState(false);
 
   const {
@@ -62,22 +62,17 @@ const HomePage = () => {
               register={register}
               name="username"
               label="Username"
-              required
               placeholder="Enter username"
             />
             <Stack spacing={0.5}>
               <Typography fontSize="small" fontWeight="bold" color="text.secondary">
                 Password
-                <Typography component="span" color="error">
-                  {' '}
-                  *
-                </Typography>
               </Typography>
               <OutlinedInput
                 {...register('password')}
                 size="small"
                 type={isShowPassword ? 'text' : 'password'}
-                placeholder="Password"
+                placeholder="Enter Password"
                 endAdornment={
                   <IconButton
                     size="small"
@@ -113,4 +108,4 @@ const HomePage = () => {
   );
 };
 
-export default HomePage;
+export default Login;

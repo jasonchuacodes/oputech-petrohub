@@ -1,5 +1,4 @@
-export * from './button'
-export * from './form'
-export * from './text-field'
-export * from './link'
-
+export * from './Button'
+export * from './Form'
+export * from './TextField'
+export * from './Link'

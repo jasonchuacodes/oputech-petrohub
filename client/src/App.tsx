@@ -15,7 +15,7 @@ export const AppLayout = () => {
 export const App = () => {
   return (
     <ThemeProvider theme={theme}>
-      <AppLayout />
+        <AppLayout />
     </ThemeProvider>
   );
 };
