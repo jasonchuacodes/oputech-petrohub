@@ -4,13 +4,15 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
-import { useLoginMutation } from '~/components/api/auth/auth.queries';
+import { useLoginMutation } from '~/api/auth/auth.queries';
 import { PageLayout } from '~/components/layouts';
 import { Button, Form, Link, TextField } from '~/components/ui';
 import { LoginUserSchema, type LoginUserInput } from '~/schema/LoginUserSchema';
 import theme from '~/theme';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
+  const navigate = useNavigate();
   const [isShowPassword, setIsShowPassword] = useState(false);
 
   const {
@@ -26,7 +28,9 @@ const Login = () => {
 
   const onSubmit = (data: LoginUserInput) => {
     login(data, {
-      onSuccess: () => console.log('Successfully logged in'),
+      onSuccess: () => {
+        navigate('/'); // Navigate to home page
+      },
       onError: (err) => console.log('Failed to login: ', err.message),
     });
 

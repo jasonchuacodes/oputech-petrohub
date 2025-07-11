@@ -1,19 +1,19 @@
 import cookieParser from 'cookie-parser';
-import cors from 'cors';
 import express from 'express';
 
 import { errorHandler } from './middlewares/errorHandler';
 import userRoutes from './modules/user/routes';
 import authRoutes from './modules/auth/routes';
+import { corsMiddleware } from './middlewares/corsMiddleware';
 
 const app = express();
 
-app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
+app.use(corsMiddleware());
 
 app.use('/users', userRoutes);
 app.use('/auth', authRoutes);
-app.use(errorHandler)
+app.use(errorHandler);
 
 export { app };
