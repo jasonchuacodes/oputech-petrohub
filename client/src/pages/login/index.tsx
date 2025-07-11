@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
+import { useLoginMutation } from '~/components/api/auth/auth.queries';
 import { PageLayout } from '~/components/layouts';
 import { Button, Form, Link, TextField } from '~/components/ui';
 import { LoginUserSchema, type LoginUserInput } from '~/schema/LoginUserSchema';
@@ -21,8 +22,14 @@ const Login = () => {
     resolver: zodResolver(LoginUserSchema),
   });
 
-  const login = (data: LoginUserInput) => {
-    console.log('Login data:', data);
+  const { mutate: login, isPending: isLoginPending } = useLoginMutation();
+
+  const onSubmit = (data: LoginUserInput) => {
+    login(data, {
+      onSuccess: () => console.log('Successfully logged in'),
+      onError: (err) => console.log('Failed to login: ', err.message),
+    });
+
     reset();
   };
 
@@ -30,7 +37,7 @@ const Login = () => {
     <PageLayout>
       <Stack bgcolor="primary.light" flex={1} maxWidth={1 / 2}></Stack>
       <Form
-        onSubmit={handleSubmit(login)}
+        onSubmit={handleSubmit(onSubmit)}
         sx={{
           flex: 1,
           justifyContent: 'center',
@@ -41,7 +48,7 @@ const Login = () => {
         <Typography variant="h4" fontWeight="bold">
           Welcome to Business
         </Typography>
-        <Stack spacing={3} width="100%" maxWidth={400}>
+        <Stack spacing={3} width="100%" maxWidth={400} minWidth={400} px={2}>
           <Stack spacing={1.5}>
             {(errors.username || errors.password) && (
               <Box
@@ -93,7 +100,13 @@ const Login = () => {
               Forgot password?
             </Link>
           </Stack>
-          <Button fullWidth={true} variant="contained" type="submit" size="large">
+          <Button
+            loading={isLoginPending}
+            fullWidth={true}
+            variant="contained"
+            type="submit"
+            size="large"
+          >
             Login
           </Button>
         </Stack>
