@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 
 import { PageLayout } from '~/components/layouts';
 import { Button, Form, Link, TextField } from '~/components/ui';
-import { RegisterUserSchema, type RegisterUserInput } from '~/schema/RegisterUserSchema';
+import { RegisterUserSchema, type RegisterUserInput } from '~/schema/registerUserSchema';
 import theme from '~/theme';
 
 const Register = () => {

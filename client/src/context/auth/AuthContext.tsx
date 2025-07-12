@@ -5,7 +5,7 @@ import type { User } from '~/services/user/user.types';
 
 type AuthContextType = {
   auth: User | null;
-  setAuth: (newvalue: User) => void;
+  setAuth: (newvalue: User | null) => void;
   loading: boolean;
 };
 
@@ -24,9 +24,9 @@ const AuthProvider = ({ children }: { children?: ReactNode }) => {
   useEffect(() => {
     const getUser = async () => {
       try {
-        const res = await getMe();
+        const user = await getMe();
 
-        setAuth(res.data.user);
+        setAuth(user);
       } catch (err) {
         console.log(err);
       } finally {

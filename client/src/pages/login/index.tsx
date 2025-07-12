@@ -8,13 +8,13 @@ import { useNavigate } from 'react-router-dom';
 import { PageLayout } from '~/components/layouts';
 import { Button, Form, Link, TextField } from '~/components/ui';
 import { useAuthContext } from '~/context/auth/useAuthContext';
-import { LoginUserSchema, type LoginUserInput } from '~/schema/LoginUserSchema';
+import { LoginUserSchema, type LoginUserInput } from '~/schema/loginUserSchema';
 import { useLoginMutation } from '~/services/auth/auth.queries';
 import theme from '~/theme';
 import { parseBackendError } from '~/utils/parseBackendError';
 
 const Login = () => {
-  const { auth, loading } = useAuthContext();
+  const { auth, setAuth, loading } = useAuthContext();
   const navigate = useNavigate();
 
   const [isShowPassword, setIsShowPassword] = useState(false);
@@ -39,13 +39,13 @@ const Login = () => {
 
   const onSubmit = (data: LoginUserInput) => {
     login(data, {
-      onSuccess: () => {
-        navigate('/');
+      onSuccess: (user) => {
+        setAuth(user);
         setError(null);
+        navigate('/');
       },
       onError: (err) => {
         const parsedErr = parseBackendError(err);
-
         setError(parsedErr);
       },
       onSettled: () => {

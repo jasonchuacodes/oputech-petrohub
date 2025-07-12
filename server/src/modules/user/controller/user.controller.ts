@@ -1,12 +1,11 @@
 import { NextFunction, Request, Response } from 'express';
 
-import { BadInputError, ConflictError, NotFoundError, UnauthorizedError } from '~/errors';
 import { createSchemaValidator } from '~/utils';
 
 import * as userService from '../services/user.service';
-import { createUserSchema } from '../schema/createUserSchema';
+import { CreateUserSchema } from '../schema/createUserSchema';
 
-const validateCreateUser = createSchemaValidator(createUserSchema);
+const validateCreateUser = createSchemaValidator(CreateUserSchema);
 
 const createUser = async (req: Request, res: Response, next: NextFunction) => {
   try {

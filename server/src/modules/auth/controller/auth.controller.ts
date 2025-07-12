@@ -5,14 +5,14 @@ import { AuthenticatedRequest } from '~/middlewares';
 import { createSchemaValidator } from '~/utils';
 
 import { registerUser as registerUserService } from '../services/register.service';
-import { userRegisterSchema } from '../schema/registerSchema';
-import { userLoginSchema } from '../schema/loginSchema';
+import { RegisterUserSchema } from '../schema/registerUserSchema';
+import { LoginUserSchema } from '../schema/loginUserSchema';
 import { loginUser as loginUserService } from '../services/login.service';
 
-const isProduction = process.env.NODE_ENV === 'production'
+const isProduction = process.env.NODE_ENV === 'production';
 
-const validateUserRegister = createSchemaValidator(userRegisterSchema);
-const validateUserLogin = createSchemaValidator(userLoginSchema);
+const validateUserRegister = createSchemaValidator(RegisterUserSchema);
+const validateUserLogin = createSchemaValidator(LoginUserSchema);
 
 const getMe = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
@@ -22,7 +22,12 @@ const getMe = (req: AuthenticatedRequest, res: Response, next: NextFunction) => 
       throw new NotFoundError('User not found');
     }
 
-    res.json({ user });
+    res.status(200).json({
+      message: 'Logged in successfully',
+      data: {
+        user,
+      },
+    });
   } catch (err) {
     next(err);
   }
@@ -66,7 +71,7 @@ const logoutUser = (_req: Request, res: Response, next: NextFunction) => {
     res.clearCookie('token', {
       httpOnly: true,
       sameSite: 'strict',
-      secure: isProduction
+      secure: isProduction,
     });
 
     res.status(200).json({ message: 'Successfully logged out' });

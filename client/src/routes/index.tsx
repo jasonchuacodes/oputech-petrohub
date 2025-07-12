@@ -10,12 +10,12 @@ export const router = createBrowserRouter(
   createRoutesFromElements(
     <Route element={<App />}>
       {/* Public Routes */}
-      <Route index path="/login" element={<Login />} />
-      <Route index path="/register" element={<Register />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
 
       {/* Protected Routes */}
       <Route element={<ProtectedRoute />}>
-        <Route index path="/" element={<Home />}></Route>
+        <Route index element={<Home />}></Route>
       </Route>
     </Route>,
   ),

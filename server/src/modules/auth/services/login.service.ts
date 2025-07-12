@@ -2,9 +2,9 @@ import { prisma } from '~/db';
 import { UnauthenticatedError } from '~/errors/unauthenticated.error';
 import { verify, signJwt } from '~/utils';
 
-import { UserLoginInput } from '../schema/loginSchema';
+import { LoginUserInput } from '../schema/loginUserSchema';
 
-const loginUser = async (data: UserLoginInput) => {
+const loginUser = async (data: LoginUserInput) => {
   const { password, username } = data;
 
   const user = await prisma.user.findUnique({

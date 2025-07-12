@@ -1,5 +1,5 @@
 import axios from '~/lib/axiosInstance';
-import type { RegisterUserInput } from '~/schema/RegisterUserSchema';
+import type { RegisterUserInput } from '~/schema/registerUserSchema';
 import type { User } from './user.types';
 
 const getAllUsers = () => {
