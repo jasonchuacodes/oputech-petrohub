@@ -1,10 +1,21 @@
 import { Navigate, Outlet } from 'react-router-dom';
 
-const ProtectedRoute = () => {
-  // TODO: replace this with auth flow
-  const isAuthenticated = false;
+import { LoadingSpinner } from '~/components/ui/LoadingSpinner';
+import { useAuthContext } from '~/context/auth/useAuthContext';
 
-  return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
+import { PageLayout } from './layouts';
+
+const ProtectedRoute = () => {
+  const { auth, loading } = useAuthContext();
+
+  if (loading)
+    return (
+      <PageLayout justifyContent="center" alignItems="center">
+        <LoadingSpinner />
+      </PageLayout>
+    );
+
+  return <PageLayout>{auth ? <Outlet /> : <Navigate to="/login" replace />}</PageLayout>;
 };
 
 export default ProtectedRoute;

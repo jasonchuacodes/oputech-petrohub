@@ -1,17 +1,22 @@
 import { alpha, Box, IconButton, OutlinedInput, Stack, Typography } from '@mui/material';
 import { VisibilityOffOutlined, VisibilityOutlined } from '@mui/icons-material';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
 
 import { PageLayout } from '~/components/layouts';
 import { Button, Form, Link, TextField } from '~/components/ui';
+import { useAuthContext } from '~/context/auth/useAuthContext';
 import { LoginUserSchema, type LoginUserInput } from '~/schema/LoginUserSchema';
 import { useLoginMutation } from '~/services/auth/auth.queries';
 import theme from '~/theme';
 import { parseBackendError } from '~/utils/parseBackendError';
 
 const Login = () => {
+  const { auth, loading } = useAuthContext();
+  const navigate = useNavigate();
+
   const [isShowPassword, setIsShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,12 +31,16 @@ const Login = () => {
 
   const { mutate: login, isPending: isLoginPending } = useLoginMutation();
 
+  useEffect(() => {
+    if (!loading && auth) {
+      navigate('/', { replace: true });
+    }
+  }, [auth, loading, navigate]);
+
   const onSubmit = (data: LoginUserInput) => {
     login(data, {
-      onSuccess: (res) => {
-        const user = res.data;
-        console.log(user);
-
+      onSuccess: () => {
+        navigate('/');
         setError(null);
       },
       onError: (err) => {
@@ -44,6 +53,8 @@ const Login = () => {
       },
     });
   };
+
+  if (loading || auth) return null;
 
   return (
     <PageLayout>
