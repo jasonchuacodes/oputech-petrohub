@@ -2,7 +2,7 @@ import { Stack, type SxProps } from '@mui/material';
 import type { PropsWithChildren } from 'react';
 
 type FormProps = PropsWithChildren<{
-  onSubmit: () => void;
+  onSubmit: React.FormEventHandler<HTMLFormElement>
   sx?: SxProps;
 }>;
 

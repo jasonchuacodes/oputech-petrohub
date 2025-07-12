@@ -4,16 +4,16 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
-import { useLoginMutation } from '~/api/auth/auth.queries';
 import { PageLayout } from '~/components/layouts';
 import { Button, Form, Link, TextField } from '~/components/ui';
 import { LoginUserSchema, type LoginUserInput } from '~/schema/LoginUserSchema';
+import { useLoginMutation } from '~/services/auth/auth.queries';
 import theme from '~/theme';
-import { useNavigate } from 'react-router-dom';
+import { parseBackendError } from '~/utils/parseBackendError';
 
 const Login = () => {
-  const navigate = useNavigate();
   const [isShowPassword, setIsShowPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const {
     register,
@@ -28,13 +28,21 @@ const Login = () => {
 
   const onSubmit = (data: LoginUserInput) => {
     login(data, {
-      onSuccess: () => {
-        navigate('/'); // Navigate to home page
-      },
-      onError: (err) => console.log('Failed to login: ', err.message),
-    });
+      onSuccess: (res) => {
+        const user = res.data;
+        console.log(user);
 
-    reset();
+        setError(null);
+      },
+      onError: (err) => {
+        const parsedErr = parseBackendError(err);
+
+        setError(parsedErr);
+      },
+      onSettled: () => {
+        reset();
+      },
+    });
   };
 
   return (
@@ -54,7 +62,7 @@ const Login = () => {
         </Typography>
         <Stack spacing={3} width="100%" maxWidth={400} minWidth={400} px={2}>
           <Stack spacing={1.5}>
-            {(errors.username || errors.password) && (
+            {(errors.username || errors.password || error) && (
               <Box
                 sx={{
                   border: '1px solid',
@@ -65,7 +73,7 @@ const Login = () => {
                 }}
               >
                 <Typography fontSize="small" color="error">
-                  {errors.username?.message || errors.password?.message}
+                  {errors.username?.message || errors.password?.message || error}
                 </Typography>
               </Box>
             )}

@@ -5,10 +5,7 @@ export const errorHandler = (err: any, _req: Request, res: Response, _next: Next
   const message = err.message || 'Something went wrong';
 
   res.status(statusCode).json({
-    success: false,
-    error: {
-      name: err.name,
-      message,
-    },
+    name: err.name,
+    message,
   });
 };

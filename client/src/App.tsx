@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom';
 
 import theme from './theme';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { AuthProvider } from './context/auth/AuthContext';
 
 const queryClient = new QueryClient();
 
@@ -19,7 +20,9 @@ export const App = () => {
   return (
     <ThemeProvider theme={theme}>
       <QueryClientProvider client={queryClient}>
-        <AppLayout />
+        <AuthProvider>
+          <AppLayout />
+        </AuthProvider>
       </QueryClientProvider>
     </ThemeProvider>
   );

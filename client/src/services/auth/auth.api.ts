@@ -6,8 +6,8 @@ const registerUser = (data: RegisterUserInput) => {
   return axios.post('/auth/register', data);
 };
 
-const loginUser = (data: LoginUserInput) => {
-  return axios.post('/auth/login', data);
+const loginUser = async (data: LoginUserInput) => {
+  return await axios.post('/auth/login', data);
 };
 
 const logoutUser = () => {
