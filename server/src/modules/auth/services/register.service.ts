@@ -1,4 +1,5 @@
 import { prisma } from '~/db';
+import { Prisma } from '~/db/prisma';
 import { ConflictError } from '~/errors';
 import { generateHash } from '~/utils';
 
@@ -18,14 +19,6 @@ const registerUser = async (data: RegisterUserInput) => {
 
   const hash = await generateHash(password);
 
-  const existingUser = await prisma.user.findUnique({
-    where: { email },
-  });
-
-  if (existingUser) {
-    throw new ConflictError('User with this email already exists');
-  }
-
   const userData: CreateUserInput = {
     name,
     password: hash,
@@ -37,7 +30,23 @@ const registerUser = async (data: RegisterUserInput) => {
     userData.email = email;
   }
 
-  return await prisma.user.create({ data: userData });
+  try {
+    return await prisma.user.create({ data: userData });
+  } catch (err) {
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
+      const fields = (err.meta?.target as string[]) ?? [];
+
+      if (fields.includes('username')) {
+        throw new ConflictError('Username is already taken');
+      }
+      if (fields.includes('email')) {
+        throw new ConflictError('Email is already registered');
+      }
+
+      throw new ConflictError('User already exists');
+    }
+    throw err;
+  }
 };
 
 export { registerUser };

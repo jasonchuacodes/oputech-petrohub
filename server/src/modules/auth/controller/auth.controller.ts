@@ -37,9 +37,9 @@ const registerUser = async (req: Request, res: Response, next: NextFunction) => 
   try {
     const data = await validateUserRegister(req.body);
 
-    await registerUserService(data);
+    const user = await registerUserService(data);
 
-    res.status(200).json({ message: 'Registered successfully' });
+    res.status(200).json({ message: 'Registered successfully', data: { user } });
   } catch (err) {
     next(err);
   }
