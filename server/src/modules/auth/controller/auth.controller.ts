@@ -49,12 +49,16 @@ const loginUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const data = await validateUserLogin(req.body);
 
-    const { user, token } = await loginUserService(data);
+    const { user, accessToken, refreshToken } = await loginUserService(data);
 
-    res.cookie('token', token, {
+    res.cookie('accessToken', accessToken, {
       httpOnly: true,
+      maxAge: 5 * 1000,
     });
-
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      maxAge: 1 * 60 * 1000,
+    });
     res.status(200).json({
       message: 'Logged in successfully',
       data: {

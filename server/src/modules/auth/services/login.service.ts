@@ -1,6 +1,6 @@
 import { prisma } from '~/db';
 import { UnauthenticatedError } from '~/errors/unauthenticated.error';
-import { verify, signJwt } from '~/utils';
+import { verify, signJwt, generateToken, generateHash } from '~/utils';
 
 import { LoginUserInput } from '../schema/loginUserSchema';
 
@@ -23,9 +23,20 @@ const loginUser = async (data: LoginUserInput) => {
     throw new UnauthenticatedError('Invalid username or password');
   }
 
-  const token = signJwt(user);
+  const accessToken = signJwt(user);
+  const token = generateToken();
+  const refreshTokenHash = await generateHash(token);
 
-  return { user, token };
+  const { id: sessionId } = await prisma.session.create({
+    data: {
+      refreshTokenHash,
+      userId: user.id,
+    },
+  });
+
+  const refreshToken = signJwt(sessionId);
+
+  return { user, accessToken, refreshToken };
 };
 
 export { loginUser };
