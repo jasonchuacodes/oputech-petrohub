@@ -133,8 +133,11 @@ exports.Prisma.UserScalarFieldEnum = {
 
 exports.Prisma.SessionScalarFieldEnum = {
   id: 'id',
+  userId: 'userId',
   refreshTokenHash: 'refreshTokenHash',
-  userId: 'userId'
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.SortOrder = {

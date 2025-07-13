@@ -22,10 +22,14 @@ model User {
 }
 
 model Session {
-  id               Int    @id @default(autoincrement())
+  id     Int  @id @default(autoincrement())
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+
   refreshTokenHash String
-  user             User   @relation(fields: [userId], references: [id])
-  userId           Int
+  expiresAt        DateTime
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }
 
 enum Role {

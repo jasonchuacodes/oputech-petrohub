@@ -23,7 +23,7 @@ const getMe = (req: AuthenticatedRequest, res: Response, next: NextFunction) => 
     }
 
     res.status(200).json({
-      message: 'Logged in successfully',
+      message: 'Successfully retrieved authenticated user',
       data: {
         user,
       },
@@ -83,5 +83,6 @@ const logoutUser = (_req: Request, res: Response, next: NextFunction) => {
     next(err);
   }
 };
+
 
 export { getMe, loginUser, logoutUser, registerUser };

@@ -1,8 +1,19 @@
 import { prisma } from '~/db';
 import { UnauthenticatedError } from '~/errors/unauthenticated.error';
-import { verify, signJwt, generateToken, generateHash } from '~/utils';
+import {
+  verify,
+  signJwt,
+  generateToken,
+  generateHash,
+  JwtSessionPayload,
+  JwtUserPayload,
+} from '~/utils';
 
 import { LoginUserInput } from '../schema/loginUserSchema';
+
+const SESSION_EXPIRES_IN_DAYS = 7;
+
+const expiresAt = new Date(Date.now() + SESSION_EXPIRES_IN_DAYS * 24 * 60 * 60 * 1000);
 
 const loginUser = async (data: LoginUserInput) => {
   const { password, username } = data;
@@ -23,7 +34,11 @@ const loginUser = async (data: LoginUserInput) => {
     throw new UnauthenticatedError('Invalid username or password');
   }
 
-  const accessToken = signJwt(user);
+  const accessToken = signJwt<JwtUserPayload>({
+    name: user.name,
+    email: user.email,
+    username: user.username,
+  });
   const token = generateToken();
   const refreshTokenHash = await generateHash(token);
 
@@ -31,10 +46,11 @@ const loginUser = async (data: LoginUserInput) => {
     data: {
       refreshTokenHash,
       userId: user.id,
+      expiresAt,
     },
   });
 
-  const refreshToken = signJwt(sessionId);
+  const refreshToken = signJwt<JwtSessionPayload>({ sessionId });
 
   return { user, accessToken, refreshToken };
 };
