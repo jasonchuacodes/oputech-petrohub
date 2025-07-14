@@ -12,7 +12,7 @@ const NavbarUserMenu = () => {
   const navigate = useNavigate();
   const { mutate: logout } = useLogoutMutation();
 
-  const userInitials = auth ? auth.username.split('')[0].toUpperCase() : 'U';
+  const userInitials = auth ? auth.username?.split('')[0].toUpperCase() : 'U';
 
   const [anchorElSettingsMenu, setAnchorElSettingsMenu] = useState<null | HTMLElement>(null);
   const isOpenSettingsMenu = Boolean(anchorElSettingsMenu);
@@ -31,7 +31,7 @@ const NavbarUserMenu = () => {
   return (
     <>
       <IconButton onClick={(e) => setAnchorElSettingsMenu(e.currentTarget)}>
-        <Avatar alt="profile-picture" src="/" sx={{ width: 24, height: 24 }}>
+        <Avatar alt="profile-picture" sx={{ width: 24, height: 24 }}>
           {userInitials}
         </Avatar>
       </IconButton>

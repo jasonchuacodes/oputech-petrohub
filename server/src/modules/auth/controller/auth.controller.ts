@@ -8,6 +8,7 @@ import { registerUser as registerUserService } from '../services/register.servic
 import { RegisterUserSchema } from '../schema/registerUserSchema';
 import { LoginUserSchema } from '../schema/loginUserSchema';
 import { loginUser as loginUserService } from '../services/login.service';
+import { logoutSession } from '../services/logout.service';
 
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -70,8 +71,13 @@ const loginUser = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-const logoutUser = (_req: Request, res: Response, next: NextFunction) => {
+const logoutUser = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
+    const refreshToken = req.cookies.refreshToken;
+    if (refreshToken) {
+      await logoutSession(refreshToken);
+    }
+
     res.clearCookie('accessToken', {
       httpOnly: true,
       sameSite: 'strict',
