@@ -85,6 +85,12 @@ export const requireAuth = async (req: AuthenticatedRequest, res: Response, next
       maxAge: 15 * 1000,
     });
 
+    req.user = {
+      name: session.user.name,
+      email: session.user.email,
+      username: session.user.username,
+    };
+
     return next();
   } catch (err) {
     next(err);

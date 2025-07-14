@@ -1,43 +1,26 @@
-import { createContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, type ReactNode } from 'react';
 
-import { getMe } from '~/services/auth/auth.api';
+import { useGetMe } from '~/services/auth/auth.queries';
 import type { User } from '~/services/user/user.types';
 
 type AuthContextType = {
-  auth: User | null;
-  setAuth: (newvalue: User | null) => void;
+  auth?: User | null;
   loading: boolean;
+  refetch: () => void;
 };
 
 const initialState = {
   auth: null,
-  setAuth: () => {},
   loading: true,
+  refetch: () => null,
 };
 
 const AuthContext = createContext<AuthContextType>(initialState);
 
 const AuthProvider = ({ children }: { children?: ReactNode }) => {
-  const [auth, setAuth] = useState<User | null>(null);
-  const [loading, setLoading] = useState(false);
+  const { data: auth, isLoading: loading, refetch } = useGetMe();
 
-  useEffect(() => {
-    const getUser = async () => {
-      try {
-        const user = await getMe();
-
-        setAuth(user);
-      } catch (err) {
-        console.log(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    getUser();
-  }, []);
-
-  return <AuthContext.Provider value={{ auth, setAuth, loading }}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={{ auth, loading, refetch }}>{children}</AuthContext.Provider>;
 };
 
 export { AuthContext, AuthProvider };

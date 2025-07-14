@@ -72,7 +72,13 @@ const loginUser = async (req: Request, res: Response, next: NextFunction) => {
 
 const logoutUser = (_req: Request, res: Response, next: NextFunction) => {
   try {
-    res.clearCookie('token', {
+    res.clearCookie('accessToken', {
+      httpOnly: true,
+      sameSite: 'strict',
+      secure: isProduction,
+    });
+
+    res.clearCookie('refreshToken', {
       httpOnly: true,
       sameSite: 'strict',
       secure: isProduction,
@@ -83,6 +89,5 @@ const logoutUser = (_req: Request, res: Response, next: NextFunction) => {
     next(err);
   }
 };
-
 
 export { getMe, loginUser, logoutUser, registerUser };
