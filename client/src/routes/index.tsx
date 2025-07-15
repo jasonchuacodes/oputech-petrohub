@@ -1,6 +1,7 @@
 import { createBrowserRouter, createRoutesFromElements, Route } from 'react-router-dom';
 
 import { App } from '~/App';
+import { DashboardLayout } from '~/components/layouts';
 import ProtectedRoute from '~/components/ProtectedRoute';
 import { Home } from '~/pages/home';
 import Login from '~/pages/login';
@@ -15,7 +16,9 @@ export const router = createBrowserRouter(
 
       {/* Protected Routes */}
       <Route element={<ProtectedRoute />}>
-        <Route index element={<Home />}></Route>
+        <Route element={<DashboardLayout />}>
+          <Route index element={<Home />}></Route>
+        </Route>
       </Route>
     </Route>,
   ),

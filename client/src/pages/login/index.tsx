@@ -1,8 +1,5 @@
 import { alpha, Box, IconButton, OutlinedInput, Stack, Typography } from '@mui/material';
-import {
-  VisibilityOffOutlined,
-  VisibilityOutlined,
-} from '@mui/icons-material';
+import { VisibilityOffOutlined, VisibilityOutlined } from '@mui/icons-material';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -51,13 +48,13 @@ const Login = () => {
     });
   };
 
- useEffect(() => {
-  if (!loading && auth) {
-    navigate('/', { replace: true });
-  }
-}, [auth, loading, navigate]);
+  useEffect(() => {
+    if (!loading && auth) {
+      navigate('/', { replace: true });
+    }
+  }, [auth, loading, navigate]);
 
-if (loading || auth) return null;
+  if (loading || auth) return null;
 
   return (
     <PageLayout>

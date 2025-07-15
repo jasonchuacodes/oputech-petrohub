@@ -15,7 +15,11 @@ const ProtectedRoute = () => {
       </PageLayout>
     );
 
-  return <PageLayout>{auth ? <Outlet /> : <Navigate to="/login" replace />}</PageLayout>;
+  if (!auth) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  return <Outlet />;
 };
 
 export default ProtectedRoute;
