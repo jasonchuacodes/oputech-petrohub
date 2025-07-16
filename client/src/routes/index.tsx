@@ -3,9 +3,13 @@ import { createBrowserRouter, createRoutesFromElements, Route } from 'react-rout
 import { App } from '~/App';
 import { DashboardLayout } from '~/components/layouts';
 import ProtectedRoute from '~/components/ProtectedRoute';
-import { Home } from '~/pages/home';
+import DashboardPage from '~/pages/dashboard';
+import HomePage from '~/pages/home';
 import Login from '~/pages/login';
 import Register from '~/pages/register';
+import ReportsPage from '~/pages/reports';
+import TimesheetsPage from '~/pages/timesheets';
+import UsersPage from '~/pages/users';
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -17,7 +21,11 @@ export const router = createBrowserRouter(
       {/* Protected Routes */}
       <Route element={<ProtectedRoute />}>
         <Route element={<DashboardLayout />}>
-          <Route index element={<Home />}></Route>
+          <Route index element={<HomePage />}></Route>
+          <Route path="/dashboard" element={<DashboardPage />}></Route>
+          <Route path="/reports" element={<ReportsPage />}></Route>
+          <Route path="/timesheets" element={<TimesheetsPage />}></Route>
+          <Route path="/users" element={<UsersPage />}></Route>
         </Route>
       </Route>
     </Route>,

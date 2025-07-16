@@ -1,9 +1,7 @@
 import {
   CalendarTodayOutlined,
   DashboardOutlined,
-  GroupOutlined,
   HomeOutlined,
-  InsertChartOutlined,
   KeyboardDoubleArrowRightOutlined,
 } from '@mui/icons-material';
 import {
@@ -16,10 +14,31 @@ import {
   ListItemText,
   Stack,
 } from '@mui/material';
-import { useState } from 'react';
+import { useState, type ComponentType } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+export type NavItem = {
+  label: string;
+  icon: ComponentType;
+  to: string;
+};
 
 const Sidebar = () => {
-  const [open, setOpen] = useState(true); // collapse? or expand?
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(true);
+
+  const navItems: NavItem[] = [
+    { label: 'Home', icon: HomeOutlined, to: '/' },
+    { label: 'Dashboard', icon: DashboardOutlined, to: '/dashboard' },
+    { label: 'Reports', icon: DashboardOutlined, to: '/reports' },
+    { label: 'Timesheets', icon: CalendarTodayOutlined, to: '/timesheets' },
+    { label: 'Users', icon: HomeOutlined, to: '/users' },
+  ];
+
+  const handleNavigate = (to: string) => {
+    navigate(to);
+  };
+
   return (
     <Stack
       justifyContent="space-between"
@@ -33,15 +52,10 @@ const Sidebar = () => {
       }}
     >
       <List>
-        {[
-          { label: 'home', icon: HomeOutlined },
-          { label: 'dashboard', icon: DashboardOutlined },
-          { label: 'reports', icon: InsertChartOutlined },
-          { label: 'timesheets', icon: CalendarTodayOutlined },
-          { label: 'users', icon: GroupOutlined },
-        ].map(({ icon, label }, index) => (
+        {navItems.map(({ icon, label, to }, index) => (
           <ListItem key={index} disablePadding sx={{ height: 48 }}>
             <ListItemButton
+              onClick={() => handleNavigate(to)}
               sx={{ display: ' flex', alignItems: 'center', px: 2, height: '100%', gap: 1 }}
             >
               <ListItemIcon sx={{ color: 'inherit', minWidth: 0 }}>
