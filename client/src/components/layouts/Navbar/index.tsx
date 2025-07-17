@@ -34,10 +34,10 @@ const Navbar = () => {
       >
         <Stack direction="row">
           <IconButton>
-            <SettingsOutlined />
+            <SettingsOutlined fontSize='small'/>
           </IconButton>
           <IconButton>
-            <NotificationsOutlined />
+            <NotificationsOutlined fontSize='small'/>
           </IconButton>
         </Stack>
         <NavbarUserMenu />

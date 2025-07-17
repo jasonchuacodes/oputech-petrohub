@@ -30,9 +30,12 @@ const NavbarUserMenu = () => {
 
   return (
     <>
-      <IconButton onClick={(e) => setAnchorElSettingsMenu(e.currentTarget)}>
+      <IconButton
+        sx={{ width: 36, height: 36 }}
+        onClick={(e) => setAnchorElSettingsMenu(e.currentTarget)}
+      >
         <Avatar alt="profile-picture" sx={{ width: 24, height: 24 }}>
-          {userInitials}
+          <Typography fontSize="small">{userInitials}</Typography>
         </Avatar>
       </IconButton>
       <Menu

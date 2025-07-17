@@ -1,13 +1,11 @@
 import { Navigate, Outlet } from 'react-router-dom';
 
-import { LoadingSpinner } from '~/components/ui/LoadingSpinner';
+import { LoadingSpinner, PageLayout } from '~/components/ui';
 import { useAuthContext } from '~/context/auth/useAuthContext';
 
-import { PageLayout } from './layouts';
-
-const ProtectedRoute = () => {
+export const ProtectedRoute = () => {
   const { auth, loading } = useAuthContext();
-
+  
   if (loading)
     return (
       <PageLayout justifyContent="center" alignItems="center">
@@ -18,8 +16,6 @@ const ProtectedRoute = () => {
   if (!auth) {
     return <Navigate to="/login" replace />;
   }
-  
+
   return <Outlet />;
 };
-
-export default ProtectedRoute;

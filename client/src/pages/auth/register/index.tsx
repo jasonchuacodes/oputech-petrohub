@@ -4,12 +4,13 @@ import { alpha, Box, Card, IconButton, OutlinedInput, Stack, Typography } from '
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
-import { PageLayout } from '~/components/layouts';
-import { Button, Form, Link, TextField } from '~/components/ui';
+import { TextField } from '~/components/form';
+import { PageLayout } from '~/components/ui';
+import { Button, Form, Link } from '~/components/ui';
 import { RegisterUserSchema, type RegisterUserInput } from '~/schema/registerUserSchema';
 import theme from '~/theme';
 
-const Register = () => {
+export const Register = () => {
   const [isShowPassword, setIsShowPassword] = useState(false);
   const [isShowConfirmPassword, setIsShowConfirmPassword] = useState(false);
 
@@ -143,5 +144,3 @@ const Register = () => {
     </PageLayout>
   );
 };
-
-export default Register;

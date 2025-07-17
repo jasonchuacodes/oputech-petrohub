@@ -1,15 +1,18 @@
 import { createBrowserRouter, createRoutesFromElements, Route } from 'react-router-dom';
 
 import { App } from '~/App';
-import { DashboardLayout } from '~/components/layouts';
-import ProtectedRoute from '~/components/ProtectedRoute';
-import DashboardPage from '~/pages/dashboard';
-import HomePage from '~/pages/home';
-import Login from '~/pages/login';
-import Register from '~/pages/register';
-import ReportsPage from '~/pages/reports';
-import TimesheetsPage from '~/pages/timesheets';
-import UsersPage from '~/pages/users';
+import { MainLayout } from '~/components/layouts/MainLayout';
+import { ProtectedRoute } from '~/components/auth/ProtectedRoute';
+import { BootstrapPage } from '~/pages/bootstrap';
+import { DashboardPage } from '~/pages/dashboard';
+import { HomePage } from '~/pages/home';
+import { Login } from '~/pages/auth/login';
+import { Register } from '~/pages/auth/register';
+import { ReportsPage } from '~/pages/reports';
+import { CreateTenantFlow } from '~/pages/tenant/create-tenant';
+import { TimesheetsPage } from '~/pages/timesheets';
+import { UsersPage } from '~/pages/users';
+import { SetupLayout } from '../components/layouts';
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -20,7 +23,14 @@ export const router = createBrowserRouter(
 
       {/* Protected Routes */}
       <Route element={<ProtectedRoute />}>
-        <Route element={<DashboardLayout />}>
+        <Route path="/bootstrap" element={<BootstrapPage />} />
+
+        <Route element={<SetupLayout />}>
+          <Route path="/create-tenant" element={<CreateTenantFlow />} />
+        </Route>
+
+        {/* Routes that require a tenant */}
+        <Route element={<MainLayout />}>
           <Route index element={<HomePage />}></Route>
           <Route path="/dashboard" element={<DashboardPage />}></Route>
           <Route path="/reports" element={<ReportsPage />}></Route>

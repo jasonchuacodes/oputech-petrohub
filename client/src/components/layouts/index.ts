@@ -1,2 +1,2 @@
-export * from './DashboardLayout';
-export * from './PageLayout';
+export * from './MainLayout';
+export * from './SetupLayout';

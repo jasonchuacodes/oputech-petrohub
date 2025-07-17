@@ -5,15 +5,15 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 
-import { PageLayout } from '~/components/layouts';
-import { Button, Form, Link, TextField } from '~/components/ui';
+import { TextField } from '~/components/form';
+import { Button, Form, Link,PageLayout } from '~/components/ui';
 import { useAuthContext } from '~/context/auth/useAuthContext';
 import { LoginUserSchema, type LoginUserInput } from '~/schema/loginUserSchema';
 import { useLoginMutation } from '~/services/auth/auth.queries';
 import theme from '~/theme';
 import { parseBackendError } from '~/utils/parseBackendError';
 
-const Login = () => {
+export const Login = () => {
   const { auth, loading, refetch: refetchAuth } = useAuthContext();
   const navigate = useNavigate();
 
@@ -36,7 +36,7 @@ const Login = () => {
       onSuccess: () => {
         refetchAuth();
         setError(null);
-        navigate('/');
+        navigate('/bootstrap');
       },
       onError: (err) => {
         const parsedErr = parseBackendError(err);
@@ -50,7 +50,7 @@ const Login = () => {
 
   useEffect(() => {
     if (!loading && auth) {
-      navigate('/', { replace: true });
+      navigate('/bootstrap', { replace: true });
     }
   }, [auth, loading, navigate]);
 
@@ -143,5 +143,3 @@ const Login = () => {
     </PageLayout>
   );
 };
-
-export default Login;
