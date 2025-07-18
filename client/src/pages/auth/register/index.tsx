@@ -7,7 +7,12 @@ import { useForm } from 'react-hook-form';
 import { TextField } from '~/components/form';
 import { PageLayout } from '~/components/ui';
 import { Button, Form, Link } from '~/components/ui';
-import { RegisterUserSchema, type RegisterUserInput } from '~/schema/registerUserSchema';
+import { useRegisterUserMutation } from '~/services/auth/auth.queries';
+import {
+  RegisterUserSchema,
+  type RegisterUserInput,
+  type RegisterUserPayload,
+} from '~/schema/registerUserSchema';
 import theme from '~/theme';
 
 export const Register = () => {
@@ -19,13 +24,22 @@ export const Register = () => {
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm({
+  } = useForm<RegisterUserInput>({
     resolver: zodResolver(RegisterUserSchema),
   });
 
-  const onSubmit = (data: RegisterUserInput) => {
-    console.log(data);
-    reset();
+  const { mutate: registerUser, isPending: isPendingRegistration } = useRegisterUserMutation();
+
+  const onSubmit = (data: RegisterUserPayload) => {
+    registerUser(data, {
+      onSuccess: () => {
+        console.log('Successfully registered user!');
+        reset();
+      },
+      onError: (err) => {
+        console.log('Registration failed: ', err.message);
+      },
+    });
   };
 
   return (
@@ -56,7 +70,7 @@ export const Register = () => {
         <Form onSubmit={handleSubmit(onSubmit)} sx={{ width: '100%' }}>
           <Stack spacing={3}>
             <Stack spacing={1.5}>
-              {(errors.username || errors.password || errors.confirmPassword) && (
+              {(errors.name || errors.username || errors.password || errors.confirmPassword) && (
                 <Box
                   sx={{
                     border: '1px solid',
@@ -73,6 +87,13 @@ export const Register = () => {
                   </Typography>
                 </Box>
               )}
+              <TextField
+                register={register}
+                required
+                name="name"
+                label="Name"
+                placeholder="Enter name"
+              />
               <TextField
                 register={register}
                 required
@@ -106,7 +127,7 @@ export const Register = () => {
               </Stack>
               <Stack spacing={0.5}>
                 <Typography fontSize="small" fontWeight="bold" color="text.secondary">
-                  Password
+                  Confirm Password
                   <Typography component="span" color="error">
                     {' '}
                     *
@@ -129,7 +150,13 @@ export const Register = () => {
                 />
               </Stack>
             </Stack>
-            <Button fullWidth={true} variant="contained" type="submit" size="large">
+            <Button
+              loading={isPendingRegistration}
+              fullWidth={true}
+              variant="contained"
+              type="submit"
+              size="large"
+            >
               Create Account
             </Button>
             <Stack direction="row" spacing={1} alignSelf="center">

@@ -21,6 +21,7 @@ const NavbarUserMenu = () => {
     logout(undefined, {
       onSuccess: () => {
         queryClient.setQueryData(['auth'], null);
+        queryClient.cancelQueries();
       },
       onSettled: () => {
         navigate('/login');

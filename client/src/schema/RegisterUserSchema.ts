@@ -2,6 +2,7 @@ import z from 'zod';
 
 export const RegisterUserSchema = z
   .object({
+    name: z.string().min(1),
     username: z.string().min(1, 'Username is required').max(20).trim(),
     password: z
       .string()
@@ -27,3 +28,4 @@ export const RegisterUserSchema = z
   });
 
 export type RegisterUserInput = z.infer<typeof RegisterUserSchema>;
+export type RegisterUserPayload = Omit<RegisterUserInput, 'confirmPassword'>;

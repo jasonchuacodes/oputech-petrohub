@@ -1,7 +1,7 @@
 import axios from '~/lib/axiosInstance';
-import type { User } from '~/services/user/user.types';
+import { UserRoleEnum, type User } from '~/services/user/user.types';
 import type { LoginUserInput } from '~/schema/loginUserSchema';
-import type { RegisterUserInput } from '~/schema/registerUserSchema';
+import type { RegisterUserPayload } from '~/schema/registerUserSchema';
 import type { ApiResponse } from '~/types/api';
 
 // Queries
@@ -12,8 +12,11 @@ const getMe = async () => {
 };
 
 // Mutation
-const registerUser = (data: RegisterUserInput) => {
-  return axios.post('/auth/register', data);
+const registerUser = (data: RegisterUserPayload) => {
+  return axios.post('/auth/register', {
+    ...data,
+    role: UserRoleEnum.ADMIN,
+  });
 };
 
 const loginUser = async (data: LoginUserInput) => {

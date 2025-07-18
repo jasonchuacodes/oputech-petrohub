@@ -1,4 +1,11 @@
-export type Role = 'ADMIN' | 'USER';
+import type { ValueOf } from '~/utils/valueOf';
+
+export const UserRoleEnum = {
+  ADMIN: 'ADMIN',
+  USER: 'USER',
+} as const;
+
+export type UserRole = ValueOf<typeof UserRoleEnum>;
 
 export type User = {
   id: number;
@@ -7,7 +14,7 @@ export type User = {
   email: string;
   createdAt: Date;
   updatedAt: Date;
-  role: Role;
+  role: UserRole;
 
   hasTenant: boolean;
 };
