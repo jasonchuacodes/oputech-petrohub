@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 
 import { NotFoundError } from '~/errors';
 import { AuthenticatedRequest } from '~/middlewares';
+import { REFRESH_TOKEN_EXPIRY_IN_DAYS } from '~/shared/constants';
 import { createSchemaValidator } from '~/utils';
 
 import { registerUser as registerUserService } from '../services/register.service';
@@ -54,11 +55,11 @@ const loginUser = async (req: Request, res: Response, next: NextFunction) => {
 
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
-      maxAge: 5 * 1000,
+      maxAge: 15 * 60 * 1000,
     });
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      maxAge: 1 * 60 * 1000,
+      maxAge: REFRESH_TOKEN_EXPIRY_IN_DAYS * 24 * 60 * 60 * 1000
     });
     res.status(200).json({
       message: 'Logged in successfully',

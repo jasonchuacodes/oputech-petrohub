@@ -1,5 +1,6 @@
 import { prisma } from '~/db';
 import { UnauthenticatedError } from '~/errors/unauthenticated.error';
+import { REFRESH_TOKEN_EXPIRY_IN_DAYS } from '~/shared/constants';
 import {
   verify,
   signJwt,
@@ -11,9 +12,7 @@ import {
 
 import { LoginUserInput } from '../schema/loginUserSchema';
 
-const SESSION_EXPIRES_IN_DAYS = 7;
-
-const expiresAt = new Date(Date.now() + SESSION_EXPIRES_IN_DAYS * 24 * 60 * 60 * 1000);
+const expiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRY_IN_DAYS * 24 * 60 * 60 * 1000);
 
 const loginUser = async (data: LoginUserInput) => {
   const { password, username } = data;
