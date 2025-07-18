@@ -8,31 +8,70 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  USER
+  ADMIN
+}
+
 model User {
-  id        Int      @id @default(autoincrement())
-  username  String   @unique
-  email     String?  @unique
-  name      String
-  password  String
+  id       Int     @id @default(autoincrement())
+  username String  @unique
+  email    String? @unique
+  name     String
+  password String
+  role     Role    @default(USER)
+
+  tenantId       Int?
+  tenant         Tenant?   @relation(fields: [tenantId], references: [id]) // belongs to one tenant
+  createdTenants Tenant[]  @relation("CreatedTenants") // tenants created by this admin
+  sessions       Session[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  role      Role     @default(USER)
-
-  sessions Session[]
 }
 
 model Session {
   id     Int  @id @default(autoincrement())
-  user   User @relation(fields: [userId], references: [id])
   userId Int
+  user   User @relation(fields: [userId], references: [id])
 
   refreshTokenHash String
   expiresAt        DateTime
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-enum Role {
-  USER
-  ADMIN
+model Tenant {
+  id          Int     @id @default(autoincrement())
+  name        String
+  email       String
+  contact     String
+  address     String
+  description String?
+
+  sss        String?
+  tin        String?
+  philhealth String?
+  pagibig    String?
+
+  logoUrl String?
+
+  createdById Int
+  createdBy   User       @relation("CreatedTenants", fields: [createdById], references: [id]) // creator (admin)
+  users       User[] // employees assigned to this tenant
+  documents   Document[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Document {
+  id       Int    @id @default(autoincrement())
+  tenantId Int
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  name       String
+  url        String
+  uploadedAt DateTime @default(now())
 }
