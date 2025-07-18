@@ -8,8 +8,16 @@ import { CreateTenantSchema, type CreateTenantInput } from '~/schema/createTenan
 
 import { CreateTenantPrompt } from './CreateTenantPrompt';
 import { GovernmentInfo } from './GovernmentInfo';
-import { OrganizationInfo } from './OrganizationInfo';
+import { GeneralInfo } from './GeneralInfo';
 import { OtherInfo } from './OtherInfo';
+
+const initialTenantForm = {
+  contact: '',
+  description: '',
+  address: '',
+  email: '',
+  name: '',
+};
 
 export const CreateTenantFlow = () => {
   const [stepIndex, setStepIndex] = useState<number>(-1);
@@ -17,18 +25,46 @@ export const CreateTenantFlow = () => {
   const nextStep = () => setStepIndex((prev) => (prev >= 3 ? 3 : prev + 1));
   const prevStep = () => setStepIndex((prev) => prev - 1);
 
-  const { register } = useForm<CreateTenantInput>({
+  const {
+    control,
+    handleSubmit,
+    register,
+    reset,
+    clearErrors,
+    formState: { errors },
+  } = useForm<CreateTenantInput>({
     resolver: zodResolver(CreateTenantSchema),
+    defaultValues: initialTenantForm,
+  });
+
+  const onSubmit = handleSubmit((data: CreateTenantInput) => {
+    console.log('Create tenant: ', data);
+    reset();
+    clearErrors();
   });
 
   const renderCreateTenantStep = () => {
     switch (stepIndex) {
       case 0:
-        return <OrganizationInfo onPrevious={prevStep} onNext={nextStep} register={register} />;
+        return (
+          <GeneralInfo
+            control={control}
+            onPrevious={prevStep}
+            onNext={nextStep}
+            register={register}
+          />
+        );
       case 1:
-        return <GovernmentInfo onPrevious={prevStep} onNext={nextStep} register={register} />;
+        return <GovernmentInfo control={control} onPrevious={prevStep} onNext={nextStep} />;
       case 2:
-        return <OtherInfo onPrevious={prevStep} onNext={nextStep} register={register} />;
+        return (
+          <OtherInfo
+            errors={errors}
+            onPrevious={prevStep}
+            onSubmit={onSubmit}
+            register={register}
+          />
+        );
 
       default:
         return null;
@@ -67,11 +103,11 @@ export const CreateTenantFlow = () => {
         {stepIndex === -1 ? (
           <CreateTenantPrompt onStart={() => setStepIndex(0)} />
         ) : (
-          <ContentCard sx={{ maxWidth: 'sm' }}>
-            <Typography variant="h5" fontWeight="bold" textAlign="start">
-              Create Tenant
-            </Typography>
+          <ContentCard sx={{ maxWidth: 'sm', gap: 4 }}>
             <Stack spacing={1}>
+              <Typography variant="h5" fontWeight="bold" textAlign="start">
+                Create Tenant
+              </Typography>
               <RadioGroup
                 row
                 value={stepIndex}
@@ -93,7 +129,7 @@ export const CreateTenantFlow = () => {
               <Typography
                 component="p"
                 variant="body2"
-                sx={{ textAlign: 'start', fontStyle: 'italic', whiteSpace: 'pre-line' }}
+                sx={{ textAlign: 'start', whiteSpace: 'pre-line' }}
               >
                 {renderCreateTenantStepInfo()}
               </Typography>

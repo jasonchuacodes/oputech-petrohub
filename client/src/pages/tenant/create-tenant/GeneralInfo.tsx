@@ -1,21 +1,21 @@
 import { Stack } from '@mui/material';
-import type { UseFormRegister } from 'react-hook-form';
+import type { Control, UseFormRegister } from 'react-hook-form';
 
+import { FormRow, InputWithFormat, TextField } from '~/components/form';
 import { StepNavigation } from '~/components/ui';
-import { FormRow } from '~/components/form/FormRow';
-import { TextField } from '~/components/form/TextField';
 import type { CreateTenantInput } from '~/schema/createTenantSchema';
 
-type OrganizationInfoProps = {
+type GeneralInfoProps = {
+  control: Control<CreateTenantInput>;
   register: UseFormRegister<CreateTenantInput>;
   onPrevious: () => void;
   onNext: () => void;
 };
 
-export const OrganizationInfo = ({ register, onNext, onPrevious }: OrganizationInfoProps) => {
+export const GeneralInfo = ({ control, register, onNext, onPrevious }: GeneralInfoProps) => {
   return (
     <>
-      <Stack spacing={3} justifyContent="start" alignItems="start">
+      <Stack spacing={2} justifyContent="start" alignItems="start">
         <FormRow label="Company Name" required>
           <TextField
             name="name"
@@ -33,7 +33,12 @@ export const OrganizationInfo = ({ register, onNext, onPrevious }: OrganizationI
           />
         </FormRow>
         <FormRow label="Contact" required>
-          <TextField name="contact" register={register} placeholder="John Doe" variant="standard" />
+          <InputWithFormat
+            control={control}
+            name="contact"
+            pattern="9999-999-9999"
+            placeholder="0925-123-1234"
+          />
         </FormRow>
         <FormRow label="Address" required>
           <TextField

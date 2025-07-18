@@ -29,11 +29,11 @@ export const TextField = <T extends object>({
         )}
       </Typography>
       <MUITextField
-        fullWidth
         {...register(name)}
+        {...muiProps}
+        fullWidth
         placeholder={placeholder}
         size="small"
-        {...muiProps}
       />
     </Stack>
   );

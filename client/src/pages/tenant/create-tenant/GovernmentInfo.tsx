@@ -1,50 +1,50 @@
 import { Stack } from '@mui/material';
-import type { UseFormRegister } from 'react-hook-form';
+import type { Control } from 'react-hook-form';
 
-import { FormRow, TextField } from '~/components/form';
+import { FormRow, InputWithFormat } from '~/components/form';
 import { StepNavigation } from '~/components/ui';
 import type { CreateTenantInput } from '~/schema/createTenantSchema';
 
 type GovernmentInfoProps = {
-  register: UseFormRegister<CreateTenantInput>;
+  control: Control<CreateTenantInput>;
   onPrevious: () => void;
   onNext: () => void;
 };
 
-export const GovernmentInfo = ({ register, onNext, onPrevious }: GovernmentInfoProps) => {
+export const GovernmentInfo = ({ control, onNext, onPrevious }: GovernmentInfoProps) => {
   return (
     <>
-      <Stack spacing={3} justifyContent="start" alignItems="start">
+      <Stack spacing={2} justifyContent="start" alignItems="start">
         <FormRow label="TIN">
-          <TextField
-            name="name"
-            register={register}
+          <InputWithFormat
+            control={control}
+            pattern="999-999-999-999"
             placeholder="123-456-789-000"
-            variant="standard"
+            name="tin"
           />
         </FormRow>
         <FormRow label="SSS">
-          <TextField
-            name="name"
-            register={register}
-            placeholder="34-1234567-8"
-            variant="standard"
+          <InputWithFormat
+            control={control}
+            pattern="99-9999999-9"
+            placeholder="12-3456789-0"
+            name="sss"
           />
         </FormRow>
         <FormRow label="PAGIBIG">
-          <TextField
-            name="name"
-            register={register}
-            placeholder="12-3456778901-2"
-            variant="standard"
+          <InputWithFormat
+            control={control}
+            name="pagibig"
+            pattern="99-9999999999-9"
+            placeholder="12-3456789012-3"
           />
         </FormRow>
         <FormRow label="PHILHEALTH">
-          <TextField
-            name="name"
-            register={register}
-            placeholder="1234-4567-9012"
-            variant="standard"
+          <InputWithFormat
+            control={control}
+            pattern="9999-9999-9999"
+            placeholder="1234-5678-9012"
+            name="philhealth"
           />
         </FormRow>
       </Stack>
