@@ -86,6 +86,7 @@ export const requireAuth = async (req: AuthenticatedRequest, res: Response, next
     });
 
     req.user = {
+      id: session.user.id,
       name: session.user.name,
       email: session.user.email,
       username: session.user.username,

@@ -34,6 +34,7 @@ const loginUser = async (data: LoginUserInput) => {
   }
 
   const accessToken = signJwt<JwtUserPayload>({
+    id: user.id,
     name: user.name,
     email: user.email,
     username: user.username,
