@@ -1,7 +1,9 @@
 import { createBrowserRouter, createRoutesFromElements, Route } from 'react-router-dom';
 
 import { App } from '~/App';
-import { MainLayout } from '~/components/layouts/MainLayout';
+import { RequireTenant } from '~/components/auth/RequireTenant';
+import { RequireNoTenant } from '~/components/auth/RequireNoTenant';
+import { MainLayout, SetupLayout } from '~/components/layouts';
 import { ProtectedRoute } from '~/components/auth/ProtectedRoute';
 import { BootstrapPage } from '~/pages/bootstrap';
 import { DashboardPage } from '~/pages/dashboard';
@@ -12,7 +14,6 @@ import { ReportsPage } from '~/pages/reports';
 import { CreateTenantFlow } from '~/pages/tenant/create-tenant';
 import { TimesheetsPage } from '~/pages/timesheets';
 import { UsersPage } from '~/pages/users';
-import { SetupLayout } from '../components/layouts';
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -25,17 +26,22 @@ export const router = createBrowserRouter(
       <Route element={<ProtectedRoute />}>
         <Route path="/bootstrap" element={<BootstrapPage />} />
 
-        <Route element={<SetupLayout />}>
-          <Route path="/create-tenant" element={<CreateTenantFlow />} />
+        {/* Routes for users without a tenant */}
+        <Route element={<RequireNoTenant />}>
+          <Route element={<SetupLayout />}>
+            <Route path="/create-tenant" element={<CreateTenantFlow />} />
+          </Route>
         </Route>
 
-        {/* Routes that require a tenant */}
-        <Route element={<MainLayout />}>
-          <Route index element={<HomePage />}></Route>
-          <Route path="/dashboard" element={<DashboardPage />}></Route>
-          <Route path="/reports" element={<ReportsPage />}></Route>
-          <Route path="/timesheets" element={<TimesheetsPage />}></Route>
-          <Route path="/users" element={<UsersPage />}></Route>
+        {/* Routes with a tenant */}
+        <Route element={<RequireTenant />}>
+          <Route element={<MainLayout />}>
+            <Route index element={<HomePage />}></Route>
+            <Route path="/dashboard" element={<DashboardPage />}></Route>
+            <Route path="/reports" element={<ReportsPage />}></Route>
+            <Route path="/timesheets" element={<TimesheetsPage />}></Route>
+            <Route path="/users" element={<UsersPage />}></Route>
+          </Route>
         </Route>
       </Route>
     </Route>,

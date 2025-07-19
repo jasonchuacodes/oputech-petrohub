@@ -13,6 +13,6 @@ router.post('/login', asyncHandler(loginUser));
 
 // Protected routes
 router.post('/logout', logoutUser);
-router.get('/me', requireAuth, getMe);
+router.get('/me', requireAuth, asyncHandler(getMe));
 
 export default router;

@@ -18,7 +18,9 @@ const initialState = {
 const AuthContext = createContext<AuthContextType>(initialState);
 
 const AuthProvider = ({ children }: { children?: ReactNode }) => {
-  const { data: auth, isLoading: loading, refetch } = useGetMe();
+  const { data: auth, isLoading, isFetching, refetch } = useGetMe();
+
+  const loading = isLoading || isFetching;
 
   return <AuthContext.Provider value={{ auth, loading, refetch }}>{children}</AuthContext.Provider>;
 };

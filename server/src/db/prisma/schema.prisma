@@ -21,10 +21,10 @@ model User {
   password String
   role     Role    @default(USER)
 
-  tenantId       Int?
-  tenant         Tenant?   @relation(fields: [tenantId], references: [id]) // belongs to one tenant
-  createdTenants Tenant[]  @relation("CreatedTenants") // tenants created by this admin
-  sessions       Session[]
+  tenantId Int?
+  tenant   Tenant?   @relation(fields: [tenantId], references: [id]) // belongs to one tenant
+  tenants  Tenant[]  @relation("tenants") // tenants created by this admin
+  sessions Session[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -58,7 +58,7 @@ model Tenant {
   logoUrl String?
 
   createdById Int
-  createdBy   User       @relation("CreatedTenants", fields: [createdById], references: [id]) // creator (admin)
+  createdBy   User       @relation("tenants", fields: [createdById], references: [id]) // creator (admin)
   users       User[] // employees assigned to this tenant
   documents   Document[]
 

@@ -1159,12 +1159,12 @@ export namespace Prisma {
    */
 
   export type UserCountOutputType = {
-    createdTenants: number
+    tenants: number
     sessions: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    createdTenants?: boolean | UserCountOutputTypeCountCreatedTenantsArgs
+    tenants?: boolean | UserCountOutputTypeCountTenantsArgs
     sessions?: boolean | UserCountOutputTypeCountSessionsArgs
   }
 
@@ -1182,7 +1182,7 @@ export namespace Prisma {
   /**
    * UserCountOutputType without action
    */
-  export type UserCountOutputTypeCountCreatedTenantsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type UserCountOutputTypeCountTenantsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: TenantWhereInput
   }
 
@@ -1473,7 +1473,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     tenant?: boolean | User$tenantArgs<ExtArgs>
-    createdTenants?: boolean | User$createdTenantsArgs<ExtArgs>
+    tenants?: boolean | User$tenantsArgs<ExtArgs>
     sessions?: boolean | User$sessionsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
@@ -1519,7 +1519,7 @@ export namespace Prisma {
   export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "username" | "email" | "name" | "password" | "role" | "tenantId" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     tenant?: boolean | User$tenantArgs<ExtArgs>
-    createdTenants?: boolean | User$createdTenantsArgs<ExtArgs>
+    tenants?: boolean | User$tenantsArgs<ExtArgs>
     sessions?: boolean | User$sessionsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
@@ -1534,7 +1534,7 @@ export namespace Prisma {
     name: "User"
     objects: {
       tenant: Prisma.$TenantPayload<ExtArgs> | null
-      createdTenants: Prisma.$TenantPayload<ExtArgs>[]
+      tenants: Prisma.$TenantPayload<ExtArgs>[]
       sessions: Prisma.$SessionPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -1942,7 +1942,7 @@ export namespace Prisma {
   export interface Prisma__UserClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     tenant<T extends User$tenantArgs<ExtArgs> = {}>(args?: Subset<T, User$tenantArgs<ExtArgs>>): Prisma__TenantClient<$Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-    createdTenants<T extends User$createdTenantsArgs<ExtArgs> = {}>(args?: Subset<T, User$createdTenantsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    tenants<T extends User$tenantsArgs<ExtArgs> = {}>(args?: Subset<T, User$tenantsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     sessions<T extends User$sessionsArgs<ExtArgs> = {}>(args?: Subset<T, User$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -2397,9 +2397,9 @@ export namespace Prisma {
   }
 
   /**
-   * User.createdTenants
+   * User.tenants
    */
-  export type User$createdTenantsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type User$tenantsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the Tenant
      */
@@ -6127,7 +6127,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     tenant?: XOR<TenantNullableScalarRelationFilter, TenantWhereInput> | null
-    createdTenants?: TenantListRelationFilter
+    tenants?: TenantListRelationFilter
     sessions?: SessionListRelationFilter
   }
 
@@ -6142,7 +6142,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     tenant?: TenantOrderByWithRelationInput
-    createdTenants?: TenantOrderByRelationAggregateInput
+    tenants?: TenantOrderByRelationAggregateInput
     sessions?: SessionOrderByRelationAggregateInput
   }
 
@@ -6160,7 +6160,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     tenant?: XOR<TenantNullableScalarRelationFilter, TenantWhereInput> | null
-    createdTenants?: TenantListRelationFilter
+    tenants?: TenantListRelationFilter
     sessions?: SessionListRelationFilter
   }, "id" | "username" | "email">
 
@@ -6432,7 +6432,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUsersInput
-    createdTenants?: TenantCreateNestedManyWithoutCreatedByInput
+    tenants?: TenantCreateNestedManyWithoutCreatedByInput
     sessions?: SessionCreateNestedManyWithoutUserInput
   }
 
@@ -6446,7 +6446,7 @@ export namespace Prisma {
     tenantId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    createdTenants?: TenantUncheckedCreateNestedManyWithoutCreatedByInput
+    tenants?: TenantUncheckedCreateNestedManyWithoutCreatedByInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -6459,7 +6459,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUsersNestedInput
-    createdTenants?: TenantUpdateManyWithoutCreatedByNestedInput
+    tenants?: TenantUpdateManyWithoutCreatedByNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
   }
 
@@ -6473,7 +6473,7 @@ export namespace Prisma {
     tenantId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    createdTenants?: TenantUncheckedUpdateManyWithoutCreatedByNestedInput
+    tenants?: TenantUncheckedUpdateManyWithoutCreatedByNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -6583,7 +6583,7 @@ export namespace Prisma {
     logoUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    createdBy: UserCreateNestedOneWithoutCreatedTenantsInput
+    createdBy: UserCreateNestedOneWithoutTenantsInput
     users?: UserCreateNestedManyWithoutTenantInput
     documents?: DocumentCreateNestedManyWithoutTenantInput
   }
@@ -6620,7 +6620,7 @@ export namespace Prisma {
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    createdBy?: UserUpdateOneRequiredWithoutCreatedTenantsNestedInput
+    createdBy?: UserUpdateOneRequiredWithoutTenantsNestedInput
     users?: UserUpdateManyWithoutTenantNestedInput
     documents?: DocumentUpdateManyWithoutTenantNestedInput
   }
@@ -7291,9 +7291,9 @@ export namespace Prisma {
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutSessionsInput, UserUpdateWithoutSessionsInput>, UserUncheckedUpdateWithoutSessionsInput>
   }
 
-  export type UserCreateNestedOneWithoutCreatedTenantsInput = {
-    create?: XOR<UserCreateWithoutCreatedTenantsInput, UserUncheckedCreateWithoutCreatedTenantsInput>
-    connectOrCreate?: UserCreateOrConnectWithoutCreatedTenantsInput
+  export type UserCreateNestedOneWithoutTenantsInput = {
+    create?: XOR<UserCreateWithoutTenantsInput, UserUncheckedCreateWithoutTenantsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutTenantsInput
     connect?: UserWhereUniqueInput
   }
 
@@ -7325,12 +7325,12 @@ export namespace Prisma {
     connect?: DocumentWhereUniqueInput | DocumentWhereUniqueInput[]
   }
 
-  export type UserUpdateOneRequiredWithoutCreatedTenantsNestedInput = {
-    create?: XOR<UserCreateWithoutCreatedTenantsInput, UserUncheckedCreateWithoutCreatedTenantsInput>
-    connectOrCreate?: UserCreateOrConnectWithoutCreatedTenantsInput
-    upsert?: UserUpsertWithoutCreatedTenantsInput
+  export type UserUpdateOneRequiredWithoutTenantsNestedInput = {
+    create?: XOR<UserCreateWithoutTenantsInput, UserUncheckedCreateWithoutTenantsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutTenantsInput
+    upsert?: UserUpsertWithoutTenantsInput
     connect?: UserWhereUniqueInput
-    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutCreatedTenantsInput, UserUpdateWithoutCreatedTenantsInput>, UserUncheckedUpdateWithoutCreatedTenantsInput>
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutTenantsInput, UserUpdateWithoutTenantsInput>, UserUncheckedUpdateWithoutTenantsInput>
   }
 
   export type UserUpdateManyWithoutTenantNestedInput = {
@@ -7596,7 +7596,7 @@ export namespace Prisma {
     logoUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    createdBy: UserCreateNestedOneWithoutCreatedTenantsInput
+    createdBy: UserCreateNestedOneWithoutTenantsInput
     documents?: DocumentCreateNestedManyWithoutTenantInput
   }
 
@@ -7717,7 +7717,7 @@ export namespace Prisma {
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    createdBy?: UserUpdateOneRequiredWithoutCreatedTenantsNestedInput
+    createdBy?: UserUpdateOneRequiredWithoutTenantsNestedInput
     documents?: DocumentUpdateManyWithoutTenantNestedInput
   }
 
@@ -7812,7 +7812,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUsersInput
-    createdTenants?: TenantCreateNestedManyWithoutCreatedByInput
+    tenants?: TenantCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutSessionsInput = {
@@ -7825,7 +7825,7 @@ export namespace Prisma {
     tenantId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    createdTenants?: TenantUncheckedCreateNestedManyWithoutCreatedByInput
+    tenants?: TenantUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutSessionsInput = {
@@ -7853,7 +7853,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUsersNestedInput
-    createdTenants?: TenantUpdateManyWithoutCreatedByNestedInput
+    tenants?: TenantUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -7866,10 +7866,10 @@ export namespace Prisma {
     tenantId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    createdTenants?: TenantUncheckedUpdateManyWithoutCreatedByNestedInput
+    tenants?: TenantUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
-  export type UserCreateWithoutCreatedTenantsInput = {
+  export type UserCreateWithoutTenantsInput = {
     username: string
     email?: string | null
     name: string
@@ -7881,7 +7881,7 @@ export namespace Prisma {
     sessions?: SessionCreateNestedManyWithoutUserInput
   }
 
-  export type UserUncheckedCreateWithoutCreatedTenantsInput = {
+  export type UserUncheckedCreateWithoutTenantsInput = {
     id?: number
     username: string
     email?: string | null
@@ -7894,9 +7894,9 @@ export namespace Prisma {
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
   }
 
-  export type UserCreateOrConnectWithoutCreatedTenantsInput = {
+  export type UserCreateOrConnectWithoutTenantsInput = {
     where: UserWhereUniqueInput
-    create: XOR<UserCreateWithoutCreatedTenantsInput, UserUncheckedCreateWithoutCreatedTenantsInput>
+    create: XOR<UserCreateWithoutTenantsInput, UserUncheckedCreateWithoutTenantsInput>
   }
 
   export type UserCreateWithoutTenantInput = {
@@ -7907,7 +7907,7 @@ export namespace Prisma {
     role?: $Enums.Role
     createdAt?: Date | string
     updatedAt?: Date | string
-    createdTenants?: TenantCreateNestedManyWithoutCreatedByInput
+    tenants?: TenantCreateNestedManyWithoutCreatedByInput
     sessions?: SessionCreateNestedManyWithoutUserInput
   }
 
@@ -7920,7 +7920,7 @@ export namespace Prisma {
     role?: $Enums.Role
     createdAt?: Date | string
     updatedAt?: Date | string
-    createdTenants?: TenantUncheckedCreateNestedManyWithoutCreatedByInput
+    tenants?: TenantUncheckedCreateNestedManyWithoutCreatedByInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -7957,18 +7957,18 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
-  export type UserUpsertWithoutCreatedTenantsInput = {
-    update: XOR<UserUpdateWithoutCreatedTenantsInput, UserUncheckedUpdateWithoutCreatedTenantsInput>
-    create: XOR<UserCreateWithoutCreatedTenantsInput, UserUncheckedCreateWithoutCreatedTenantsInput>
+  export type UserUpsertWithoutTenantsInput = {
+    update: XOR<UserUpdateWithoutTenantsInput, UserUncheckedUpdateWithoutTenantsInput>
+    create: XOR<UserCreateWithoutTenantsInput, UserUncheckedCreateWithoutTenantsInput>
     where?: UserWhereInput
   }
 
-  export type UserUpdateToOneWithWhereWithoutCreatedTenantsInput = {
+  export type UserUpdateToOneWithWhereWithoutTenantsInput = {
     where?: UserWhereInput
-    data: XOR<UserUpdateWithoutCreatedTenantsInput, UserUncheckedUpdateWithoutCreatedTenantsInput>
+    data: XOR<UserUpdateWithoutTenantsInput, UserUncheckedUpdateWithoutTenantsInput>
   }
 
-  export type UserUpdateWithoutCreatedTenantsInput = {
+  export type UserUpdateWithoutTenantsInput = {
     username?: StringFieldUpdateOperationsInput | string
     email?: NullableStringFieldUpdateOperationsInput | string | null
     name?: StringFieldUpdateOperationsInput | string
@@ -7980,7 +7980,7 @@ export namespace Prisma {
     sessions?: SessionUpdateManyWithoutUserNestedInput
   }
 
-  export type UserUncheckedUpdateWithoutCreatedTenantsInput = {
+  export type UserUncheckedUpdateWithoutTenantsInput = {
     id?: IntFieldUpdateOperationsInput | number
     username?: StringFieldUpdateOperationsInput | string
     email?: NullableStringFieldUpdateOperationsInput | string | null
@@ -8064,7 +8064,7 @@ export namespace Prisma {
     logoUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    createdBy: UserCreateNestedOneWithoutCreatedTenantsInput
+    createdBy: UserCreateNestedOneWithoutTenantsInput
     users?: UserCreateNestedManyWithoutTenantInput
   }
 
@@ -8115,7 +8115,7 @@ export namespace Prisma {
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    createdBy?: UserUpdateOneRequiredWithoutCreatedTenantsNestedInput
+    createdBy?: UserUpdateOneRequiredWithoutTenantsNestedInput
     users?: UserUpdateManyWithoutTenantNestedInput
   }
 
@@ -8261,7 +8261,7 @@ export namespace Prisma {
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    createdTenants?: TenantUpdateManyWithoutCreatedByNestedInput
+    tenants?: TenantUpdateManyWithoutCreatedByNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
   }
 
@@ -8274,7 +8274,7 @@ export namespace Prisma {
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    createdTenants?: TenantUncheckedUpdateManyWithoutCreatedByNestedInput
+    tenants?: TenantUncheckedUpdateManyWithoutCreatedByNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
   }
 

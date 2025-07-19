@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 
 import { NotFoundError } from '~/errors';
 import { AuthenticatedRequest } from '~/middlewares';
+import { getUserById as getUserService } from '~/modules/user/services/user.service';
 import { REFRESH_TOKEN_EXPIRY_IN_DAYS } from '~/shared/constants';
 import { createSchemaValidator } from '~/utils';
 
@@ -16,18 +17,28 @@ const isProduction = process.env.NODE_ENV === 'production';
 const validateUserRegister = createSchemaValidator(RegisterUserSchema);
 const validateUserLogin = createSchemaValidator(LoginUserSchema);
 
-const getMe = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+const getMe = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
-    const user = req.user;
+    const userId = req.user?.id;
 
-    if (!user) {
+    if (!userId) {
       throw new NotFoundError('User not found');
     }
+
+    const user = await getUserService(userId);
+
+    const authUserData = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      username: user.username,
+      hasTenant: user.tenants.length > 0,
+    };
 
     res.status(200).json({
       message: 'Successfully retrieved authenticated user',
       data: {
-        user,
+        user: authUserData,
       },
     });
   } catch (err) {
@@ -59,7 +70,7 @@ const loginUser = async (req: Request, res: Response, next: NextFunction) => {
     });
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      maxAge: REFRESH_TOKEN_EXPIRY_IN_DAYS * 24 * 60 * 60 * 1000
+      maxAge: REFRESH_TOKEN_EXPIRY_IN_DAYS * 24 * 60 * 60 * 1000,
     });
     res.status(200).json({
       message: 'Logged in successfully',

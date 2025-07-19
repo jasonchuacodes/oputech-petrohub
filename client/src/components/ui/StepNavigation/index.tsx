@@ -10,6 +10,7 @@ type StepNavigationProps = {
   previousLabel?: string;
   hidePrevious?: boolean;
   disabled?: boolean
+  loading?: boolean
 };
 
 export const StepNavigation = ({
@@ -18,7 +19,8 @@ export const StepNavigation = ({
   nextLabel = 'Next',
   previousLabel = 'Previous',
   hidePrevious = false,
-  disabled
+  disabled,
+  loading
 }: StepNavigationProps) => {
   return (
     <Stack direction="row" justifyContent="space-between" mt={5}>
@@ -37,6 +39,7 @@ export const StepNavigation = ({
 
       <Button
         disabled={disabled}
+        loading={loading}
         onClick={onNext}
         variant="contained"
         size="small"

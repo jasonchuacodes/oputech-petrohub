@@ -2,8 +2,10 @@ import { Container, FormControlLabel, Radio, RadioGroup, Stack, Typography } fro
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
 
 import { ContentCard, PageLayout } from '~/components/ui';
+import { useCreateTenantMutation } from '~/services/tenant/tenant.queries';
 import { CreateTenantSchema, type CreateTenantInput } from '~/schema/createTenantSchema';
 
 import { CreateTenantPrompt } from './CreateTenantPrompt';
@@ -20,6 +22,7 @@ const initialTenantForm = {
 };
 
 export const CreateTenantFlow = () => {
+  const navigate = useNavigate();
   const [stepIndex, setStepIndex] = useState<number>(-1);
 
   const nextStep = () => setStepIndex((prev) => (prev >= 3 ? 3 : prev + 1));
@@ -37,10 +40,20 @@ export const CreateTenantFlow = () => {
     defaultValues: initialTenantForm,
   });
 
-  const onSubmit = handleSubmit((data: CreateTenantInput) => {
-    console.log('Create tenant: ', data);
-    reset();
-    clearErrors();
+  const { mutate: createTenant, isPending: isCreatingTenant } = useCreateTenantMutation();
+
+  const onSubmit = handleSubmit(async (data: CreateTenantInput) => {
+    createTenant(data, {
+      onSuccess: () => {
+        console.log('Successfully created tenant: ', data);
+        reset();
+        clearErrors();
+        navigate('/');
+      },
+      onError: (err) => {
+        console.log('Failed to create tenant: ', err.message);
+      },
+    });
   });
 
   const renderCreateTenantStep = () => {
@@ -60,6 +73,7 @@ export const CreateTenantFlow = () => {
         return (
           <OtherInfo
             errors={errors}
+            isPending={isCreatingTenant}
             onPrevious={prevStep}
             onSubmit={onSubmit}
             register={register}

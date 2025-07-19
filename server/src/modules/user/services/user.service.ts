@@ -22,7 +22,7 @@ const getAllUsers = async () => {
 };
 
 const getUserById = async (id: number) => {
-  const user = await prisma.user.findFirst({ where: { id } });
+  const user = await prisma.user.findFirst({ where: { id }, include: { tenants: true } });
 
   if (!user) {
     throw new NotFoundError('User not found');
