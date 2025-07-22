@@ -14,25 +14,29 @@ import type { ReactNode } from 'react';
 import { Button } from '~/components/ui/Button';
 
 type Props = ModalProps & {
-  onClose: () => void;
-  onCancel?: () => void;
   title: string;
+  onClose: () => void;
   subheader?: string;
   children?: ReactNode;
-  disabledSubmit?: boolean;
+  disabled?: boolean;
   maxWidth?: number;
   loading?: boolean;
+  submitText?: string;
+  onCancel?: () => void;
+  onSubmit?: () => void;
 };
 
 export const CustomModal = ({
-  onCancel,
-  onClose,
   title,
   subheader,
   children,
-  disabledSubmit,
+  disabled,
   loading,
   maxWidth,
+  submitText = 'Submit',
+  onCancel,
+  onClose,
+  onSubmit,
   ...modalProps
 }: Props) => {
   return (
@@ -71,8 +75,14 @@ export const CustomModal = ({
             <Button disableElevation={true} onClick={onCancel} type="button" variant="outlined">
               Cancel
             </Button>
-            <Button disabled={disabledSubmit} loading={loading} type="submit" variant="contained">
-              Submit
+            <Button
+              disabled={disabled}
+              loading={loading}
+              type="submit"
+              variant="contained"
+              onClick={onSubmit}
+            >
+              {submitText}
             </Button>
           </CardActions>
         </Card>
