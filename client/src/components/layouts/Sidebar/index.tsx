@@ -1,4 +1,5 @@
 import {
+  AssessmentOutlined,
   CalendarTodayOutlined,
   DashboardOutlined,
   GroupOutlined,
@@ -31,7 +32,7 @@ const Sidebar = () => {
   const navItems: NavItem[] = [
     { label: 'Home', icon: HomeOutlined, to: '/' },
     { label: 'Dashboard', icon: DashboardOutlined, to: '/dashboard' },
-    { label: 'Reports', icon: DashboardOutlined, to: '/reports' },
+    { label: 'Reports', icon: AssessmentOutlined, to: '/reports' },
     { label: 'Timesheets', icon: CalendarTodayOutlined, to: '/timesheets' },
     { label: 'Users', icon: GroupOutlined, to: '/users' },
   ];
