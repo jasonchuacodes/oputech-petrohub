@@ -1,6 +1,15 @@
 import { createTheme } from '@mui/material';
 
 const theme = createTheme({
+  components: {
+    MuiCssBaseline: {
+      styleOverrides: {
+        body: {
+          scrollbarColor: '#b1b9c2 transparent',
+        },
+      },
+    },
+  },
   palette: {
     mode: 'light',
 
@@ -19,7 +28,7 @@ const theme = createTheme({
     },
 
     background: {
-      default: '#f4f6f8',
+      default: '#fafbfc',
       paper: '#ffffff',
     },
 

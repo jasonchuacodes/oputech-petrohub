@@ -44,14 +44,13 @@ export const Register = () => {
 
   return (
     <PageLayout
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        bgcolor: theme.palette.background.default,
-        gap: 3,
-      }}
+      alignItems="center"
+      bgcolor={theme.palette.background.default}
+      display="flex"
+      flexDirection="column"
+      gap={3}
+      justifyContent="center"
+      mt={10}
     >
       <Typography variant="h4" fontWeight="bold">
         Register

@@ -6,7 +6,14 @@ import TenantSelector from './TenantSelector';
 
 const Navbar = () => {
   return (
-    <Stack direction="row" justifyContent="space-between" p={1} bgcolor="background.paper">
+    <Stack
+      direction="row"
+      justifyContent="space-between"
+      p={1}
+      bgcolor="background.paper"
+      borderBottom={1}
+      borderColor="divider"
+    >
       <Stack direction="row" alignItems="center" spacing={1}>
         {/* Organization Initials */}
         <Avatar sx={{ bgcolor: 'primary.main' }} variant="rounded">
@@ -34,10 +41,10 @@ const Navbar = () => {
       >
         <Stack direction="row">
           <IconButton>
-            <SettingsOutlined fontSize='small'/>
+            <SettingsOutlined fontSize="small" />
           </IconButton>
           <IconButton>
-            <NotificationsOutlined fontSize='small'/>
+            <NotificationsOutlined fontSize="small" />
           </IconButton>
         </Stack>
         <NavbarUserMenu />

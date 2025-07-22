@@ -1,6 +1,7 @@
 import {
   CalendarTodayOutlined,
   DashboardOutlined,
+  GroupOutlined,
   HomeOutlined,
   KeyboardDoubleArrowRightOutlined,
 } from '@mui/icons-material';
@@ -32,7 +33,7 @@ const Sidebar = () => {
     { label: 'Dashboard', icon: DashboardOutlined, to: '/dashboard' },
     { label: 'Reports', icon: DashboardOutlined, to: '/reports' },
     { label: 'Timesheets', icon: CalendarTodayOutlined, to: '/timesheets' },
-    { label: 'Users', icon: HomeOutlined, to: '/users' },
+    { label: 'Users', icon: GroupOutlined, to: '/users' },
   ];
 
   const handleNavigate = (to: string) => {

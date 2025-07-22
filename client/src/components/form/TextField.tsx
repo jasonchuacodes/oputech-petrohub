@@ -3,7 +3,7 @@ import type { FieldValues, Path, UseFormRegister } from 'react-hook-form';
 
 type Props<T extends FieldValues> = {
   name: Path<T>;
-  register: UseFormRegister<T>;
+  register?: UseFormRegister<T>;
   placeholder: string;
   required?: boolean;
   label?: string;
@@ -29,7 +29,7 @@ export const TextField = <T extends object>({
         )}
       </Typography>
       <MUITextField
-        {...register(name)}
+        {...(register ? register(name) : {})}
         {...muiProps}
         fullWidth
         placeholder={placeholder}
