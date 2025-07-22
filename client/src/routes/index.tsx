@@ -11,7 +11,7 @@ import { HomePage } from '~/pages/home';
 import { Login } from '~/pages/auth/login';
 import { Register } from '~/pages/auth/register';
 import { ReportsPage } from '~/pages/reports';
-import { CreateTenantFlow } from '~/pages/tenant/create-tenant';
+import { CreateTenantFlow } from '~/pages/tenant/create';
 import { TimesheetsPage } from '~/pages/timesheets';
 import { UsersPage } from '~/pages/users';
 
@@ -40,6 +40,8 @@ export const router = createBrowserRouter(
             <Route path="/dashboard" element={<DashboardPage />}></Route>
             <Route path="/reports" element={<ReportsPage />}></Route>
             <Route path="/timesheets" element={<TimesheetsPage />}></Route>
+            
+            {/* Users */}
             <Route path="/users" element={<UsersPage />}></Route>
           </Route>
         </Route>

@@ -1,5 +1,6 @@
 export * from './Button';
 export * from './ContentCard';
+export * from './CustomModal';
 export * from './Form';
 export * from './Link';
 export * from './LoadingSpinner';
