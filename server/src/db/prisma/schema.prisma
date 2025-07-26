@@ -22,7 +22,7 @@ model User {
   role     Role    @default(USER)
 
   tenantId Int?
-  tenant   Tenant?   @relation(fields: [tenantId], references: [id]) // belongs to one tenant
+  tenant   Tenant?   @relation(fields: [tenantId], references: [id], onDelete: Cascade) // belongs to one tenant
   tenants  Tenant[]  @relation("tenants") // tenants created by this admin
   sessions Session[]
 
@@ -33,7 +33,7 @@ model User {
 model Session {
   id     Int  @id @default(autoincrement())
   userId Int
-  user   User @relation(fields: [userId], references: [id])
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   refreshTokenHash String
   expiresAt        DateTime
@@ -58,7 +58,7 @@ model Tenant {
   logoUrl String?
 
   createdById Int
-  createdBy   User       @relation("tenants", fields: [createdById], references: [id]) // creator (admin)
+  createdBy   User       @relation("tenants", fields: [createdById], references: [id], onDelete: Cascade) // creator (admin)
   users       User[] // employees assigned to this tenant
   documents   Document[]
 
