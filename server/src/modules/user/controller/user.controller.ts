@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 
+import { AuthenticatedRequest } from '~/middlewares';
 import { createSchemaValidator } from '~/utils';
 
 import * as userService from '../services/user.service';
@@ -7,13 +8,13 @@ import { CreateUserSchema } from '../schema/createUserSchema';
 
 const validateCreateUser = createSchemaValidator(CreateUserSchema);
 
-const createUser = async (req: Request, res: Response, next: NextFunction) => {
+const createUser = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
-    const data = await validateCreateUser(req.body);
+    const data = await validateCreateUser({ ...req.body, password: 'Password123!' });
 
-    await userService.createUser(data);
+    const { password, ...user } = await userService.createUser({ ...data });
 
-    res.status(201).json({ message: 'User created successfully' });
+    res.status(201).json({ message: 'User created successfully', data: user });
   } catch (err) {
     next(err);
   }

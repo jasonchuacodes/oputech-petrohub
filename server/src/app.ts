@@ -15,7 +15,7 @@ app.use(corsMiddleware());
 
 app.use('/users', userRoutes);
 app.use('/auth', authRoutes);
-app.use('/tenant', tenantRoutes);
+app.use('/tenants', tenantRoutes);
 app.use(errorHandler);
 
 export { app };

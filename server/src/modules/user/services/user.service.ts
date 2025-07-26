@@ -4,14 +4,14 @@ import { ConflictError, NotFoundError } from '~/errors';
 import { CreateUserInput } from '../schema/createUserSchema';
 
 const createUser = async (data: CreateUserInput) => {
-  const { email } = data;
+  const { username } = data;
 
   const existingUser = await prisma.user.findUnique({
-    where: { email },
+    where: { username },
   });
 
   if (existingUser) {
-    throw new ConflictError('User with this email already exists');
+    throw new ConflictError('User with this username already exists');
   }
 
   return await prisma.user.create({ data });
