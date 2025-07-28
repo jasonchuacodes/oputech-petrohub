@@ -6,7 +6,9 @@ import { useForm } from 'react-hook-form';
 import { TextField, Select } from '~/components/form';
 import { CustomModal } from '~/components/ui';
 import { CreateUserSchema, type CreateUserInput } from '~/schema/createUserSchema';
+import { createUser } from '~/services/user/user.api';
 import { UserRoleEnum, type UserRole } from '~/services/user/user.types';
+import { parseBackendError } from '~/utils/parseBackendError';
 import { toTitleCase } from '~/utils/textUtils';
 
 const roleOptions = Object.values(UserRoleEnum).map((value) => {
@@ -37,10 +39,21 @@ export const UserCreateModal = ({ open, setOpen }: Props) => {
     resolver: zodResolver(CreateUserSchema),
   });
 
-  const onSubmit = handleSubmit((data: CreateUserInput) => {
-    console.log('Create User: ', data);
-    setOpen(false);
-    reset();
+  const onSubmit = handleSubmit(async (data: CreateUserInput) => {
+    try {
+      const user = await createUser({
+        ...data,
+        tenantId: 1, // TODO: handle tenantId dynamically based on context
+      });
+
+      console.log('Successfully created user:', user);
+
+      setOpen(false);
+      reset();
+    } catch (err) {
+      const parsedErr = parseBackendError(err);
+      console.error('Error creating user:', parsedErr);
+    }
   });
 
   return (
