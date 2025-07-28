@@ -4,8 +4,17 @@ import { NotFoundError } from '~/errors';
 import { CreateTenantPayload } from '../schema/createTenantSchema';
 
 const createTenant = async (data: CreateTenantPayload) => {
+  const { createdById, ...tenantData } = data;
+
   const tenant = await prisma.tenant.create({
-    data,
+    data: {
+      ...tenantData,
+      users: {
+        create: {
+          user: { connect: { id: createdById } },
+        },
+      },
+    },
   });
 
   return tenant;
@@ -18,13 +27,22 @@ const getTenants = async () => {
 };
 
 const getTenantUsers = async (tenantId: number) => {
-  const users = await prisma.user.findMany({
-    where: { tenantId },
+  const tenantWithUsers = await prisma.tenant.findUnique({
+    where: { id: tenantId },
+    include: {
+      users: {
+        include: {
+          user: true,
+        },
+      },
+    },
   });
 
-  if (users.length === 0) {
+  if (!tenantWithUsers || tenantWithUsers.users.length === 0) {
     throw new NotFoundError('No users found');
   }
+
+  const users = tenantWithUsers.users.map((u) => u.user);
 
   return users;
 };

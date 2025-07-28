@@ -6,7 +6,7 @@ import type { CreateTenantInput } from '~/schema/createTenantSchema';
 
 // Mutations
 const createTenant = (data: CreateTenantInput) => {
-  return axios.post('/tenant/create', data);
+  return axios.post('/tenants/create', data);
 };
 
 export { createTenant };

@@ -127,16 +127,6 @@ exports.Prisma.UserScalarFieldEnum = {
   name: 'name',
   password: 'password',
   role: 'role',
-  tenantId: 'tenantId',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-exports.Prisma.SessionScalarFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  refreshTokenHash: 'refreshTokenHash',
-  expiresAt: 'expiresAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -153,7 +143,20 @@ exports.Prisma.TenantScalarFieldEnum = {
   philhealth: 'philhealth',
   pagibig: 'pagibig',
   logoUrl: 'logoUrl',
-  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.TenantsOnUsersScalarFieldEnum = {
+  userId: 'userId',
+  tenantId: 'tenantId'
+};
+
+exports.Prisma.SessionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  refreshTokenHash: 'refreshTokenHash',
+  expiresAt: 'expiresAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -187,8 +190,9 @@ exports.Role = exports.$Enums.Role = {
 
 exports.Prisma.ModelName = {
   User: 'User',
-  Session: 'Session',
   Tenant: 'Tenant',
+  TenantsOnUsers: 'TenantsOnUsers',
+  Session: 'Session',
   Document: 'Document'
 };
 
