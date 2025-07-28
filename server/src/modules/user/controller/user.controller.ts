@@ -32,7 +32,7 @@ const getAllUsers = async (req: Request, res: Response, next: NextFunction) => {
 
 const getUserById = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { id } = req.body;
+    const { id } = req.params;
 
     const user = await userService.getUserById(id);
 
