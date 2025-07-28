@@ -2,6 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Stack, type SelectChangeEvent } from '@mui/material';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
 
 import { TextField, Select } from '~/components/form';
 import { CustomModal } from '~/components/ui';
@@ -41,18 +42,18 @@ export const UserCreateModal = ({ open, setOpen }: Props) => {
 
   const onSubmit = handleSubmit(async (data: CreateUserInput) => {
     try {
-      const user = await createUser({
+      await createUser({
         ...data,
         tenantId: 1, // TODO: handle tenantId dynamically based on context
       });
 
-      console.log('Successfully created user:', user);
+      toast.success('User created successfully!');
 
       setOpen(false);
       reset();
     } catch (err) {
       const parsedErr = parseBackendError(err);
-      console.error('Error creating user:', parsedErr);
+      toast.error(`Failed to create user: ${parsedErr}`);
     }
   });
 

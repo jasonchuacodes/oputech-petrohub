@@ -3,6 +3,7 @@ import { VisibilityOutlined, VisibilityOffOutlined } from '@mui/icons-material';
 import { alpha, Box, Card, IconButton, OutlinedInput, Stack, Typography } from '@mui/material';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { toast } from 'react-hot-toast';
 
 import { TextField } from '~/components/form';
 import { PageLayout } from '~/components/ui';
@@ -14,6 +15,7 @@ import {
   type RegisterUserPayload,
 } from '~/schema/registerUserSchema';
 import theme from '~/theme';
+import { parseBackendError } from '~/utils/parseBackendError';
 
 export const Register = () => {
   const [isShowPassword, setIsShowPassword] = useState(false);
@@ -33,11 +35,12 @@ export const Register = () => {
   const onSubmit = (data: RegisterUserPayload) => {
     registerUser(data, {
       onSuccess: () => {
-        console.log('Successfully registered user!');
+        toast.success('User registered successfully!');
         reset();
       },
       onError: (err) => {
-        console.log('Registration failed: ', err.message);
+        const parsedErr = parseBackendError(err);
+        toast.error(`Registration failed: ${parsedErr}`);
       },
     });
   };

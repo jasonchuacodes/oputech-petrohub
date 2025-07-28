@@ -6,3 +6,4 @@ export * from './Link';
 export * from './LoadingSpinner';
 export * from './PageLayout';
 export * from './StepNavigation';
+export * from './AppToaster';
