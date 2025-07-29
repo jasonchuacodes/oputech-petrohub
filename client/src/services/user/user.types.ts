@@ -1,5 +1,7 @@
 import type { ValueOf } from '~/utils/valueOf';
 
+import type { Tenant } from '../tenant/tenant.types';
+
 export const UserRoleEnum = {
   ADMIN: 'ADMIN',
   USER: 'USER',
@@ -17,4 +19,6 @@ export type User = {
   role: UserRole;
 
   hasTenant: boolean;
+
+  tenants: Tenant[];
 };

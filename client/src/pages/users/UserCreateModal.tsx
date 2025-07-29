@@ -40,6 +40,11 @@ export const UserCreateModal = ({ open, setOpen }: Props) => {
     resolver: zodResolver(CreateUserSchema),
   });
 
+  const handleCancel = () => {
+    setOpen(false);
+    reset();
+  };
+
   const onSubmit = handleSubmit(async (data: CreateUserInput) => {
     try {
       await createUser({
@@ -62,7 +67,8 @@ export const UserCreateModal = ({ open, setOpen }: Props) => {
       disabled={!isValid}
       title="Create User"
       open={open}
-      onClose={() => setOpen(false)}
+      onClose={handleCancel}
+      onCancel={handleCancel}
       maxWidth={520}
       onSubmit={onSubmit}
     >

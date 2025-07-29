@@ -19,6 +19,10 @@ import {
 import { useState, type ComponentType } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { useTenantContext } from '~/context/tenant/useTenantContext';
+import { Routes } from '~/routes';
+import { pathFor } from '~/utils/pathFor';
+
 export type NavItem = {
   label: string;
   icon: ComponentType;
@@ -27,14 +31,51 @@ export type NavItem = {
 
 const Sidebar = () => {
   const navigate = useNavigate();
+  const { tenantId } = useTenantContext();
+
   const [open, setOpen] = useState(true);
 
   const navItems: NavItem[] = [
-    { label: 'Home', icon: HomeOutlined, to: '/' },
-    { label: 'Dashboard', icon: DashboardOutlined, to: '/dashboard' },
-    { label: 'Reports', icon: AssessmentOutlined, to: '/reports' },
-    { label: 'Timesheets', icon: CalendarTodayOutlined, to: '/timesheets' },
-    { label: 'Users', icon: GroupOutlined, to: '/users' },
+    {
+      label: 'Home',
+      icon: HomeOutlined,
+      to: pathFor({
+        pathname: Routes.TenantHome,
+        params: { tenantId },
+      }),
+    },
+    {
+      label: 'Dashboard',
+      icon: DashboardOutlined,
+      to: pathFor({
+        pathname: Routes.TenantDashboard,
+        params: { tenantId },
+      }),
+    },
+    {
+      label: 'Reports',
+      icon: AssessmentOutlined,
+      to: pathFor({
+        pathname: Routes.TenantReports,
+        params: { tenantId },
+      }),
+    },
+    {
+      label: 'Timesheets',
+      icon: CalendarTodayOutlined,
+      to: pathFor({
+        pathname: Routes.TenantTimesheets,
+        params: { tenantId },
+      }),
+    },
+    {
+      label: 'Users',
+      icon: GroupOutlined,
+      to: pathFor({
+        pathname: Routes.TenantUsers,
+        params: { tenantId },
+      }),
+    },
   ];
 
   const handleNavigate = (to: string) => {

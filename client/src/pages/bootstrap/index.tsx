@@ -1,14 +1,23 @@
 import { Navigate } from 'react-router-dom';
 
-import { LoadingSpinner } from '~/components/ui';
+import { LoadingSpinner, PageLayout } from '~/components/ui';
 import { useAuthContext } from '~/context/auth/useAuthContext';
 
 export const BootstrapPage = () => {
   const { auth, loading } = useAuthContext();
 
-  if (loading) return <LoadingSpinner />;
+  if (loading)
+    return (
+      <PageLayout justifyContent="center" alignItems="center" height="100vh">
+        <LoadingSpinner />
+      </PageLayout>
+    );
 
-  if (!auth || !auth?.hasTenant) return <Navigate to="/create-tenant" replace />;
+  if (!auth) return <Navigate to="/login" replace />;
 
-  return <Navigate to="/" replace={true} />;
+  return auth.hasTenant ? (
+    <Navigate to={`/tenants/${auth.tenants[0].id}`} replace />
+  ) : (
+    <Navigate to="/create-tenant" replace />
+  );
 };

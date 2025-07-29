@@ -36,7 +36,7 @@ export const Login = () => {
       onSuccess: () => {
         refetchAuth();
         setError(null);
-        navigate('/bootstrap');
+        navigate('/');
       },
       onError: (err) => {
         const parsedErr = parseBackendError(err);
@@ -50,7 +50,7 @@ export const Login = () => {
 
   useEffect(() => {
     if (!loading && auth) {
-      navigate('/bootstrap', { replace: true });
+      navigate('/', { replace: true });
     }
   }, [auth, loading, navigate]);
 
