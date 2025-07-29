@@ -1,6 +1,7 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 
-import { createTenant } from './tenant.api';
+import { createTenant, getTenants } from './tenant.api';
+import type { Tenant } from './tenant.types';
 
 const useCreateTenantMutation = () => {
   const queryClient = useQueryClient();
@@ -14,4 +15,11 @@ const useCreateTenantMutation = () => {
   });
 };
 
-export { useCreateTenantMutation };
+const useGetTenantsQuery = (): UseQueryResult<Tenant[]> => {
+  return useQuery({
+    queryKey: ['tenants'],
+    queryFn: getTenants,
+  });
+};
+
+export { useCreateTenantMutation, useGetTenantsQuery };
