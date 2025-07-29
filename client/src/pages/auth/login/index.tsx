@@ -57,9 +57,9 @@ export const Login = () => {
   if (loading || auth) return null;
 
   return (
-    <PageLayout height='100vh'>
+    <PageLayout height="100vh">
       <Stack direction="row" height="100%">
-        <Stack bgcolor="primary.light" flex={1} maxWidth='50%'></Stack>
+        <Stack bgcolor="primary.light" flex={1} maxWidth="50%"></Stack>
         <Form
           onSubmit={handleSubmit(onSubmit)}
           sx={{
@@ -96,7 +96,7 @@ export const Login = () => {
                 placeholder="Enter username"
               />
               <Stack spacing={0.5}>
-                <Typography fontSize="small" fontWeight="bold" color="text.secondary">
+                <Typography fontWeight="bold" color="text.secondary">
                   Password
                 </Typography>
                 <OutlinedInput

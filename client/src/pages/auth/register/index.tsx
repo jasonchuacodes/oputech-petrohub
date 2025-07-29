@@ -104,7 +104,7 @@ export const Register = () => {
                 placeholder="Enter username"
               />
               <Stack spacing={0.5}>
-                <Typography fontSize="small" fontWeight="bold" color="text.secondary">
+                <Typography fontWeight="bold" color="text.secondary">
                   Password
                   <Typography component="span" color="error">
                     {' '}
@@ -128,7 +128,7 @@ export const Register = () => {
                 />
               </Stack>
               <Stack spacing={0.5}>
-                <Typography fontSize="small" fontWeight="bold" color="text.secondary">
+                <Typography fontWeight="bold" color="text.secondary">
                   Confirm Password
                   <Typography component="span" color="error">
                     {' '}
