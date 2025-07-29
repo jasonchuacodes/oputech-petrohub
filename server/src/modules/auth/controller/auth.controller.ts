@@ -33,6 +33,12 @@ const getMe = async (req: AuthenticatedRequest, res: Response, next: NextFunctio
       email: user.email,
       username: user.username,
       hasTenant: user.tenants.length > 0,
+      role: user.role,
+
+      tenants: user.tenants.map(({ tenant }) => ({
+        id: tenant.id,
+        name: tenant.name,
+      })),
     };
 
     res.status(200).json({
