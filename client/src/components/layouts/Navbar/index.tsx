@@ -41,10 +41,10 @@ const Navbar = () => {
       >
         <Stack direction="row">
           <IconButton>
-            <SettingsOutlined fontSize="small" />
+            <SettingsOutlined />
           </IconButton>
           <IconButton>
-            <NotificationsOutlined fontSize="small" />
+            <NotificationsOutlined />
           </IconButton>
         </Stack>
         <NavbarUserMenu />

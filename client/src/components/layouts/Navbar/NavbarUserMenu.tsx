@@ -32,10 +32,10 @@ const NavbarUserMenu = () => {
   return (
     <>
       <IconButton
-        sx={{ width: 36, height: 36 }}
+        sx={{ width: 40, height: 40 }}
         onClick={(e) => setAnchorElSettingsMenu(e.currentTarget)}
       >
-        <Avatar alt="profile-picture" sx={{ width: 24, height: 24 }}>
+        <Avatar alt="profile-picture" sx={{ width: 28, height: 28 }}>
           <Typography fontSize="small">{userInitials}</Typography>
         </Avatar>
       </IconButton>
