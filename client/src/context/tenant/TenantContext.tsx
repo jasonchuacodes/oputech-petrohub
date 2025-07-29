@@ -2,11 +2,11 @@ import { createContext } from 'react';
 import { useParams } from 'react-router-dom';
 
 type TenantType = {
-  tenantId?: string | null;
+  tenantId?: string;
 };
 
 const initialState = {
-  tenantId: null,
+  tenantId: undefined,
 };
 
 const TenantContext = createContext<TenantType>(initialState);

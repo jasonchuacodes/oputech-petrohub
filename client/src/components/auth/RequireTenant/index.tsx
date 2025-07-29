@@ -17,7 +17,7 @@ export const RequireTenant = () => {
       </PageLayout>
     );
 
-  const hasTenantAccess = auth?.tenants?.some((tenant) => tenant.id === Number(tenantId));
+  const hasTenantAccess = auth?.tenants?.some((tenant) => tenant.id === tenantId);
   const fallbackTenant = auth?.tenants[0];
 
   if (!hasTenantAccess) {
