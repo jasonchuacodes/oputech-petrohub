@@ -22,7 +22,7 @@ export const CreateUserSchema = z.object({
       message: 'Password must include at least one special character',
     }),
   role: z.nativeEnum(Role).default(Role.USER),
-  tenantId: z.coerce.number().int().optional(),
+  tenantId: z.string().optional()
 });
 
 export type CreateUserInput = z.infer<typeof CreateUserSchema>;

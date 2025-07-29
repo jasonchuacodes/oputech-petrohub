@@ -32,11 +32,9 @@ const getAllUsers = async () => {
   return await prisma.user.findMany();
 };
 
-const getUserById = async (id: number | string) => {
-  const userId = Number(id);
-
+const getUserById = async (id: string) => {
   const user = await prisma.user.findFirst({
-    where: { id: userId },
+    where: { id },
     include: {
       tenants: {
         include: {

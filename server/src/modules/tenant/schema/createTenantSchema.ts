@@ -36,5 +36,5 @@ export const CreateTenantSchema = z.object({
 
 export type CreateTenantInput = z.infer<typeof CreateTenantSchema>;
 export type CreateTenantPayload = CreateTenantInput & {
-  createdById: number;
+  createdById: string;
 };

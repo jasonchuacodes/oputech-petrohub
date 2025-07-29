@@ -26,7 +26,7 @@ const getTenants = async () => {
   return tenants;
 };
 
-const getTenantUsers = async (tenantId: number) => {
+const getTenantUsers = async (tenantId: string) => {
   const tenantWithUsers = await prisma.tenant.findUnique({
     where: { id: tenantId },
     include: {

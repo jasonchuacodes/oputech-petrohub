@@ -60,7 +60,7 @@ const getTenantUsers = async (req: AuthenticatedRequest, res: Response, next: Ne
   try {
     const { tenantId } = await validateGetTenantUsers({ tenantId: req.params.tenantId });
 
-    const users = await getTenantUsersService(Number(tenantId));
+    const users = await getTenantUsersService(tenantId);
 
     res.status(200).json({
       message: 'Successfully retrieved tenant users',

@@ -5,14 +5,14 @@ const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey';
 const JWT_EXPIRES_IN = '12h';
 
 export type JwtUserPayload = {
-  id: number;
+  id: string;
   name: string;
   username: string;
   email: string | null;
 };
 
 export type JwtSessionPayload = {
-  sessionId: number;
+  sessionId: string;
 };
 
 export const signJwt = <T extends object>(payload: T): string => {
