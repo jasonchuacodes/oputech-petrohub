@@ -4,6 +4,7 @@ import { alpha, Box, Card, IconButton, OutlinedInput, Stack, Typography } from '
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 
 import { TextField } from '~/components/form';
 import { PageLayout } from '~/components/ui';
@@ -18,6 +19,8 @@ import theme from '~/theme';
 import { parseBackendError } from '~/utils/parseBackendError';
 
 export const Register = () => {
+  const navigate = useNavigate();
+
   const [isShowPassword, setIsShowPassword] = useState(false);
   const [isShowConfirmPassword, setIsShowConfirmPassword] = useState(false);
 
@@ -35,7 +38,32 @@ export const Register = () => {
   const onSubmit = (data: RegisterUserPayload) => {
     registerUser(data, {
       onSuccess: () => {
-        toast.success('User registered successfully!');
+        let countdown = 5;
+
+        const toastId = toast.success(
+          () =>
+            `Successfully registered user! Redirecting to login in ${countdown} second${countdown !== 1 ? 's' : ''}.`,
+          {
+            duration: 5000,
+          },
+        );
+
+        const interval = setInterval(() => {
+          countdown--;
+
+          toast.success(
+            () =>
+              `Successfully registered user! Redirecting to login in ${countdown} second${countdown !== 1 ? 's' : ''}.`,
+            { id: toastId },
+          );
+
+          if (countdown === 0) {
+            clearInterval(interval);
+            toast.dismiss(toastId);
+            navigate('/login');
+          }
+        }, 1000);
+
         reset();
       },
       onError: (err) => {
