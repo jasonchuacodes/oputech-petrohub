@@ -1,8 +1,4 @@
-import {
-  AddBoxOutlined,
-  ChevronRight,
-  SettingsOutlined,
-} from '@mui/icons-material';
+import { AddBoxOutlined, ChevronRight, SettingsOutlined } from '@mui/icons-material';
 import { Avatar, Box, Divider, ListItemIcon, Menu, MenuItem, Typography } from '@mui/material';
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -33,7 +29,15 @@ const TenantSelector = () => {
   const handleCloseMenu = () => setAnchorElSettingsMenu(null);
 
   const handleCreateTenant = () => {
-    console.log('Create tenant');
+    navigate(
+      pathFor({
+        pathname: Routes.TenantCreate,
+        params: {
+          tenantId,
+        },
+      }),
+    );
+    handleCloseMenu();
   };
 
   const handleSelectTenant = (id: string) => {
@@ -88,7 +92,7 @@ const TenantSelector = () => {
         {tenants?.map(({ name, id }) => {
           if (id === tenantId)
             return (
-              <Box sx={{ display: 'flex', px: 2, py: 1 }}>
+              <Box key={id} sx={{ display: 'flex', px: 2, py: 1 }}>
                 <Typography fontWeight="bold">{name}</Typography>
               </Box>
             );

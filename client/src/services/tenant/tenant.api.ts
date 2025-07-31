@@ -19,8 +19,10 @@ const getTenantUsers = async (tenantId: string): Promise<User[]> => {
 };
 
 // Mutations
-const createTenant = (data: CreateTenantInput) => {
-  return axios.post('/tenants/create', data);
+const createTenant = async (data: CreateTenantInput): Promise<Tenant> => {
+  const res = await axios.post('/tenants/create', data);
+
+  return res.data.data.tenant
 };
 
 export { createTenant, getTenants, getTenantUsers };

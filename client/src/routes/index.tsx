@@ -12,7 +12,8 @@ import { HomePage } from '~/pages/home';
 import { Login } from '~/pages/auth/login';
 import { Register } from '~/pages/auth/register';
 import { ReportsPage } from '~/pages/reports';
-import { CreateTenantFlow } from '~/pages/tenant/create';
+import { CreateTenant } from '~/pages/tenant/create';
+import { CreateTenantFlow } from '~/pages/tenant/create-flow';
 import { TimesheetsPage } from '~/pages/timesheets';
 import { UsersPage } from '~/pages/users';
 
@@ -20,8 +21,9 @@ export const Routes = {
   Bootstrap: '/',
   Login: '/login',
   Register: '/register',
-  CreateTenant: '/create-tenant',
+  TenantCreateFlow: '/create-tenant',
   TenantHome: '/tenants/:tenantId',
+  TenantCreate: '/tenants/:tenantId/create-tenant',
   TenantDashboard: '/tenants/:tenantId/dashboard',
   TenantReports: '/tenants/:tenantId/reports',
   TenantTimesheets: '/tenants/:tenantId/timesheets',
@@ -42,7 +44,7 @@ export const router = createBrowserRouter(
         {/* Routes for users without a tenant */}
         <Route element={<RequireNoTenant />}>
           <Route element={<SetupLayout />}>
-            <Route path={Routes.CreateTenant} element={<CreateTenantFlow />} />
+            <Route path={Routes.TenantCreateFlow} element={<CreateTenantFlow />} />
           </Route>
         </Route>
 
@@ -60,9 +62,8 @@ export const router = createBrowserRouter(
             <Route path="dashboard" element={<DashboardPage />} />
             <Route path="reports" element={<ReportsPage />} />
             <Route path="timesheets" element={<TimesheetsPage />} />
-
-            {/* Users */}
             <Route path="users" element={<UsersPage />} />
+            <Route path="create-tenant" element={<CreateTenant />} />
           </Route>
         </Route>
       </Route>

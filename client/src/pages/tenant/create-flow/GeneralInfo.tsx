@@ -38,6 +38,7 @@ export const GeneralInfo = ({ control, register, onNext, onPrevious }: GeneralIn
             name="contact"
             pattern="9999-999-9999"
             placeholder="0925-123-1234"
+            variant='standard'
           />
         </FormRow>
         <FormRow label="Address" required>

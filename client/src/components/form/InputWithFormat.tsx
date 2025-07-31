@@ -1,22 +1,25 @@
-import { TextField } from '@mui/material';
+import { Stack, TextField, Typography } from '@mui/material';
 import { Controller, type Control, type Path } from 'react-hook-form';
 import { formatDigitsWithPattern } from '../../utils/textUtils';
 
 type Props<T extends object> = {
   name: Path<T>;
-  label?: string;
-  placeholder?: string;
   control: Control<T>;
   pattern: string;
+  required?: boolean;
+  placeholder?: string;
+  label?: string;
   variant?: 'standard' | 'outlined' | 'filled';
 };
 
 export const InputWithFormat = <T extends object>({
   name,
+  label,
   control,
   placeholder,
   pattern,
-  variant = 'standard',
+  required,
+  variant = 'outlined',
 }: Props<T>) => {
   return (
     <Controller
@@ -30,18 +33,30 @@ export const InputWithFormat = <T extends object>({
         const { formatted } = formatDigitsWithPattern(rawDigits, pattern);
 
         return (
-          <TextField
-            {...field}
-            value={formatted}
-            onChange={(e) => {
-              const rawDigits = e.target.value.replace(/\D/g, '');
-              const slicedRaw = rawDigits.slice(0, maxRawLength);
-              onChange(slicedRaw === '' ? null : slicedRaw);
-            }}
-            fullWidth
-            variant={variant}
-            placeholder={placeholder}
-          />
+          <Stack spacing={0.5} width="100%">
+            <Typography fontWeight="bold" color="text.secondary">
+              {label}
+              {required && (
+                <Typography component="span" color="error">
+                  {' '}
+                  *
+                </Typography>
+              )}
+            </Typography>
+            <TextField
+              {...field}
+              fullWidth
+              size="small"
+              variant={variant}
+              placeholder={placeholder}
+              value={formatted}
+              onChange={(e) => {
+                const rawDigits = e.target.value.replace(/\D/g, '');
+                const slicedRaw = rawDigits.slice(0, maxRawLength);
+                onChange(slicedRaw === '' ? null : slicedRaw);
+              }}
+            />
+          </Stack>
         );
       }}
     />

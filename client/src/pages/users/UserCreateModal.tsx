@@ -43,7 +43,7 @@ export const UserCreateModal = ({ open, setOpen }: Props) => {
     resolver: zodResolver(CreateUserSchema),
   });
 
-  const { mutateAsync: createUser } = useCreateUserMutation({
+  const { mutate: createUser } = useCreateUserMutation({
     tenantId,
   });
 
@@ -52,23 +52,27 @@ export const UserCreateModal = ({ open, setOpen }: Props) => {
     reset();
   };
 
-  const onSubmit = handleSubmit(async (data: CreateUserInput) => {
+  const onSubmit = handleSubmit((data: CreateUserInput) => {
     if (!tenantId) return;
-
-    try {
-      await createUser({
+    
+    createUser(
+      {
         ...data,
         tenantId,
-      });
+      },
+      {
+        onSuccess: () => {
+          toast.success('User created successfully!');
 
-      toast.success('User created successfully!');
-
-      setOpen(false);
-      reset();
-    } catch (err) {
-      const parsedErr = parseBackendError(err);
-      toast.error(`Failed to create user: ${parsedErr}`);
-    }
+          setOpen(false);
+          reset();
+        },
+        onError: (err) => {
+          const parsedErr = parseBackendError(err);
+          toast.error(`Failed to create user: ${parsedErr}`);
+        },
+      },
+    );
   });
 
   return (
