@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const GetTenantUsersSchema = z.object({
-  tenantId: z.coerce.number().int().positive(),
+  tenantId: z.string(),
 });
 
 export type GetTenantUsersInput = z.infer<typeof GetTenantUsersSchema>;

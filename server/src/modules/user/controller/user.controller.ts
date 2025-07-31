@@ -20,7 +20,7 @@ const createUser = async (req: AuthenticatedRequest, res: Response, next: NextFu
   }
 };
 
-const getAllUsers = async (req: Request, res: Response, next: NextFunction) => {
+const getAllUsers = async (_req: Request, res: Response, next: NextFunction) => {
   try {
     const allUsers = await userService.getAllUsers();
 

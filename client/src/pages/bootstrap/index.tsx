@@ -8,7 +8,7 @@ export const BootstrapPage = () => {
 
   if (loading)
     return (
-      <PageLayout justifyContent="center" alignItems="center" height="100vh">
+      <PageLayout justifyContent="center" alignItems="center" pt={10}>
         <LoadingSpinner />
       </PageLayout>
     );

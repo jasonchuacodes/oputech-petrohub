@@ -38,13 +38,11 @@ const getTenantUsers = async (tenantId: string) => {
     },
   });
 
-  if (!tenantWithUsers || tenantWithUsers.users.length === 0) {
-    throw new NotFoundError('No users found');
+  if (!tenantWithUsers) {
+    throw new NotFoundError('Tenant not found');
   }
 
-  const users = tenantWithUsers.users.map((u) => u.user);
-
-  return users;
+  return tenantWithUsers.users.map((u) => u.user) ?? [];
 };
 
 export { createTenant, getTenants, getTenantUsers };

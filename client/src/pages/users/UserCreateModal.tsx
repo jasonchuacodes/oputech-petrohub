@@ -6,9 +6,10 @@ import toast from 'react-hot-toast';
 
 import { TextField, Select } from '~/components/form';
 import { CustomModal } from '~/components/ui';
-import { CreateUserSchema, type CreateUserInput } from '~/schema/createUserSchema';
-import { createUser } from '~/services/user/user.api';
+import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { UserRoleEnum, type UserRole } from '~/services/user/user.types';
+import { CreateUserSchema, type CreateUserInput } from '~/schema/createUserSchema';
+import { useCreateUserMutation } from '~/services/user/user.queries';
 import { parseBackendError } from '~/utils/parseBackendError';
 import { toTitleCase } from '~/utils/textUtils';
 
@@ -25,6 +26,8 @@ type Props = {
 };
 
 export const UserCreateModal = ({ open, setOpen }: Props) => {
+  const { tenantId } = useTenantContext();
+
   const [selectedRole, setSelectedRole] = useState<UserRole>(UserRoleEnum.USER);
 
   const handleSelectRole = (event: SelectChangeEvent) => {
@@ -40,16 +43,22 @@ export const UserCreateModal = ({ open, setOpen }: Props) => {
     resolver: zodResolver(CreateUserSchema),
   });
 
+  const { mutateAsync: createUser } = useCreateUserMutation({
+    tenantId,
+  });
+
   const handleCancel = () => {
     setOpen(false);
     reset();
   };
 
   const onSubmit = handleSubmit(async (data: CreateUserInput) => {
+    if (!tenantId) return;
+
     try {
       await createUser({
         ...data,
-        tenantId: 1, // TODO: handle tenantId dynamically based on context
+        tenantId,
       });
 
       toast.success('User created successfully!');

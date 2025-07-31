@@ -7,15 +7,15 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 
 import { Button } from '~/components/ui';
-import { userData } from '~/data/mockUsers';
+import type { User } from '~/services/user/user.types';
 
-export const UsersTable = () => {
+export const UsersTable = ({ users }: { users?: User[] }) => {
   return (
     <TableContainer>
-      <Table sx={{ minWidth: 650 }} aria-label="simple table">
+      <Table sx={{ minWidth: 650 }}>
         <TableHead>
           <TableRow>
-            <TableCell sx={{ fontWeight: 'bold', width: 560 }}>Name</TableCell>
+            <TableCell sx={{ fontWeight: 'bold', maxWidth: 560 }}>Name</TableCell>
             <TableCell align="left" sx={{ fontWeight: 'bold' }}>
               Roles
             </TableCell>
@@ -23,9 +23,9 @@ export const UsersTable = () => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {userData.map(({ id, name, role }) => (
+          {users?.map(({ id, name, role }) => (
             <TableRow key={id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-              <TableCell component="th" scope="row" sx={{ width: 560 }}>
+              <TableCell component="th" scope="row" sx={{ maxWidth: 560 }}>
                 {name}
               </TableCell>
               <TableCell align="left">{role}</TableCell>
