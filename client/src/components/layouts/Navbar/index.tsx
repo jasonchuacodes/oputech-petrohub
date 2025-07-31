@@ -1,4 +1,4 @@
-import { Avatar, Divider, IconButton, Stack } from '@mui/material';
+import { Divider, IconButton, Stack } from '@mui/material';
 import { NotificationsOutlined, SettingsOutlined } from '@mui/icons-material';
 
 import NavbarUserMenu from './NavbarUserMenu';
@@ -14,15 +14,10 @@ const Navbar = () => {
       borderBottom={1}
       borderColor="divider"
     >
-      <Stack direction="row" alignItems="center" spacing={1}>
-        {/* Organization Initials */}
-        <Avatar sx={{ bgcolor: 'primary.main' }} variant="rounded">
-          B
-        </Avatar>
-        <TenantSelector />
-      </Stack>
+      <TenantSelector /> 
       <Stack
         direction="row"
+        marginLeft="auto" 
         alignItems="center"
         spacing={1.5}
         divider={
