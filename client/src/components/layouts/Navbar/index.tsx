@@ -1,5 +1,5 @@
 import { Divider, IconButton, Stack } from '@mui/material';
-import { NotificationsOutlined, SettingsOutlined } from '@mui/icons-material';
+import { NotificationsOutlined } from '@mui/icons-material';
 
 import NavbarUserMenu from './NavbarUserMenu';
 import TenantSelector from './TenantSelector';
@@ -14,10 +14,10 @@ const Navbar = () => {
       borderBottom={1}
       borderColor="divider"
     >
-      <TenantSelector /> 
+      <TenantSelector />
       <Stack
         direction="row"
-        marginLeft="auto" 
+        marginLeft="auto"
         alignItems="center"
         spacing={1.5}
         divider={
@@ -34,14 +34,9 @@ const Navbar = () => {
           />
         }
       >
-        <Stack direction="row">
-          <IconButton>
-            <SettingsOutlined />
-          </IconButton>
-          <IconButton>
-            <NotificationsOutlined />
-          </IconButton>
-        </Stack>
+        <IconButton>
+          <NotificationsOutlined />
+        </IconButton>
         <NavbarUserMenu />
       </Stack>
     </Stack>

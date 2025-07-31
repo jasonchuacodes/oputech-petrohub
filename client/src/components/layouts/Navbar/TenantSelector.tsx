@@ -1,5 +1,9 @@
-import { ChevronRight } from '@mui/icons-material';
-import { Avatar, Menu, MenuItem, Typography } from '@mui/material';
+import {
+  AddBoxOutlined,
+  ChevronRight,
+  SettingsOutlined,
+} from '@mui/icons-material';
+import { Avatar, Box, Divider, ListItemIcon, Menu, MenuItem, Typography } from '@mui/material';
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -15,10 +19,9 @@ const TenantSelector = () => {
   const { tenantId } = useTenantContext();
 
   const [anchorElSettingsMenu, setAnchorElSettingsMenu] = useState<null | HTMLElement>(null);
-  const isOpenSettingsMenu = Boolean(anchorElSettingsMenu);
+  const isOpenMenu = Boolean(anchorElSettingsMenu);
 
   const tenants = auth?.tenants;
-  const multipleTenants = tenants && tenants.length > 1;
 
   const activeTenant = useMemo(() => {
     return tenants?.find((tenant) => tenant.id === tenantId);
@@ -28,6 +31,10 @@ const TenantSelector = () => {
     setAnchorElSettingsMenu(e.currentTarget);
 
   const handleCloseMenu = () => setAnchorElSettingsMenu(null);
+
+  const handleCreateTenant = () => {
+    console.log('Create tenant');
+  };
 
   const handleSelectTenant = (id: string) => {
     navigate(
@@ -49,43 +56,63 @@ const TenantSelector = () => {
             {activeTenant?.name?.charAt(0)}
           </Avatar>
           <Typography>{activeTenant?.name}</Typography>
-          {multipleTenants && <ChevronRight fontSize="small" sx={{ transform: 'rotate(90deg)' }} />}
+          <ChevronRight fontSize="small" sx={{ transform: 'rotate(90deg)' }} />
         </Button>
       )}
 
-      {multipleTenants && (
-        <Menu
-          anchorEl={anchorElSettingsMenu}
-          id="settings-menu"
-          open={isOpenSettingsMenu}
-          onClose={handleCloseMenu}
-          anchorOrigin={{
-            vertical: 'bottom',
-            horizontal: 'left',
-          }}
-          transformOrigin={{
-            vertical: 'top',
-            horizontal: 'left',
-          }}
-          slotProps={{
-            paper: {
-              elevation: 4,
-              sx: {
-                mt: 0.5,
-                minWidth: 180,
-              },
+      <Menu
+        anchorEl={anchorElSettingsMenu}
+        id="tenant-menu"
+        open={isOpenMenu}
+        onClose={handleCloseMenu}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'left',
+        }}
+        slotProps={{
+          paper: {
+            elevation: 4,
+            sx: {
+              px: 2,
+              py: 1,
+              mt: 0.5,
+              minWidth: 240,
             },
-          }}
-        >
-          {tenants?.map(({ name, id }) => {
+          },
+        }}
+      >
+        {tenants?.map(({ name, id }) => {
+          if (id === tenantId)
             return (
-              <MenuItem key={id} selected={tenantId === id} onClick={() => handleSelectTenant(id)}>
-                <Typography>{name}</Typography>
-              </MenuItem>
+              <Box sx={{ display: 'flex', px: 2, py: 1 }}>
+                <Typography fontWeight="bold">{name}</Typography>
+              </Box>
             );
-          })}
-        </Menu>
-      )}
+
+          return (
+            <MenuItem key={id} onClick={() => handleSelectTenant(id)}>
+              <Typography>{name}</Typography>
+            </MenuItem>
+          );
+        })}
+        <Divider sx={{ my: 1 }} />
+        <MenuItem onClick={handleCreateTenant}>
+          <ListItemIcon>
+            <AddBoxOutlined fontSize="small" />
+          </ListItemIcon>
+          <Typography>Create tenant</Typography>
+        </MenuItem>
+        <MenuItem onClick={() => null}>
+          <ListItemIcon>
+            <SettingsOutlined fontSize="small" />
+          </ListItemIcon>
+          <Typography>Settings</Typography>
+        </MenuItem>
+      </Menu>
     </>
   );
 };
