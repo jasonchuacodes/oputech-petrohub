@@ -41,7 +41,7 @@ export const GeneralInfo = ({ control, register, onNext, onPrevious }: GeneralIn
             variant='standard'
           />
         </FormRow>
-        <FormRow label="Address" required>
+        <FormRow label="Address">
           <TextField
             name="address"
             register={register}

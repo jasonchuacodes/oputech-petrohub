@@ -1,6 +1,8 @@
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 
+import { Role } from '../db/prisma';
+
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey';
 const JWT_EXPIRES_IN = '12h';
 
@@ -9,6 +11,7 @@ export type JwtUserPayload = {
   name: string;
   username: string;
   email: string | null;
+  role: Role;
 };
 
 export type JwtSessionPayload = {

@@ -90,6 +90,7 @@ export const requireAuth = async (req: AuthenticatedRequest, res: Response, next
       name: session.user.name,
       email: session.user.email,
       username: session.user.username,
+      role: session.user.role
     };
 
     return next();
