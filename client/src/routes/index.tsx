@@ -1,21 +1,25 @@
 import { createBrowserRouter, createRoutesFromElements, Route } from 'react-router-dom';
 
 import { App } from '~/App';
-import { RequireTenant } from '~/components/auth/RequireTenant';
-import { RequireNoTenant } from '~/components/auth/RequireNoTenant';
-import { MainLayout, SetupLayout } from '~/components/layouts';
 import { ProtectedRoute } from '~/components/auth/ProtectedRoute';
+import { RequireNoTenant } from '~/components/auth/RequireNoTenant';
+import { RequireTenant } from '~/components/auth/RequireTenant';
+import { MainLayout, SetupLayout } from '~/components/layouts';
 import { TenantProvider } from '~/context/tenant/TenantContext';
-import { BootstrapPage } from '~/pages/bootstrap';
-import { DashboardPage } from '~/pages/dashboard';
-import { HomePage } from '~/pages/home';
+import { DashboardPage } from '~/pages/admin/dashboard';
+import { CreateTenant } from '~/pages/admin/tenant/create';
+import { CreateTenantFlow } from '~/pages/admin/tenant/create-flow';
+import { TimesheetsPage } from '~/pages/admin/timesheets';
+import { UsersPage } from '~/pages/admin/users';
+import { BootstrapPage } from '~/pages/admin/bootstrap';
+import { HomePage } from '~/pages/admin/home';
+import { ReportsPage } from '~/pages/admin/reports';
 import { Login } from '~/pages/auth/login';
 import { Register } from '~/pages/auth/register';
-import { ReportsPage } from '~/pages/reports';
-import { CreateTenant } from '~/pages/tenant/create';
-import { CreateTenantFlow } from '~/pages/tenant/create-flow';
-import { TimesheetsPage } from '~/pages/timesheets';
-import { UsersPage } from '~/pages/users';
+import { HomePage as UserHomePage } from '~/pages/user/home';
+import { NotFoundPage } from '~/pages/NotFound';
+import { UnauthorizedPage } from '~/pages/Unauthorized';
+import { UserRoleEnum } from '~/services/user/user.types';
 
 export const Routes = {
   Bootstrap: '/',
@@ -28,6 +32,7 @@ export const Routes = {
   TenantReports: '/tenants/:tenantId/reports',
   TenantTimesheets: '/tenants/:tenantId/timesheets',
   TenantUsers: '/tenants/:tenantId/users',
+  Unauthorized: '/unauthorized',
 };
 
 export const router = createBrowserRouter(
@@ -37,18 +42,23 @@ export const router = createBrowserRouter(
       <Route path={Routes.Login} element={<Login />} />
       <Route path={Routes.Register} element={<Register />} />
 
-      {/* Protected Routes */}
-      <Route element={<ProtectedRoute />}>
-        <Route path={Routes.Bootstrap} element={<BootstrapPage />} />
+      {/* User Routes */}
+      <Route path="/" element={<ProtectedRoute allowedRoles={[UserRoleEnum.USER]} />}>
+        <Route index element={<UserHomePage />} />
+      </Route>
 
-        {/* Routes for users without a tenant */}
+      {/* Admin Routes */}
+      <Route path="/admin" element={<ProtectedRoute allowedRoles={[UserRoleEnum.ADMIN]} />}>
+        <Route index element={<BootstrapPage />} />
+      </Route>
+
+      <Route element={<ProtectedRoute allowedRoles={[UserRoleEnum.ADMIN]} />}>
         <Route element={<RequireNoTenant />}>
           <Route element={<SetupLayout />}>
             <Route path={Routes.TenantCreateFlow} element={<CreateTenantFlow />} />
           </Route>
         </Route>
 
-        {/* Routes with a tenant */}
         <Route
           path={Routes.TenantHome + '/*'}
           element={
@@ -67,6 +77,9 @@ export const router = createBrowserRouter(
           </Route>
         </Route>
       </Route>
+
+      <Route path={Routes.Unauthorized} element={<UnauthorizedPage />} />
+      <Route path="*" element={<NotFoundPage />} />
     </Route>,
   ),
 );

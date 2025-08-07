@@ -1,17 +1,12 @@
 import { Navigate, Outlet } from 'react-router-dom';
 
-import { LoadingSpinner, PageLayout } from '~/components/ui';
+import { LoadingScreen } from '~/components/layouts/LoadingScreen';
 import { useAuthContext } from '~/context/auth/useAuthContext';
 
 export const RequireNoTenant = () => {
   const { auth, loading } = useAuthContext();
 
-  if (loading)
-    return (
-      <PageLayout justifyContent="center" alignItems="center">
-        <LoadingSpinner />
-      </PageLayout>
-    );
+  if (loading) return <LoadingScreen />;
 
   if (auth?.hasTenant) {
     return <Navigate to="/" replace />;

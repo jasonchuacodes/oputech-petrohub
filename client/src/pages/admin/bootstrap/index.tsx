@@ -1,17 +1,12 @@
 import { Navigate } from 'react-router-dom';
 
-import { LoadingSpinner, PageLayout } from '~/components/ui';
+import { LoadingScreen } from '~/components/layouts/LoadingScreen';
 import { useAuthContext } from '~/context/auth/useAuthContext';
 
 export const BootstrapPage = () => {
   const { auth, loading } = useAuthContext();
 
-  if (loading)
-    return (
-      <PageLayout justifyContent="center" alignItems="center" pt={10}>
-        <LoadingSpinner />
-      </PageLayout>
-    );
+  if (loading) return <LoadingScreen />;
 
   if (!auth) return <Navigate to="/login" replace />;
 

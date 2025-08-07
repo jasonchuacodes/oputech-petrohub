@@ -1,6 +1,6 @@
 import { Navigate, Outlet } from 'react-router-dom';
 
-import { LoadingSpinner, PageLayout } from '~/components/ui';
+import { LoadingScreen } from '~/components/layouts/LoadingScreen';
 import { useAuthContext } from '~/context/auth/useAuthContext';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { Routes } from '~/routes';
@@ -10,12 +10,7 @@ export const RequireTenant = () => {
   const { auth, loading } = useAuthContext();
   const { tenantId } = useTenantContext();
 
-  if (loading)
-    return (
-      <PageLayout justifyContent="center" alignItems="center">
-        <LoadingSpinner />
-      </PageLayout>
-    );
+  if (loading) return <LoadingScreen />;
 
   const hasTenantAccess = auth?.tenants?.some((tenant) => tenant.id === tenantId);
   const fallbackTenant = auth?.tenants[0];

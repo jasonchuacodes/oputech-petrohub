@@ -1,21 +1,27 @@
 import { Navigate, Outlet } from 'react-router-dom';
 
-import { LoadingSpinner, PageLayout } from '~/components/ui';
+import { LoadingScreen } from '~/components/layouts/LoadingScreen';
 import { useAuthContext } from '~/context/auth/useAuthContext';
+import { UserRoleEnum, type UserRole } from '~/services/user/user.types';
 
-export const ProtectedRoute = () => {
+type ProtectedRouteProps = {
+  allowedRoles: UserRole[];
+};
+
+export const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
   const { auth, loading } = useAuthContext();
+
+  if (loading) return <LoadingScreen />;
+
+  if (!auth) return <Navigate to="/login" replace />;
   
-  if (loading)
-    return (
-      <PageLayout justifyContent="center" alignItems="center">
-        <LoadingSpinner />
-      </PageLayout>
-    );
+  if (!allowedRoles.includes(auth.role)) {
+    if (auth.role === UserRoleEnum.ADMIN) {
+      return <Navigate to="/admin" replace />;
+    }
 
-  if (!auth) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/unauthorized" replace />;
   }
-
+  
   return <Outlet />;
 };
