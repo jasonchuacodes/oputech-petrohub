@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '~/components/ui';
 import { useAuthContext } from '~/context/auth/useAuthContext';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
-import { Routes } from '~/routes';
+import { AdminRoutes } from '~/routes';
 import { pathFor } from '~/utils/pathFor';
 
 const TenantSelector = () => {
@@ -31,7 +31,7 @@ const TenantSelector = () => {
   const handleCreateTenant = () => {
     navigate(
       pathFor({
-        pathname: Routes.TenantCreate,
+        pathname: AdminRoutes.TenantCreate,
         params: {
           tenantId,
         },
@@ -43,7 +43,7 @@ const TenantSelector = () => {
   const handleSelectTenant = (id: string) => {
     navigate(
       pathFor({
-        pathname: Routes.TenantHome,
+        pathname: AdminRoutes.TenantHome,
         params: {
           tenantId: id,
         },

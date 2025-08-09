@@ -4,7 +4,7 @@ import { Outlet } from 'react-router-dom';
 import Navbar from '../Navbar';
 import Sidebar from '../Sidebar';
 
-export const MainLayout = ({ ...props }: StackProps) => {
+export const AdminMainLayout = ({ ...props }: StackProps) => {
   return (
     <Stack direction="column" height="100vh" width="100%" bgcolor="background" {...props}>
       <Box position="sticky" top={0} zIndex={1100} bgcolor="background.paper">

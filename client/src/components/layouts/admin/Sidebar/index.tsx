@@ -20,7 +20,7 @@ import { useState, type ComponentType } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useTenantContext } from '~/context/tenant/useTenantContext';
-import { Routes } from '~/routes';
+import { AdminRoutes } from '~/routes';
 import { pathFor } from '~/utils/pathFor';
 
 export type NavItem = {
@@ -40,7 +40,7 @@ const Sidebar = () => {
       label: 'Home',
       icon: HomeOutlined,
       to: pathFor({
-        pathname: Routes.TenantHome,
+        pathname: AdminRoutes.TenantHome,
         params: { tenantId },
       }),
     },
@@ -48,7 +48,7 @@ const Sidebar = () => {
       label: 'Dashboard',
       icon: DashboardOutlined,
       to: pathFor({
-        pathname: Routes.TenantDashboard,
+        pathname: AdminRoutes.TenantDashboard,
         params: { tenantId },
       }),
     },
@@ -56,7 +56,7 @@ const Sidebar = () => {
       label: 'Reports',
       icon: AssessmentOutlined,
       to: pathFor({
-        pathname: Routes.TenantReports,
+        pathname: AdminRoutes.TenantReports,
         params: { tenantId },
       }),
     },
@@ -64,7 +64,7 @@ const Sidebar = () => {
       label: 'Timesheets',
       icon: CalendarTodayOutlined,
       to: pathFor({
-        pathname: Routes.TenantTimesheets,
+        pathname: AdminRoutes.TenantTimesheets,
         params: { tenantId },
       }),
     },
@@ -72,7 +72,7 @@ const Sidebar = () => {
       label: 'Users',
       icon: GroupOutlined,
       to: pathFor({
-        pathname: Routes.TenantUsers,
+        pathname: AdminRoutes.TenantUsers,
         params: { tenantId },
       }),
     },
@@ -96,10 +96,18 @@ const Sidebar = () => {
     >
       <List>
         {navItems.map(({ icon, label, to }, index) => (
-          <ListItem key={index} disablePadding sx={{ height: 48 }}>
+          <ListItem key={index} disablePadding sx={{ height: 40 }}>
             <ListItemButton
               onClick={() => handleNavigate(to)}
-              sx={{ display: ' flex', alignItems: 'center', px: 2, height: '100%', gap: 1 }}
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                mx: 1,
+                px: 1,
+                gap: 1,
+                height: '100%',
+                borderRadius: 1,
+              }}
             >
               <ListItemIcon sx={{ color: 'inherit', minWidth: 0 }}>
                 <Icon component={icon} fontSize="small" />

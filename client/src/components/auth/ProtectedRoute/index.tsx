@@ -1,6 +1,6 @@
 import { Navigate, Outlet } from 'react-router-dom';
 
-import { LoadingScreen } from '~/components/layouts/LoadingScreen';
+import { LoadingScreen } from '~/components/layouts/admin/LoadingScreen';
 import { useAuthContext } from '~/context/auth/useAuthContext';
 import { UserRoleEnum, type UserRole } from '~/services/user/user.types';
 

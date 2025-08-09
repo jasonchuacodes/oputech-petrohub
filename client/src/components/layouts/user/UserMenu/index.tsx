@@ -1,12 +1,15 @@
-import { IconButton, Avatar, Menu, MenuItem, Typography, Divider } from '@mui/material';
+import { Avatar, Menu, MenuItem, Typography, Divider, Box, alpha, Stack } from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { Button } from '~/components/ui';
 import { useAuthContext } from '~/context/auth/useAuthContext';
 import { useLogoutMutation } from '~/services/auth/auth.queries';
+import theme from '~/theme';
+import { toTitleCase } from '~/utils/textUtils';
 
-const NavbarUserMenu = () => {
+const UserMenu = () => {
   const { auth } = useAuthContext();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -15,7 +18,7 @@ const NavbarUserMenu = () => {
   const userInitials = auth ? auth.username?.split('')[0].toUpperCase() : 'U';
 
   const [anchorElSettingsMenu, setAnchorElSettingsMenu] = useState<null | HTMLElement>(null);
-  const isOpenSettingsMenu = Boolean(anchorElSettingsMenu);
+  const isOpenMenu = Boolean(anchorElSettingsMenu);
 
   const handleLogout = () => {
     logout(undefined, {
@@ -30,51 +33,64 @@ const NavbarUserMenu = () => {
   };
 
   return (
-    <>
-      <IconButton
-        sx={{ width: 40, height: 40 }}
+    <Box p={1} borderTop="1px solid" borderColor="divider">
+      <Button
         onClick={(e) => setAnchorElSettingsMenu(e.currentTarget)}
+        fullWidth={true}
+        sx={{
+          justifyContent: 'flex-start',
+          gap: 1,
+          p: 1,
+          bgcolor: isOpenMenu ? alpha(theme.palette.primary.light, 0.1) : '',
+        }}
       >
-        <Avatar alt="profile-picture" sx={{ width: 28, height: 28 }}>
-          <Typography fontSize="small">{userInitials}</Typography>
+        <Avatar alt="profile-picture" sx={{ width: 32, height: 32 }}>
+          <Typography>{userInitials}</Typography>
         </Avatar>
-      </IconButton>
+        <Stack justifyContent="start" alignItems="start">
+          <Typography variant="body1">{auth?.name}</Typography>
+          <Typography color="text.secondary" variant="subtitle2" lineHeight={1}>
+            {toTitleCase(auth?.role)}
+          </Typography>
+        </Stack>
+      </Button>
       <Menu
         anchorEl={anchorElSettingsMenu}
         id="settings-menu"
-        open={isOpenSettingsMenu}
+        open={isOpenMenu}
         onClose={() => setAnchorElSettingsMenu(null)}
         anchorOrigin={{
-          vertical: 'bottom',
+          vertical: 'top',
           horizontal: 'left',
         }}
         transformOrigin={{
-          vertical: 'top',
+          vertical: 'bottom',
           horizontal: 'left',
         }}
         slotProps={{
           paper: {
             elevation: 4,
             sx: {
-              mt: 0.5,
-              minWidth: 140,
+              mt: -1,
+              ml: -1,
+              minWidth: 240,
             },
           },
         }}
       >
-        <MenuItem onClick={() => null}>
+        <MenuItem dense onClick={() => null}>
           <Typography>Settings</Typography>
         </MenuItem>
-        <MenuItem onClick={() => null}>
+        <MenuItem dense onClick={() => null}>
           <Typography>Help </Typography>
         </MenuItem>
         <Divider />
-        <MenuItem onClick={handleLogout}>
+        <MenuItem dense onClick={handleLogout}>
           <Typography>Logout</Typography>
         </MenuItem>
       </Menu>
-    </>
+    </Box>
   );
 };
 
-export default NavbarUserMenu;
+export default UserMenu;

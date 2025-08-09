@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { FormRow, InputWithFormat, TextField } from '~/components/form';
 import { Button, Form, PageLayout } from '~/components/ui';
-import { Routes } from '~/routes';
+import { AdminRoutes } from '~/routes';
 import { CreateTenantSchema, type CreateTenantInput } from '~/schema/createTenantSchema';
 import { useCreateTenantMutation } from '~/services/tenant/tenant.queries';
 import { parseBackendError } from '~/utils/parseBackendError';
@@ -50,7 +50,7 @@ export const CreateTenant = () => {
           clearInterval(interval);
           navigate(
             pathFor({
-              pathname: Routes.TenantHome,
+              pathname: AdminRoutes.TenantHome,
               params: { tenantId: tenant.id },
             }),
           );

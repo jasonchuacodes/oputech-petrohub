@@ -1,9 +1,9 @@
 import { Navigate, Outlet } from 'react-router-dom';
 
-import { LoadingScreen } from '~/components/layouts/LoadingScreen';
+import { LoadingScreen } from '~/components/layouts/admin/LoadingScreen';
 import { useAuthContext } from '~/context/auth/useAuthContext';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
-import { Routes } from '~/routes';
+import { AdminRoutes } from '~/routes';
 import { pathFor } from '~/utils/pathFor';
 
 export const RequireTenant = () => {
@@ -19,7 +19,7 @@ export const RequireTenant = () => {
     return fallbackTenant ? (
       <Navigate
         to={pathFor({
-          pathname: Routes.TenantHome,
+          pathname: AdminRoutes.TenantHome,
           params: { tenantId: fallbackTenant.id },
         })}
         replace

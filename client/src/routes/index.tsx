@@ -4,7 +4,7 @@ import { App } from '~/App';
 import { ProtectedRoute } from '~/components/auth/ProtectedRoute';
 import { RequireNoTenant } from '~/components/auth/RequireNoTenant';
 import { RequireTenant } from '~/components/auth/RequireTenant';
-import { MainLayout, SetupLayout } from '~/components/layouts';
+import { AdminMainLayout, UserMainLayout, SetupLayout } from '~/components/layouts';
 import { TenantProvider } from '~/context/tenant/TenantContext';
 import { DashboardPage } from '~/pages/admin/dashboard';
 import { CreateTenant } from '~/pages/admin/tenant/create';
@@ -21,7 +21,7 @@ import { NotFoundPage } from '~/pages/NotFound';
 import { UnauthorizedPage } from '~/pages/Unauthorized';
 import { UserRoleEnum } from '~/services/user/user.types';
 
-export const Routes = {
+export const AdminRoutes = {
   Bootstrap: '/',
   Login: '/login',
   Register: '/register',
@@ -35,16 +35,23 @@ export const Routes = {
   Unauthorized: '/unauthorized',
 };
 
+export const UserRoutes = {
+  Home: '/'
+}
+
 export const router = createBrowserRouter(
   createRoutesFromElements(
     <Route element={<App />}>
       {/* Public Routes */}
-      <Route path={Routes.Login} element={<Login />} />
-      <Route path={Routes.Register} element={<Register />} />
+      <Route path={AdminRoutes.Login} element={<Login />} />
+      <Route path={AdminRoutes.Register} element={<Register />} />
 
       {/* User Routes */}
       <Route path="/" element={<ProtectedRoute allowedRoles={[UserRoleEnum.USER]} />}>
+        <Route element={<UserMainLayout />}>
+
         <Route index element={<UserHomePage />} />
+        </Route>
       </Route>
 
       {/* Admin Routes */}
@@ -55,19 +62,19 @@ export const router = createBrowserRouter(
       <Route element={<ProtectedRoute allowedRoles={[UserRoleEnum.ADMIN]} />}>
         <Route element={<RequireNoTenant />}>
           <Route element={<SetupLayout />}>
-            <Route path={Routes.TenantCreateFlow} element={<CreateTenantFlow />} />
+            <Route path={AdminRoutes.TenantCreateFlow} element={<CreateTenantFlow />} />
           </Route>
         </Route>
 
         <Route
-          path={Routes.TenantHome + '/*'}
+          path={AdminRoutes.TenantHome + '/*'}
           element={
             <TenantProvider>
               <RequireTenant />
             </TenantProvider>
           }
         >
-          <Route element={<MainLayout />}>
+          <Route element={<AdminMainLayout />}>
             <Route index element={<HomePage />} />
             <Route path="dashboard" element={<DashboardPage />} />
             <Route path="reports" element={<ReportsPage />} />
@@ -78,7 +85,7 @@ export const router = createBrowserRouter(
         </Route>
       </Route>
 
-      <Route path={Routes.Unauthorized} element={<UnauthorizedPage />} />
+      <Route path={AdminRoutes.Unauthorized} element={<UnauthorizedPage />} />
       <Route path="*" element={<NotFoundPage />} />
     </Route>,
   ),
