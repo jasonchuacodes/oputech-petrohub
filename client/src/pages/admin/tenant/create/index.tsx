@@ -28,6 +28,8 @@ export const CreateTenant = () => {
 
   const { mutateAsync: createTenant } = useCreateTenantMutation();
 
+  const handleBack = () => navigate(-1);
+
   const onSubmit = async (data: CreateTenantInput) => {
     let countdown = 5;
     try {
@@ -208,7 +210,9 @@ export const CreateTenant = () => {
             <Button disabled={!isValid} variant="contained" type="submit">
               Create Tenant
             </Button>
-            <Button variant="outlined">Cancel</Button>
+            <Button variant="outlined" onClick={handleBack}>
+              Cancel
+            </Button>
           </Stack>
         </Form>
       </Container>
