@@ -68,10 +68,9 @@ export const CreateTenant = () => {
 
   return (
     <PageLayout p={3}>
-      <Container maxWidth="md" disableGutters>
+      <Container maxWidth="lg" disableGutters>
         <Form onSubmit={handleSubmit(onSubmit)} sx={{ width: '100%' }}>
           {/* Header */}
-
           <Stack
             alignItems="center"
             direction="row"

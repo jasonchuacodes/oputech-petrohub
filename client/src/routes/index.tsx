@@ -14,6 +14,7 @@ import { UsersPage } from '~/pages/admin/users';
 import { BootstrapPage } from '~/pages/admin/bootstrap';
 import { HomePage } from '~/pages/admin/home';
 import { ReportsPage } from '~/pages/admin/reports';
+import { UserDetailPage } from '~/pages/admin/users/user-detail';
 import { Login } from '~/pages/auth/login';
 import { Register } from '~/pages/auth/register';
 import { HomePage as UserHomePage } from '~/pages/user/home';
@@ -32,12 +33,14 @@ export const AdminRoutes = {
   TenantReports: '/tenants/:tenantId/reports',
   TenantTimesheets: '/tenants/:tenantId/timesheets',
   TenantUsers: '/tenants/:tenantId/users',
+  TenantUserDetail: '/tenants/:tenantId/users/:userId',
+
   Unauthorized: '/unauthorized',
 };
 
 export const UserRoutes = {
-  Home: '/'
-}
+  Home: '/',
+};
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -49,8 +52,7 @@ export const router = createBrowserRouter(
       {/* User Routes */}
       <Route path="/" element={<ProtectedRoute allowedRoles={[UserRoleEnum.USER]} />}>
         <Route element={<UserMainLayout />}>
-
-        <Route index element={<UserHomePage />} />
+          <Route index element={<UserHomePage />} />
         </Route>
       </Route>
 
@@ -80,6 +82,7 @@ export const router = createBrowserRouter(
             <Route path="reports" element={<ReportsPage />} />
             <Route path="timesheets" element={<TimesheetsPage />} />
             <Route path="users" element={<UsersPage />} />
+            <Route path="users/:userId" element={<UserDetailPage />} />
             <Route path="create-tenant" element={<CreateTenant />} />
           </Route>
         </Route>

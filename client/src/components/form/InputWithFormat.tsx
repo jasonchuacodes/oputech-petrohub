@@ -1,6 +1,7 @@
 import { Stack, TextField, Typography } from '@mui/material';
 import { Controller, type Control, type Path } from 'react-hook-form';
-import { formatDigitsWithPattern } from '../../utils/textUtils';
+
+import { formatDigitsWithPattern } from '~/utils/textUtils';
 
 type Props<T extends object> = {
   name: Path<T>;
@@ -10,6 +11,7 @@ type Props<T extends object> = {
   placeholder?: string;
   label?: string;
   variant?: 'standard' | 'outlined' | 'filled';
+  mode?: 'view' | 'edit';
 };
 
 export const InputWithFormat = <T extends object>({
@@ -20,6 +22,7 @@ export const InputWithFormat = <T extends object>({
   pattern,
   required,
   variant = 'outlined',
+  mode = 'edit',
 }: Props<T>) => {
   return (
     <Controller
@@ -43,19 +46,24 @@ export const InputWithFormat = <T extends object>({
                 </Typography>
               )}
             </Typography>
-            <TextField
-              {...field}
-              fullWidth
-              size="small"
-              variant={variant}
-              placeholder={placeholder}
-              value={formatted}
-              onChange={(e) => {
-                const rawDigits = e.target.value.replace(/\D/g, '');
-                const slicedRaw = rawDigits.slice(0, maxRawLength);
-                onChange(slicedRaw === '' ? null : slicedRaw);
-              }}
-            />
+
+            {mode === 'edit' ? (
+              <TextField
+                {...field}
+                fullWidth
+                size="small"
+                variant={variant}
+                placeholder={placeholder}
+                value={formatted}
+                onChange={(e) => {
+                  const rawDigits = e.target.value.replace(/\D/g, '');
+                  const slicedRaw = rawDigits.slice(0, maxRawLength);
+                  onChange(slicedRaw === '' ? null : slicedRaw);
+                }}
+              />
+            ) : (
+              <Typography height={40}>{value ?? 'N/A'}</Typography>
+            )}
           </Stack>
         );
       }}

@@ -7,6 +7,8 @@ type Props<T extends FieldValues> = {
   placeholder: string;
   required?: boolean;
   label?: string;
+  value?: string;
+  mode?: 'edit' | 'view';
 } & TextFieldProps;
 
 export const TextField = <T extends object>({
@@ -15,10 +17,12 @@ export const TextField = <T extends object>({
   label,
   placeholder,
   required = false,
+  value,
+  mode = 'edit',
   ...muiProps
 }: Props<T>) => {
   return (
-    <Stack spacing={0.5} width="100%">
+    <Stack justifyContent="center" spacing={0.5} width="100%">
       <Typography fontWeight="bold" color="text.secondary">
         {label}
         {required && (
@@ -28,13 +32,17 @@ export const TextField = <T extends object>({
           </Typography>
         )}
       </Typography>
-      <MUITextField
-        {...(register ? register(name) : {})}
-        {...muiProps}
-        fullWidth
-        placeholder={placeholder}
-        size="small"
-      />
+      {mode === 'edit' ? (
+        <MUITextField
+          {...(register ? register(name) : {})}
+          {...muiProps}
+          fullWidth
+          placeholder={placeholder}
+          size="small"
+        />
+      ) : (
+        <Typography sx={{ height: 40 }}>{value}</Typography>
+      )}
     </Stack>
   );
 };

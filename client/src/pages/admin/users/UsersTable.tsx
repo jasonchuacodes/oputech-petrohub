@@ -1,4 +1,3 @@
-import { MoreHorizOutlined } from '@mui/icons-material';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -6,10 +5,14 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 
-import { Button } from '~/components/ui';
+import { Link } from '~/components/ui';
 import type { User } from '~/services/user/user.types';
 
-export const UsersTable = ({ users }: { users?: User[] }) => {
+import { MoreDetailsMenu } from './MoreDetailsMenu';
+
+type UsersTableProps = { users?: User[] };
+
+export const UsersTable = ({ users }: UsersTableProps) => {
   return (
     <TableContainer>
       <Table sx={{ minWidth: 650 }}>
@@ -26,13 +29,11 @@ export const UsersTable = ({ users }: { users?: User[] }) => {
           {users?.map(({ id, name, role }) => (
             <TableRow key={id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
               <TableCell component="th" scope="row" sx={{ maxWidth: 560 }}>
-                {name}
+                <Link to={id}>{name}</Link>
               </TableCell>
               <TableCell align="left">{role}</TableCell>
               <TableCell align="left">
-                <Button size="small" variant="outlined" sx={{ height: 24, minWidth: 24 }}>
-                  <MoreHorizOutlined fontSize="inherit" />
-                </Button>
+                <MoreDetailsMenu id={id} />
               </TableCell>
             </TableRow>
           ))}

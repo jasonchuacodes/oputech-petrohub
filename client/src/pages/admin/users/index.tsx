@@ -12,7 +12,7 @@ import { UserCreateModal } from './UserCreateModal';
 
 export const UsersPage = () => {
   const { tenantId } = useTenantContext();
-  
+
   const [isCreateUserModalOpen, setIsCreateUserModalOpen] = useState(false);
 
   const { data: tenantUsers, isLoading } = useGetTenantUsersQuery({ tenantId });
@@ -28,7 +28,7 @@ export const UsersPage = () => {
                 Users
               </Typography>
               {!isLoading && (
-                <Typography variant="body2">
+                <Typography variant="body2" color="text.secondary">
                   Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatum, voluptatibus.
                 </Typography>
               )}
@@ -59,7 +59,6 @@ export const UsersPage = () => {
         </Stack>
       </Container>
 
-      {/* Create User modal */}
       <UserCreateModal open={isCreateUserModalOpen} setOpen={setIsCreateUserModalOpen} />
     </PageLayout>
   );

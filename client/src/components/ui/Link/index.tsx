@@ -22,7 +22,6 @@ export const Link = ({ to, children, sx, ...props }: Props) => {
       {...props}
       sx={{
         color: 'info.main',
-        textDecoration: 'underline',
         background: 'none',
         border: 'none',
         padding: 0,

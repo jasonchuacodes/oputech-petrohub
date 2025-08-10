@@ -10,7 +10,7 @@ export const UserRoleEnum = {
 export type UserRole = ValueOf<typeof UserRoleEnum>;
 
 export type User = {
-  id: number;
+  id: string;
   username: string;
   name: string;
   email: string;
