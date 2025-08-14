@@ -69,4 +69,18 @@ const updateUser = async (id: string, data: UpdateUserPayload) => {
   return updatedUser;
 };
 
-export { createUser, getAllUsers, getUserById, updateUser };
+const deleteUser = async (id: string) => {
+  const existingUser = await prisma.user.findUnique({
+    where: { id },
+  });
+
+  if (!existingUser) {
+    throw new NotFoundError('User not found');
+  }
+
+  await prisma.user.delete({
+    where: { id },
+  });
+};
+
+export { createUser, getAllUsers, getUserById, updateUser, deleteUser };

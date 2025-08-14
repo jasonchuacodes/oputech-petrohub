@@ -68,4 +68,18 @@ const updateUser = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export { createUser, getAllUsers, getUserById, updateUser };
+const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+
+    await userService.deleteUser(id);
+
+    res.status(204).json({
+      message: 'User deleted',
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export { createUser, getAllUsers, getUserById, updateUser, deleteUser };
