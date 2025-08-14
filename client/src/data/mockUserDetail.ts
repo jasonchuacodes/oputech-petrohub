@@ -5,12 +5,12 @@ export const user = {
   name: 'Jason Clyde Chua',
   role: UserRoleEnum.USER,
 
-  tin: '317-451-133-000',
+  tin: '317452133000',
   philhealth: null,
   pagibig: null,
   sss: null,
 
   birthday: '1995-10-16',
-  contact: '0926019935',
+  contact: '09262019935',
   address: 'JC Chua Boarding House, Barangay Daro, Dumaguete City, Negros Oriental',
 };

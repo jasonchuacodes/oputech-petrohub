@@ -62,7 +62,9 @@ export const InputWithFormat = <T extends object>({
                 }}
               />
             ) : (
-              <Typography height={40}>{value ?? 'N/A'}</Typography>
+              <Typography height={40}>
+                {formatted === '' || formatted === null ? 'N/A' : formatted}
+              </Typography>
             )}
           </Stack>
         );

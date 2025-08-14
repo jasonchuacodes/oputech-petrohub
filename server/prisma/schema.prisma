@@ -14,12 +14,20 @@ enum Role {
 }
 
 model User {
-  id       String     @id @default(uuid())
+  id       String  @id @default(uuid())
   username String  @unique
   email    String? @unique
   name     String
   password String
   role     Role    @default(USER)
+
+  birthday   DateTime?
+  contact    String?
+  address    String?
+  sss        String?
+  tin        String?
+  philhealth String?
+  pagibig    String?
 
   sessions Session[]
 
@@ -30,7 +38,7 @@ model User {
 }
 
 model Tenant {
-  id          String     @id @default(uuid())
+  id          String  @id @default(uuid())
   name        String
   email       String
   contact     String
@@ -42,7 +50,7 @@ model Tenant {
   philhealth String?
   pagibig    String?
 
-  logoUrl String?
+  logoUrl   String?
   documents Document[]
 
   users TenantsOnUsers[]
@@ -52,7 +60,7 @@ model Tenant {
 }
 
 model TenantsOnUsers {
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String
 
   tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
@@ -62,9 +70,9 @@ model TenantsOnUsers {
 }
 
 model Session {
-  id     String  @id @default(uuid())
+  id     String @id @default(uuid())
   userId String
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   refreshTokenHash String
   expiresAt        DateTime
@@ -74,7 +82,7 @@ model Session {
 }
 
 model Document {
-  id       String    @id @default(uuid())
+  id       String @id @default(uuid())
   tenantId String
   tenant   Tenant @relation(fields: [tenantId], references: [id])
 

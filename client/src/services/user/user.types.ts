@@ -19,6 +19,13 @@ export type User = {
   role: UserRole;
 
   hasTenant: boolean;
-
   tenants: Tenant[];
+
+  birthday?: string;
+  contact?: string;
+  address?: string;
+  sss?: string;
+  tin?: string;
+  philhealth?: string;
+  pagibig?: string;
 };

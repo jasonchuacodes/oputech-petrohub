@@ -3,13 +3,17 @@ import z from 'zod';
 import { UserRoleEnum } from '../services/user/user.types';
 
 export const UpdateUserSchema = z.object({
-  name: z.string().optional(),
-  contact: z.string().regex(/^\d{11}$/, {
-    message: 'Contact must be 11 digits',
-  }),
-  role: z.nativeEnum(UserRoleEnum),
+  name: z.string(),
+  contact: z
+    .string()
+    .regex(/^\d{11}$/, {
+      message: 'Contact must be 11 digits',
+    })
+    .optional()
+    .nullable(),
+  role: z.nativeEnum(UserRoleEnum).optional(),
   birthday: z.string().optional().nullable(),
-  address: z.string(),
+  address: z.string().optional().nullable(),
   tin: z
     .string()
     .trim()
@@ -37,3 +41,5 @@ export const UpdateUserSchema = z.object({
 });
 
 export type UpdateUserInput = z.infer<typeof UpdateUserSchema>;
+export type UpdateUserPayload = Omit<UpdateUserInput, 'role'>;
+export type UpdateUserRole = Pick<UpdateUserInput, 'role'>;

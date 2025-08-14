@@ -5,10 +5,12 @@ import { createSchemaValidator, generateHash } from '~/utils';
 
 import * as userService from '../services/user.service';
 import { CreateUserSchema } from '../schema/createUserSchema';
+import { UpdateUserSchema } from '../schema/updateUserSchema';
 
 const DEFAULT_PASSWORD = 'Password123!';
 
 const validateCreateUser = createSchemaValidator(CreateUserSchema);
+const validateUpdateUser = createSchemaValidator(UpdateUserSchema);
 
 const createUser = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
@@ -49,4 +51,21 @@ const getUserById = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export { createUser, getAllUsers, getUserById };
+const updateUser = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+
+    const data = await validateUpdateUser(req.body);
+
+    const updatedUser = await userService.updateUser(id, data);
+
+    res.status(201).json({
+      message: 'User updated successfully',
+      data: updatedUser,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export { createUser, getAllUsers, getUserById, updateUser };

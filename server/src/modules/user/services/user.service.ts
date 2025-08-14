@@ -2,6 +2,7 @@ import { prisma } from '~/db/index';
 import { ConflictError, NotFoundError } from '~/errors';
 
 import { CreateUserInput } from '../schema/createUserSchema';
+import { UpdateUserInput, UpdateUserPayload } from '../schema/updateUserSchema';
 
 const createUser = async (data: CreateUserInput) => {
   const { tenantId, ...userData } = data;
@@ -51,4 +52,21 @@ const getUserById = async (id: string) => {
   return user;
 };
 
-export { createUser, getAllUsers, getUserById };
+const updateUser = async (id: string, data: UpdateUserPayload) => {
+  const existingUser = await prisma.user.findUnique({
+    where: { id },
+  });
+
+  if (!existingUser) {
+    throw new NotFoundError('User not found');
+  }
+
+  const updatedUser = await prisma.user.update({
+    where: { id },
+    data,
+  });
+
+  return updatedUser;
+};
+
+export { createUser, getAllUsers, getUserById, updateUser };

@@ -7,7 +7,7 @@ type Props<T extends FieldValues> = {
   placeholder: string;
   required?: boolean;
   label?: string;
-  value?: string;
+  value?: string | null;
   mode?: 'edit' | 'view';
 } & TextFieldProps;
 
@@ -41,7 +41,9 @@ export const TextField = <T extends object>({
           size="small"
         />
       ) : (
-        <Typography sx={{ height: 40 }}>{value}</Typography>
+        <Typography sx={{ height: 40 }}>
+          {value === '' || value === null ? 'N/A' : value}
+        </Typography>
       )}
     </Stack>
   );
