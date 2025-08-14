@@ -16,6 +16,7 @@ import { Button } from '~/components/ui/Button';
 type Props = ModalProps & {
   title: string;
   onClose: () => void;
+  type?: 'default' | 'danger';
   subheader?: string;
   children?: ReactNode;
   disabled?: boolean;
@@ -37,6 +38,7 @@ export const CustomModal = ({
   onCancel,
   onClose,
   onSubmit,
+  type = 'default',
   ...modalProps
 }: Props) => {
   return (
@@ -72,7 +74,12 @@ export const CustomModal = ({
             {children}
           </CardContent>
           <CardActions sx={{ justifySelf: 'flex-end', p: 2 }}>
-            <Button disableElevation={true} onClick={onCancel} type="button" variant="outlined">
+            <Button
+              disableElevation={true}
+              onClick={onCancel ?? onClose}
+              type="button"
+              variant="outlined"
+            >
               Cancel
             </Button>
             <Button
@@ -81,6 +88,7 @@ export const CustomModal = ({
               type="submit"
               variant="contained"
               onClick={onSubmit}
+              color={type === 'danger' ? 'error' : 'primary'}
             >
               {submitText}
             </Button>

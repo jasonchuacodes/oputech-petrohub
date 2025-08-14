@@ -20,4 +20,8 @@ const updateUser = (id: string, data: UpdateUserPayload) => {
   return axios.put(`/users/${id}`, data);
 };
 
-export { getAllUsers, getUserById, createUser, updateUser };
+const deleteUser = (id: string) => {
+  return axios.delete(`/users/${id}`);
+};
+
+export { getAllUsers, getUserById, createUser, updateUser, deleteUser };

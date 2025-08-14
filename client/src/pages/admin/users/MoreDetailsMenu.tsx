@@ -3,19 +3,30 @@ import { Menu, MenuItem, Typography, Divider, Button } from '@mui/material';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { useAuthContext } from '~/context/auth/useAuthContext';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { AdminRoutes } from '~/routes';
 import { pathFor } from '~/utils/pathFor';
 
-export const MoreDetailsMenu = ({ id }: { id?: string }) => {
-  const { tenantId } = useTenantContext();
+export const MoreDetailsMenu = ({
+  id,
+  onDelete,
+}: {
+  id: string;
+  onDelete: (id: string) => void;
+}) => {
   const navigate = useNavigate();
+  const { auth } = useAuthContext();
+  const { tenantId } = useTenantContext();
 
   const [anchorElSettingsMenu, setAnchorElSettingsMenu] = useState<null | HTMLElement>(null);
   const isOpenSettingsMenu = Boolean(anchorElSettingsMenu);
 
-  const handleOpenMenu = (e: React.MouseEvent<HTMLElement>) =>
-    setAnchorElSettingsMenu(e.currentTarget);
+  const isDeleteDisabled = auth?.id === id;
+
+  const openMenu = (e: React.MouseEvent<HTMLElement>) => setAnchorElSettingsMenu(e.currentTarget);
+
+  const closeMenu = () => setAnchorElSettingsMenu(null);
 
   const handleViewDetails = () => {
     navigate(
@@ -28,21 +39,22 @@ export const MoreDetailsMenu = ({ id }: { id?: string }) => {
       }),
     );
   };
+
+  const handleDelete = (id: string) => {
+    closeMenu();
+    onDelete(id);
+  };
+
   return (
     <>
-      <Button
-        onClick={handleOpenMenu}
-        size="small"
-        variant="outlined"
-        sx={{ height: 24, minWidth: 24 }}
-      >
+      <Button onClick={openMenu} size="small" variant="outlined" sx={{ height: 24, minWidth: 24 }}>
         <MoreHorizOutlined fontSize="inherit" />
       </Button>
       <Menu
         anchorEl={anchorElSettingsMenu}
         id="settings-menu"
         open={isOpenSettingsMenu}
-        onClose={() => setAnchorElSettingsMenu(null)}
+        onClose={closeMenu}
         anchorOrigin={{
           vertical: 'bottom',
           horizontal: 'left',
@@ -68,7 +80,7 @@ export const MoreDetailsMenu = ({ id }: { id?: string }) => {
         <MenuItem onClick={() => null}>
           <Typography>Assign Roles</Typography>
         </MenuItem>
-        <MenuItem onClick={() => null}>
+        <MenuItem disabled={isDeleteDisabled} onClick={() => handleDelete(id)}>
           <Typography>Delete</Typography>
         </MenuItem>
       </Menu>

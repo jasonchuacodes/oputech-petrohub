@@ -10,9 +10,9 @@ import type { User } from '~/services/user/user.types';
 
 import { MoreDetailsMenu } from './MoreDetailsMenu';
 
-type UsersTableProps = { users?: User[] };
+type UsersListProps = { users: User[]; onDeleteRequest: (id: string) => void };
 
-export const UsersTable = ({ users }: UsersTableProps) => {
+export const UsersList = ({ users, onDeleteRequest }: UsersListProps) => {
   return (
     <TableContainer>
       <Table sx={{ minWidth: 650 }}>
@@ -26,17 +26,18 @@ export const UsersTable = ({ users }: UsersTableProps) => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {users?.map(({ id, name, role }) => (
-            <TableRow key={id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-              <TableCell component="th" scope="row" sx={{ maxWidth: 560 }}>
-                <Link to={id}>{name}</Link>
-              </TableCell>
-              <TableCell align="left">{role}</TableCell>
-              <TableCell align="left">
-                <MoreDetailsMenu id={id} />
-              </TableCell>
-            </TableRow>
-          ))}
+          {users &&
+            users.map(({ id, name, role }) => (
+              <TableRow key={id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                <TableCell component="th" scope="row" sx={{ maxWidth: 560 }}>
+                  <Link to={id}>{name}</Link>
+                </TableCell>
+                <TableCell align="left">{role}</TableCell>
+                <TableCell align="left">
+                  <MoreDetailsMenu id={id} onDelete={() => onDeleteRequest(id)} />
+                </TableCell>
+              </TableRow>
+            ))}
         </TableBody>
       </Table>
     </TableContainer>
