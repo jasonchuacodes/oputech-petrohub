@@ -1,14 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { VisibilityOutlined, VisibilityOffOutlined } from '@mui/icons-material';
-import { alpha, Box, Card, IconButton, OutlinedInput, Stack, Typography } from '@mui/material';
+import { Card, IconButton, List, OutlinedInput, Stack, Typography } from '@mui/material';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
 import { TextField } from '~/components/form';
-import { PageLayout } from '~/components/ui';
-import { Button, Form, Link } from '~/components/ui';
+import { Button, Form, InfoBox, Link, PageLayout } from '~/components/ui';
 import { useRegisterUserMutation } from '~/services/auth/auth.queries';
 import {
   RegisterUserSchema,
@@ -28,8 +27,9 @@ export const Register = () => {
     register,
     handleSubmit,
     reset,
-    formState: { errors },
+    formState: { errors, isValid },
   } = useForm<RegisterUserInput>({
+    mode: 'onBlur',
     resolver: zodResolver(RegisterUserSchema),
   });
 
@@ -100,23 +100,6 @@ export const Register = () => {
         <Form onSubmit={handleSubmit(onSubmit)} sx={{ width: '100%' }}>
           <Stack spacing={3}>
             <Stack spacing={1.5}>
-              {(errors.name || errors.username || errors.password || errors.confirmPassword) && (
-                <Box
-                  sx={{
-                    border: '1px solid',
-                    px: 1,
-                    py: 0.5,
-                    bgcolor: alpha(theme.palette.error.main, 0.2),
-                    borderColor: 'error.light',
-                  }}
-                >
-                  <Typography fontSize="small" color="error">
-                    {errors.username?.message ||
-                      errors.password?.message ||
-                      errors.confirmPassword?.message}
-                  </Typography>
-                </Box>
-              )}
               <TextField
                 register={register}
                 required
@@ -180,7 +163,36 @@ export const Register = () => {
                 />
               </Stack>
             </Stack>
+
+            <InfoBox variant="info" title="Password requirements:">
+              <List sx={{ listStyleType: 'disc', pl: 3, m: 0 }}>
+                {[
+                  'At least 8 characters',
+                  'One uppercase letter (A-Z)',
+                  'One lowercase letter (a-z)',
+                  'One number (0-9)',
+                  'One special character (e.g. !@#$%^&*)',
+                ].map((item) => (
+                  <Typography key={item} component="li" fontSize="small" sx={{ pl: 1 }}>
+                    {item}
+                  </Typography>
+                ))}
+              </List>
+            </InfoBox>
+
+            {(errors.name || errors.username || errors.password || errors.confirmPassword) && (
+              <InfoBox variant="error">
+                <Typography fontSize="small" color="error">
+                  {errors.name?.message ||
+                    errors.username?.message ||
+                    errors.password?.message ||
+                    errors.confirmPassword?.message}
+                </Typography>
+              </InfoBox>
+            )}
+
             <Button
+              disabled={!isValid}
               loading={isPendingRegistration}
               fullWidth={true}
               variant="contained"

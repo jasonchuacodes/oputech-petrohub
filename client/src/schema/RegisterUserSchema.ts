@@ -2,7 +2,7 @@ import z from 'zod';
 
 export const RegisterUserSchema = z
   .object({
-    name: z.string().min(1),
+    name: z.string().min(1, 'Name is required'),
     username: z.string().min(1, 'Username is required').max(20).trim(),
     password: z
       .string()

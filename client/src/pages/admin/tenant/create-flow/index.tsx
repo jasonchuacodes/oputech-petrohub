@@ -1,23 +1,13 @@
-import {
-  alpha,
-  Box,
-  Container,
-  FormControlLabel,
-  Radio,
-  RadioGroup,
-  Stack,
-  Typography,
-} from '@mui/material';
+import { Container, FormControlLabel, Radio, RadioGroup, Stack, Typography } from '@mui/material';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
-import { ContentCard, PageLayout, StepNavigation } from '~/components/ui';
+import { ContentCard, InfoBox, PageLayout, StepNavigation } from '~/components/ui';
 import { useCreateTenantMutation } from '~/services/tenant/tenant.queries';
 import { CreateTenantSchema, type CreateTenantInput } from '~/schema/createTenantSchema';
-import theme from '~/theme';
 import { parseBackendError } from '~/utils/parseBackendError';
 
 import { CreateTenantPrompt } from './CreateTenantPrompt';
@@ -161,16 +151,7 @@ export const CreateTenantFlow = () => {
               errors?.tin ||
               errors?.pagibig ||
               errors?.philhealth) && (
-              <Box
-                sx={{
-                  textAlign: 'start',
-                  border: '1px solid',
-                  px: 1,
-                  py: 0.5,
-                  bgcolor: alpha(theme.palette.error.main, 0.2),
-                  borderColor: 'error.light',
-                }}
-              >
+              <InfoBox variant="error">
                 <Typography fontSize="small" color="error">
                   {errors.name?.message ||
                     errors.email?.message ||
@@ -180,7 +161,7 @@ export const CreateTenantFlow = () => {
                     errors.pagibig?.message ||
                     errors.philhealth?.message}
                 </Typography>
-              </Box>
+              </InfoBox>
             )}
 
             <StepNavigation
