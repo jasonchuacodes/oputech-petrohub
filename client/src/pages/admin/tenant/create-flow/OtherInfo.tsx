@@ -1,26 +1,16 @@
 import { AddOutlined } from '@mui/icons-material';
-import { FormHelperText, Stack, Typography } from '@mui/material';
-import type { FieldErrors, UseFormRegister } from 'react-hook-form';
+import { Stack, Typography } from '@mui/material';
+import type { UseFormRegister } from 'react-hook-form';
 
 import { FormRow, TextField } from '~/components/form';
-import { Button, StepNavigation } from '~/components/ui';
+import { Button } from '~/components/ui';
 import type { CreateTenantInput } from '~/schema/createTenantSchema';
 
 type OtherInfoProps = {
   register: UseFormRegister<CreateTenantInput>;
-  onPrevious: () => void;
-  onSubmit: () => void;
-  errors?: FieldErrors<CreateTenantInput>;
-  isPending?: boolean;
 };
 
-export const OtherInfo = ({
-  errors,
-  isPending,
-  register,
-  onSubmit,
-  onPrevious,
-}: OtherInfoProps) => {
+export const OtherInfo = ({ register }: OtherInfoProps) => {
   return (
     <Stack spacing={4}>
       <Stack spacing={2} justifyContent="start" alignItems="start">
@@ -43,21 +33,6 @@ export const OtherInfo = ({
           </Stack>
         </FormRow>
       </Stack>
-
-      <FormHelperText error component="div">
-        {Object.values(errors || {}).map((error, index) => (
-          <Typography key={index} component="p" mb={0.5}>
-            {error?.message?.toString()}
-          </Typography>
-        ))}
-      </FormHelperText>
-
-      <StepNavigation
-        loading={isPending}
-        onNext={onSubmit}
-        onPrevious={onPrevious}
-        nextLabel="Create Tenant"
-      />
     </Stack>
   );
 };

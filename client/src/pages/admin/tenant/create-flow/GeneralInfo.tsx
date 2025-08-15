@@ -2,17 +2,14 @@ import { Stack } from '@mui/material';
 import type { Control, UseFormRegister } from 'react-hook-form';
 
 import { FormRow, InputWithFormat, TextField } from '~/components/form';
-import { StepNavigation } from '~/components/ui';
 import type { CreateTenantInput } from '~/schema/createTenantSchema';
 
 type GeneralInfoProps = {
   control: Control<CreateTenantInput>;
   register: UseFormRegister<CreateTenantInput>;
-  onPrevious: () => void;
-  onNext: () => void;
 };
 
-export const GeneralInfo = ({ control, register, onNext, onPrevious }: GeneralInfoProps) => {
+export const GeneralInfo = ({ control, register }: GeneralInfoProps) => {
   return (
     <>
       <Stack spacing={2} justifyContent="start" alignItems="start">
@@ -38,7 +35,7 @@ export const GeneralInfo = ({ control, register, onNext, onPrevious }: GeneralIn
             name="contact"
             pattern="9999-999-9999"
             placeholder="0925-123-1234"
-            variant='standard'
+            variant="standard"
           />
         </FormRow>
         <FormRow label="Address">
@@ -50,8 +47,6 @@ export const GeneralInfo = ({ control, register, onNext, onPrevious }: GeneralIn
           />
         </FormRow>
       </Stack>
-
-      <StepNavigation onNext={onNext} onPrevious={onPrevious} />
     </>
   );
 };

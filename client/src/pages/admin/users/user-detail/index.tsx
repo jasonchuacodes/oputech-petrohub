@@ -79,7 +79,7 @@ export const UserDetailPage = () => {
       toast.success('User updated successfully');
     } catch (err) {
       const parsedError = parseBackendError(err);
-      toast.error(parsedError);
+      toast.error(`Failed to update user: ${parsedError}`);
     }
   };
 
@@ -202,36 +202,37 @@ export const UserDetailPage = () => {
                 </FormRow>
               </Stack>
             </Stack>
+            
+            {(errors.name ||
+              errors.address ||
+              errors.contact ||
+              errors.tin ||
+              errors.sss ||
+              errors.pagibig ||
+              errors.philhealth ||
+              errors.birthday) && (
+              <Box
+                sx={{
+                  border: '1px solid',
+                  px: 1,
+                  py: 0.5,
+                  bgcolor: alpha(theme.palette.error.main, 0.2),
+                  borderColor: 'error.light',
+                }}
+              >
+                <Typography fontSize="small" color="error">
+                  {errors.name?.message ||
+                    errors.address?.message ||
+                    errors.contact?.message ||
+                    errors.tin?.message ||
+                    errors.sss?.message ||
+                    errors.pagibig?.message ||
+                    errors.philhealth?.message ||
+                    errors.birthday?.message}
+                </Typography>
+              </Box>
+            )}
           </Stack>
-          {(errors.name ||
-            errors.address ||
-            errors.contact ||
-            errors.tin ||
-            errors.sss ||
-            errors.pagibig ||
-            errors.philhealth ||
-            errors.birthday) && (
-            <Box
-              sx={{
-                border: '1px solid',
-                px: 1,
-                py: 0.5,
-                bgcolor: alpha(theme.palette.error.main, 0.2),
-                borderColor: 'error.light',
-              }}
-            >
-              <Typography fontSize="small" color="error">
-                {errors.name?.message ||
-                  errors.address?.message ||
-                  errors.contact?.message ||
-                  errors.tin?.message ||
-                  errors.sss?.message ||
-                  errors.pagibig?.message ||
-                  errors.philhealth?.message ||
-                  errors.birthday?.message}
-              </Typography>
-            </Box>
-          )}
 
           {mode === 'edit' && (
             <Stack justifyContent="start" direction="row" spacing={1} my={5}>

@@ -1,12 +1,24 @@
-import { Container, FormControlLabel, Radio, RadioGroup, Stack, Typography } from '@mui/material';
+import {
+  alpha,
+  Box,
+  Container,
+  FormControlLabel,
+  Radio,
+  RadioGroup,
+  Stack,
+  Typography,
+} from '@mui/material';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
-import { ContentCard, PageLayout } from '~/components/ui';
+import { ContentCard, PageLayout, StepNavigation } from '~/components/ui';
 import { useCreateTenantMutation } from '~/services/tenant/tenant.queries';
 import { CreateTenantSchema, type CreateTenantInput } from '~/schema/createTenantSchema';
+import theme from '~/theme';
+import { parseBackendError } from '~/utils/parseBackendError';
 
 import { CreateTenantPrompt } from './CreateTenantPrompt';
 import { GovernmentInfo } from './GovernmentInfo';
@@ -21,12 +33,16 @@ const initialTenantForm = {
   name: '',
 };
 
+const TOTAL_STEPS = 3;
+
 export const CreateTenantFlow = () => {
   const navigate = useNavigate();
   const [stepIndex, setStepIndex] = useState<number>(-1);
 
-  const nextStep = () => setStepIndex((prev) => (prev >= 3 ? 3 : prev + 1));
+  const nextStep = () => setStepIndex((prev) => (prev >= TOTAL_STEPS ? TOTAL_STEPS : prev + 1));
   const prevStep = () => setStepIndex((prev) => prev - 1);
+
+  const isLastStep = stepIndex + 1 === TOTAL_STEPS;
 
   const {
     control,
@@ -34,9 +50,10 @@ export const CreateTenantFlow = () => {
     register,
     reset,
     clearErrors,
-    formState: { errors },
+    formState: { errors, isValid },
   } = useForm<CreateTenantInput>({
     resolver: zodResolver(CreateTenantSchema),
+    mode: 'onBlur',
     defaultValues: initialTenantForm,
   });
 
@@ -45,13 +62,14 @@ export const CreateTenantFlow = () => {
   const onSubmit = handleSubmit(async (data: CreateTenantInput) => {
     createTenant(data, {
       onSuccess: () => {
-        console.log('Successfully created tenant: ', data);
+        toast.success('Successfully created tenant');
         reset();
         clearErrors();
         navigate('/');
       },
       onError: (err) => {
-        console.log('Failed to create tenant: ', err.message);
+        const errorMessage = parseBackendError(err);
+        toast.error(`Failed to create tenant: ${errorMessage}`);
       },
     });
   });
@@ -59,26 +77,11 @@ export const CreateTenantFlow = () => {
   const renderCreateTenantStep = () => {
     switch (stepIndex) {
       case 0:
-        return (
-          <GeneralInfo
-            control={control}
-            onPrevious={prevStep}
-            onNext={nextStep}
-            register={register}
-          />
-        );
+        return <GeneralInfo control={control} register={register} />;
       case 1:
-        return <GovernmentInfo control={control} onPrevious={prevStep} onNext={nextStep} />;
+        return <GovernmentInfo control={control} />;
       case 2:
-        return (
-          <OtherInfo
-            errors={errors}
-            isPending={isCreatingTenant}
-            onPrevious={prevStep}
-            onSubmit={onSubmit}
-            register={register}
-          />
-        );
+        return <OtherInfo register={register} />;
 
       default:
         return null;
@@ -150,6 +153,43 @@ export const CreateTenantFlow = () => {
             </Stack>
 
             {renderCreateTenantStep()}
+
+            {(errors?.contact ||
+              errors?.name ||
+              errors?.email ||
+              errors?.sss ||
+              errors?.tin ||
+              errors?.pagibig ||
+              errors?.philhealth) && (
+              <Box
+                sx={{
+                  textAlign: 'start',
+                  border: '1px solid',
+                  px: 1,
+                  py: 0.5,
+                  bgcolor: alpha(theme.palette.error.main, 0.2),
+                  borderColor: 'error.light',
+                }}
+              >
+                <Typography fontSize="small" color="error">
+                  {errors.name?.message ||
+                    errors.email?.message ||
+                    errors.contact?.message ||
+                    errors.tin?.message ||
+                    errors.sss?.message ||
+                    errors.pagibig?.message ||
+                    errors.philhealth?.message}
+                </Typography>
+              </Box>
+            )}
+
+            <StepNavigation
+              disabled={isLastStep && !isValid}
+              nextLabel={isLastStep ? 'Create Tenant' : 'Next'}
+              loading={isCreatingTenant}
+              onNext={isLastStep ? onSubmit : nextStep}
+              onPrevious={prevStep}
+            />
           </ContentCard>
         )}
       </Container>

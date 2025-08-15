@@ -2743,7 +2743,7 @@ export namespace Prisma {
     name: string
     email: string
     contact: string
-    address: string
+    address: string | null
     description: string | null
     sss: string | null
     tin: string | null
@@ -2858,7 +2858,7 @@ export namespace Prisma {
       name: string
       email: string
       contact: string
-      address: string
+      address: string | null
       description: string | null
       sss: string | null
       tin: string | null
@@ -7204,7 +7204,7 @@ export namespace Prisma {
     name?: StringFilter<"Tenant"> | string
     email?: StringFilter<"Tenant"> | string
     contact?: StringFilter<"Tenant"> | string
-    address?: StringFilter<"Tenant"> | string
+    address?: StringNullableFilter<"Tenant"> | string | null
     description?: StringNullableFilter<"Tenant"> | string | null
     sss?: StringNullableFilter<"Tenant"> | string | null
     tin?: StringNullableFilter<"Tenant"> | string | null
@@ -7222,7 +7222,7 @@ export namespace Prisma {
     name?: SortOrder
     email?: SortOrder
     contact?: SortOrder
-    address?: SortOrder
+    address?: SortOrderInput | SortOrder
     description?: SortOrderInput | SortOrder
     sss?: SortOrderInput | SortOrder
     tin?: SortOrderInput | SortOrder
@@ -7243,7 +7243,7 @@ export namespace Prisma {
     name?: StringFilter<"Tenant"> | string
     email?: StringFilter<"Tenant"> | string
     contact?: StringFilter<"Tenant"> | string
-    address?: StringFilter<"Tenant"> | string
+    address?: StringNullableFilter<"Tenant"> | string | null
     description?: StringNullableFilter<"Tenant"> | string | null
     sss?: StringNullableFilter<"Tenant"> | string | null
     tin?: StringNullableFilter<"Tenant"> | string | null
@@ -7261,7 +7261,7 @@ export namespace Prisma {
     name?: SortOrder
     email?: SortOrder
     contact?: SortOrder
-    address?: SortOrder
+    address?: SortOrderInput | SortOrder
     description?: SortOrderInput | SortOrder
     sss?: SortOrderInput | SortOrder
     tin?: SortOrderInput | SortOrder
@@ -7283,7 +7283,7 @@ export namespace Prisma {
     name?: StringWithAggregatesFilter<"Tenant"> | string
     email?: StringWithAggregatesFilter<"Tenant"> | string
     contact?: StringWithAggregatesFilter<"Tenant"> | string
-    address?: StringWithAggregatesFilter<"Tenant"> | string
+    address?: StringNullableWithAggregatesFilter<"Tenant"> | string | null
     description?: StringNullableWithAggregatesFilter<"Tenant"> | string | null
     sss?: StringNullableWithAggregatesFilter<"Tenant"> | string | null
     tin?: StringNullableWithAggregatesFilter<"Tenant"> | string | null
@@ -7592,7 +7592,7 @@ export namespace Prisma {
     name: string
     email: string
     contact: string
-    address: string
+    address?: string | null
     description?: string | null
     sss?: string | null
     tin?: string | null
@@ -7610,7 +7610,7 @@ export namespace Prisma {
     name: string
     email: string
     contact: string
-    address: string
+    address?: string | null
     description?: string | null
     sss?: string | null
     tin?: string | null
@@ -7628,7 +7628,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     contact?: StringFieldUpdateOperationsInput | string
-    address?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     sss?: NullableStringFieldUpdateOperationsInput | string | null
     tin?: NullableStringFieldUpdateOperationsInput | string | null
@@ -7646,7 +7646,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     contact?: StringFieldUpdateOperationsInput | string
-    address?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     sss?: NullableStringFieldUpdateOperationsInput | string | null
     tin?: NullableStringFieldUpdateOperationsInput | string | null
@@ -7664,7 +7664,7 @@ export namespace Prisma {
     name: string
     email: string
     contact: string
-    address: string
+    address?: string | null
     description?: string | null
     sss?: string | null
     tin?: string | null
@@ -7680,7 +7680,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     contact?: StringFieldUpdateOperationsInput | string
-    address?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     sss?: NullableStringFieldUpdateOperationsInput | string | null
     tin?: NullableStringFieldUpdateOperationsInput | string | null
@@ -7696,7 +7696,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     contact?: StringFieldUpdateOperationsInput | string
-    address?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     sss?: NullableStringFieldUpdateOperationsInput | string | null
     tin?: NullableStringFieldUpdateOperationsInput | string | null
@@ -8833,7 +8833,7 @@ export namespace Prisma {
     name: string
     email: string
     contact: string
-    address: string
+    address?: string | null
     description?: string | null
     sss?: string | null
     tin?: string | null
@@ -8850,7 +8850,7 @@ export namespace Prisma {
     name: string
     email: string
     contact: string
-    address: string
+    address?: string | null
     description?: string | null
     sss?: string | null
     tin?: string | null
@@ -8932,7 +8932,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     contact?: StringFieldUpdateOperationsInput | string
-    address?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     sss?: NullableStringFieldUpdateOperationsInput | string | null
     tin?: NullableStringFieldUpdateOperationsInput | string | null
@@ -8949,7 +8949,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     contact?: StringFieldUpdateOperationsInput | string
-    address?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     sss?: NullableStringFieldUpdateOperationsInput | string | null
     tin?: NullableStringFieldUpdateOperationsInput | string | null
@@ -9058,7 +9058,7 @@ export namespace Prisma {
     name: string
     email: string
     contact: string
-    address: string
+    address?: string | null
     description?: string | null
     sss?: string | null
     tin?: string | null
@@ -9075,7 +9075,7 @@ export namespace Prisma {
     name: string
     email: string
     contact: string
-    address: string
+    address?: string | null
     description?: string | null
     sss?: string | null
     tin?: string | null
@@ -9108,7 +9108,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     contact?: StringFieldUpdateOperationsInput | string
-    address?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     sss?: NullableStringFieldUpdateOperationsInput | string | null
     tin?: NullableStringFieldUpdateOperationsInput | string | null
@@ -9125,7 +9125,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     contact?: StringFieldUpdateOperationsInput | string
-    address?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     sss?: NullableStringFieldUpdateOperationsInput | string | null
     tin?: NullableStringFieldUpdateOperationsInput | string | null

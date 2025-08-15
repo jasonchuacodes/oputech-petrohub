@@ -23,7 +23,7 @@ export const StepNavigation = ({
   loading
 }: StepNavigationProps) => {
   return (
-    <Stack direction="row" justifyContent="space-between" mt={5}>
+    <Stack direction="row" justifyContent="space-between" mt={4}>
       {!hidePrevious ? (
         <Button
           onClick={onPrevious}

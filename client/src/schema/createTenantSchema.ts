@@ -7,7 +7,7 @@ export const CreateTenantSchema = z.object({
   contact: z.string().regex(/^\d{11}$/, {
     message: 'Contact must be 11 digits',
   }),
-  address: z.string(),
+  address: z.string().optional().nullable(),
   tin: z
     .string()
     .trim()

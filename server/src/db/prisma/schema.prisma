@@ -42,7 +42,7 @@ model Tenant {
   name        String
   email       String
   contact     String
-  address     String
+  address     String?
   description String?
 
   sss        String?

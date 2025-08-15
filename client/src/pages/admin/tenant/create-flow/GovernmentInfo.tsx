@@ -2,16 +2,13 @@ import { Stack } from '@mui/material';
 import type { Control } from 'react-hook-form';
 
 import { FormRow, InputWithFormat } from '~/components/form';
-import { StepNavigation } from '~/components/ui';
 import type { CreateTenantInput } from '~/schema/createTenantSchema';
 
 type GovernmentInfoProps = {
   control: Control<CreateTenantInput>;
-  onPrevious: () => void;
-  onNext: () => void;
 };
 
-export const GovernmentInfo = ({ control, onNext, onPrevious }: GovernmentInfoProps) => {
+export const GovernmentInfo = ({ control }: GovernmentInfoProps) => {
   return (
     <>
       <Stack spacing={2} justifyContent="start" alignItems="start">
@@ -21,7 +18,7 @@ export const GovernmentInfo = ({ control, onNext, onPrevious }: GovernmentInfoPr
             pattern="999-999-999-999"
             placeholder="123-456-789-000"
             name="tin"
-            variant='standard'
+            variant="standard"
           />
         </FormRow>
         <FormRow label="SSS">
@@ -30,7 +27,7 @@ export const GovernmentInfo = ({ control, onNext, onPrevious }: GovernmentInfoPr
             pattern="99-9999999-9"
             placeholder="12-3456789-0"
             name="sss"
-            variant='standard'
+            variant="standard"
           />
         </FormRow>
         <FormRow label="PAGIBIG">
@@ -39,7 +36,7 @@ export const GovernmentInfo = ({ control, onNext, onPrevious }: GovernmentInfoPr
             name="pagibig"
             pattern="99-9999999999-9"
             placeholder="12-3456789012-3"
-            variant='standard'
+            variant="standard"
           />
         </FormRow>
         <FormRow label="PHILHEALTH">
@@ -48,11 +45,10 @@ export const GovernmentInfo = ({ control, onNext, onPrevious }: GovernmentInfoPr
             pattern="9999-9999-9999"
             placeholder="1234-5678-9012"
             name="philhealth"
-            variant='standard'
+            variant="standard"
           />
         </FormRow>
       </Stack>
-      <StepNavigation onNext={onNext} onPrevious={onPrevious} />
     </>
   );
 };
