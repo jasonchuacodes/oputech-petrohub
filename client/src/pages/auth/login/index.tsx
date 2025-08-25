@@ -59,7 +59,12 @@ export const Login = () => {
   return (
     <PageLayout height="100vh">
       <Stack direction="row" height="100%">
-        <Stack bgcolor="primary.light" flex={1} maxWidth="50%"></Stack>
+        <Stack
+          display={{ xs: 'none', md: 'flex' }}
+          bgcolor="primary.light"
+          flex={1}
+          maxWidth="50%"
+        />
         <Form
           onSubmit={handleSubmit(onSubmit)}
           sx={{
@@ -72,7 +77,7 @@ export const Login = () => {
           <Typography variant="h4" fontWeight="bold">
             Welcome to Business
           </Typography>
-          <Stack spacing={3} width="100%" maxWidth={400} minWidth={400} px={2}>
+          <Stack spacing={3} width="100%" maxWidth={{ xs: '100%', sm: 400 }} px={2}>
             <Stack spacing={1.5}>
               {(errors.username || errors.password || error) && (
                 <Box

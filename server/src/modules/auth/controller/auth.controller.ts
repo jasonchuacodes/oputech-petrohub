@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 
+import { isProduction } from '~/config/environment';
 import { NotFoundError } from '~/errors';
 import { AuthenticatedRequest } from '~/middlewares';
 import { getUserById as getUserService } from '~/modules/user/services/user.service';
@@ -11,8 +12,6 @@ import { RegisterUserSchema } from '../schema/registerUserSchema';
 import { LoginUserSchema } from '../schema/loginUserSchema';
 import { loginUser as loginUserService } from '../services/login.service';
 import { logoutSession } from '../services/logout.service';
-
-const isProduction = process.env.NODE_ENV === 'production';
 
 const validateUserRegister = createSchemaValidator(RegisterUserSchema);
 const validateUserLogin = createSchemaValidator(LoginUserSchema);

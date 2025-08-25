@@ -25,7 +25,7 @@ export const InfoBox = ({ variant = 'info', title, children }: InfoBoxProps) => 
         textAlign: 'start',
         border: '1px solid',
         p: 1,
-        bgcolor: alpha(palette.light, 0.2),
+        bgcolor: alpha(palette.light, 0.05),
         borderColor: variant === 'error' ? palette.light : 'divider',
         borderRadius: 0.5,
       }}

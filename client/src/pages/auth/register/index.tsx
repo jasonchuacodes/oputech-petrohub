@@ -29,7 +29,7 @@ export const Register = () => {
     reset,
     formState: { errors, isValid },
   } = useForm<RegisterUserInput>({
-    mode: 'onBlur',
+    mode: 'onChange',
     resolver: zodResolver(RegisterUserSchema),
   });
 
