@@ -24,7 +24,7 @@ export const Login = () => {
     register,
     handleSubmit,
     reset,
-    formState: { errors },
+    formState: { errors, isValid },
   } = useForm({
     resolver: zodResolver(LoginUserSchema),
   });
@@ -129,6 +129,7 @@ export const Login = () => {
               </Link>
             </Stack>
             <Button
+              disabled={!isValid}
               loading={isLoginPending}
               fullWidth={true}
               variant="contained"

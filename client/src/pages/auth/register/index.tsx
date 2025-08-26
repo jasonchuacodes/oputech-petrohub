@@ -98,11 +98,16 @@ export const Register = () => {
         sx={{
           p: 4,
           maxHeight: 'fit-content',
-          maxWidth: 560,
-          width: '50%',
+          width: {
+            xs: '95%',
+            sm: '90%',
+            md: '70%',
+            lg: 560,
+          },
           justifyContent: 'center',
           display: 'flex',
           height: 'fit-content',
+          mx: 'auto',
         }}
       >
         <Form onSubmit={handleSubmit(onSubmit)} sx={{ width: '100%' }}>
