@@ -2,11 +2,12 @@ import { Stack, Typography, List, ListItem, ListItemText, Chip } from '@mui/mate
 import dayjs from 'dayjs';
 
 import { CardContainer } from '~/components/dashboard';
-import { Link } from '~/components/ui';
+import { SearchInput } from '~/components/form';
+import { PageLayout } from '~/components/ui';
 import { userTimesheets } from '~/data/mockUserTimesheets';
 import { toTitleCase } from '~/utils/textUtils';
 
-export const Timesheets = () => {
+export const TimesheetsPage = () => {
   const latestEntries = userTimesheets
     .flatMap((t) =>
       t.entries.map((entry) => ({
@@ -16,8 +17,7 @@ export const Timesheets = () => {
         totalHours: t.totalHours,
       })),
     )
-    .sort((a, b) => dayjs(b.timestamp).valueOf() - dayjs(a.timestamp).valueOf())
-    .slice(0, 5);
+    .sort((a, b) => dayjs(b.timestamp).valueOf() - dayjs(a.timestamp).valueOf());
 
   const groupedEntries = latestEntries.reduce(
     (acc, entry) => {
@@ -33,17 +33,9 @@ export const Timesheets = () => {
   );
 
   return (
-    <Stack>
-      <Stack direction="row" alignItems="center" justifyContent="space-between">
-        <Typography fontWeight="bold">Recent Logs</Typography>
-        <Link
-          to="/timesheets"
-          alignSelf="flex-start"
-          sx={{ fontSize: 'small', color: 'text.main' }}
-        >
-          Show All
-        </Link>
-      </Stack>
+    <PageLayout p={2} spacing={2}>
+      {/* TODO: replace search input with date picker using @mui/x-date-pickers*/}
+      <SearchInput placeholder="Search by date" />
       <List>
         <Stack spacing={1}>
           {Object.entries(groupedEntries).map(([date, group]) => (
@@ -81,6 +73,6 @@ export const Timesheets = () => {
           ))}
         </Stack>
       </List>
-    </Stack>
+    </PageLayout>
   );
 };

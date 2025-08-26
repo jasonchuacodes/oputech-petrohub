@@ -18,6 +18,7 @@ import { UserDetailPage } from '~/pages/admin/users/user-detail';
 import { Login } from '~/pages/auth/login';
 import { Register } from '~/pages/auth/register';
 import { HomePage as UserHomePage } from '~/pages/user/home';
+import { TimesheetsPage as UserTimesheetsPage } from '~/pages/user/timesheets';
 import { NotFoundPage } from '~/pages/NotFound';
 import { UnauthorizedPage } from '~/pages/Unauthorized';
 import { UserRoleEnum } from '~/services/user/user.types';
@@ -42,6 +43,7 @@ export const AdminRoutes = {
 
 export const UserRoutes = {
   Home: '/',
+  Timesheets: '/timesheets',
 };
 
 export const router = createBrowserRouter(
@@ -55,6 +57,7 @@ export const router = createBrowserRouter(
       <Route path="/" element={<ProtectedRoute allowedRoles={[UserRoleEnum.USER]} />}>
         <Route element={<UserMainLayout />}>
           <Route index element={<UserHomePage />} />
+          <Route path={UserRoutes.Timesheets} element={<UserTimesheetsPage />} />
         </Route>
       </Route>
 

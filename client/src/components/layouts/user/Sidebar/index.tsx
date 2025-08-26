@@ -19,7 +19,7 @@ import {
   Typography,
 } from '@mui/material';
 import { useState, type ComponentType } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { matchPath, useLocation, useNavigate } from 'react-router-dom';
 
 import { Button } from '~/components/ui';
 import { useAuthContext } from '~/context/auth/useAuthContext';
@@ -35,12 +35,12 @@ export type NavItem = {
 };
 
 const Sidebar = () => {
+  const location = useLocation();
   const navigate = useNavigate();
   const { auth } = useAuthContext();
 
   const [open, setOpen] = useState(false);
 
-  const currentTenant = auth?.tenants[0];
   const navItems: NavItem[] = [
     {
       label: 'Dashboard',
@@ -53,10 +53,16 @@ const Sidebar = () => {
       label: 'Timesheets',
       icon: CalendarTodayOutlined,
       to: pathFor({
-        pathname: UserRoutes.Home,
+        pathname: UserRoutes.Timesheets,
       }),
     },
   ];
+
+  const currentTenant = auth?.tenants[0];
+  const currentNavItem = navItems.find((item) =>
+    matchPath({ path: item.to, end: item.to === '/' }, location.pathname),
+  );
+  const pageTitle = currentNavItem?.label ?? '';
 
   const handleNavigate = (to: string) => {
     setOpen(false);
@@ -133,7 +139,7 @@ const Sidebar = () => {
           <MenuOutlined />
         </IconButton>
         <Typography fontWeight="bold" variant="h5">
-          {currentTenant?.name}
+          {pageTitle}
         </Typography>
       </Stack>
 

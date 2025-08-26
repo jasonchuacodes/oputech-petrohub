@@ -84,7 +84,7 @@ export const UsersPage = () => {
             </Box>
           ) : (
             <>
-              <SearchInput />
+              <SearchInput placeholder="Search employee" />
               {tenantUsers && (
                 <UsersList users={tenantUsers} onDeleteRequest={handleDeleteRequest} />
               )}

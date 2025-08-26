@@ -4,7 +4,7 @@ import { PageLayout } from '~/components/ui';
 
 import { DateTimeDisplay } from './DateTimeDisplay';
 import { TimeLogger } from './TimeLogger';
-import { Timesheets } from './Timesheets';
+import { TimesheetsSection } from './TimesheetsSection';
 
 export const HomePage = () => {
   return (
@@ -14,7 +14,7 @@ export const HomePage = () => {
         <TimeLogger />
       </Stack>
 
-      <Timesheets />
+      <TimesheetsSection />
     </PageLayout>
   );
 };
