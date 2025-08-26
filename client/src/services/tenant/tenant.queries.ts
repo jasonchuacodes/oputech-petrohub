@@ -15,7 +15,7 @@ const useGetTenantUsersQuery = ({ tenantId }: { tenantId?: string }) => {
   return useQuery({
     queryKey: ['tenantUsers', tenantId],
     queryFn: () => getTenantUsers(tenantId!),
-    enabled: !!tenantId
+    enabled: !!tenantId,
   });
 };
 
@@ -27,7 +27,6 @@ const useCreateTenantMutation = () => {
     mutationFn: createTenant,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tenants'] });
-      queryClient.invalidateQueries({ queryKey: ['auth'] });
     },
   });
 };

@@ -7,11 +7,9 @@ import { useNavigate } from 'react-router-dom';
 
 import { FormRow, InputWithFormat, TextField } from '~/components/form';
 import { Button, Form, PageLayout } from '~/components/ui';
-import { AdminRoutes } from '~/routes';
 import { CreateTenantSchema, type CreateTenantInput } from '~/schema/createTenantSchema';
 import { useCreateTenantMutation } from '~/services/tenant/tenant.queries';
 import { parseBackendError } from '~/utils/parseBackendError';
-import { pathFor } from '~/utils/pathFor';
 
 export const CreateTenant = () => {
   const navigate = useNavigate();
@@ -26,44 +24,21 @@ export const CreateTenant = () => {
     resolver: zodResolver(CreateTenantSchema),
   });
 
-  const { mutateAsync: createTenant } = useCreateTenantMutation();
+  const { mutate: createTenant } = useCreateTenantMutation();
 
   const handleBack = () => navigate(-1);
 
   const onSubmit = async (data: CreateTenantInput) => {
-    let countdown = 5;
-    try {
-      const tenant = await createTenant(data);
-
-      const toastId = toast.success(
-        `Successfully created tenant. Redirecting in ${countdown} second${countdown > 1 ? 's' : ''}.`,
-        { duration: 6000 },
-      );
-
-      const interval = setInterval(() => {
-        countdown--;
-
-        toast.success(
-          `Successfully created tenant. Redirecting in ${countdown} second${countdown > 1 ? 's' : ''}.`,
-          { id: toastId },
-        );
-
-        if (countdown === 0) {
-          clearInterval(interval);
-          navigate(
-            pathFor({
-              pathname: AdminRoutes.TenantHome,
-              params: { tenantId: tenant.id },
-            }),
-          );
-          toast.dismiss(toastId);
-          reset();
-        }
-      }, 1000);
-    } catch (err) {
-      const errorMessage = parseBackendError(err);
-      toast.error(`Failed to create tenant: ${errorMessage}`);
-    }
+    createTenant(data, {
+      onSuccess: () => {
+        toast.success('Successfully created tenant.');
+        reset();
+      },
+      onError: (err) => {
+        const errorMessage = parseBackendError(err);
+        toast.error(`Failed to create tenant: ${errorMessage}`);
+      },
+    });
   };
 
   return (

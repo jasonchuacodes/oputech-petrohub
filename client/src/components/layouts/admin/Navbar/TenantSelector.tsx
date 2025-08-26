@@ -13,6 +13,7 @@ import {
   Menu,
   MenuItem,
   MenuList,
+  Skeleton,
   Stack,
   Typography,
 } from '@mui/material';
@@ -20,21 +21,21 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { Button } from '~/components/ui';
-import { useAuthContext } from '~/context/auth/useAuthContext';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { AdminRoutes } from '~/routes';
+import { useGetTenantsQuery } from '~/services/tenant/tenant.queries';
 import { pathFor } from '~/utils/pathFor';
 
 const TenantSelector = () => {
   const navigate = useNavigate();
-  const { auth } = useAuthContext();
   const { tenantId } = useTenantContext();
 
   const [anchorElSettingsMenu, setAnchorElSettingsMenu] = useState<null | HTMLElement>(null);
   const [viewTenants, setViewTenants] = useState(false);
 
   const isOpenMenu = Boolean(anchorElSettingsMenu);
-  const tenants = auth?.tenants;
+
+  const { data: tenants, isLoading: isLoadingTenants } = useGetTenantsQuery();
 
   const activeTenant = useMemo(() => {
     return tenants?.find((tenant) => tenant.id === tenantId);
@@ -128,20 +129,30 @@ const TenantSelector = () => {
               </IconButton>
               <Typography fontWeight="bold">Select Tenant</Typography>
             </Stack>
-            <Stack flex={1} overflow="auto">
-              {tenants?.map(({ id, name }) => {
-                return (
-                  <MenuItem
-                    selected={id === tenantId}
-                    key={id}
-                    onClick={() => handleSelectTenant(id)}
-                    sx={{ borderRadius: 1 }}
-                  >
-                    <Typography fontWeight={id === tenantId ? 'bold' : 'normal'}>{name}</Typography>
-                  </MenuItem>
-                );
-              })}
-            </Stack>
+            {isLoadingTenants ? (
+              <Stack spacing={0.5}>
+                {Array.from({ length: 3 }).map((_, index) => {
+                  return <Skeleton key={index} height={40} variant="rounded" />;
+                })}
+              </Stack>
+            ) : (
+              <Stack flex={1} overflow="auto">
+                {tenants?.map(({ id, name }) => {
+                  return (
+                    <MenuItem
+                      selected={id === tenantId}
+                      key={id}
+                      onClick={() => handleSelectTenant(id)}
+                      sx={{ borderRadius: 1 }}
+                    >
+                      <Typography fontWeight={id === tenantId ? 'bold' : 'normal'}>
+                        {name}
+                      </Typography>
+                    </MenuItem>
+                  );
+                })}
+              </Stack>
+            )}
           </Stack>
         ) : (
           <MenuList
