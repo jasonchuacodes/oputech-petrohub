@@ -2,17 +2,49 @@ import { Navigate } from 'react-router-dom';
 
 import { LoadingScreen } from '~/components/layouts/admin/LoadingScreen';
 import { useAuthContext } from '~/context/auth/useAuthContext';
+import { AdminRoutes, PublicRoutes } from '~/routes';
+import { useGetTenantsQuery } from '~/services/tenant/tenant.queries';
+import { pathFor } from '~/utils/pathFor';
 
 export const BootstrapPage = () => {
-  const { auth, loading } = useAuthContext();
+  const { auth, loading: isLoadingAuth } = useAuthContext();
 
-  if (loading) return <LoadingScreen />;
+  const { data: tenants, isLoading: isLoadingTenants } = useGetTenantsQuery();
 
-  if (!auth) return <Navigate to="/login" replace />;
+  if (isLoadingAuth || isLoadingTenants) {
+    return <LoadingScreen />;
+  }
 
-  return auth.hasTenant ? (
-    <Navigate to={`/tenants/${auth.tenants[0].id}`} replace />
-  ) : (
-    <Navigate to="/create-tenant" replace />
+  if (!auth) {
+    return (
+      <Navigate
+        to={pathFor({
+          pathname: PublicRoutes.Login,
+        })}
+        replace
+      />
+    );
+  }
+
+  if (!tenants || tenants.length === 0) {
+    return (
+      <Navigate
+        to={pathFor({
+          pathname: AdminRoutes.TenantCreateFlow,
+        })}
+        replace
+      />
+    );
+  }
+
+  // TODO: implement tenantSelection page for tenants.length > 1
+  return (
+    <Navigate
+      to={pathFor({
+        pathname: AdminRoutes.TenantHome,
+        params: { tenantId: tenants[0].id },
+      })}
+      replace
+    />
   );
 };

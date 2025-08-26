@@ -2,7 +2,7 @@ import { prisma } from '~/db/index';
 import { ConflictError, NotFoundError } from '~/errors';
 
 import { CreateUserInput } from '../schema/createUserSchema';
-import { UpdateUserInput, UpdateUserPayload } from '../schema/updateUserSchema';
+import { UpdateUserPayload } from '../schema/updateUserSchema';
 
 const createUser = async (data: CreateUserInput) => {
   const { tenantId, ...userData } = data;

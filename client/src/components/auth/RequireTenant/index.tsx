@@ -1,31 +1,30 @@
 import { Navigate, Outlet } from 'react-router-dom';
 
 import { LoadingScreen } from '~/components/layouts/admin/LoadingScreen';
-import { useAuthContext } from '~/context/auth/useAuthContext';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
-import { AdminRoutes } from '~/routes';
+import { PublicRoutes } from '~/routes';
+import { useGetTenantByIdQuery } from '~/services/tenant/tenant.queries';
 import { pathFor } from '~/utils/pathFor';
 
 export const RequireTenant = () => {
-  const { auth, loading } = useAuthContext();
   const { tenantId } = useTenantContext();
 
-  if (loading) return <LoadingScreen />;
+  const { data: tenant, isLoading } = useGetTenantByIdQuery({
+    tenantId,
+  });
 
-  const hasTenantAccess = auth?.tenants?.some((tenant) => tenant.id === tenantId);
-  const fallbackTenant = auth?.tenants[0];
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
 
-  if (!hasTenantAccess) {
-    return fallbackTenant ? (
+  if (!tenant) {
+    return (
       <Navigate
         to={pathFor({
-          pathname: AdminRoutes.TenantHome,
-          params: { tenantId: fallbackTenant.id },
+          pathname: PublicRoutes.Unauthorized,
         })}
         replace
       />
-    ) : (
-      <Navigate to="/" replace />
     );
   }
 

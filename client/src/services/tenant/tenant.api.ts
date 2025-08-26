@@ -6,6 +6,12 @@ import type { User } from '../user/user.types';
 import type { Tenant } from './tenant.types';
 
 // Queries
+const getTenant = async (tenantId: string): Promise<Tenant> => {
+  const res = await axios.get(`/tenants/${tenantId}`);
+  
+  return res.data.data.tenant;
+};
+
 const getTenants = async (): Promise<Tenant[]> => {
   const res = await axios.get('/tenants');
 
@@ -22,7 +28,7 @@ const getTenantUsers = async (tenantId: string): Promise<User[]> => {
 const createTenant = async (data: CreateTenantInput): Promise<Tenant> => {
   const res = await axios.post('/tenants/create', data);
 
-  return res.data.data.tenant
+  return res.data.data.tenant;
 };
 
-export { createTenant, getTenants, getTenantUsers };
+export { createTenant, getTenant, getTenants, getTenantUsers };

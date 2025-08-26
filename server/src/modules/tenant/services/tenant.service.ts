@@ -1,5 +1,5 @@
 import { prisma } from '~/db/index';
-import { NotFoundError } from '~/errors';
+import { ForbiddenError, NotFoundError } from '~/errors';
 
 import { CreateTenantPayload } from '../schema/createTenantSchema';
 
@@ -20,10 +20,35 @@ const createTenant = async (data: CreateTenantPayload) => {
   return tenant;
 };
 
-const getTenants = async () => {
-  const tenants = await prisma.tenant.findMany();
+const getTenants = async (userId: string) => {
+  const tenants = await prisma.tenant.findMany({
+    where: {
+      users: {
+        some: {
+          userId,
+        },
+      },
+    },
+  });
 
   return tenants;
+};
+
+const getTenantById = async (userId: string, tenantId: string) => {
+  const tenant = await prisma.tenant.findUnique({
+    where: {
+      id: tenantId,
+    },
+    include: {
+      users: true,
+    },
+  });
+
+  if (!tenant || !tenant.users.some((u) => u.userId === userId)) {
+    throw new ForbiddenError('You do not have access to this tenant');
+  }
+
+  return tenant;
 };
 
 const getTenantUsers = async (tenantId: string) => {
@@ -45,4 +70,4 @@ const getTenantUsers = async (tenantId: string) => {
   return tenantWithUsers.users.map((u) => u.user) ?? [];
 };
 
-export { createTenant, getTenants, getTenantUsers };
+export { createTenant, getTenantById, getTenants, getTenantUsers };

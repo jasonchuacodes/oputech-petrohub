@@ -22,10 +22,14 @@ import { NotFoundPage } from '~/pages/NotFound';
 import { UnauthorizedPage } from '~/pages/Unauthorized';
 import { UserRoleEnum } from '~/services/user/user.types';
 
-export const AdminRoutes = {
-  Bootstrap: '/',
+export const PublicRoutes = {
   Login: '/login',
   Register: '/register',
+  Unauthorized: '/unauthorized',
+};
+
+export const AdminRoutes = {
+  Bootstrap: '/',
   TenantCreateFlow: '/create-tenant',
   TenantHome: '/tenants/:tenantId',
   TenantCreate: '/tenants/:tenantId/create-tenant',
@@ -34,8 +38,6 @@ export const AdminRoutes = {
   TenantTimesheets: '/tenants/:tenantId/timesheets',
   TenantUsers: '/tenants/:tenantId/users',
   TenantUserDetail: '/tenants/:tenantId/users/:userId',
-
-  Unauthorized: '/unauthorized',
 };
 
 export const UserRoutes = {
@@ -46,8 +48,8 @@ export const router = createBrowserRouter(
   createRoutesFromElements(
     <Route element={<App />}>
       {/* Public Routes */}
-      <Route path={AdminRoutes.Login} element={<Login />} />
-      <Route path={AdminRoutes.Register} element={<Register />} />
+      <Route path={PublicRoutes.Login} element={<Login />} />
+      <Route path={PublicRoutes.Register} element={<Register />} />
 
       {/* User Routes */}
       <Route path="/" element={<ProtectedRoute allowedRoles={[UserRoleEnum.USER]} />}>
@@ -88,7 +90,7 @@ export const router = createBrowserRouter(
         </Route>
       </Route>
 
-      <Route path={AdminRoutes.Unauthorized} element={<UnauthorizedPage />} />
+      <Route path={PublicRoutes.Unauthorized} element={<UnauthorizedPage />} />
       <Route path="*" element={<NotFoundPage />} />
     </Route>,
   ),
