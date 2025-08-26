@@ -1,5 +1,21 @@
-import { AddBoxOutlined, ChevronRight, SettingsOutlined } from '@mui/icons-material';
-import { Avatar, Box, Divider, ListItemIcon, Menu, MenuItem, Typography } from '@mui/material';
+import {
+  AddBoxOutlined,
+  CachedOutlined,
+  ChevronLeftOutlined,
+  ChevronRight,
+  SettingsOutlined,
+} from '@mui/icons-material';
+import {
+  Avatar,
+  Divider,
+  IconButton,
+  ListItemIcon,
+  Menu,
+  MenuItem,
+  MenuList,
+  Stack,
+  Typography,
+} from '@mui/material';
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -15,8 +31,9 @@ const TenantSelector = () => {
   const { tenantId } = useTenantContext();
 
   const [anchorElSettingsMenu, setAnchorElSettingsMenu] = useState<null | HTMLElement>(null);
-  const isOpenMenu = Boolean(anchorElSettingsMenu);
+  const [viewTenants, setViewTenants] = useState(false);
 
+  const isOpenMenu = Boolean(anchorElSettingsMenu);
   const tenants = auth?.tenants;
 
   const activeTenant = useMemo(() => {
@@ -26,7 +43,10 @@ const TenantSelector = () => {
   const handleOpenMenu = (e: React.MouseEvent<HTMLElement>) =>
     setAnchorElSettingsMenu(e.currentTarget);
 
-  const handleCloseMenu = () => setAnchorElSettingsMenu(null);
+  const handleCloseMenu = () => {
+    setAnchorElSettingsMenu(null);
+    setViewTenants(false);
+  };
 
   const handleCreateTenant = () => {
     navigate(
@@ -89,33 +109,75 @@ const TenantSelector = () => {
           },
         }}
       >
-        {tenants?.map(({ name, id }) => {
-          if (id === tenantId)
-            return (
-              <Box key={id} sx={{ display: 'flex', px: 2, py: 1 }}>
-                <Typography fontWeight="bold">{name}</Typography>
-              </Box>
-            );
-
-          return (
-            <MenuItem key={id} onClick={() => handleSelectTenant(id)}>
-              <Typography>{name}</Typography>
+        {viewTenants ? (
+          <Stack maxHeight={240} spacing={1}>
+            <Stack
+              direction="row"
+              justifyContent="center"
+              alignItems="center"
+              position="relative"
+              p={1}
+              flexShrink={0}
+            >
+              <IconButton
+                size="small"
+                sx={{ position: 'absolute', left: 0 }}
+                onClick={() => setViewTenants(false)}
+              >
+                <ChevronLeftOutlined fontSize="inherit" />
+              </IconButton>
+              <Typography fontWeight="bold">Select Tenant</Typography>
+            </Stack>
+            <Stack flex={1} overflow="auto">
+              {tenants?.map(({ id, name }) => {
+                return (
+                  <MenuItem
+                    selected={id === tenantId}
+                    key={id}
+                    onClick={() => handleSelectTenant(id)}
+                    sx={{ borderRadius: 1 }}
+                  >
+                    <Typography fontWeight={id === tenantId ? 'bold' : 'normal'}>{name}</Typography>
+                  </MenuItem>
+                );
+              })}
+            </Stack>
+          </Stack>
+        ) : (
+          <MenuList
+            sx={{
+              '& .MuiMenuItem-root': {
+                borderRadius: 1,
+              },
+            }}
+          >
+            <Stack px={2} py={1}>
+              <Typography fontWeight="bold">{activeTenant?.name}</Typography>
+            </Stack>
+            <Divider sx={{ my: 1 }} />
+            <MenuItem
+              disabled={tenants && tenants?.length <= 1}
+              onClick={() => setViewTenants(true)}
+            >
+              <ListItemIcon>
+                <CachedOutlined fontSize="small" />
+              </ListItemIcon>
+              <Typography>Switch Tenant</Typography>
             </MenuItem>
-          );
-        })}
-        <Divider sx={{ my: 1 }} />
-        <MenuItem onClick={handleCreateTenant}>
-          <ListItemIcon>
-            <AddBoxOutlined fontSize="small" />
-          </ListItemIcon>
-          <Typography>Create tenant</Typography>
-        </MenuItem>
-        <MenuItem onClick={() => null}>
-          <ListItemIcon>
-            <SettingsOutlined fontSize="small" />
-          </ListItemIcon>
-          <Typography>Settings</Typography>
-        </MenuItem>
+            <MenuItem onClick={handleCreateTenant}>
+              <ListItemIcon>
+                <AddBoxOutlined fontSize="small" />
+              </ListItemIcon>
+              <Typography>Create tenant</Typography>
+            </MenuItem>
+            <MenuItem onClick={() => null}>
+              <ListItemIcon>
+                <SettingsOutlined fontSize="small" />
+              </ListItemIcon>
+              <Typography>Settings</Typography>
+            </MenuItem>
+          </MenuList>
+        )}
       </Menu>
     </>
   );
