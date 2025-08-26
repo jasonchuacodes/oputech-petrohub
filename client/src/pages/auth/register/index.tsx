@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { VisibilityOutlined, VisibilityOffOutlined } from '@mui/icons-material';
 import { Card, IconButton, List, OutlinedInput, Stack, Typography } from '@mui/material';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
@@ -19,6 +19,8 @@ import { parseBackendError } from '~/utils/parseBackendError';
 
 export const Register = () => {
   const navigate = useNavigate();
+
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const [isShowPassword, setIsShowPassword] = useState(false);
   const [isShowConfirmPassword, setIsShowConfirmPassword] = useState(false);
@@ -41,24 +43,21 @@ export const Register = () => {
         let countdown = 5;
 
         const toastId = toast.success(
-          () =>
-            `Successfully registered user! Redirecting to login in ${countdown} second${countdown !== 1 ? 's' : ''}.`,
-          {
-            duration: 5000,
-          },
+          `Successfully registered user! Redirecting to login in ${countdown} seconds.`,
+          { duration: 5000 },
         );
 
-        const interval = setInterval(() => {
+        intervalRef.current = setInterval(() => {
           countdown--;
 
-          toast.success(
-            () =>
+          if (countdown > 0) {
+            toast.success(
               `Successfully registered user! Redirecting to login in ${countdown} second${countdown !== 1 ? 's' : ''}.`,
-            { id: toastId },
-          );
-
-          if (countdown === 0) {
-            clearInterval(interval);
+              { id: toastId },
+            );
+          } else {
+            clearInterval(intervalRef.current!);
+            intervalRef.current = null;
             toast.dismiss(toastId);
             navigate('/login');
           }
@@ -72,6 +71,15 @@ export const Register = () => {
       },
     });
   };
+
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+      toast.dismiss();
+    };
+  }, []);
 
   return (
     <PageLayout
