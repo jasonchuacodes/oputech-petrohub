@@ -1,10 +1,11 @@
-import { Stack, Typography, List, ListItem, ListItemText, Chip } from '@mui/material';
+import { FilterOutlined } from '@mui/icons-material';
+import { Stack, Typography, List, ListItem, ListItemText, Chip, alpha } from '@mui/material';
 import dayjs from 'dayjs';
 
 import { CardContainer } from '~/components/dashboard';
-import { SearchInput } from '~/components/form';
-import { PageLayout } from '~/components/ui';
+import { Button, DateRangePicker, PageLayout } from '~/components/ui';
 import { userTimesheets } from '~/data/mockUserTimesheets';
+import theme from '~/theme';
 import { toTitleCase } from '~/utils/textUtils';
 
 export const TimesheetsPage = () => {
@@ -34,8 +35,23 @@ export const TimesheetsPage = () => {
 
   return (
     <PageLayout p={2} spacing={2}>
-      {/* TODO: replace search input with date picker using @mui/x-date-pickers*/}
-      <SearchInput placeholder="Search by date" />
+      <Stack direction="row" justifyContent="space-between">
+        <DateRangePicker label="Select Date Range" />
+        <Button
+          disabled={true}
+          variant="outlined"
+          startIcon={<FilterOutlined fontSize="inherit" />}
+          size="small"
+        >
+          Filters
+        </Button>
+      </Stack>
+      <Stack padding={2} bgcolor={alpha(theme.palette.info.dark, 0.2)} borderRadius={1}>
+        <Typography variant="body2">Total Hours:</Typography>
+        <Typography variant="h6" fontWeight="bold">
+          21
+        </Typography>
+      </Stack>
       <List>
         <Stack spacing={1}>
           {Object.entries(groupedEntries).map(([date, group]) => (

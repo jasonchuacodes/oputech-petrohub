@@ -3,6 +3,7 @@ export * from './BackButton';
 export * from './Button';
 export * from './ContentCard';
 export * from './CustomModal';
+export * from './DateRangePicker';
 export * from './InfoBox';
 export * from './Form';
 export * from './Link';
