@@ -13,6 +13,17 @@ enum Role {
   ADMIN
 }
 
+enum TimesheetStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum TimesheetEntryAction {
+  CHECK_IN
+  CHECK_OUT
+}
+
 model User {
   id       String  @id @default(uuid())
   username String  @unique
@@ -29,7 +40,8 @@ model User {
   philhealth String?
   pagibig    String?
 
-  sessions Session[]
+  sessions   Session[]
+  timesheets Timesheet[]
 
   tenants TenantsOnUsers[]
 
@@ -89,4 +101,26 @@ model Document {
   name       String
   url        String
   uploadedAt DateTime @default(now())
+}
+
+model Timesheet {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  totalHours Float            @default(0)
+  status     TimesheetStatus  @default(PENDING)
+  entries    TimesheetEntry[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TimesheetEntry {
+  id          String    @id @default(uuid())
+  timesheetId String
+  timesheet   Timesheet @relation(fields: [timesheetId], references: [id], onDelete: Cascade)
+
+  action    TimesheetEntryAction
+  timestamp DateTime             @default(now())
 }

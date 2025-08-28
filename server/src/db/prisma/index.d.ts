@@ -38,6 +38,16 @@ export type Session = $Result.DefaultSelection<Prisma.$SessionPayload>
  * 
  */
 export type Document = $Result.DefaultSelection<Prisma.$DocumentPayload>
+/**
+ * Model Timesheet
+ * 
+ */
+export type Timesheet = $Result.DefaultSelection<Prisma.$TimesheetPayload>
+/**
+ * Model TimesheetEntry
+ * 
+ */
+export type TimesheetEntry = $Result.DefaultSelection<Prisma.$TimesheetEntryPayload>
 
 /**
  * Enums
@@ -50,11 +60,36 @@ export namespace $Enums {
 
 export type Role = (typeof Role)[keyof typeof Role]
 
+
+export const TimesheetStatus: {
+  PENDING: 'PENDING',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED'
+};
+
+export type TimesheetStatus = (typeof TimesheetStatus)[keyof typeof TimesheetStatus]
+
+
+export const TimesheetEntryAction: {
+  CHECK_IN: 'CHECK_IN',
+  CHECK_OUT: 'CHECK_OUT'
+};
+
+export type TimesheetEntryAction = (typeof TimesheetEntryAction)[keyof typeof TimesheetEntryAction]
+
 }
 
 export type Role = $Enums.Role
 
 export const Role: typeof $Enums.Role
+
+export type TimesheetStatus = $Enums.TimesheetStatus
+
+export const TimesheetStatus: typeof $Enums.TimesheetStatus
+
+export type TimesheetEntryAction = $Enums.TimesheetEntryAction
+
+export const TimesheetEntryAction: typeof $Enums.TimesheetEntryAction
 
 /**
  * ##  Prisma Client ʲˢ
@@ -230,6 +265,26 @@ export class PrismaClient<
     * ```
     */
   get document(): Prisma.DocumentDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.timesheet`: Exposes CRUD operations for the **Timesheet** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Timesheets
+    * const timesheets = await prisma.timesheet.findMany()
+    * ```
+    */
+  get timesheet(): Prisma.TimesheetDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.timesheetEntry`: Exposes CRUD operations for the **TimesheetEntry** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more TimesheetEntries
+    * const timesheetEntries = await prisma.timesheetEntry.findMany()
+    * ```
+    */
+  get timesheetEntry(): Prisma.TimesheetEntryDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -674,7 +729,9 @@ export namespace Prisma {
     Tenant: 'Tenant',
     TenantsOnUsers: 'TenantsOnUsers',
     Session: 'Session',
-    Document: 'Document'
+    Document: 'Document',
+    Timesheet: 'Timesheet',
+    TimesheetEntry: 'TimesheetEntry'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -693,7 +750,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "tenant" | "tenantsOnUsers" | "session" | "document"
+      modelProps: "user" | "tenant" | "tenantsOnUsers" | "session" | "document" | "timesheet" | "timesheetEntry"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1067,6 +1124,154 @@ export namespace Prisma {
           }
         }
       }
+      Timesheet: {
+        payload: Prisma.$TimesheetPayload<ExtArgs>
+        fields: Prisma.TimesheetFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.TimesheetFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TimesheetPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.TimesheetFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TimesheetPayload>
+          }
+          findFirst: {
+            args: Prisma.TimesheetFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TimesheetPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.TimesheetFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TimesheetPayload>
+          }
+          findMany: {
+            args: Prisma.TimesheetFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TimesheetPayload>[]
+          }
+          create: {
+            args: Prisma.TimesheetCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TimesheetPayload>
+          }
+          createMany: {
+            args: Prisma.TimesheetCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.TimesheetCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TimesheetPayload>[]
+          }
+          delete: {
+            args: Prisma.TimesheetDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TimesheetPayload>
+          }
+          update: {
+            args: Prisma.TimesheetUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TimesheetPayload>
+          }
+          deleteMany: {
+            args: Prisma.TimesheetDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.TimesheetUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.TimesheetUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TimesheetPayload>[]
+          }
+          upsert: {
+            args: Prisma.TimesheetUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TimesheetPayload>
+          }
+          aggregate: {
+            args: Prisma.TimesheetAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateTimesheet>
+          }
+          groupBy: {
+            args: Prisma.TimesheetGroupByArgs<ExtArgs>
+            result: $Utils.Optional<TimesheetGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.TimesheetCountArgs<ExtArgs>
+            result: $Utils.Optional<TimesheetCountAggregateOutputType> | number
+          }
+        }
+      }
+      TimesheetEntry: {
+        payload: Prisma.$TimesheetEntryPayload<ExtArgs>
+        fields: Prisma.TimesheetEntryFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.TimesheetEntryFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TimesheetEntryPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.TimesheetEntryFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TimesheetEntryPayload>
+          }
+          findFirst: {
+            args: Prisma.TimesheetEntryFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TimesheetEntryPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.TimesheetEntryFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TimesheetEntryPayload>
+          }
+          findMany: {
+            args: Prisma.TimesheetEntryFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TimesheetEntryPayload>[]
+          }
+          create: {
+            args: Prisma.TimesheetEntryCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TimesheetEntryPayload>
+          }
+          createMany: {
+            args: Prisma.TimesheetEntryCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.TimesheetEntryCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TimesheetEntryPayload>[]
+          }
+          delete: {
+            args: Prisma.TimesheetEntryDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TimesheetEntryPayload>
+          }
+          update: {
+            args: Prisma.TimesheetEntryUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TimesheetEntryPayload>
+          }
+          deleteMany: {
+            args: Prisma.TimesheetEntryDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.TimesheetEntryUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.TimesheetEntryUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TimesheetEntryPayload>[]
+          }
+          upsert: {
+            args: Prisma.TimesheetEntryUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TimesheetEntryPayload>
+          }
+          aggregate: {
+            args: Prisma.TimesheetEntryAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateTimesheetEntry>
+          }
+          groupBy: {
+            args: Prisma.TimesheetEntryGroupByArgs<ExtArgs>
+            result: $Utils.Optional<TimesheetEntryGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.TimesheetEntryCountArgs<ExtArgs>
+            result: $Utils.Optional<TimesheetEntryCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1156,6 +1361,8 @@ export namespace Prisma {
     tenantsOnUsers?: TenantsOnUsersOmit
     session?: SessionOmit
     document?: DocumentOmit
+    timesheet?: TimesheetOmit
+    timesheetEntry?: TimesheetEntryOmit
   }
 
   /* Types for Logging */
@@ -1251,11 +1458,13 @@ export namespace Prisma {
 
   export type UserCountOutputType = {
     sessions: number
+    timesheets: number
     tenants: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     sessions?: boolean | UserCountOutputTypeCountSessionsArgs
+    timesheets?: boolean | UserCountOutputTypeCountTimesheetsArgs
     tenants?: boolean | UserCountOutputTypeCountTenantsArgs
   }
 
@@ -1275,6 +1484,13 @@ export namespace Prisma {
    */
   export type UserCountOutputTypeCountSessionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: SessionWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountTimesheetsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TimesheetWhereInput
   }
 
   /**
@@ -1322,6 +1538,37 @@ export namespace Prisma {
    */
   export type TenantCountOutputTypeCountUsersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: TenantsOnUsersWhereInput
+  }
+
+
+  /**
+   * Count Type TimesheetCountOutputType
+   */
+
+  export type TimesheetCountOutputType = {
+    entries: number
+  }
+
+  export type TimesheetCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    entries?: boolean | TimesheetCountOutputTypeCountEntriesArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * TimesheetCountOutputType without action
+   */
+  export type TimesheetCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TimesheetCountOutputType
+     */
+    select?: TimesheetCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * TimesheetCountOutputType without action
+   */
+  export type TimesheetCountOutputTypeCountEntriesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TimesheetEntryWhereInput
   }
 
 
@@ -1574,6 +1821,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     sessions?: boolean | User$sessionsArgs<ExtArgs>
+    timesheets?: boolean | User$timesheetsArgs<ExtArgs>
     tenants?: boolean | User$tenantsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
@@ -1635,6 +1883,7 @@ export namespace Prisma {
   export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "username" | "email" | "name" | "password" | "role" | "birthday" | "contact" | "address" | "sss" | "tin" | "philhealth" | "pagibig" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     sessions?: boolean | User$sessionsArgs<ExtArgs>
+    timesheets?: boolean | User$timesheetsArgs<ExtArgs>
     tenants?: boolean | User$tenantsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
@@ -1645,6 +1894,7 @@ export namespace Prisma {
     name: "User"
     objects: {
       sessions: Prisma.$SessionPayload<ExtArgs>[]
+      timesheets: Prisma.$TimesheetPayload<ExtArgs>[]
       tenants: Prisma.$TenantsOnUsersPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -2058,6 +2308,7 @@ export namespace Prisma {
   export interface Prisma__UserClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     sessions<T extends User$sessionsArgs<ExtArgs> = {}>(args?: Subset<T, User$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    timesheets<T extends User$timesheetsArgs<ExtArgs> = {}>(args?: Subset<T, User$timesheetsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TimesheetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     tenants<T extends User$tenantsArgs<ExtArgs> = {}>(args?: Subset<T, User$tenantsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TenantsOnUsersPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -2512,6 +2763,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: SessionScalarFieldEnum | SessionScalarFieldEnum[]
+  }
+
+  /**
+   * User.timesheets
+   */
+  export type User$timesheetsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Timesheet
+     */
+    select?: TimesheetSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Timesheet
+     */
+    omit?: TimesheetOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TimesheetInclude<ExtArgs> | null
+    where?: TimesheetWhereInput
+    orderBy?: TimesheetOrderByWithRelationInput | TimesheetOrderByWithRelationInput[]
+    cursor?: TimesheetWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: TimesheetScalarFieldEnum | TimesheetScalarFieldEnum[]
   }
 
   /**
@@ -6916,6 +7191,2186 @@ export namespace Prisma {
 
 
   /**
+   * Model Timesheet
+   */
+
+  export type AggregateTimesheet = {
+    _count: TimesheetCountAggregateOutputType | null
+    _avg: TimesheetAvgAggregateOutputType | null
+    _sum: TimesheetSumAggregateOutputType | null
+    _min: TimesheetMinAggregateOutputType | null
+    _max: TimesheetMaxAggregateOutputType | null
+  }
+
+  export type TimesheetAvgAggregateOutputType = {
+    totalHours: number | null
+  }
+
+  export type TimesheetSumAggregateOutputType = {
+    totalHours: number | null
+  }
+
+  export type TimesheetMinAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    totalHours: number | null
+    status: $Enums.TimesheetStatus | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type TimesheetMaxAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    totalHours: number | null
+    status: $Enums.TimesheetStatus | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type TimesheetCountAggregateOutputType = {
+    id: number
+    userId: number
+    totalHours: number
+    status: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type TimesheetAvgAggregateInputType = {
+    totalHours?: true
+  }
+
+  export type TimesheetSumAggregateInputType = {
+    totalHours?: true
+  }
+
+  export type TimesheetMinAggregateInputType = {
+    id?: true
+    userId?: true
+    totalHours?: true
+    status?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type TimesheetMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    totalHours?: true
+    status?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type TimesheetCountAggregateInputType = {
+    id?: true
+    userId?: true
+    totalHours?: true
+    status?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type TimesheetAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Timesheet to aggregate.
+     */
+    where?: TimesheetWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Timesheets to fetch.
+     */
+    orderBy?: TimesheetOrderByWithRelationInput | TimesheetOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: TimesheetWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Timesheets from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Timesheets.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Timesheets
+    **/
+    _count?: true | TimesheetCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: TimesheetAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: TimesheetSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: TimesheetMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: TimesheetMaxAggregateInputType
+  }
+
+  export type GetTimesheetAggregateType<T extends TimesheetAggregateArgs> = {
+        [P in keyof T & keyof AggregateTimesheet]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateTimesheet[P]>
+      : GetScalarType<T[P], AggregateTimesheet[P]>
+  }
+
+
+
+
+  export type TimesheetGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TimesheetWhereInput
+    orderBy?: TimesheetOrderByWithAggregationInput | TimesheetOrderByWithAggregationInput[]
+    by: TimesheetScalarFieldEnum[] | TimesheetScalarFieldEnum
+    having?: TimesheetScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: TimesheetCountAggregateInputType | true
+    _avg?: TimesheetAvgAggregateInputType
+    _sum?: TimesheetSumAggregateInputType
+    _min?: TimesheetMinAggregateInputType
+    _max?: TimesheetMaxAggregateInputType
+  }
+
+  export type TimesheetGroupByOutputType = {
+    id: string
+    userId: string
+    totalHours: number
+    status: $Enums.TimesheetStatus
+    createdAt: Date
+    updatedAt: Date
+    _count: TimesheetCountAggregateOutputType | null
+    _avg: TimesheetAvgAggregateOutputType | null
+    _sum: TimesheetSumAggregateOutputType | null
+    _min: TimesheetMinAggregateOutputType | null
+    _max: TimesheetMaxAggregateOutputType | null
+  }
+
+  type GetTimesheetGroupByPayload<T extends TimesheetGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<TimesheetGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof TimesheetGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], TimesheetGroupByOutputType[P]>
+            : GetScalarType<T[P], TimesheetGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type TimesheetSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    totalHours?: boolean
+    status?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    entries?: boolean | Timesheet$entriesArgs<ExtArgs>
+    _count?: boolean | TimesheetCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["timesheet"]>
+
+  export type TimesheetSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    totalHours?: boolean
+    status?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["timesheet"]>
+
+  export type TimesheetSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    totalHours?: boolean
+    status?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["timesheet"]>
+
+  export type TimesheetSelectScalar = {
+    id?: boolean
+    userId?: boolean
+    totalHours?: boolean
+    status?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type TimesheetOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "totalHours" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["timesheet"]>
+  export type TimesheetInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    entries?: boolean | Timesheet$entriesArgs<ExtArgs>
+    _count?: boolean | TimesheetCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type TimesheetIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type TimesheetIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $TimesheetPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Timesheet"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs>
+      entries: Prisma.$TimesheetEntryPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      userId: string
+      totalHours: number
+      status: $Enums.TimesheetStatus
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["timesheet"]>
+    composites: {}
+  }
+
+  type TimesheetGetPayload<S extends boolean | null | undefined | TimesheetDefaultArgs> = $Result.GetResult<Prisma.$TimesheetPayload, S>
+
+  type TimesheetCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<TimesheetFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: TimesheetCountAggregateInputType | true
+    }
+
+  export interface TimesheetDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Timesheet'], meta: { name: 'Timesheet' } }
+    /**
+     * Find zero or one Timesheet that matches the filter.
+     * @param {TimesheetFindUniqueArgs} args - Arguments to find a Timesheet
+     * @example
+     * // Get one Timesheet
+     * const timesheet = await prisma.timesheet.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends TimesheetFindUniqueArgs>(args: SelectSubset<T, TimesheetFindUniqueArgs<ExtArgs>>): Prisma__TimesheetClient<$Result.GetResult<Prisma.$TimesheetPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Timesheet that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {TimesheetFindUniqueOrThrowArgs} args - Arguments to find a Timesheet
+     * @example
+     * // Get one Timesheet
+     * const timesheet = await prisma.timesheet.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends TimesheetFindUniqueOrThrowArgs>(args: SelectSubset<T, TimesheetFindUniqueOrThrowArgs<ExtArgs>>): Prisma__TimesheetClient<$Result.GetResult<Prisma.$TimesheetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Timesheet that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TimesheetFindFirstArgs} args - Arguments to find a Timesheet
+     * @example
+     * // Get one Timesheet
+     * const timesheet = await prisma.timesheet.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends TimesheetFindFirstArgs>(args?: SelectSubset<T, TimesheetFindFirstArgs<ExtArgs>>): Prisma__TimesheetClient<$Result.GetResult<Prisma.$TimesheetPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Timesheet that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TimesheetFindFirstOrThrowArgs} args - Arguments to find a Timesheet
+     * @example
+     * // Get one Timesheet
+     * const timesheet = await prisma.timesheet.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends TimesheetFindFirstOrThrowArgs>(args?: SelectSubset<T, TimesheetFindFirstOrThrowArgs<ExtArgs>>): Prisma__TimesheetClient<$Result.GetResult<Prisma.$TimesheetPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Timesheets that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TimesheetFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Timesheets
+     * const timesheets = await prisma.timesheet.findMany()
+     * 
+     * // Get first 10 Timesheets
+     * const timesheets = await prisma.timesheet.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const timesheetWithIdOnly = await prisma.timesheet.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends TimesheetFindManyArgs>(args?: SelectSubset<T, TimesheetFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TimesheetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Timesheet.
+     * @param {TimesheetCreateArgs} args - Arguments to create a Timesheet.
+     * @example
+     * // Create one Timesheet
+     * const Timesheet = await prisma.timesheet.create({
+     *   data: {
+     *     // ... data to create a Timesheet
+     *   }
+     * })
+     * 
+     */
+    create<T extends TimesheetCreateArgs>(args: SelectSubset<T, TimesheetCreateArgs<ExtArgs>>): Prisma__TimesheetClient<$Result.GetResult<Prisma.$TimesheetPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Timesheets.
+     * @param {TimesheetCreateManyArgs} args - Arguments to create many Timesheets.
+     * @example
+     * // Create many Timesheets
+     * const timesheet = await prisma.timesheet.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends TimesheetCreateManyArgs>(args?: SelectSubset<T, TimesheetCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Timesheets and returns the data saved in the database.
+     * @param {TimesheetCreateManyAndReturnArgs} args - Arguments to create many Timesheets.
+     * @example
+     * // Create many Timesheets
+     * const timesheet = await prisma.timesheet.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Timesheets and only return the `id`
+     * const timesheetWithIdOnly = await prisma.timesheet.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends TimesheetCreateManyAndReturnArgs>(args?: SelectSubset<T, TimesheetCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TimesheetPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Timesheet.
+     * @param {TimesheetDeleteArgs} args - Arguments to delete one Timesheet.
+     * @example
+     * // Delete one Timesheet
+     * const Timesheet = await prisma.timesheet.delete({
+     *   where: {
+     *     // ... filter to delete one Timesheet
+     *   }
+     * })
+     * 
+     */
+    delete<T extends TimesheetDeleteArgs>(args: SelectSubset<T, TimesheetDeleteArgs<ExtArgs>>): Prisma__TimesheetClient<$Result.GetResult<Prisma.$TimesheetPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Timesheet.
+     * @param {TimesheetUpdateArgs} args - Arguments to update one Timesheet.
+     * @example
+     * // Update one Timesheet
+     * const timesheet = await prisma.timesheet.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends TimesheetUpdateArgs>(args: SelectSubset<T, TimesheetUpdateArgs<ExtArgs>>): Prisma__TimesheetClient<$Result.GetResult<Prisma.$TimesheetPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Timesheets.
+     * @param {TimesheetDeleteManyArgs} args - Arguments to filter Timesheets to delete.
+     * @example
+     * // Delete a few Timesheets
+     * const { count } = await prisma.timesheet.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends TimesheetDeleteManyArgs>(args?: SelectSubset<T, TimesheetDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Timesheets.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TimesheetUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Timesheets
+     * const timesheet = await prisma.timesheet.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends TimesheetUpdateManyArgs>(args: SelectSubset<T, TimesheetUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Timesheets and returns the data updated in the database.
+     * @param {TimesheetUpdateManyAndReturnArgs} args - Arguments to update many Timesheets.
+     * @example
+     * // Update many Timesheets
+     * const timesheet = await prisma.timesheet.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Timesheets and only return the `id`
+     * const timesheetWithIdOnly = await prisma.timesheet.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends TimesheetUpdateManyAndReturnArgs>(args: SelectSubset<T, TimesheetUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TimesheetPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Timesheet.
+     * @param {TimesheetUpsertArgs} args - Arguments to update or create a Timesheet.
+     * @example
+     * // Update or create a Timesheet
+     * const timesheet = await prisma.timesheet.upsert({
+     *   create: {
+     *     // ... data to create a Timesheet
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Timesheet we want to update
+     *   }
+     * })
+     */
+    upsert<T extends TimesheetUpsertArgs>(args: SelectSubset<T, TimesheetUpsertArgs<ExtArgs>>): Prisma__TimesheetClient<$Result.GetResult<Prisma.$TimesheetPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Timesheets.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TimesheetCountArgs} args - Arguments to filter Timesheets to count.
+     * @example
+     * // Count the number of Timesheets
+     * const count = await prisma.timesheet.count({
+     *   where: {
+     *     // ... the filter for the Timesheets we want to count
+     *   }
+     * })
+    **/
+    count<T extends TimesheetCountArgs>(
+      args?: Subset<T, TimesheetCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], TimesheetCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Timesheet.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TimesheetAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends TimesheetAggregateArgs>(args: Subset<T, TimesheetAggregateArgs>): Prisma.PrismaPromise<GetTimesheetAggregateType<T>>
+
+    /**
+     * Group by Timesheet.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TimesheetGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends TimesheetGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: TimesheetGroupByArgs['orderBy'] }
+        : { orderBy?: TimesheetGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, TimesheetGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetTimesheetGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Timesheet model
+   */
+  readonly fields: TimesheetFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Timesheet.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__TimesheetClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    entries<T extends Timesheet$entriesArgs<ExtArgs> = {}>(args?: Subset<T, Timesheet$entriesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TimesheetEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Timesheet model
+   */
+  interface TimesheetFieldRefs {
+    readonly id: FieldRef<"Timesheet", 'String'>
+    readonly userId: FieldRef<"Timesheet", 'String'>
+    readonly totalHours: FieldRef<"Timesheet", 'Float'>
+    readonly status: FieldRef<"Timesheet", 'TimesheetStatus'>
+    readonly createdAt: FieldRef<"Timesheet", 'DateTime'>
+    readonly updatedAt: FieldRef<"Timesheet", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Timesheet findUnique
+   */
+  export type TimesheetFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Timesheet
+     */
+    select?: TimesheetSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Timesheet
+     */
+    omit?: TimesheetOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TimesheetInclude<ExtArgs> | null
+    /**
+     * Filter, which Timesheet to fetch.
+     */
+    where: TimesheetWhereUniqueInput
+  }
+
+  /**
+   * Timesheet findUniqueOrThrow
+   */
+  export type TimesheetFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Timesheet
+     */
+    select?: TimesheetSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Timesheet
+     */
+    omit?: TimesheetOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TimesheetInclude<ExtArgs> | null
+    /**
+     * Filter, which Timesheet to fetch.
+     */
+    where: TimesheetWhereUniqueInput
+  }
+
+  /**
+   * Timesheet findFirst
+   */
+  export type TimesheetFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Timesheet
+     */
+    select?: TimesheetSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Timesheet
+     */
+    omit?: TimesheetOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TimesheetInclude<ExtArgs> | null
+    /**
+     * Filter, which Timesheet to fetch.
+     */
+    where?: TimesheetWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Timesheets to fetch.
+     */
+    orderBy?: TimesheetOrderByWithRelationInput | TimesheetOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Timesheets.
+     */
+    cursor?: TimesheetWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Timesheets from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Timesheets.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Timesheets.
+     */
+    distinct?: TimesheetScalarFieldEnum | TimesheetScalarFieldEnum[]
+  }
+
+  /**
+   * Timesheet findFirstOrThrow
+   */
+  export type TimesheetFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Timesheet
+     */
+    select?: TimesheetSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Timesheet
+     */
+    omit?: TimesheetOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TimesheetInclude<ExtArgs> | null
+    /**
+     * Filter, which Timesheet to fetch.
+     */
+    where?: TimesheetWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Timesheets to fetch.
+     */
+    orderBy?: TimesheetOrderByWithRelationInput | TimesheetOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Timesheets.
+     */
+    cursor?: TimesheetWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Timesheets from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Timesheets.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Timesheets.
+     */
+    distinct?: TimesheetScalarFieldEnum | TimesheetScalarFieldEnum[]
+  }
+
+  /**
+   * Timesheet findMany
+   */
+  export type TimesheetFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Timesheet
+     */
+    select?: TimesheetSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Timesheet
+     */
+    omit?: TimesheetOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TimesheetInclude<ExtArgs> | null
+    /**
+     * Filter, which Timesheets to fetch.
+     */
+    where?: TimesheetWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Timesheets to fetch.
+     */
+    orderBy?: TimesheetOrderByWithRelationInput | TimesheetOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Timesheets.
+     */
+    cursor?: TimesheetWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Timesheets from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Timesheets.
+     */
+    skip?: number
+    distinct?: TimesheetScalarFieldEnum | TimesheetScalarFieldEnum[]
+  }
+
+  /**
+   * Timesheet create
+   */
+  export type TimesheetCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Timesheet
+     */
+    select?: TimesheetSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Timesheet
+     */
+    omit?: TimesheetOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TimesheetInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Timesheet.
+     */
+    data: XOR<TimesheetCreateInput, TimesheetUncheckedCreateInput>
+  }
+
+  /**
+   * Timesheet createMany
+   */
+  export type TimesheetCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Timesheets.
+     */
+    data: TimesheetCreateManyInput | TimesheetCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Timesheet createManyAndReturn
+   */
+  export type TimesheetCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Timesheet
+     */
+    select?: TimesheetSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Timesheet
+     */
+    omit?: TimesheetOmit<ExtArgs> | null
+    /**
+     * The data used to create many Timesheets.
+     */
+    data: TimesheetCreateManyInput | TimesheetCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TimesheetIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Timesheet update
+   */
+  export type TimesheetUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Timesheet
+     */
+    select?: TimesheetSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Timesheet
+     */
+    omit?: TimesheetOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TimesheetInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Timesheet.
+     */
+    data: XOR<TimesheetUpdateInput, TimesheetUncheckedUpdateInput>
+    /**
+     * Choose, which Timesheet to update.
+     */
+    where: TimesheetWhereUniqueInput
+  }
+
+  /**
+   * Timesheet updateMany
+   */
+  export type TimesheetUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Timesheets.
+     */
+    data: XOR<TimesheetUpdateManyMutationInput, TimesheetUncheckedUpdateManyInput>
+    /**
+     * Filter which Timesheets to update
+     */
+    where?: TimesheetWhereInput
+    /**
+     * Limit how many Timesheets to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Timesheet updateManyAndReturn
+   */
+  export type TimesheetUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Timesheet
+     */
+    select?: TimesheetSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Timesheet
+     */
+    omit?: TimesheetOmit<ExtArgs> | null
+    /**
+     * The data used to update Timesheets.
+     */
+    data: XOR<TimesheetUpdateManyMutationInput, TimesheetUncheckedUpdateManyInput>
+    /**
+     * Filter which Timesheets to update
+     */
+    where?: TimesheetWhereInput
+    /**
+     * Limit how many Timesheets to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TimesheetIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Timesheet upsert
+   */
+  export type TimesheetUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Timesheet
+     */
+    select?: TimesheetSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Timesheet
+     */
+    omit?: TimesheetOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TimesheetInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Timesheet to update in case it exists.
+     */
+    where: TimesheetWhereUniqueInput
+    /**
+     * In case the Timesheet found by the `where` argument doesn't exist, create a new Timesheet with this data.
+     */
+    create: XOR<TimesheetCreateInput, TimesheetUncheckedCreateInput>
+    /**
+     * In case the Timesheet was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<TimesheetUpdateInput, TimesheetUncheckedUpdateInput>
+  }
+
+  /**
+   * Timesheet delete
+   */
+  export type TimesheetDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Timesheet
+     */
+    select?: TimesheetSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Timesheet
+     */
+    omit?: TimesheetOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TimesheetInclude<ExtArgs> | null
+    /**
+     * Filter which Timesheet to delete.
+     */
+    where: TimesheetWhereUniqueInput
+  }
+
+  /**
+   * Timesheet deleteMany
+   */
+  export type TimesheetDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Timesheets to delete
+     */
+    where?: TimesheetWhereInput
+    /**
+     * Limit how many Timesheets to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Timesheet.entries
+   */
+  export type Timesheet$entriesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TimesheetEntry
+     */
+    select?: TimesheetEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TimesheetEntry
+     */
+    omit?: TimesheetEntryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TimesheetEntryInclude<ExtArgs> | null
+    where?: TimesheetEntryWhereInput
+    orderBy?: TimesheetEntryOrderByWithRelationInput | TimesheetEntryOrderByWithRelationInput[]
+    cursor?: TimesheetEntryWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: TimesheetEntryScalarFieldEnum | TimesheetEntryScalarFieldEnum[]
+  }
+
+  /**
+   * Timesheet without action
+   */
+  export type TimesheetDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Timesheet
+     */
+    select?: TimesheetSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Timesheet
+     */
+    omit?: TimesheetOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TimesheetInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model TimesheetEntry
+   */
+
+  export type AggregateTimesheetEntry = {
+    _count: TimesheetEntryCountAggregateOutputType | null
+    _min: TimesheetEntryMinAggregateOutputType | null
+    _max: TimesheetEntryMaxAggregateOutputType | null
+  }
+
+  export type TimesheetEntryMinAggregateOutputType = {
+    id: string | null
+    timesheetId: string | null
+    action: $Enums.TimesheetEntryAction | null
+    timestamp: Date | null
+  }
+
+  export type TimesheetEntryMaxAggregateOutputType = {
+    id: string | null
+    timesheetId: string | null
+    action: $Enums.TimesheetEntryAction | null
+    timestamp: Date | null
+  }
+
+  export type TimesheetEntryCountAggregateOutputType = {
+    id: number
+    timesheetId: number
+    action: number
+    timestamp: number
+    _all: number
+  }
+
+
+  export type TimesheetEntryMinAggregateInputType = {
+    id?: true
+    timesheetId?: true
+    action?: true
+    timestamp?: true
+  }
+
+  export type TimesheetEntryMaxAggregateInputType = {
+    id?: true
+    timesheetId?: true
+    action?: true
+    timestamp?: true
+  }
+
+  export type TimesheetEntryCountAggregateInputType = {
+    id?: true
+    timesheetId?: true
+    action?: true
+    timestamp?: true
+    _all?: true
+  }
+
+  export type TimesheetEntryAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which TimesheetEntry to aggregate.
+     */
+    where?: TimesheetEntryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TimesheetEntries to fetch.
+     */
+    orderBy?: TimesheetEntryOrderByWithRelationInput | TimesheetEntryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: TimesheetEntryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TimesheetEntries from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TimesheetEntries.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned TimesheetEntries
+    **/
+    _count?: true | TimesheetEntryCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: TimesheetEntryMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: TimesheetEntryMaxAggregateInputType
+  }
+
+  export type GetTimesheetEntryAggregateType<T extends TimesheetEntryAggregateArgs> = {
+        [P in keyof T & keyof AggregateTimesheetEntry]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateTimesheetEntry[P]>
+      : GetScalarType<T[P], AggregateTimesheetEntry[P]>
+  }
+
+
+
+
+  export type TimesheetEntryGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TimesheetEntryWhereInput
+    orderBy?: TimesheetEntryOrderByWithAggregationInput | TimesheetEntryOrderByWithAggregationInput[]
+    by: TimesheetEntryScalarFieldEnum[] | TimesheetEntryScalarFieldEnum
+    having?: TimesheetEntryScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: TimesheetEntryCountAggregateInputType | true
+    _min?: TimesheetEntryMinAggregateInputType
+    _max?: TimesheetEntryMaxAggregateInputType
+  }
+
+  export type TimesheetEntryGroupByOutputType = {
+    id: string
+    timesheetId: string
+    action: $Enums.TimesheetEntryAction
+    timestamp: Date
+    _count: TimesheetEntryCountAggregateOutputType | null
+    _min: TimesheetEntryMinAggregateOutputType | null
+    _max: TimesheetEntryMaxAggregateOutputType | null
+  }
+
+  type GetTimesheetEntryGroupByPayload<T extends TimesheetEntryGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<TimesheetEntryGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof TimesheetEntryGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], TimesheetEntryGroupByOutputType[P]>
+            : GetScalarType<T[P], TimesheetEntryGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type TimesheetEntrySelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    timesheetId?: boolean
+    action?: boolean
+    timestamp?: boolean
+    timesheet?: boolean | TimesheetDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["timesheetEntry"]>
+
+  export type TimesheetEntrySelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    timesheetId?: boolean
+    action?: boolean
+    timestamp?: boolean
+    timesheet?: boolean | TimesheetDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["timesheetEntry"]>
+
+  export type TimesheetEntrySelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    timesheetId?: boolean
+    action?: boolean
+    timestamp?: boolean
+    timesheet?: boolean | TimesheetDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["timesheetEntry"]>
+
+  export type TimesheetEntrySelectScalar = {
+    id?: boolean
+    timesheetId?: boolean
+    action?: boolean
+    timestamp?: boolean
+  }
+
+  export type TimesheetEntryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "timesheetId" | "action" | "timestamp", ExtArgs["result"]["timesheetEntry"]>
+  export type TimesheetEntryInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    timesheet?: boolean | TimesheetDefaultArgs<ExtArgs>
+  }
+  export type TimesheetEntryIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    timesheet?: boolean | TimesheetDefaultArgs<ExtArgs>
+  }
+  export type TimesheetEntryIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    timesheet?: boolean | TimesheetDefaultArgs<ExtArgs>
+  }
+
+  export type $TimesheetEntryPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "TimesheetEntry"
+    objects: {
+      timesheet: Prisma.$TimesheetPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      timesheetId: string
+      action: $Enums.TimesheetEntryAction
+      timestamp: Date
+    }, ExtArgs["result"]["timesheetEntry"]>
+    composites: {}
+  }
+
+  type TimesheetEntryGetPayload<S extends boolean | null | undefined | TimesheetEntryDefaultArgs> = $Result.GetResult<Prisma.$TimesheetEntryPayload, S>
+
+  type TimesheetEntryCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<TimesheetEntryFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: TimesheetEntryCountAggregateInputType | true
+    }
+
+  export interface TimesheetEntryDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['TimesheetEntry'], meta: { name: 'TimesheetEntry' } }
+    /**
+     * Find zero or one TimesheetEntry that matches the filter.
+     * @param {TimesheetEntryFindUniqueArgs} args - Arguments to find a TimesheetEntry
+     * @example
+     * // Get one TimesheetEntry
+     * const timesheetEntry = await prisma.timesheetEntry.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends TimesheetEntryFindUniqueArgs>(args: SelectSubset<T, TimesheetEntryFindUniqueArgs<ExtArgs>>): Prisma__TimesheetEntryClient<$Result.GetResult<Prisma.$TimesheetEntryPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one TimesheetEntry that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {TimesheetEntryFindUniqueOrThrowArgs} args - Arguments to find a TimesheetEntry
+     * @example
+     * // Get one TimesheetEntry
+     * const timesheetEntry = await prisma.timesheetEntry.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends TimesheetEntryFindUniqueOrThrowArgs>(args: SelectSubset<T, TimesheetEntryFindUniqueOrThrowArgs<ExtArgs>>): Prisma__TimesheetEntryClient<$Result.GetResult<Prisma.$TimesheetEntryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first TimesheetEntry that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TimesheetEntryFindFirstArgs} args - Arguments to find a TimesheetEntry
+     * @example
+     * // Get one TimesheetEntry
+     * const timesheetEntry = await prisma.timesheetEntry.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends TimesheetEntryFindFirstArgs>(args?: SelectSubset<T, TimesheetEntryFindFirstArgs<ExtArgs>>): Prisma__TimesheetEntryClient<$Result.GetResult<Prisma.$TimesheetEntryPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first TimesheetEntry that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TimesheetEntryFindFirstOrThrowArgs} args - Arguments to find a TimesheetEntry
+     * @example
+     * // Get one TimesheetEntry
+     * const timesheetEntry = await prisma.timesheetEntry.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends TimesheetEntryFindFirstOrThrowArgs>(args?: SelectSubset<T, TimesheetEntryFindFirstOrThrowArgs<ExtArgs>>): Prisma__TimesheetEntryClient<$Result.GetResult<Prisma.$TimesheetEntryPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more TimesheetEntries that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TimesheetEntryFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all TimesheetEntries
+     * const timesheetEntries = await prisma.timesheetEntry.findMany()
+     * 
+     * // Get first 10 TimesheetEntries
+     * const timesheetEntries = await prisma.timesheetEntry.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const timesheetEntryWithIdOnly = await prisma.timesheetEntry.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends TimesheetEntryFindManyArgs>(args?: SelectSubset<T, TimesheetEntryFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TimesheetEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a TimesheetEntry.
+     * @param {TimesheetEntryCreateArgs} args - Arguments to create a TimesheetEntry.
+     * @example
+     * // Create one TimesheetEntry
+     * const TimesheetEntry = await prisma.timesheetEntry.create({
+     *   data: {
+     *     // ... data to create a TimesheetEntry
+     *   }
+     * })
+     * 
+     */
+    create<T extends TimesheetEntryCreateArgs>(args: SelectSubset<T, TimesheetEntryCreateArgs<ExtArgs>>): Prisma__TimesheetEntryClient<$Result.GetResult<Prisma.$TimesheetEntryPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many TimesheetEntries.
+     * @param {TimesheetEntryCreateManyArgs} args - Arguments to create many TimesheetEntries.
+     * @example
+     * // Create many TimesheetEntries
+     * const timesheetEntry = await prisma.timesheetEntry.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends TimesheetEntryCreateManyArgs>(args?: SelectSubset<T, TimesheetEntryCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many TimesheetEntries and returns the data saved in the database.
+     * @param {TimesheetEntryCreateManyAndReturnArgs} args - Arguments to create many TimesheetEntries.
+     * @example
+     * // Create many TimesheetEntries
+     * const timesheetEntry = await prisma.timesheetEntry.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many TimesheetEntries and only return the `id`
+     * const timesheetEntryWithIdOnly = await prisma.timesheetEntry.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends TimesheetEntryCreateManyAndReturnArgs>(args?: SelectSubset<T, TimesheetEntryCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TimesheetEntryPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a TimesheetEntry.
+     * @param {TimesheetEntryDeleteArgs} args - Arguments to delete one TimesheetEntry.
+     * @example
+     * // Delete one TimesheetEntry
+     * const TimesheetEntry = await prisma.timesheetEntry.delete({
+     *   where: {
+     *     // ... filter to delete one TimesheetEntry
+     *   }
+     * })
+     * 
+     */
+    delete<T extends TimesheetEntryDeleteArgs>(args: SelectSubset<T, TimesheetEntryDeleteArgs<ExtArgs>>): Prisma__TimesheetEntryClient<$Result.GetResult<Prisma.$TimesheetEntryPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one TimesheetEntry.
+     * @param {TimesheetEntryUpdateArgs} args - Arguments to update one TimesheetEntry.
+     * @example
+     * // Update one TimesheetEntry
+     * const timesheetEntry = await prisma.timesheetEntry.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends TimesheetEntryUpdateArgs>(args: SelectSubset<T, TimesheetEntryUpdateArgs<ExtArgs>>): Prisma__TimesheetEntryClient<$Result.GetResult<Prisma.$TimesheetEntryPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more TimesheetEntries.
+     * @param {TimesheetEntryDeleteManyArgs} args - Arguments to filter TimesheetEntries to delete.
+     * @example
+     * // Delete a few TimesheetEntries
+     * const { count } = await prisma.timesheetEntry.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends TimesheetEntryDeleteManyArgs>(args?: SelectSubset<T, TimesheetEntryDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more TimesheetEntries.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TimesheetEntryUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many TimesheetEntries
+     * const timesheetEntry = await prisma.timesheetEntry.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends TimesheetEntryUpdateManyArgs>(args: SelectSubset<T, TimesheetEntryUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more TimesheetEntries and returns the data updated in the database.
+     * @param {TimesheetEntryUpdateManyAndReturnArgs} args - Arguments to update many TimesheetEntries.
+     * @example
+     * // Update many TimesheetEntries
+     * const timesheetEntry = await prisma.timesheetEntry.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more TimesheetEntries and only return the `id`
+     * const timesheetEntryWithIdOnly = await prisma.timesheetEntry.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends TimesheetEntryUpdateManyAndReturnArgs>(args: SelectSubset<T, TimesheetEntryUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TimesheetEntryPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one TimesheetEntry.
+     * @param {TimesheetEntryUpsertArgs} args - Arguments to update or create a TimesheetEntry.
+     * @example
+     * // Update or create a TimesheetEntry
+     * const timesheetEntry = await prisma.timesheetEntry.upsert({
+     *   create: {
+     *     // ... data to create a TimesheetEntry
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the TimesheetEntry we want to update
+     *   }
+     * })
+     */
+    upsert<T extends TimesheetEntryUpsertArgs>(args: SelectSubset<T, TimesheetEntryUpsertArgs<ExtArgs>>): Prisma__TimesheetEntryClient<$Result.GetResult<Prisma.$TimesheetEntryPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of TimesheetEntries.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TimesheetEntryCountArgs} args - Arguments to filter TimesheetEntries to count.
+     * @example
+     * // Count the number of TimesheetEntries
+     * const count = await prisma.timesheetEntry.count({
+     *   where: {
+     *     // ... the filter for the TimesheetEntries we want to count
+     *   }
+     * })
+    **/
+    count<T extends TimesheetEntryCountArgs>(
+      args?: Subset<T, TimesheetEntryCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], TimesheetEntryCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a TimesheetEntry.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TimesheetEntryAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends TimesheetEntryAggregateArgs>(args: Subset<T, TimesheetEntryAggregateArgs>): Prisma.PrismaPromise<GetTimesheetEntryAggregateType<T>>
+
+    /**
+     * Group by TimesheetEntry.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TimesheetEntryGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends TimesheetEntryGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: TimesheetEntryGroupByArgs['orderBy'] }
+        : { orderBy?: TimesheetEntryGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, TimesheetEntryGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetTimesheetEntryGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the TimesheetEntry model
+   */
+  readonly fields: TimesheetEntryFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for TimesheetEntry.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__TimesheetEntryClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    timesheet<T extends TimesheetDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TimesheetDefaultArgs<ExtArgs>>): Prisma__TimesheetClient<$Result.GetResult<Prisma.$TimesheetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the TimesheetEntry model
+   */
+  interface TimesheetEntryFieldRefs {
+    readonly id: FieldRef<"TimesheetEntry", 'String'>
+    readonly timesheetId: FieldRef<"TimesheetEntry", 'String'>
+    readonly action: FieldRef<"TimesheetEntry", 'TimesheetEntryAction'>
+    readonly timestamp: FieldRef<"TimesheetEntry", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * TimesheetEntry findUnique
+   */
+  export type TimesheetEntryFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TimesheetEntry
+     */
+    select?: TimesheetEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TimesheetEntry
+     */
+    omit?: TimesheetEntryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TimesheetEntryInclude<ExtArgs> | null
+    /**
+     * Filter, which TimesheetEntry to fetch.
+     */
+    where: TimesheetEntryWhereUniqueInput
+  }
+
+  /**
+   * TimesheetEntry findUniqueOrThrow
+   */
+  export type TimesheetEntryFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TimesheetEntry
+     */
+    select?: TimesheetEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TimesheetEntry
+     */
+    omit?: TimesheetEntryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TimesheetEntryInclude<ExtArgs> | null
+    /**
+     * Filter, which TimesheetEntry to fetch.
+     */
+    where: TimesheetEntryWhereUniqueInput
+  }
+
+  /**
+   * TimesheetEntry findFirst
+   */
+  export type TimesheetEntryFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TimesheetEntry
+     */
+    select?: TimesheetEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TimesheetEntry
+     */
+    omit?: TimesheetEntryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TimesheetEntryInclude<ExtArgs> | null
+    /**
+     * Filter, which TimesheetEntry to fetch.
+     */
+    where?: TimesheetEntryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TimesheetEntries to fetch.
+     */
+    orderBy?: TimesheetEntryOrderByWithRelationInput | TimesheetEntryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for TimesheetEntries.
+     */
+    cursor?: TimesheetEntryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TimesheetEntries from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TimesheetEntries.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TimesheetEntries.
+     */
+    distinct?: TimesheetEntryScalarFieldEnum | TimesheetEntryScalarFieldEnum[]
+  }
+
+  /**
+   * TimesheetEntry findFirstOrThrow
+   */
+  export type TimesheetEntryFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TimesheetEntry
+     */
+    select?: TimesheetEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TimesheetEntry
+     */
+    omit?: TimesheetEntryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TimesheetEntryInclude<ExtArgs> | null
+    /**
+     * Filter, which TimesheetEntry to fetch.
+     */
+    where?: TimesheetEntryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TimesheetEntries to fetch.
+     */
+    orderBy?: TimesheetEntryOrderByWithRelationInput | TimesheetEntryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for TimesheetEntries.
+     */
+    cursor?: TimesheetEntryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TimesheetEntries from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TimesheetEntries.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TimesheetEntries.
+     */
+    distinct?: TimesheetEntryScalarFieldEnum | TimesheetEntryScalarFieldEnum[]
+  }
+
+  /**
+   * TimesheetEntry findMany
+   */
+  export type TimesheetEntryFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TimesheetEntry
+     */
+    select?: TimesheetEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TimesheetEntry
+     */
+    omit?: TimesheetEntryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TimesheetEntryInclude<ExtArgs> | null
+    /**
+     * Filter, which TimesheetEntries to fetch.
+     */
+    where?: TimesheetEntryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TimesheetEntries to fetch.
+     */
+    orderBy?: TimesheetEntryOrderByWithRelationInput | TimesheetEntryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing TimesheetEntries.
+     */
+    cursor?: TimesheetEntryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TimesheetEntries from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TimesheetEntries.
+     */
+    skip?: number
+    distinct?: TimesheetEntryScalarFieldEnum | TimesheetEntryScalarFieldEnum[]
+  }
+
+  /**
+   * TimesheetEntry create
+   */
+  export type TimesheetEntryCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TimesheetEntry
+     */
+    select?: TimesheetEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TimesheetEntry
+     */
+    omit?: TimesheetEntryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TimesheetEntryInclude<ExtArgs> | null
+    /**
+     * The data needed to create a TimesheetEntry.
+     */
+    data: XOR<TimesheetEntryCreateInput, TimesheetEntryUncheckedCreateInput>
+  }
+
+  /**
+   * TimesheetEntry createMany
+   */
+  export type TimesheetEntryCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many TimesheetEntries.
+     */
+    data: TimesheetEntryCreateManyInput | TimesheetEntryCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * TimesheetEntry createManyAndReturn
+   */
+  export type TimesheetEntryCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TimesheetEntry
+     */
+    select?: TimesheetEntrySelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the TimesheetEntry
+     */
+    omit?: TimesheetEntryOmit<ExtArgs> | null
+    /**
+     * The data used to create many TimesheetEntries.
+     */
+    data: TimesheetEntryCreateManyInput | TimesheetEntryCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TimesheetEntryIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * TimesheetEntry update
+   */
+  export type TimesheetEntryUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TimesheetEntry
+     */
+    select?: TimesheetEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TimesheetEntry
+     */
+    omit?: TimesheetEntryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TimesheetEntryInclude<ExtArgs> | null
+    /**
+     * The data needed to update a TimesheetEntry.
+     */
+    data: XOR<TimesheetEntryUpdateInput, TimesheetEntryUncheckedUpdateInput>
+    /**
+     * Choose, which TimesheetEntry to update.
+     */
+    where: TimesheetEntryWhereUniqueInput
+  }
+
+  /**
+   * TimesheetEntry updateMany
+   */
+  export type TimesheetEntryUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update TimesheetEntries.
+     */
+    data: XOR<TimesheetEntryUpdateManyMutationInput, TimesheetEntryUncheckedUpdateManyInput>
+    /**
+     * Filter which TimesheetEntries to update
+     */
+    where?: TimesheetEntryWhereInput
+    /**
+     * Limit how many TimesheetEntries to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * TimesheetEntry updateManyAndReturn
+   */
+  export type TimesheetEntryUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TimesheetEntry
+     */
+    select?: TimesheetEntrySelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the TimesheetEntry
+     */
+    omit?: TimesheetEntryOmit<ExtArgs> | null
+    /**
+     * The data used to update TimesheetEntries.
+     */
+    data: XOR<TimesheetEntryUpdateManyMutationInput, TimesheetEntryUncheckedUpdateManyInput>
+    /**
+     * Filter which TimesheetEntries to update
+     */
+    where?: TimesheetEntryWhereInput
+    /**
+     * Limit how many TimesheetEntries to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TimesheetEntryIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * TimesheetEntry upsert
+   */
+  export type TimesheetEntryUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TimesheetEntry
+     */
+    select?: TimesheetEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TimesheetEntry
+     */
+    omit?: TimesheetEntryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TimesheetEntryInclude<ExtArgs> | null
+    /**
+     * The filter to search for the TimesheetEntry to update in case it exists.
+     */
+    where: TimesheetEntryWhereUniqueInput
+    /**
+     * In case the TimesheetEntry found by the `where` argument doesn't exist, create a new TimesheetEntry with this data.
+     */
+    create: XOR<TimesheetEntryCreateInput, TimesheetEntryUncheckedCreateInput>
+    /**
+     * In case the TimesheetEntry was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<TimesheetEntryUpdateInput, TimesheetEntryUncheckedUpdateInput>
+  }
+
+  /**
+   * TimesheetEntry delete
+   */
+  export type TimesheetEntryDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TimesheetEntry
+     */
+    select?: TimesheetEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TimesheetEntry
+     */
+    omit?: TimesheetEntryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TimesheetEntryInclude<ExtArgs> | null
+    /**
+     * Filter which TimesheetEntry to delete.
+     */
+    where: TimesheetEntryWhereUniqueInput
+  }
+
+  /**
+   * TimesheetEntry deleteMany
+   */
+  export type TimesheetEntryDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which TimesheetEntries to delete
+     */
+    where?: TimesheetEntryWhereInput
+    /**
+     * Limit how many TimesheetEntries to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * TimesheetEntry without action
+   */
+  export type TimesheetEntryDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TimesheetEntry
+     */
+    select?: TimesheetEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TimesheetEntry
+     */
+    omit?: TimesheetEntryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TimesheetEntryInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -7000,6 +9455,28 @@ export namespace Prisma {
   export type DocumentScalarFieldEnum = (typeof DocumentScalarFieldEnum)[keyof typeof DocumentScalarFieldEnum]
 
 
+  export const TimesheetScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    totalHours: 'totalHours',
+    status: 'status',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type TimesheetScalarFieldEnum = (typeof TimesheetScalarFieldEnum)[keyof typeof TimesheetScalarFieldEnum]
+
+
+  export const TimesheetEntryScalarFieldEnum: {
+    id: 'id',
+    timesheetId: 'timesheetId',
+    action: 'action',
+    timestamp: 'timestamp'
+  };
+
+  export type TimesheetEntryScalarFieldEnum = (typeof TimesheetEntryScalarFieldEnum)[keyof typeof TimesheetEntryScalarFieldEnum]
+
+
   export const SortOrder: {
     asc: 'asc',
     desc: 'desc'
@@ -7072,6 +9549,48 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'Float'
+   */
+  export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
+    
+
+
+  /**
+   * Reference to a field of type 'Float[]'
+   */
+  export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'TimesheetStatus'
+   */
+  export type EnumTimesheetStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TimesheetStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'TimesheetStatus[]'
+   */
+  export type ListEnumTimesheetStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TimesheetStatus[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'TimesheetEntryAction'
+   */
+  export type EnumTimesheetEntryActionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TimesheetEntryAction'>
+    
+
+
+  /**
+   * Reference to a field of type 'TimesheetEntryAction[]'
+   */
+  export type ListEnumTimesheetEntryActionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TimesheetEntryAction[]'>
+    
+
+
+  /**
    * Reference to a field of type 'Int'
    */
   export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
@@ -7108,6 +9627,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     sessions?: SessionListRelationFilter
+    timesheets?: TimesheetListRelationFilter
     tenants?: TenantsOnUsersListRelationFilter
   }
 
@@ -7128,6 +9648,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     sessions?: SessionOrderByRelationAggregateInput
+    timesheets?: TimesheetOrderByRelationAggregateInput
     tenants?: TenantsOnUsersOrderByRelationAggregateInput
   }
 
@@ -7151,6 +9672,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     sessions?: SessionListRelationFilter
+    timesheets?: TimesheetListRelationFilter
     tenants?: TenantsOnUsersListRelationFilter
   }, "id" | "username" | "email">
 
@@ -7453,6 +9975,121 @@ export namespace Prisma {
     uploadedAt?: DateTimeWithAggregatesFilter<"Document"> | Date | string
   }
 
+  export type TimesheetWhereInput = {
+    AND?: TimesheetWhereInput | TimesheetWhereInput[]
+    OR?: TimesheetWhereInput[]
+    NOT?: TimesheetWhereInput | TimesheetWhereInput[]
+    id?: StringFilter<"Timesheet"> | string
+    userId?: StringFilter<"Timesheet"> | string
+    totalHours?: FloatFilter<"Timesheet"> | number
+    status?: EnumTimesheetStatusFilter<"Timesheet"> | $Enums.TimesheetStatus
+    createdAt?: DateTimeFilter<"Timesheet"> | Date | string
+    updatedAt?: DateTimeFilter<"Timesheet"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    entries?: TimesheetEntryListRelationFilter
+  }
+
+  export type TimesheetOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    totalHours?: SortOrder
+    status?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    user?: UserOrderByWithRelationInput
+    entries?: TimesheetEntryOrderByRelationAggregateInput
+  }
+
+  export type TimesheetWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: TimesheetWhereInput | TimesheetWhereInput[]
+    OR?: TimesheetWhereInput[]
+    NOT?: TimesheetWhereInput | TimesheetWhereInput[]
+    userId?: StringFilter<"Timesheet"> | string
+    totalHours?: FloatFilter<"Timesheet"> | number
+    status?: EnumTimesheetStatusFilter<"Timesheet"> | $Enums.TimesheetStatus
+    createdAt?: DateTimeFilter<"Timesheet"> | Date | string
+    updatedAt?: DateTimeFilter<"Timesheet"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    entries?: TimesheetEntryListRelationFilter
+  }, "id">
+
+  export type TimesheetOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    totalHours?: SortOrder
+    status?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: TimesheetCountOrderByAggregateInput
+    _avg?: TimesheetAvgOrderByAggregateInput
+    _max?: TimesheetMaxOrderByAggregateInput
+    _min?: TimesheetMinOrderByAggregateInput
+    _sum?: TimesheetSumOrderByAggregateInput
+  }
+
+  export type TimesheetScalarWhereWithAggregatesInput = {
+    AND?: TimesheetScalarWhereWithAggregatesInput | TimesheetScalarWhereWithAggregatesInput[]
+    OR?: TimesheetScalarWhereWithAggregatesInput[]
+    NOT?: TimesheetScalarWhereWithAggregatesInput | TimesheetScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Timesheet"> | string
+    userId?: StringWithAggregatesFilter<"Timesheet"> | string
+    totalHours?: FloatWithAggregatesFilter<"Timesheet"> | number
+    status?: EnumTimesheetStatusWithAggregatesFilter<"Timesheet"> | $Enums.TimesheetStatus
+    createdAt?: DateTimeWithAggregatesFilter<"Timesheet"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Timesheet"> | Date | string
+  }
+
+  export type TimesheetEntryWhereInput = {
+    AND?: TimesheetEntryWhereInput | TimesheetEntryWhereInput[]
+    OR?: TimesheetEntryWhereInput[]
+    NOT?: TimesheetEntryWhereInput | TimesheetEntryWhereInput[]
+    id?: StringFilter<"TimesheetEntry"> | string
+    timesheetId?: StringFilter<"TimesheetEntry"> | string
+    action?: EnumTimesheetEntryActionFilter<"TimesheetEntry"> | $Enums.TimesheetEntryAction
+    timestamp?: DateTimeFilter<"TimesheetEntry"> | Date | string
+    timesheet?: XOR<TimesheetScalarRelationFilter, TimesheetWhereInput>
+  }
+
+  export type TimesheetEntryOrderByWithRelationInput = {
+    id?: SortOrder
+    timesheetId?: SortOrder
+    action?: SortOrder
+    timestamp?: SortOrder
+    timesheet?: TimesheetOrderByWithRelationInput
+  }
+
+  export type TimesheetEntryWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: TimesheetEntryWhereInput | TimesheetEntryWhereInput[]
+    OR?: TimesheetEntryWhereInput[]
+    NOT?: TimesheetEntryWhereInput | TimesheetEntryWhereInput[]
+    timesheetId?: StringFilter<"TimesheetEntry"> | string
+    action?: EnumTimesheetEntryActionFilter<"TimesheetEntry"> | $Enums.TimesheetEntryAction
+    timestamp?: DateTimeFilter<"TimesheetEntry"> | Date | string
+    timesheet?: XOR<TimesheetScalarRelationFilter, TimesheetWhereInput>
+  }, "id">
+
+  export type TimesheetEntryOrderByWithAggregationInput = {
+    id?: SortOrder
+    timesheetId?: SortOrder
+    action?: SortOrder
+    timestamp?: SortOrder
+    _count?: TimesheetEntryCountOrderByAggregateInput
+    _max?: TimesheetEntryMaxOrderByAggregateInput
+    _min?: TimesheetEntryMinOrderByAggregateInput
+  }
+
+  export type TimesheetEntryScalarWhereWithAggregatesInput = {
+    AND?: TimesheetEntryScalarWhereWithAggregatesInput | TimesheetEntryScalarWhereWithAggregatesInput[]
+    OR?: TimesheetEntryScalarWhereWithAggregatesInput[]
+    NOT?: TimesheetEntryScalarWhereWithAggregatesInput | TimesheetEntryScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"TimesheetEntry"> | string
+    timesheetId?: StringWithAggregatesFilter<"TimesheetEntry"> | string
+    action?: EnumTimesheetEntryActionWithAggregatesFilter<"TimesheetEntry"> | $Enums.TimesheetEntryAction
+    timestamp?: DateTimeWithAggregatesFilter<"TimesheetEntry"> | Date | string
+  }
+
   export type UserCreateInput = {
     id?: string
     username: string
@@ -7470,6 +10107,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     sessions?: SessionCreateNestedManyWithoutUserInput
+    timesheets?: TimesheetCreateNestedManyWithoutUserInput
     tenants?: TenantsOnUsersCreateNestedManyWithoutUserInput
   }
 
@@ -7490,6 +10128,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
+    timesheets?: TimesheetUncheckedCreateNestedManyWithoutUserInput
     tenants?: TenantsOnUsersUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -7510,6 +10149,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     sessions?: SessionUpdateManyWithoutUserNestedInput
+    timesheets?: TimesheetUpdateManyWithoutUserNestedInput
     tenants?: TenantsOnUsersUpdateManyWithoutUserNestedInput
   }
 
@@ -7530,6 +10170,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
+    timesheets?: TimesheetUncheckedUpdateManyWithoutUserNestedInput
     tenants?: TenantsOnUsersUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -7858,6 +10499,120 @@ export namespace Prisma {
     uploadedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type TimesheetCreateInput = {
+    id?: string
+    totalHours?: number
+    status?: $Enums.TimesheetStatus
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutTimesheetsInput
+    entries?: TimesheetEntryCreateNestedManyWithoutTimesheetInput
+  }
+
+  export type TimesheetUncheckedCreateInput = {
+    id?: string
+    userId: string
+    totalHours?: number
+    status?: $Enums.TimesheetStatus
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    entries?: TimesheetEntryUncheckedCreateNestedManyWithoutTimesheetInput
+  }
+
+  export type TimesheetUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    totalHours?: FloatFieldUpdateOperationsInput | number
+    status?: EnumTimesheetStatusFieldUpdateOperationsInput | $Enums.TimesheetStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutTimesheetsNestedInput
+    entries?: TimesheetEntryUpdateManyWithoutTimesheetNestedInput
+  }
+
+  export type TimesheetUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    totalHours?: FloatFieldUpdateOperationsInput | number
+    status?: EnumTimesheetStatusFieldUpdateOperationsInput | $Enums.TimesheetStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    entries?: TimesheetEntryUncheckedUpdateManyWithoutTimesheetNestedInput
+  }
+
+  export type TimesheetCreateManyInput = {
+    id?: string
+    userId: string
+    totalHours?: number
+    status?: $Enums.TimesheetStatus
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TimesheetUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    totalHours?: FloatFieldUpdateOperationsInput | number
+    status?: EnumTimesheetStatusFieldUpdateOperationsInput | $Enums.TimesheetStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TimesheetUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    totalHours?: FloatFieldUpdateOperationsInput | number
+    status?: EnumTimesheetStatusFieldUpdateOperationsInput | $Enums.TimesheetStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TimesheetEntryCreateInput = {
+    id?: string
+    action: $Enums.TimesheetEntryAction
+    timestamp?: Date | string
+    timesheet: TimesheetCreateNestedOneWithoutEntriesInput
+  }
+
+  export type TimesheetEntryUncheckedCreateInput = {
+    id?: string
+    timesheetId: string
+    action: $Enums.TimesheetEntryAction
+    timestamp?: Date | string
+  }
+
+  export type TimesheetEntryUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    action?: EnumTimesheetEntryActionFieldUpdateOperationsInput | $Enums.TimesheetEntryAction
+    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
+    timesheet?: TimesheetUpdateOneRequiredWithoutEntriesNestedInput
+  }
+
+  export type TimesheetEntryUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    timesheetId?: StringFieldUpdateOperationsInput | string
+    action?: EnumTimesheetEntryActionFieldUpdateOperationsInput | $Enums.TimesheetEntryAction
+    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TimesheetEntryCreateManyInput = {
+    id?: string
+    timesheetId: string
+    action: $Enums.TimesheetEntryAction
+    timestamp?: Date | string
+  }
+
+  export type TimesheetEntryUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    action?: EnumTimesheetEntryActionFieldUpdateOperationsInput | $Enums.TimesheetEntryAction
+    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TimesheetEntryUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    timesheetId?: StringFieldUpdateOperationsInput | string
+    action?: EnumTimesheetEntryActionFieldUpdateOperationsInput | $Enums.TimesheetEntryAction
+    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type StringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -7923,6 +10678,12 @@ export namespace Prisma {
     none?: SessionWhereInput
   }
 
+  export type TimesheetListRelationFilter = {
+    every?: TimesheetWhereInput
+    some?: TimesheetWhereInput
+    none?: TimesheetWhereInput
+  }
+
   export type TenantsOnUsersListRelationFilter = {
     every?: TenantsOnUsersWhereInput
     some?: TenantsOnUsersWhereInput
@@ -7935,6 +10696,10 @@ export namespace Prisma {
   }
 
   export type SessionOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type TimesheetOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -8209,11 +10974,150 @@ export namespace Prisma {
     uploadedAt?: SortOrder
   }
 
+  export type FloatFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatFilter<$PrismaModel> | number
+  }
+
+  export type EnumTimesheetStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.TimesheetStatus | EnumTimesheetStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.TimesheetStatus[] | ListEnumTimesheetStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TimesheetStatus[] | ListEnumTimesheetStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumTimesheetStatusFilter<$PrismaModel> | $Enums.TimesheetStatus
+  }
+
+  export type TimesheetEntryListRelationFilter = {
+    every?: TimesheetEntryWhereInput
+    some?: TimesheetEntryWhereInput
+    none?: TimesheetEntryWhereInput
+  }
+
+  export type TimesheetEntryOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type TimesheetCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    totalHours?: SortOrder
+    status?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TimesheetAvgOrderByAggregateInput = {
+    totalHours?: SortOrder
+  }
+
+  export type TimesheetMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    totalHours?: SortOrder
+    status?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TimesheetMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    totalHours?: SortOrder
+    status?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TimesheetSumOrderByAggregateInput = {
+    totalHours?: SortOrder
+  }
+
+  export type FloatWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedFloatFilter<$PrismaModel>
+    _min?: NestedFloatFilter<$PrismaModel>
+    _max?: NestedFloatFilter<$PrismaModel>
+  }
+
+  export type EnumTimesheetStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.TimesheetStatus | EnumTimesheetStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.TimesheetStatus[] | ListEnumTimesheetStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TimesheetStatus[] | ListEnumTimesheetStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumTimesheetStatusWithAggregatesFilter<$PrismaModel> | $Enums.TimesheetStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumTimesheetStatusFilter<$PrismaModel>
+    _max?: NestedEnumTimesheetStatusFilter<$PrismaModel>
+  }
+
+  export type EnumTimesheetEntryActionFilter<$PrismaModel = never> = {
+    equals?: $Enums.TimesheetEntryAction | EnumTimesheetEntryActionFieldRefInput<$PrismaModel>
+    in?: $Enums.TimesheetEntryAction[] | ListEnumTimesheetEntryActionFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TimesheetEntryAction[] | ListEnumTimesheetEntryActionFieldRefInput<$PrismaModel>
+    not?: NestedEnumTimesheetEntryActionFilter<$PrismaModel> | $Enums.TimesheetEntryAction
+  }
+
+  export type TimesheetScalarRelationFilter = {
+    is?: TimesheetWhereInput
+    isNot?: TimesheetWhereInput
+  }
+
+  export type TimesheetEntryCountOrderByAggregateInput = {
+    id?: SortOrder
+    timesheetId?: SortOrder
+    action?: SortOrder
+    timestamp?: SortOrder
+  }
+
+  export type TimesheetEntryMaxOrderByAggregateInput = {
+    id?: SortOrder
+    timesheetId?: SortOrder
+    action?: SortOrder
+    timestamp?: SortOrder
+  }
+
+  export type TimesheetEntryMinOrderByAggregateInput = {
+    id?: SortOrder
+    timesheetId?: SortOrder
+    action?: SortOrder
+    timestamp?: SortOrder
+  }
+
+  export type EnumTimesheetEntryActionWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.TimesheetEntryAction | EnumTimesheetEntryActionFieldRefInput<$PrismaModel>
+    in?: $Enums.TimesheetEntryAction[] | ListEnumTimesheetEntryActionFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TimesheetEntryAction[] | ListEnumTimesheetEntryActionFieldRefInput<$PrismaModel>
+    not?: NestedEnumTimesheetEntryActionWithAggregatesFilter<$PrismaModel> | $Enums.TimesheetEntryAction
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumTimesheetEntryActionFilter<$PrismaModel>
+    _max?: NestedEnumTimesheetEntryActionFilter<$PrismaModel>
+  }
+
   export type SessionCreateNestedManyWithoutUserInput = {
     create?: XOR<SessionCreateWithoutUserInput, SessionUncheckedCreateWithoutUserInput> | SessionCreateWithoutUserInput[] | SessionUncheckedCreateWithoutUserInput[]
     connectOrCreate?: SessionCreateOrConnectWithoutUserInput | SessionCreateOrConnectWithoutUserInput[]
     createMany?: SessionCreateManyUserInputEnvelope
     connect?: SessionWhereUniqueInput | SessionWhereUniqueInput[]
+  }
+
+  export type TimesheetCreateNestedManyWithoutUserInput = {
+    create?: XOR<TimesheetCreateWithoutUserInput, TimesheetUncheckedCreateWithoutUserInput> | TimesheetCreateWithoutUserInput[] | TimesheetUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: TimesheetCreateOrConnectWithoutUserInput | TimesheetCreateOrConnectWithoutUserInput[]
+    createMany?: TimesheetCreateManyUserInputEnvelope
+    connect?: TimesheetWhereUniqueInput | TimesheetWhereUniqueInput[]
   }
 
   export type TenantsOnUsersCreateNestedManyWithoutUserInput = {
@@ -8228,6 +11132,13 @@ export namespace Prisma {
     connectOrCreate?: SessionCreateOrConnectWithoutUserInput | SessionCreateOrConnectWithoutUserInput[]
     createMany?: SessionCreateManyUserInputEnvelope
     connect?: SessionWhereUniqueInput | SessionWhereUniqueInput[]
+  }
+
+  export type TimesheetUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<TimesheetCreateWithoutUserInput, TimesheetUncheckedCreateWithoutUserInput> | TimesheetCreateWithoutUserInput[] | TimesheetUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: TimesheetCreateOrConnectWithoutUserInput | TimesheetCreateOrConnectWithoutUserInput[]
+    createMany?: TimesheetCreateManyUserInputEnvelope
+    connect?: TimesheetWhereUniqueInput | TimesheetWhereUniqueInput[]
   }
 
   export type TenantsOnUsersUncheckedCreateNestedManyWithoutUserInput = {
@@ -8271,6 +11182,20 @@ export namespace Prisma {
     deleteMany?: SessionScalarWhereInput | SessionScalarWhereInput[]
   }
 
+  export type TimesheetUpdateManyWithoutUserNestedInput = {
+    create?: XOR<TimesheetCreateWithoutUserInput, TimesheetUncheckedCreateWithoutUserInput> | TimesheetCreateWithoutUserInput[] | TimesheetUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: TimesheetCreateOrConnectWithoutUserInput | TimesheetCreateOrConnectWithoutUserInput[]
+    upsert?: TimesheetUpsertWithWhereUniqueWithoutUserInput | TimesheetUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: TimesheetCreateManyUserInputEnvelope
+    set?: TimesheetWhereUniqueInput | TimesheetWhereUniqueInput[]
+    disconnect?: TimesheetWhereUniqueInput | TimesheetWhereUniqueInput[]
+    delete?: TimesheetWhereUniqueInput | TimesheetWhereUniqueInput[]
+    connect?: TimesheetWhereUniqueInput | TimesheetWhereUniqueInput[]
+    update?: TimesheetUpdateWithWhereUniqueWithoutUserInput | TimesheetUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: TimesheetUpdateManyWithWhereWithoutUserInput | TimesheetUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: TimesheetScalarWhereInput | TimesheetScalarWhereInput[]
+  }
+
   export type TenantsOnUsersUpdateManyWithoutUserNestedInput = {
     create?: XOR<TenantsOnUsersCreateWithoutUserInput, TenantsOnUsersUncheckedCreateWithoutUserInput> | TenantsOnUsersCreateWithoutUserInput[] | TenantsOnUsersUncheckedCreateWithoutUserInput[]
     connectOrCreate?: TenantsOnUsersCreateOrConnectWithoutUserInput | TenantsOnUsersCreateOrConnectWithoutUserInput[]
@@ -8297,6 +11222,20 @@ export namespace Prisma {
     update?: SessionUpdateWithWhereUniqueWithoutUserInput | SessionUpdateWithWhereUniqueWithoutUserInput[]
     updateMany?: SessionUpdateManyWithWhereWithoutUserInput | SessionUpdateManyWithWhereWithoutUserInput[]
     deleteMany?: SessionScalarWhereInput | SessionScalarWhereInput[]
+  }
+
+  export type TimesheetUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<TimesheetCreateWithoutUserInput, TimesheetUncheckedCreateWithoutUserInput> | TimesheetCreateWithoutUserInput[] | TimesheetUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: TimesheetCreateOrConnectWithoutUserInput | TimesheetCreateOrConnectWithoutUserInput[]
+    upsert?: TimesheetUpsertWithWhereUniqueWithoutUserInput | TimesheetUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: TimesheetCreateManyUserInputEnvelope
+    set?: TimesheetWhereUniqueInput | TimesheetWhereUniqueInput[]
+    disconnect?: TimesheetWhereUniqueInput | TimesheetWhereUniqueInput[]
+    delete?: TimesheetWhereUniqueInput | TimesheetWhereUniqueInput[]
+    connect?: TimesheetWhereUniqueInput | TimesheetWhereUniqueInput[]
+    update?: TimesheetUpdateWithWhereUniqueWithoutUserInput | TimesheetUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: TimesheetUpdateManyWithWhereWithoutUserInput | TimesheetUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: TimesheetScalarWhereInput | TimesheetScalarWhereInput[]
   }
 
   export type TenantsOnUsersUncheckedUpdateManyWithoutUserNestedInput = {
@@ -8453,6 +11392,92 @@ export namespace Prisma {
     update?: XOR<XOR<TenantUpdateToOneWithWhereWithoutDocumentsInput, TenantUpdateWithoutDocumentsInput>, TenantUncheckedUpdateWithoutDocumentsInput>
   }
 
+  export type UserCreateNestedOneWithoutTimesheetsInput = {
+    create?: XOR<UserCreateWithoutTimesheetsInput, UserUncheckedCreateWithoutTimesheetsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutTimesheetsInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type TimesheetEntryCreateNestedManyWithoutTimesheetInput = {
+    create?: XOR<TimesheetEntryCreateWithoutTimesheetInput, TimesheetEntryUncheckedCreateWithoutTimesheetInput> | TimesheetEntryCreateWithoutTimesheetInput[] | TimesheetEntryUncheckedCreateWithoutTimesheetInput[]
+    connectOrCreate?: TimesheetEntryCreateOrConnectWithoutTimesheetInput | TimesheetEntryCreateOrConnectWithoutTimesheetInput[]
+    createMany?: TimesheetEntryCreateManyTimesheetInputEnvelope
+    connect?: TimesheetEntryWhereUniqueInput | TimesheetEntryWhereUniqueInput[]
+  }
+
+  export type TimesheetEntryUncheckedCreateNestedManyWithoutTimesheetInput = {
+    create?: XOR<TimesheetEntryCreateWithoutTimesheetInput, TimesheetEntryUncheckedCreateWithoutTimesheetInput> | TimesheetEntryCreateWithoutTimesheetInput[] | TimesheetEntryUncheckedCreateWithoutTimesheetInput[]
+    connectOrCreate?: TimesheetEntryCreateOrConnectWithoutTimesheetInput | TimesheetEntryCreateOrConnectWithoutTimesheetInput[]
+    createMany?: TimesheetEntryCreateManyTimesheetInputEnvelope
+    connect?: TimesheetEntryWhereUniqueInput | TimesheetEntryWhereUniqueInput[]
+  }
+
+  export type FloatFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
+  export type EnumTimesheetStatusFieldUpdateOperationsInput = {
+    set?: $Enums.TimesheetStatus
+  }
+
+  export type UserUpdateOneRequiredWithoutTimesheetsNestedInput = {
+    create?: XOR<UserCreateWithoutTimesheetsInput, UserUncheckedCreateWithoutTimesheetsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutTimesheetsInput
+    upsert?: UserUpsertWithoutTimesheetsInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutTimesheetsInput, UserUpdateWithoutTimesheetsInput>, UserUncheckedUpdateWithoutTimesheetsInput>
+  }
+
+  export type TimesheetEntryUpdateManyWithoutTimesheetNestedInput = {
+    create?: XOR<TimesheetEntryCreateWithoutTimesheetInput, TimesheetEntryUncheckedCreateWithoutTimesheetInput> | TimesheetEntryCreateWithoutTimesheetInput[] | TimesheetEntryUncheckedCreateWithoutTimesheetInput[]
+    connectOrCreate?: TimesheetEntryCreateOrConnectWithoutTimesheetInput | TimesheetEntryCreateOrConnectWithoutTimesheetInput[]
+    upsert?: TimesheetEntryUpsertWithWhereUniqueWithoutTimesheetInput | TimesheetEntryUpsertWithWhereUniqueWithoutTimesheetInput[]
+    createMany?: TimesheetEntryCreateManyTimesheetInputEnvelope
+    set?: TimesheetEntryWhereUniqueInput | TimesheetEntryWhereUniqueInput[]
+    disconnect?: TimesheetEntryWhereUniqueInput | TimesheetEntryWhereUniqueInput[]
+    delete?: TimesheetEntryWhereUniqueInput | TimesheetEntryWhereUniqueInput[]
+    connect?: TimesheetEntryWhereUniqueInput | TimesheetEntryWhereUniqueInput[]
+    update?: TimesheetEntryUpdateWithWhereUniqueWithoutTimesheetInput | TimesheetEntryUpdateWithWhereUniqueWithoutTimesheetInput[]
+    updateMany?: TimesheetEntryUpdateManyWithWhereWithoutTimesheetInput | TimesheetEntryUpdateManyWithWhereWithoutTimesheetInput[]
+    deleteMany?: TimesheetEntryScalarWhereInput | TimesheetEntryScalarWhereInput[]
+  }
+
+  export type TimesheetEntryUncheckedUpdateManyWithoutTimesheetNestedInput = {
+    create?: XOR<TimesheetEntryCreateWithoutTimesheetInput, TimesheetEntryUncheckedCreateWithoutTimesheetInput> | TimesheetEntryCreateWithoutTimesheetInput[] | TimesheetEntryUncheckedCreateWithoutTimesheetInput[]
+    connectOrCreate?: TimesheetEntryCreateOrConnectWithoutTimesheetInput | TimesheetEntryCreateOrConnectWithoutTimesheetInput[]
+    upsert?: TimesheetEntryUpsertWithWhereUniqueWithoutTimesheetInput | TimesheetEntryUpsertWithWhereUniqueWithoutTimesheetInput[]
+    createMany?: TimesheetEntryCreateManyTimesheetInputEnvelope
+    set?: TimesheetEntryWhereUniqueInput | TimesheetEntryWhereUniqueInput[]
+    disconnect?: TimesheetEntryWhereUniqueInput | TimesheetEntryWhereUniqueInput[]
+    delete?: TimesheetEntryWhereUniqueInput | TimesheetEntryWhereUniqueInput[]
+    connect?: TimesheetEntryWhereUniqueInput | TimesheetEntryWhereUniqueInput[]
+    update?: TimesheetEntryUpdateWithWhereUniqueWithoutTimesheetInput | TimesheetEntryUpdateWithWhereUniqueWithoutTimesheetInput[]
+    updateMany?: TimesheetEntryUpdateManyWithWhereWithoutTimesheetInput | TimesheetEntryUpdateManyWithWhereWithoutTimesheetInput[]
+    deleteMany?: TimesheetEntryScalarWhereInput | TimesheetEntryScalarWhereInput[]
+  }
+
+  export type TimesheetCreateNestedOneWithoutEntriesInput = {
+    create?: XOR<TimesheetCreateWithoutEntriesInput, TimesheetUncheckedCreateWithoutEntriesInput>
+    connectOrCreate?: TimesheetCreateOrConnectWithoutEntriesInput
+    connect?: TimesheetWhereUniqueInput
+  }
+
+  export type EnumTimesheetEntryActionFieldUpdateOperationsInput = {
+    set?: $Enums.TimesheetEntryAction
+  }
+
+  export type TimesheetUpdateOneRequiredWithoutEntriesNestedInput = {
+    create?: XOR<TimesheetCreateWithoutEntriesInput, TimesheetUncheckedCreateWithoutEntriesInput>
+    connectOrCreate?: TimesheetCreateOrConnectWithoutEntriesInput
+    upsert?: TimesheetUpsertWithoutEntriesInput
+    connect?: TimesheetWhereUniqueInput
+    update?: XOR<XOR<TimesheetUpdateToOneWithWhereWithoutEntriesInput, TimesheetUpdateWithoutEntriesInput>, TimesheetUncheckedUpdateWithoutEntriesInput>
+  }
+
   export type NestedStringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -8604,6 +11629,67 @@ export namespace Prisma {
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
+  export type NestedFloatFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatFilter<$PrismaModel> | number
+  }
+
+  export type NestedEnumTimesheetStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.TimesheetStatus | EnumTimesheetStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.TimesheetStatus[] | ListEnumTimesheetStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TimesheetStatus[] | ListEnumTimesheetStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumTimesheetStatusFilter<$PrismaModel> | $Enums.TimesheetStatus
+  }
+
+  export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedFloatFilter<$PrismaModel>
+    _min?: NestedFloatFilter<$PrismaModel>
+    _max?: NestedFloatFilter<$PrismaModel>
+  }
+
+  export type NestedEnumTimesheetStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.TimesheetStatus | EnumTimesheetStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.TimesheetStatus[] | ListEnumTimesheetStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TimesheetStatus[] | ListEnumTimesheetStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumTimesheetStatusWithAggregatesFilter<$PrismaModel> | $Enums.TimesheetStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumTimesheetStatusFilter<$PrismaModel>
+    _max?: NestedEnumTimesheetStatusFilter<$PrismaModel>
+  }
+
+  export type NestedEnumTimesheetEntryActionFilter<$PrismaModel = never> = {
+    equals?: $Enums.TimesheetEntryAction | EnumTimesheetEntryActionFieldRefInput<$PrismaModel>
+    in?: $Enums.TimesheetEntryAction[] | ListEnumTimesheetEntryActionFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TimesheetEntryAction[] | ListEnumTimesheetEntryActionFieldRefInput<$PrismaModel>
+    not?: NestedEnumTimesheetEntryActionFilter<$PrismaModel> | $Enums.TimesheetEntryAction
+  }
+
+  export type NestedEnumTimesheetEntryActionWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.TimesheetEntryAction | EnumTimesheetEntryActionFieldRefInput<$PrismaModel>
+    in?: $Enums.TimesheetEntryAction[] | ListEnumTimesheetEntryActionFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TimesheetEntryAction[] | ListEnumTimesheetEntryActionFieldRefInput<$PrismaModel>
+    not?: NestedEnumTimesheetEntryActionWithAggregatesFilter<$PrismaModel> | $Enums.TimesheetEntryAction
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumTimesheetEntryActionFilter<$PrismaModel>
+    _max?: NestedEnumTimesheetEntryActionFilter<$PrismaModel>
+  }
+
   export type SessionCreateWithoutUserInput = {
     id?: string
     refreshTokenHash: string
@@ -8627,6 +11713,34 @@ export namespace Prisma {
 
   export type SessionCreateManyUserInputEnvelope = {
     data: SessionCreateManyUserInput | SessionCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type TimesheetCreateWithoutUserInput = {
+    id?: string
+    totalHours?: number
+    status?: $Enums.TimesheetStatus
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    entries?: TimesheetEntryCreateNestedManyWithoutTimesheetInput
+  }
+
+  export type TimesheetUncheckedCreateWithoutUserInput = {
+    id?: string
+    totalHours?: number
+    status?: $Enums.TimesheetStatus
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    entries?: TimesheetEntryUncheckedCreateNestedManyWithoutTimesheetInput
+  }
+
+  export type TimesheetCreateOrConnectWithoutUserInput = {
+    where: TimesheetWhereUniqueInput
+    create: XOR<TimesheetCreateWithoutUserInput, TimesheetUncheckedCreateWithoutUserInput>
+  }
+
+  export type TimesheetCreateManyUserInputEnvelope = {
+    data: TimesheetCreateManyUserInput | TimesheetCreateManyUserInput[]
     skipDuplicates?: boolean
   }
 
@@ -8674,6 +11788,34 @@ export namespace Prisma {
     expiresAt?: DateTimeFilter<"Session"> | Date | string
     createdAt?: DateTimeFilter<"Session"> | Date | string
     updatedAt?: DateTimeFilter<"Session"> | Date | string
+  }
+
+  export type TimesheetUpsertWithWhereUniqueWithoutUserInput = {
+    where: TimesheetWhereUniqueInput
+    update: XOR<TimesheetUpdateWithoutUserInput, TimesheetUncheckedUpdateWithoutUserInput>
+    create: XOR<TimesheetCreateWithoutUserInput, TimesheetUncheckedCreateWithoutUserInput>
+  }
+
+  export type TimesheetUpdateWithWhereUniqueWithoutUserInput = {
+    where: TimesheetWhereUniqueInput
+    data: XOR<TimesheetUpdateWithoutUserInput, TimesheetUncheckedUpdateWithoutUserInput>
+  }
+
+  export type TimesheetUpdateManyWithWhereWithoutUserInput = {
+    where: TimesheetScalarWhereInput
+    data: XOR<TimesheetUpdateManyMutationInput, TimesheetUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type TimesheetScalarWhereInput = {
+    AND?: TimesheetScalarWhereInput | TimesheetScalarWhereInput[]
+    OR?: TimesheetScalarWhereInput[]
+    NOT?: TimesheetScalarWhereInput | TimesheetScalarWhereInput[]
+    id?: StringFilter<"Timesheet"> | string
+    userId?: StringFilter<"Timesheet"> | string
+    totalHours?: FloatFilter<"Timesheet"> | number
+    status?: EnumTimesheetStatusFilter<"Timesheet"> | $Enums.TimesheetStatus
+    createdAt?: DateTimeFilter<"Timesheet"> | Date | string
+    updatedAt?: DateTimeFilter<"Timesheet"> | Date | string
   }
 
   export type TenantsOnUsersUpsertWithWhereUniqueWithoutUserInput = {
@@ -8802,6 +11944,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     sessions?: SessionCreateNestedManyWithoutUserInput
+    timesheets?: TimesheetCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutTenantsInput = {
@@ -8821,6 +11964,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
+    timesheets?: TimesheetUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutTenantsInput = {
@@ -8895,6 +12039,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     sessions?: SessionUpdateManyWithoutUserNestedInput
+    timesheets?: TimesheetUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutTenantsInput = {
@@ -8914,6 +12059,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
+    timesheets?: TimesheetUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type TenantUpsertWithoutUsersInput = {
@@ -8977,6 +12123,7 @@ export namespace Prisma {
     pagibig?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    timesheets?: TimesheetCreateNestedManyWithoutUserInput
     tenants?: TenantsOnUsersCreateNestedManyWithoutUserInput
   }
 
@@ -8996,6 +12143,7 @@ export namespace Prisma {
     pagibig?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    timesheets?: TimesheetUncheckedCreateNestedManyWithoutUserInput
     tenants?: TenantsOnUsersUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -9031,6 +12179,7 @@ export namespace Prisma {
     pagibig?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    timesheets?: TimesheetUpdateManyWithoutUserNestedInput
     tenants?: TenantsOnUsersUpdateManyWithoutUserNestedInput
   }
 
@@ -9050,6 +12199,7 @@ export namespace Prisma {
     pagibig?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    timesheets?: TimesheetUncheckedUpdateManyWithoutUserNestedInput
     tenants?: TenantsOnUsersUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -9137,10 +12287,214 @@ export namespace Prisma {
     users?: TenantsOnUsersUncheckedUpdateManyWithoutTenantNestedInput
   }
 
+  export type UserCreateWithoutTimesheetsInput = {
+    id?: string
+    username: string
+    email?: string | null
+    name: string
+    password: string
+    role?: $Enums.Role
+    birthday?: Date | string | null
+    contact?: string | null
+    address?: string | null
+    sss?: string | null
+    tin?: string | null
+    philhealth?: string | null
+    pagibig?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    sessions?: SessionCreateNestedManyWithoutUserInput
+    tenants?: TenantsOnUsersCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutTimesheetsInput = {
+    id?: string
+    username: string
+    email?: string | null
+    name: string
+    password: string
+    role?: $Enums.Role
+    birthday?: Date | string | null
+    contact?: string | null
+    address?: string | null
+    sss?: string | null
+    tin?: string | null
+    philhealth?: string | null
+    pagibig?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
+    tenants?: TenantsOnUsersUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutTimesheetsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutTimesheetsInput, UserUncheckedCreateWithoutTimesheetsInput>
+  }
+
+  export type TimesheetEntryCreateWithoutTimesheetInput = {
+    id?: string
+    action: $Enums.TimesheetEntryAction
+    timestamp?: Date | string
+  }
+
+  export type TimesheetEntryUncheckedCreateWithoutTimesheetInput = {
+    id?: string
+    action: $Enums.TimesheetEntryAction
+    timestamp?: Date | string
+  }
+
+  export type TimesheetEntryCreateOrConnectWithoutTimesheetInput = {
+    where: TimesheetEntryWhereUniqueInput
+    create: XOR<TimesheetEntryCreateWithoutTimesheetInput, TimesheetEntryUncheckedCreateWithoutTimesheetInput>
+  }
+
+  export type TimesheetEntryCreateManyTimesheetInputEnvelope = {
+    data: TimesheetEntryCreateManyTimesheetInput | TimesheetEntryCreateManyTimesheetInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type UserUpsertWithoutTimesheetsInput = {
+    update: XOR<UserUpdateWithoutTimesheetsInput, UserUncheckedUpdateWithoutTimesheetsInput>
+    create: XOR<UserCreateWithoutTimesheetsInput, UserUncheckedCreateWithoutTimesheetsInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutTimesheetsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutTimesheetsInput, UserUncheckedUpdateWithoutTimesheetsInput>
+  }
+
+  export type UserUpdateWithoutTimesheetsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    birthday?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    contact?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    sss?: NullableStringFieldUpdateOperationsInput | string | null
+    tin?: NullableStringFieldUpdateOperationsInput | string | null
+    philhealth?: NullableStringFieldUpdateOperationsInput | string | null
+    pagibig?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sessions?: SessionUpdateManyWithoutUserNestedInput
+    tenants?: TenantsOnUsersUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutTimesheetsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    birthday?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    contact?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    sss?: NullableStringFieldUpdateOperationsInput | string | null
+    tin?: NullableStringFieldUpdateOperationsInput | string | null
+    philhealth?: NullableStringFieldUpdateOperationsInput | string | null
+    pagibig?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
+    tenants?: TenantsOnUsersUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type TimesheetEntryUpsertWithWhereUniqueWithoutTimesheetInput = {
+    where: TimesheetEntryWhereUniqueInput
+    update: XOR<TimesheetEntryUpdateWithoutTimesheetInput, TimesheetEntryUncheckedUpdateWithoutTimesheetInput>
+    create: XOR<TimesheetEntryCreateWithoutTimesheetInput, TimesheetEntryUncheckedCreateWithoutTimesheetInput>
+  }
+
+  export type TimesheetEntryUpdateWithWhereUniqueWithoutTimesheetInput = {
+    where: TimesheetEntryWhereUniqueInput
+    data: XOR<TimesheetEntryUpdateWithoutTimesheetInput, TimesheetEntryUncheckedUpdateWithoutTimesheetInput>
+  }
+
+  export type TimesheetEntryUpdateManyWithWhereWithoutTimesheetInput = {
+    where: TimesheetEntryScalarWhereInput
+    data: XOR<TimesheetEntryUpdateManyMutationInput, TimesheetEntryUncheckedUpdateManyWithoutTimesheetInput>
+  }
+
+  export type TimesheetEntryScalarWhereInput = {
+    AND?: TimesheetEntryScalarWhereInput | TimesheetEntryScalarWhereInput[]
+    OR?: TimesheetEntryScalarWhereInput[]
+    NOT?: TimesheetEntryScalarWhereInput | TimesheetEntryScalarWhereInput[]
+    id?: StringFilter<"TimesheetEntry"> | string
+    timesheetId?: StringFilter<"TimesheetEntry"> | string
+    action?: EnumTimesheetEntryActionFilter<"TimesheetEntry"> | $Enums.TimesheetEntryAction
+    timestamp?: DateTimeFilter<"TimesheetEntry"> | Date | string
+  }
+
+  export type TimesheetCreateWithoutEntriesInput = {
+    id?: string
+    totalHours?: number
+    status?: $Enums.TimesheetStatus
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutTimesheetsInput
+  }
+
+  export type TimesheetUncheckedCreateWithoutEntriesInput = {
+    id?: string
+    userId: string
+    totalHours?: number
+    status?: $Enums.TimesheetStatus
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TimesheetCreateOrConnectWithoutEntriesInput = {
+    where: TimesheetWhereUniqueInput
+    create: XOR<TimesheetCreateWithoutEntriesInput, TimesheetUncheckedCreateWithoutEntriesInput>
+  }
+
+  export type TimesheetUpsertWithoutEntriesInput = {
+    update: XOR<TimesheetUpdateWithoutEntriesInput, TimesheetUncheckedUpdateWithoutEntriesInput>
+    create: XOR<TimesheetCreateWithoutEntriesInput, TimesheetUncheckedCreateWithoutEntriesInput>
+    where?: TimesheetWhereInput
+  }
+
+  export type TimesheetUpdateToOneWithWhereWithoutEntriesInput = {
+    where?: TimesheetWhereInput
+    data: XOR<TimesheetUpdateWithoutEntriesInput, TimesheetUncheckedUpdateWithoutEntriesInput>
+  }
+
+  export type TimesheetUpdateWithoutEntriesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    totalHours?: FloatFieldUpdateOperationsInput | number
+    status?: EnumTimesheetStatusFieldUpdateOperationsInput | $Enums.TimesheetStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutTimesheetsNestedInput
+  }
+
+  export type TimesheetUncheckedUpdateWithoutEntriesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    totalHours?: FloatFieldUpdateOperationsInput | number
+    status?: EnumTimesheetStatusFieldUpdateOperationsInput | $Enums.TimesheetStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type SessionCreateManyUserInput = {
     id?: string
     refreshTokenHash: string
     expiresAt: Date | string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TimesheetCreateManyUserInput = {
+    id?: string
+    totalHours?: number
+    status?: $Enums.TimesheetStatus
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -9169,6 +12523,32 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     refreshTokenHash?: StringFieldUpdateOperationsInput | string
     expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TimesheetUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    totalHours?: FloatFieldUpdateOperationsInput | number
+    status?: EnumTimesheetStatusFieldUpdateOperationsInput | $Enums.TimesheetStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    entries?: TimesheetEntryUpdateManyWithoutTimesheetNestedInput
+  }
+
+  export type TimesheetUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    totalHours?: FloatFieldUpdateOperationsInput | number
+    status?: EnumTimesheetStatusFieldUpdateOperationsInput | $Enums.TimesheetStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    entries?: TimesheetEntryUncheckedUpdateManyWithoutTimesheetNestedInput
+  }
+
+  export type TimesheetUncheckedUpdateManyWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    totalHours?: FloatFieldUpdateOperationsInput | number
+    status?: EnumTimesheetStatusFieldUpdateOperationsInput | $Enums.TimesheetStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -9227,6 +12607,30 @@ export namespace Prisma {
 
   export type TenantsOnUsersUncheckedUpdateManyWithoutTenantInput = {
     userId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type TimesheetEntryCreateManyTimesheetInput = {
+    id?: string
+    action: $Enums.TimesheetEntryAction
+    timestamp?: Date | string
+  }
+
+  export type TimesheetEntryUpdateWithoutTimesheetInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    action?: EnumTimesheetEntryActionFieldUpdateOperationsInput | $Enums.TimesheetEntryAction
+    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TimesheetEntryUncheckedUpdateWithoutTimesheetInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    action?: EnumTimesheetEntryActionFieldUpdateOperationsInput | $Enums.TimesheetEntryAction
+    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TimesheetEntryUncheckedUpdateManyWithoutTimesheetInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    action?: EnumTimesheetEntryActionFieldUpdateOperationsInput | $Enums.TimesheetEntryAction
+    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
 

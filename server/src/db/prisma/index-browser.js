@@ -176,6 +176,22 @@ exports.Prisma.DocumentScalarFieldEnum = {
   uploadedAt: 'uploadedAt'
 };
 
+exports.Prisma.TimesheetScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  totalHours: 'totalHours',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.TimesheetEntryScalarFieldEnum = {
+  id: 'id',
+  timesheetId: 'timesheetId',
+  action: 'action',
+  timestamp: 'timestamp'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -195,12 +211,25 @@ exports.Role = exports.$Enums.Role = {
   ADMIN: 'ADMIN'
 };
 
+exports.TimesheetStatus = exports.$Enums.TimesheetStatus = {
+  PENDING: 'PENDING',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED'
+};
+
+exports.TimesheetEntryAction = exports.$Enums.TimesheetEntryAction = {
+  CHECK_IN: 'CHECK_IN',
+  CHECK_OUT: 'CHECK_OUT'
+};
+
 exports.Prisma.ModelName = {
   User: 'User',
   Tenant: 'Tenant',
   TenantsOnUsers: 'TenantsOnUsers',
   Session: 'Session',
-  Document: 'Document'
+  Document: 'Document',
+  Timesheet: 'Timesheet',
+  TimesheetEntry: 'TimesheetEntry'
 };
 
 /**
