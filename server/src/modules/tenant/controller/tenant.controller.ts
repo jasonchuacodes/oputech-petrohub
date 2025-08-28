@@ -12,11 +12,11 @@ import {
 } from '../services/tenant.service';
 import { CreateTenantSchema } from '../schema/createTenantSchema';
 import { GetTenantUsersSchema } from '../schema/getTenantUsersSchema';
-import { getTenantByIdSchema } from '../schema/getTenantByIdSchema';
+import { GetTenantByIdSchema } from '../schema/getTenantByIdSchema';
 
 const validateCreateTenant = createSchemaValidator(CreateTenantSchema);
 const validateGetTenantUsers = createSchemaValidator(GetTenantUsersSchema);
-const validateGetTenantById = createSchemaValidator(getTenantByIdSchema);
+const validateGetTenantById = createSchemaValidator(GetTenantByIdSchema);
 
 const createTenant = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {

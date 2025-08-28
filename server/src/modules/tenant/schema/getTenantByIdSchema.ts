@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
-export const getTenantByIdSchema = z.object({
+export const GetTenantByIdSchema = z.object({
   tenantId: z.string(),
 });
 
-export type GetTenantByIdInput = z.infer<typeof getTenantByIdSchema>;
+export type GetTenantByIdInput = z.infer<typeof GetTenantByIdSchema>;
