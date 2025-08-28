@@ -88,7 +88,7 @@ export const checkIn = async (userId: string) => {
   const endOfDay = new Date();
   endOfDay.setUTCHours(23, 59, 59, 999);
 
-  const timesheet = await prisma.timesheet.findFirst({
+  let timesheet = await prisma.timesheet.findFirst({
     where: {
       userId,
       createdAt: {
@@ -98,32 +98,34 @@ export const checkIn = async (userId: string) => {
     },
   });
 
-  if (timesheet) {
-    const existingCheckIn = await prisma.timesheetEntry.findFirst({
-      where: {
-        timesheetId: timesheet.id,
-        action: TimesheetEntryAction.CHECK_IN,
-        timestamp: {
-          gte: new Date(new Date().setHours(0, 0, 0, 0)),
-          lte: new Date(new Date().setHours(23, 59, 59, 999)),
-        },
-      },
-    });
-
-    if (existingCheckIn) {
-      throw new ConflictError('Already checked in today');
-    }
-
-    return prisma.timesheetEntry.create({
-      data: {
-        timesheet: { connect: { id: timesheet.id } },
-        action: TimesheetEntryAction.CHECK_IN,
-        timestamp: new Date(),
-      },
-    });
-  } else {
-    return await createTimesheet({ userId });
+  if (!timesheet) {
+    timesheet = await createTimesheet({ userId });
   }
+
+  const latestEntry = await prisma.timesheetEntry.findFirst({
+    where: {
+      timesheetId: timesheet.id,
+      timestamp: {
+        gte: startOfDay,
+        lte: endOfDay,
+      },
+    },
+    orderBy: {
+      timestamp: 'desc',
+    },
+  });
+
+  if (latestEntry && latestEntry.action === TimesheetEntryAction.CHECK_IN) {
+    throw new ConflictError('Already checked in today');
+  }
+
+  return prisma.timesheetEntry.create({
+    data: {
+      timesheetId: timesheet.id,
+      action: TimesheetEntryAction.CHECK_IN,
+      timestamp: new Date(),
+    },
+  });
 };
 
 export const checkOut = async (userId: string) => {
@@ -143,47 +145,26 @@ export const checkOut = async (userId: string) => {
     throw new Error('No timesheet for today');
   }
 
-  const checkInEntry = await prisma.timesheetEntry.findFirst({
-    where: {
-      timesheetId: timesheet.id,
-      action: TimesheetEntryAction.CHECK_IN,
-      timestamp: {
-        gte: new Date(new Date().setHours(0, 0, 0, 0)),
-        lte: new Date(new Date().setHours(23, 59, 59, 999)),
-      },
-    },
+  const lastEntry = await prisma.timesheetEntry.findFirst({
+    where: { timesheetId: timesheet.id },
+    orderBy: { timestamp: 'desc' },
   });
 
-  if (!checkInEntry) {
-    throw new Error('No check-in entry for today');
-  }
-
-  const existingCheckOut = await prisma.timesheetEntry.findFirst({
-    where: {
-      timesheetId: timesheet.id,
-      action: TimesheetEntryAction.CHECK_OUT,
-      timestamp: {
-        gte: new Date(new Date().setHours(0, 0, 0, 0)),
-        lte: new Date(new Date().setHours(23, 59, 59, 999)),
-      },
-    },
-  });
-
-  if (existingCheckOut) {
-    throw new ConflictError('Already checked out today');
+  if (!lastEntry || lastEntry.action !== TimesheetEntryAction.CHECK_IN) {
+    throw new Error('No active check-in entry for today');
   }
 
   const checkOutEntry = await prisma.timesheetEntry.create({
     data: {
-      timesheet: { connect: { id: timesheet.id } },
+      timesheetId: timesheet.id,
       action: TimesheetEntryAction.CHECK_OUT,
       timestamp: new Date(),
     },
   });
 
-  const totalHours = Number(
+  const sessionHours = Number(
     (
-      (checkOutEntry.timestamp.getTime() - checkInEntry.timestamp.getTime()) /
+      (checkOutEntry.timestamp.getTime() - lastEntry.timestamp.getTime()) /
       (1000 * 60 * 60)
     ).toFixed(2),
   );
@@ -191,7 +172,7 @@ export const checkOut = async (userId: string) => {
   await prisma.timesheet.update({
     where: { id: timesheet.id },
     data: {
-      totalHours,
+      totalHours: timesheet.totalHours + sessionHours,
       status: TimesheetStatus.PENDING,
     },
   });
