@@ -13,8 +13,8 @@ export type Timesheet = {
 };
 
 export const TimesheetEntryActionEnum = {
-  CHECK_IN: 'CHECK IN',
-  CHECK_OUT: 'CHECK OUT',
+  CHECK_IN: 'CHECK_IN',
+  CHECK_OUT: 'CHECK_OUT',
 } as const;
 export type TimesheetEntryAction = ValueOf<typeof TimesheetEntryActionEnum>;
 
