@@ -214,7 +214,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/Users/sirj/Desktop/workspace/buzhub/server/src/db/prisma",
+      "value": "/home/jason/projects/buzhub/server/src/db/prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -223,12 +223,12 @@ const config = {
     "binaryTargets": [
       {
         "fromEnvVar": null,
-        "value": "darwin-arm64",
+        "value": "debian-openssl-1.1.x",
         "native": true
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "/Users/sirj/Desktop/workspace/buzhub/server/prisma/schema.prisma",
+    "sourceFilePath": "/home/jason/projects/buzhub/server/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {

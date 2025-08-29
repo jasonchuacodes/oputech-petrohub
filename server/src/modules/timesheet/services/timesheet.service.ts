@@ -99,7 +99,7 @@ export const checkIn = async (userId: string) => {
   });
 
   if (!timesheet) {
-    timesheet = await createTimesheet({ userId });
+    return await createTimesheet({ userId });
   }
 
   const latestEntry = await prisma.timesheetEntry.findFirst({
