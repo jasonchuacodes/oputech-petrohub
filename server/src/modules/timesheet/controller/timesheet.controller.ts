@@ -6,6 +6,7 @@ import { createSchemaValidator } from '~/utils';
 
 import {
   createTimesheet as createTimesheetService,
+  getTodayTimesheet as getTodayTimesheetService,
   getTimesheet as getTimesheetService,
   getTimesheets as getTimesheetsService,
   checkIn as checkInService,
@@ -44,7 +45,7 @@ const checkIn = async (req: AuthenticatedRequest, res: Response, next: NextFunct
 
     res.status(200).json({
       message: 'Checked in successfully',
-      data
+      data,
     });
   } catch (err) {
     next(err);
@@ -58,6 +59,23 @@ const checkOut = async (req: AuthenticatedRequest, res: Response, next: NextFunc
 
     res.status(200).json({
       message: 'Checked out successfully',
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const getTodayTimesheet = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  const userId = req.user!.id;
+
+  try {
+    const timesheet = await getTodayTimesheetService(userId);
+
+    res.status(200).json({
+      message: "Successfully retrieved today's timesheet",
+      data: {
+        timesheet,
+      },
     });
   } catch (err) {
     next(err);
@@ -107,4 +125,11 @@ const getUserTimesheets = async (req: AuthenticatedRequest, res: Response, next:
   }
 };
 
-export { createTimesheet, checkIn, checkOut, getTimesheetById, getUserTimesheets };
+export {
+  createTimesheet,
+  checkIn,
+  checkOut,
+  getTodayTimesheet,
+  getTimesheetById,
+  getUserTimesheets,
+};

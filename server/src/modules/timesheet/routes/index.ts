@@ -5,6 +5,7 @@ import { asyncHandler } from '~/utils';
 
 import {
   createTimesheet,
+  getTodayTimesheet,
   getTimesheetById,
   getUserTimesheets,
   checkIn,
@@ -17,6 +18,7 @@ const router = express.Router();
 
 // Private routes
 router.post('/create', requireAuth, asyncHandler(createTimesheet));
+router.get('/today', requireAuth, asyncHandler(getTodayTimesheet));
 router.get('/:timesheetId', requireAuth, asyncHandler(getTimesheetById));
 router.get('/', requireAuth, asyncHandler(getUserTimesheets));
 router.post('/check-in', requireAuth, asyncHandler(checkIn));

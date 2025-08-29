@@ -1,6 +1,6 @@
 import { prisma } from '~/db';
 import { Prisma, TimesheetEntryAction, TimesheetStatus } from '~/db/prisma';
-import { ConflictError } from '~/errors';
+import { ConflictError, NotFoundError } from '~/errors';
 
 import { CreateTimesheetPayload } from '../schema/createTimesheetSchema';
 
@@ -39,6 +39,32 @@ const createTimesheet = async ({ userId }: CreateTimesheetPayload) => {
       entries: true,
     },
   });
+};
+
+const getTodayTimesheet = (userId: string) => {
+  const startOfDay = new Date();
+  startOfDay.setUTCHours(0, 0, 0, 0);
+
+  const endOfDay = new Date();
+  endOfDay.setUTCHours(23, 59, 59, 999);
+
+  const timesheet = prisma.timesheet.findFirst({
+    where: {
+      userId,
+      createdAt: {
+        gte: startOfDay,
+        lte: endOfDay,
+      },
+    },
+    orderBy: { createdAt: 'desc' },
+    include: { entries: true },
+  });
+
+  if (!timesheet) {
+    throw new NotFoundError('Timesheet not found');
+  }
+
+  return timesheet;
 };
 
 const getTimesheet = async (userId: string, timesheetId: string) => {
@@ -180,4 +206,4 @@ export const checkOut = async (userId: string) => {
   return checkOutEntry;
 };
 
-export { createTimesheet, getTimesheet, getTimesheets };
+export { createTimesheet, getTodayTimesheet, getTimesheet, getTimesheets };
