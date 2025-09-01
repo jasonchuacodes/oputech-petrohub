@@ -16,7 +16,13 @@ export const TimesheetEntryActionEnum = {
   CHECK_IN: 'CHECK_IN',
   CHECK_OUT: 'CHECK_OUT',
 } as const;
+
 export type TimesheetEntryAction = ValueOf<typeof TimesheetEntryActionEnum>;
+
+export const TimesheetEntryActionMap: Record<TimesheetEntryAction, string> = {
+  [TimesheetEntryActionEnum.CHECK_IN]: 'CHECK IN',
+  [TimesheetEntryActionEnum.CHECK_OUT]: 'CHECK OUT',
+};
 
 export const TimesheetStatusEnum = {
   IN_PROGRESS: 'IN_PROGRESS',

@@ -18,7 +18,7 @@ const getTimesheet = async (timesheetId: string): Promise<Timesheet> => {
 const getTimesheets = async (): Promise<Timesheet[]> => {
   const res = await axios.get('/timesheets');
 
-  return res.data.data.timesheet;
+  return res.data.data.timesheets;
 };
 
 // Mutations

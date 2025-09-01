@@ -13,15 +13,7 @@ import dayjs from 'dayjs';
 import { CardContainer } from '~/components/dashboard';
 import { Link } from '~/components/ui';
 import { useGetTodayTimesheetQuery } from '~/services/timesheet/timesheet.queries';
-import {
-  TimesheetEntryActionEnum,
-  type TimesheetEntryAction,
-} from '~/services/timesheet/timesheet.types';
-
-const TimesheetEntryActionMap: Record<TimesheetEntryAction, string> = {
-  [TimesheetEntryActionEnum.CHECK_IN]: 'CHECK IN',
-  [TimesheetEntryActionEnum.CHECK_OUT]: 'CHECK OUT',
-};
+import { TimesheetEntryActionMap } from '~/services/timesheet/timesheet.types';
 
 export const TimesheetsSection = () => {
   const { data: todayTimesheet, isLoading: isLoadingTimesheet } = useGetTodayTimesheetQuery();
