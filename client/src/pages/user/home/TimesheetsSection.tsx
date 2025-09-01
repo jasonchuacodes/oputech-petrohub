@@ -46,7 +46,7 @@ export const TimesheetsSection = () => {
                         </Typography>
                       </Stack>
                     </ListItem>
-                    <Stack maxHeight={240} overflow="auto" paddingRight={2}>
+                    <Stack maxHeight={240} overflow="auto" paddingRight={1}>
                       {todayTimesheet?.entries.map((entry) => (
                         <ListItem key={entry.id} sx={{ py: 0.5, px: 0 }}>
                           <ListItemText
@@ -74,7 +74,7 @@ export const TimesheetsSection = () => {
                     <Stack direction="row" spacing={0.5}>
                       <Typography variant="body2">Total Hours:</Typography>
                       <Typography variant="body2" fontWeight="bold">
-                        {todayTimesheet?.totalHours}
+                        {todayTimesheet?.totalHours.toFixed(2)}
                       </Typography>
                     </Stack>
                   </Stack>

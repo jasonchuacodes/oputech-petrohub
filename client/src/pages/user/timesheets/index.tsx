@@ -86,7 +86,7 @@ export const TimesheetsPage = () => {
                       </Typography>
                     </Stack>
                   </ListItem>
-                  <Stack>
+                  <Stack maxHeight={240} overflow="auto" paddingRight={1}>
                     {group.entries.map((entry) => (
                       <ListItem key={entry.id} sx={{ py: 0.5, px: 0 }}>
                         <ListItemText

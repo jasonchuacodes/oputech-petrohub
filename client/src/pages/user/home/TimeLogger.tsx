@@ -11,7 +11,7 @@ import {
   useCheckOutMutation,
   useGetTodayTimesheetQuery,
 } from '~/services/timesheet/timesheet.queries';
-import { TimesheetEntryActionEnum } from '~/services/timesheet/timesheet.types';
+import { TimesheetEntryActionEnum, type Timesheet } from '~/services/timesheet/timesheet.types';
 import theme from '~/theme';
 
 dayjs.extend(duration);
@@ -29,37 +29,44 @@ export const TimeLogger = () => {
     );
   }, [timesheet]);
 
-  const isCheckedIn = useMemo(() => {
-    if (!latestEntry) return false;
-
-    return latestEntry.action === TimesheetEntryActionEnum.CHECK_IN;
-  }, [latestEntry]);
+  const isCheckedIn = latestEntry?.action === TimesheetEntryActionEnum.CHECK_IN;
 
   useEffect(() => {
-    if (!isCheckedIn || !latestEntry) {
-      setElapsed('00:00:00');
-      return;
-    }
+    const getElapsedTime = (timesheet: Timesheet | null): number => {
+      if (!timesheet) return 0;
 
-    const checkInTime = dayjs(latestEntry.timestamp);
+      let totalSeconds = timesheet.totalHours * 3600;
+
+      if (latestEntry?.action === TimesheetEntryActionEnum.CHECK_IN) {
+        const startTime = dayjs(latestEntry.timestamp);
+        const now = dayjs();
+        totalSeconds += now.diff(startTime, 'second');
+      }
+
+      return totalSeconds;
+    };
 
     const tick = () => {
-      const diffMs = dayjs().diff(checkInTime);
-      const d = dayjs.duration(diffMs);
+      const secs = getElapsedTime(timesheet ?? null);
 
-      const hh = String(d.hours()).padStart(2, '0');
-      const mm = String(d.minutes()).padStart(2, '0');
-      const ss = String(d.seconds()).padStart(2, '0');
+      const formatElapsed = (totalSeconds: number): string => {
+        const d = dayjs.duration(totalSeconds, 'seconds');
 
-      setElapsed(`${hh}:${mm}:${ss}`);
+        const hh = String(d.hours() + d.days() * 24).padStart(2, '0');
+        const mm = String(d.minutes()).padStart(2, '0');
+        const ss = String(d.seconds()).padStart(2, '0');
+
+        return `${hh}:${mm}:${ss}`;
+      };
+
+      setElapsed(formatElapsed(secs));
     };
 
     tick();
+    const id = setInterval(tick, 1000);
 
-    const interval = setInterval(tick, 1000);
-
-    return () => clearInterval(interval);
-  }, [isCheckedIn, latestEntry]);
+    return () => clearInterval(id);
+  }, [latestEntry, timesheet]);
 
   const styles = {
     borderColor: isCheckedIn ? theme.palette.success.light : theme.palette.grey[400],
