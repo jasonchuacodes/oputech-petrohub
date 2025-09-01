@@ -1,5 +1,7 @@
 import { alpha, Typography } from '@mui/material';
-import { useMemo } from 'react';
+import dayjs from 'dayjs';
+import duration from 'dayjs/plugin/duration';
+import { useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import { CardContainer } from '~/components/dashboard';
@@ -12,7 +14,11 @@ import {
 import { TimesheetEntryActionEnum } from '~/services/timesheet/timesheet.types';
 import theme from '~/theme';
 
+dayjs.extend(duration);
+
 export const TimeLogger = () => {
+  const [elapsed, setElapsed] = useState('00:00:00');
+
   const { data: timesheet, isLoading: isLoadingTimesheet } = useGetTodayTimesheetQuery();
 
   const latestEntry = useMemo(() => {
@@ -28,6 +34,32 @@ export const TimeLogger = () => {
 
     return latestEntry.action === TimesheetEntryActionEnum.CHECK_IN;
   }, [latestEntry]);
+
+  useEffect(() => {
+    if (!isCheckedIn || !latestEntry) {
+      setElapsed('00:00:00');
+      return;
+    }
+
+    const checkInTime = dayjs(latestEntry.timestamp);
+
+    const tick = () => {
+      const diffMs = dayjs().diff(checkInTime);
+      const d = dayjs.duration(diffMs);
+
+      const hh = String(d.hours()).padStart(2, '0');
+      const mm = String(d.minutes()).padStart(2, '0');
+      const ss = String(d.seconds()).padStart(2, '0');
+
+      setElapsed(`${hh}:${mm}:${ss}`);
+    };
+
+    tick();
+
+    const interval = setInterval(tick, 1000);
+
+    return () => clearInterval(interval);
+  }, [isCheckedIn, latestEntry]);
 
   const styles = {
     borderColor: isCheckedIn ? theme.palette.success.light : theme.palette.grey[400],
@@ -58,7 +90,7 @@ export const TimeLogger = () => {
   return (
     <CardContainer direction="row" justifyContent="space-between" alignItems="center" sx={styles}>
       <Typography fontWeight="bold" color={isCheckedIn ? 'success.dark' : 'text.primary'}>
-        {isCheckedIn ? 'Checked In' : 'Check In'}
+        {isCheckedIn ? `In ${elapsed} hrs` : 'Check In'}
       </Typography>
 
       <Switch
