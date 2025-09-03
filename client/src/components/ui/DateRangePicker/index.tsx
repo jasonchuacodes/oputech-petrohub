@@ -10,12 +10,18 @@ import { useState } from 'react';
 import theme from '~/theme';
 import { Button } from '~/components/ui';
 
-export const DateRangePicker = ({ label }: { label?: string }) => {
+type DateRangePickerProps = {
+  label?: string;
+  initialStart?: Dayjs;
+  initialEnd?: Dayjs;
+};
+
+export const DateRangePicker = ({ label, initialStart, initialEnd }: DateRangePickerProps) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const isOpen = Boolean(anchorEl);
 
-  const [startDate, setStartDate] = useState<Dayjs | null>(null);
-  const [endDate, setEndDate] = useState<Dayjs | null>(null);
+  const [startDate, setStartDate] = useState<Dayjs | null>(initialStart || null);
+  const [endDate, setEndDate] = useState<Dayjs | null>(initialEnd || null);
   const [isStartOpen, setIsStartOpen] = useState(false);
   const [isEndOpen, setIsEndOpen] = useState(false);
 
@@ -35,9 +41,20 @@ export const DateRangePicker = ({ label }: { label?: string }) => {
         }}
         startIcon={<CalendarOutlined fontSize="small" />}
       >
-        {startDate && endDate
-          ? `${startDate.format('MMM D, YYYY')} - ${endDate.format('MMM D, YYYY')}`
-          : label}
+        <Typography>
+          {startDate && endDate ? (
+            <Stack direction="row" spacing={1}>
+              <Typography component="span" color="text.secondary">
+                Time period:
+              </Typography>
+              <Typography>
+                {`${startDate.format('MMM D, YYYY')} - ${endDate.format('MMM D, YYYY')}`}
+              </Typography>
+            </Stack>
+          ) : (
+            label
+          )}
+        </Typography>
       </Button>
 
       <Menu

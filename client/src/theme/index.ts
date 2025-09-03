@@ -9,6 +9,15 @@ const theme = createTheme({
         },
       },
     },
+    MuiTableCell: {
+      styleOverrides: {
+        head: {
+          fontWeight: 600,
+          paddingBottom: 8,
+          paddingTop: 8,
+        },
+      },
+    },
   },
   palette: {
     mode: 'light',

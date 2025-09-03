@@ -47,7 +47,7 @@ export const TimesheetsPage = () => {
   return (
     <PageLayout p={2} spacing={2}>
       <Stack direction="row" justifyContent="space-between">
-        <DateRangePicker label="Select Date Range" />
+        <DateRangePicker label="Select Time Period" />
         <Button
           disabled={true}
           variant="outlined"

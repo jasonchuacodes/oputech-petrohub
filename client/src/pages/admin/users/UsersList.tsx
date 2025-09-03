@@ -1,7 +1,16 @@
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
+import {
+  alpha,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from '@mui/material';
 
-import { Link } from '~/components/ui';
+import { Link, Paper } from '~/components/ui';
 import type { User } from '~/services/user/user.types';
+import theme from '~/theme';
 
 import { MoreDetailsMenu } from './MoreDetailsMenu';
 
@@ -9,14 +18,12 @@ type UsersListProps = { users: User[]; onDeleteRequest: (id: string) => void };
 
 export const UsersList = ({ users, onDeleteRequest }: UsersListProps) => {
   return (
-    <TableContainer>
+    <TableContainer component={Paper} sx={{ border: '1px solid', borderColor: 'divider' }}>
       <Table sx={{ minWidth: 650 }}>
-        <TableHead>
+        <TableHead sx={{ bgcolor: alpha(theme.palette.primary.light, 0.1) }}>
           <TableRow>
-            <TableCell sx={{ fontWeight: 'bold', maxWidth: 560 }}>Name</TableCell>
-            <TableCell align="left" sx={{ fontWeight: 'bold' }}>
-              Roles
-            </TableCell>
+            <TableCell sx={{ maxWidth: 560 }}>Name</TableCell>
+            <TableCell align="left">Roles</TableCell>
             <TableCell align="left" />
           </TableRow>
         </TableHead>
