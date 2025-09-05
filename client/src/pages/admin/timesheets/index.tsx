@@ -3,15 +3,19 @@ import dayjs from 'dayjs';
 import weekday from 'dayjs/plugin/weekday';
 
 import { SearchInput } from '~/components/form';
-import { DateRangePicker, LoadingSpinner, PageLayout } from '~/components/ui';
+import { Button, DateRangePicker, LoadingSpinner, PageLayout } from '~/components/ui';
+
+import { TimesheetTable } from './TimesheetTable';
 
 dayjs.extend(weekday);
+
+const startOfWeek = dayjs().weekday(0);
+const endOfWeek = dayjs().weekday(6);
 
 export const TimesheetsPage = () => {
   const isLoading = false;
 
-  const startOfWeek = dayjs().weekday(0);
-  const endOfWeek = dayjs().weekday(6);
+  const handleExport = () => alert('This is feature is pending.');
 
   return (
     <PageLayout p={3}>
@@ -35,8 +39,13 @@ export const TimesheetsPage = () => {
             </Box>
           ) : (
             <>
-              <SearchInput placeholder="Search employee" />
-              {/* User Timesheets table - display timesheet summary per user for all users*/}
+              <Stack direction="row" justifyContent="space-between">
+                <SearchInput placeholder="Search employee" />
+                <Button onClick={handleExport} variant="outlined">
+                  Export
+                </Button>
+              </Stack>
+              <TimesheetTable />
             </>
           )}
         </Stack>

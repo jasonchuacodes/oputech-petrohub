@@ -12,7 +12,7 @@ import { useDeleteUserMutation } from '~/services/user/user.queries';
 import { parseBackendError } from '~/utils/parseBackendError';
 
 import { UserCreateModal } from './UserCreateModal';
-import { UsersList } from './UsersList';
+import { UserList } from './UserList';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
 
 export const UsersPage = () => {
@@ -86,7 +86,7 @@ export const UsersPage = () => {
             <>
               <SearchInput placeholder="Search employee" />
               {tenantUsers && (
-                <UsersList users={tenantUsers} onDeleteRequest={handleDeleteRequest} />
+                <UserList users={tenantUsers} onDeleteRequest={handleDeleteRequest} />
               )}
             </>
           )}

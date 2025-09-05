@@ -14,9 +14,9 @@ import theme from '~/theme';
 
 import { MoreDetailsMenu } from './MoreDetailsMenu';
 
-type UsersListProps = { users: User[]; onDeleteRequest: (id: string) => void };
+type UserListProps = { users: User[]; onDeleteRequest: (id: string) => void };
 
-export const UsersList = ({ users, onDeleteRequest }: UsersListProps) => {
+export const UserList = ({ users, onDeleteRequest }: UserListProps) => {
   return (
     <TableContainer component={Paper} sx={{ border: '1px solid', borderColor: 'divider' }}>
       <Table sx={{ minWidth: 650 }}>
