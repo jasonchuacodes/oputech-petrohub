@@ -8,6 +8,7 @@ import {
   getTodayTimesheet,
   getTimesheetById,
   getUserTimesheets,
+  getAllTimesheets,
   checkIn,
   checkOut,
 } from '../controller/timesheet.controller';
@@ -17,11 +18,15 @@ const router = express.Router();
 // Public routes
 
 // Private routes
-router.post('/create', requireAuth, asyncHandler(createTimesheet));
-router.get('/today', requireAuth, asyncHandler(getTodayTimesheet));
-router.get('/:timesheetId', requireAuth, asyncHandler(getTimesheetById));
 router.get('/', requireAuth, asyncHandler(getUserTimesheets));
+
+router.get('/today', requireAuth, asyncHandler(getTodayTimesheet));
+router.get('/all', requireAuth, asyncHandler(getAllTimesheets));
+
+router.post('/create', requireAuth, asyncHandler(createTimesheet));
 router.post('/check-in', requireAuth, asyncHandler(checkIn));
 router.post('/check-out', requireAuth, asyncHandler(checkOut));
+
+router.get('/:timesheetId', requireAuth, asyncHandler(getTimesheetById));
 
 export default router;

@@ -7,20 +7,28 @@ import {
   TableHead,
   TableRow,
 } from '@mui/material';
+import { useEffect } from 'react';
 
 import { Link, Paper } from '~/components/ui';
+import type { Timesheet } from '~/services/timesheet/timesheet.types';
 import theme from '~/theme';
 
 import { MoreDetailsMenu } from './MoreDetailsMenu';
 
-export const TimesheetTable = () => {
+export const TimesheetTable = ({ timesheets }: { timesheets?: Timesheet[] }) => {
+  
   const weeklyTimesheets = [
     { id: 'eb2cab22-e5fb-449d-97d4-a6873fdcdb61', name: 'Jonathan Doe', totalHours: 40.2 },
     { id: 'eb2cab22-e5fb-449d-97d4-a6873fdcdb62', name: 'Jane Doe', totalHours: 42.2 },
     { id: 'eb2cab22-e5fb-449d-97d4-a6873fdcdb63', name: 'Jackson Villa', totalHours: 40.2 },
     { id: 'eb2cab22-e5fb-449d-97d4-a6873fdcdb64', name: 'Emily Rose', totalHours: 40.2 },
   ];
-
+  
+  // TODO: integrate collated timesheet logs and render on timesheet table
+  useEffect(() => {
+    console.log('Timesheets: ', timesheets);
+  }, [timesheets]);
+  
   return (
     <TableContainer component={Paper} sx={{ border: '1px solid', borderColor: 'divider' }}>
       <Table sx={{ minWidth: 650 }}>

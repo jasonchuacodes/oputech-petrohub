@@ -12,16 +12,22 @@ import { Button } from '~/components/ui';
 
 type DateRangePickerProps = {
   label?: string;
-  initialStart?: Dayjs;
-  initialEnd?: Dayjs;
+  startDate?: Dayjs | null;
+  endDate?: Dayjs | null;
+  onSelectStart: (date: Dayjs | null) => void;
+  onSelectEnd: (date: Dayjs | null) => void;
 };
 
-export const DateRangePicker = ({ label, initialStart, initialEnd }: DateRangePickerProps) => {
+export const DateRangePicker = ({
+  label,
+  startDate,
+  endDate,
+  onSelectStart,
+  onSelectEnd,
+}: DateRangePickerProps) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const isOpen = Boolean(anchorEl);
 
-  const [startDate, setStartDate] = useState<Dayjs | null>(initialStart || null);
-  const [endDate, setEndDate] = useState<Dayjs | null>(initialEnd || null);
   const [isStartOpen, setIsStartOpen] = useState(false);
   const [isEndOpen, setIsEndOpen] = useState(false);
 
@@ -41,20 +47,21 @@ export const DateRangePicker = ({ label, initialStart, initialEnd }: DateRangePi
         }}
         startIcon={<CalendarOutlined fontSize="small" />}
       >
-        <Typography>
-          {startDate && endDate ? (
-            <Stack direction="row" spacing={1}>
-              <Typography component="span" color="text.secondary">
-                Time period:
-              </Typography>
-              <Typography>
-                {`${startDate.format('MMM D, YYYY')} - ${endDate.format('MMM D, YYYY')}`}
-              </Typography>
-            </Stack>
+        <Stack direction="row" spacing={1}>
+          <Typography component="span" color="text.secondary">
+            Time period:
+          </Typography>
+
+          {startDate || endDate ? (
+            <Typography component="span">
+              {startDate ? startDate.format('MM/DD/YY') : 'MM/DD/YY'}
+              {' - '}
+              {endDate ? endDate.format('MM/DD/YY') : 'MM/DD/YY'}
+            </Typography>
           ) : (
-            label
+            <Typography component="span">{label}</Typography>
           )}
-        </Typography>
+        </Stack>
       </Button>
 
       <Menu
@@ -90,7 +97,7 @@ export const DateRangePicker = ({ label, initialStart, initialEnd }: DateRangePi
                 onOpen={() => setIsStartOpen(true)}
                 onClose={() => setIsStartOpen(false)}
                 onChange={(newValue) => {
-                  setStartDate(newValue);
+                  onSelectStart(newValue);
                   setIsStartOpen(false);
                 }}
                 open={isStartOpen}
@@ -122,7 +129,7 @@ export const DateRangePicker = ({ label, initialStart, initialEnd }: DateRangePi
                 onOpen={() => setIsEndOpen(true)}
                 onClose={() => setIsEndOpen(false)}
                 onChange={(newValue) => {
-                  setEndDate(newValue);
+                  onSelectEnd(newValue);
                   setIsEndOpen(false);
 
                   if (startDate) {

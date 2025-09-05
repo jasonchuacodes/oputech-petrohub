@@ -1,3 +1,5 @@
+import type { Dayjs } from 'dayjs';
+
 import axios from '~/lib/axiosInstance';
 
 import type { Timesheet } from './timesheet.types';
@@ -15,8 +17,36 @@ const getTimesheet = async (timesheetId: string): Promise<Timesheet> => {
   return res.data.data.timesheet;
 };
 
-const getTimesheets = async (): Promise<Timesheet[]> => {
-  const res = await axios.get('/timesheets');
+const getUserTimesheets = async ({
+  startDate,
+  endDate,
+}: {
+  startDate?: Dayjs | null;
+  endDate?: Dayjs | null;
+}): Promise<Timesheet[]> => {
+  const res = await axios.get('/timesheets', {
+    params: {
+      startDate,
+      endDate,
+    },
+  });
+
+  return res.data.data.timesheets;
+};
+
+const getAllTimesheets = async ({
+  startDate,
+  endDate,
+}: {
+  startDate?: Dayjs | null;
+  endDate?: Dayjs | null;
+}): Promise<Timesheet[]> => {
+  const res = await axios.get('/timesheets/all', {
+    params: {
+      startDate: startDate ? startDate.utc().toISOString() : undefined,
+      endDate: endDate ? endDate.utc().toISOString() : undefined,
+    },
+  });
 
   return res.data.data.timesheets;
 };
@@ -33,4 +63,4 @@ const checkOut = async () => {
   return res.data.message;
 };
 
-export { getTodayTimesheet, getTimesheet, getTimesheets, checkIn, checkOut };
+export { getTodayTimesheet, getTimesheet, getUserTimesheets, getAllTimesheets, checkIn, checkOut };

@@ -1,6 +1,14 @@
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
+import type { Dayjs } from 'dayjs';
 
-import { checkIn, checkOut, getTimesheet, getTimesheets, getTodayTimesheet } from './timesheet.api';
+import {
+  checkIn,
+  checkOut,
+  getTimesheet,
+  getUserTimesheets,
+  getTodayTimesheet,
+  getAllTimesheets,
+} from './timesheet.api';
 import type { Timesheet } from './timesheet.types';
 
 // Queries
@@ -11,10 +19,29 @@ const useGetTodayTimesheetQuery = (): UseQueryResult<Timesheet> => {
   });
 };
 
-const useGetTimesheetsQuery = (): UseQueryResult<Timesheet[]> => {
+const useGetUserTimesheetsQuery = ({
+  startDate,
+  endDate,
+}: {
+  startDate?: Dayjs | null;
+  endDate?: Dayjs | null;
+}): UseQueryResult<Timesheet[]> => {
   return useQuery({
     queryKey: ['timesheets'],
-    queryFn: getTimesheets,
+    queryFn: () => getUserTimesheets({ endDate, startDate }),
+  });
+};
+
+const useGetAllTimesheetsQuery = ({
+  startDate,
+  endDate,
+}: {
+  startDate?: Dayjs | null;
+  endDate?: Dayjs | null;
+}): UseQueryResult<Timesheet[]> => {
+  return useQuery({
+    queryKey: ['timesheets'],
+    queryFn: () => getAllTimesheets({ endDate, startDate }),
   });
 };
 
@@ -42,7 +69,7 @@ const useCheckInMutation = () => {
 
 const useCheckOutMutation = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: checkOut,
     onSuccess: () => {
@@ -54,7 +81,8 @@ const useCheckOutMutation = () => {
 
 export {
   useGetTodayTimesheetQuery,
-  useGetTimesheetsQuery,
+  useGetUserTimesheetsQuery,
+  useGetAllTimesheetsQuery,
   useGetTimesheetByIdQuery,
   useCheckInMutation,
   useCheckOutMutation,

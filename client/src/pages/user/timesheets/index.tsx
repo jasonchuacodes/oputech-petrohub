@@ -1,4 +1,3 @@
-import { FilterOutlined } from '@mui/icons-material';
 import {
   Stack,
   Typography,
@@ -12,13 +11,13 @@ import {
 import dayjs from 'dayjs';
 
 import { CardContainer } from '~/components/dashboard';
-import { Button, DateRangePicker, PageLayout } from '~/components/ui';
+import { DateRangePicker, PageLayout } from '~/components/ui';
 import theme from '~/theme';
-import { useGetTimesheetsQuery } from '~/services/timesheet/timesheet.queries';
+import { useGetUserTimesheetsQuery } from '~/services/timesheet/timesheet.queries';
 import { TimesheetEntryActionMap } from '~/services/timesheet/timesheet.types';
 
 export const TimesheetsPage = () => {
-  const { data: timesheets, isLoading: isLoadingTimesheets } = useGetTimesheetsQuery();
+  const { data: timesheets, isLoading: isLoadingTimesheets } = useGetUserTimesheetsQuery({});
 
   const latestEntries = timesheets
     ?.flatMap((t) =>
@@ -47,15 +46,12 @@ export const TimesheetsPage = () => {
   return (
     <PageLayout p={2} spacing={2}>
       <Stack direction="row" justifyContent="space-between">
-        <DateRangePicker label="Select Time Period" />
-        <Button
-          disabled={true}
-          variant="outlined"
-          startIcon={<FilterOutlined fontSize="inherit" />}
-          size="small"
-        >
-          Filters
-        </Button>
+        {/* TODO: implement query invalidation on daterange selection */}
+        <DateRangePicker
+          label="Select Time Period"
+          onSelectStart={() => null}
+          onSelectEnd={() => null}
+        />
       </Stack>
       <Stack padding={2} bgcolor={alpha(theme.palette.info.dark, 0.2)} borderRadius={1}>
         <Typography variant="body2">Total Hours:</Typography>

@@ -85,7 +85,15 @@ const getTimesheet = async (userId: string, timesheetId: string) => {
   return timesheet;
 };
 
-const getTimesheets = async (userId: string, startDate?: string, endDate?: string) => {
+const getTimesheets = async ({
+  userId,
+  startDate,
+  endDate,
+}: {
+  userId?: string;
+  startDate?: string;
+  endDate?: string;
+}) => {
   const where: Prisma.TimesheetWhereInput = {
     userId,
     ...(startDate || endDate
@@ -100,7 +108,14 @@ const getTimesheets = async (userId: string, startDate?: string, endDate?: strin
 
   const timesheets = await prisma.timesheet.findMany({
     where,
-    include: { entries: true },
+    include: {
+      entries: true,
+      user: {
+        select: {
+          name: true,
+        },
+      },
+    },
     orderBy: { createdAt: 'desc' },
   });
 

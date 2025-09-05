@@ -112,7 +112,27 @@ const getUserTimesheets = async (req: AuthenticatedRequest, res: Response, next:
       endDate: req.query.endDate as string,
     });
 
-    const timesheets = await getTimesheetsService(userId, startDate, endDate);
+    const timesheets = await getTimesheetsService({ userId, startDate, endDate });
+
+    res.status(200).json({
+      message: 'Successfully retrieved user timesheets',
+      data: {
+        timesheets,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const getAllTimesheets = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const { startDate, endDate } = await validateGetTimesheets({
+      startDate: req.query.startDate as string,
+      endDate: req.query.endDate as string,
+    });
+
+    const timesheets = await getTimesheetsService({ startDate, endDate });
 
     res.status(200).json({
       message: 'Successfully retrieved timesheets',
@@ -132,4 +152,5 @@ export {
   getTodayTimesheet,
   getTimesheetById,
   getUserTimesheets,
+  getAllTimesheets,
 };
