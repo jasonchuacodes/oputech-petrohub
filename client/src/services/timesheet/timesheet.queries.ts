@@ -32,19 +32,21 @@ const useGetUserTimesheetsQuery = ({
   });
 };
 
-const useGetAllTimesheetsQuery = ({
-  startDate,
-  endDate,
-}: {
+const useGetAllTimesheetsQuery = (filters: {
   startDate?: Dayjs | null;
   endDate?: Dayjs | null;
+  userName?: string;
 }): UseQueryResult<Timesheet[]> => {
   return useQuery({
     queryKey: [
       'timesheets',
-      { startDate: startDate?.toISOString(), endDate: endDate?.toISOString() },
+      {
+        startDate: filters.startDate?.toISOString(),
+        endDate: filters.endDate?.toISOString(),
+        username: filters.userName,
+      },
     ],
-    queryFn: () => getAllTimesheets({ startDate, endDate }),
+    queryFn: () => getAllTimesheets(filters),
   });
 };
 

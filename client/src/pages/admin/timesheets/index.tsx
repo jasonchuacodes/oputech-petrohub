@@ -73,26 +73,21 @@ export const TimesheetsPage = () => {
               onAccept={handleSelectDateRange}
             />
           </Stack>
-
+          <Stack direction="row" alignItems="end" justifyContent="space-between">
+            {/* This is the search input - filter the timesheets */}
+            <SearchInput placeholder="Search employee" />
+            <Button onClick={handleExport} variant="outlined" sx={{ height: 40, flexShrink: 0 }}>
+              Export
+            </Button>
+          </Stack>
           {isLoading ? (
             <Box display="flex" justifyContent="center" alignItems="center" pt={10}>
               <LoadingSpinner />
             </Box>
+          ) : timesheets && timesheets.length > 0 ? (
+            <TimesheetTable timesheets={timesheets} />
           ) : (
-            <>
-              <Stack direction="row" alignItems="end" justifyContent="space-between">
-                <SearchInput placeholder="Search employee" />
-                <Button
-                  onClick={handleExport}
-                  variant="outlined"
-                  sx={{ height: 40, flexShrink: 0 }}
-                >
-                  Export
-                </Button>
-              </Stack>
-
-              {timesheets?.length ? <TimesheetTable timesheets={timesheets} /> : <NoData />}
-            </>
+            <NoData text="No timesheets data available." />
           )}
         </Stack>
       </Container>

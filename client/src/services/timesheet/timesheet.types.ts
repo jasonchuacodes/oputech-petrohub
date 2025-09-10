@@ -1,6 +1,6 @@
-import type { ValueOf } from "~/utils/valueOf";
+import type { ValueOf } from '~/utils/valueOf';
 
-import type { User } from "../user/user.types";
+import type { User } from '../user/user.types';
 
 export type Timesheet = {
   id: string;

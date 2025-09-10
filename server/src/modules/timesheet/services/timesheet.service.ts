@@ -89,13 +89,23 @@ const getTimesheets = async ({
   userId,
   startDate,
   endDate,
+  username,
 }: {
   userId?: string;
   startDate?: string;
   endDate?: string;
+  username?: string;
 }) => {
   const where: Prisma.TimesheetWhereInput = {
     userId,
+    user: username
+      ? {
+          name: {
+            contains: username,
+            mode: 'insensitive',
+          },
+        }
+      : undefined,
     ...(startDate || endDate
       ? {
           createdAt: {
