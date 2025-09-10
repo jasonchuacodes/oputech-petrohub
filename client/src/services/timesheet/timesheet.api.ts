@@ -18,16 +18,19 @@ const getTimesheet = async (timesheetId: string): Promise<Timesheet> => {
 };
 
 const getUserTimesheets = async ({
+  userId,
   startDate,
   endDate,
 }: {
+  userId?: string;
   startDate?: Dayjs | null;
   endDate?: Dayjs | null;
 }): Promise<Timesheet[]> => {
   const res = await axios.get('/timesheets', {
     params: {
-      startDate,
-      endDate,
+      startDate: startDate ? startDate.utc().toISOString() : undefined,
+      endDate: endDate ? endDate.utc().toISOString() : undefined,
+      userId,
     },
   });
 
@@ -37,14 +40,17 @@ const getUserTimesheets = async ({
 const getAllTimesheets = async ({
   startDate,
   endDate,
+  tenantId,
 }: {
   startDate?: Dayjs | null;
   endDate?: Dayjs | null;
+  tenantId?: string;
 }): Promise<Timesheet[]> => {
   const res = await axios.get('/timesheets/all', {
     params: {
       startDate: startDate ? startDate.utc().toISOString() : undefined,
       endDate: endDate ? endDate.utc().toISOString() : undefined,
+      tenantId,
     },
   });
 
@@ -54,6 +60,7 @@ const getAllTimesheets = async ({
 // Mutations
 const checkIn = async () => {
   const res = await axios.post('/timesheets/check-in');
+
   return res.data.message;
 };
 

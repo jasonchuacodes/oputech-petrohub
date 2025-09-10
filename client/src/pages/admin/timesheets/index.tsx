@@ -1,3 +1,4 @@
+import { FileDownloadOutlined } from '@mui/icons-material';
 import { Box, Container, Stack, Typography } from '@mui/material';
 import dayjs, { Dayjs } from 'dayjs';
 import weekday from 'dayjs/plugin/weekday';
@@ -84,7 +85,12 @@ export const TimesheetsPage = () => {
               value={searchTerm}
               onChange={setSearchTerm}
             />
-            <Button onClick={handleExport} variant="outlined" sx={{ height: 40, flexShrink: 0 }}>
+            <Button
+              startIcon={<FileDownloadOutlined />}
+              onClick={handleExport}
+              variant="contained"
+              sx={{ height: 40, flexShrink: 0 }}
+            >
               Export
             </Button>
           </Stack>

@@ -57,8 +57,8 @@ export const DateRangePicker = ({
         fullWidth
         variant="outlined"
         sx={{
+          height: 40,
           justifyContent: 'flex-start',
-          p: 1,
           bgcolor: isOpen ? alpha(theme.palette.primary.light, 0.1) : '',
         }}
         startIcon={<CalendarOutlined fontSize="small" />}

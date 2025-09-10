@@ -5,7 +5,7 @@ import { createUser, deleteUser, getUserById, updateUser } from './user.api';
 import type { UpdateUserPayload } from '~/schema/updateUserSchema';
 
 // Queries
-const useGetUserQuery = ({ tenantId, userId }: { tenantId: string; userId: string }) => {
+const useGetUserQuery = ({ tenantId, userId }: { tenantId?: string; userId?: string }) => {
   return useQuery({
     queryKey: ['tenantUser', tenantId, userId],
     queryFn: () => getUserById(userId),

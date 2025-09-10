@@ -45,7 +45,10 @@ const getUserById = async (req: Request, res: Response, next: NextFunction) => {
 
     const user = await userService.getUserById(id);
 
-    res.status(201).json(user);
+    res.status(201).json({
+      message: 'Successfully retrieved user details',
+      data: { user },
+    });
   } catch (err) {
     next(err);
   }

@@ -46,11 +46,10 @@ export const UserDetailPage = () => {
 
   const { name, address } = useWatch({ control });
 
-  const { data: userData, isLoading: isLoadingUser } = useGetUserQuery({
-    tenantId: tenantId ?? '',
-    userId: userId ?? '',
+  const { data: user, isLoading: isLoadingUser } = useGetUserQuery({
+    tenantId,
+    userId,
   });
-  const user = userData?.data;
 
   const { mutateAsync: updateUser, isPending: isUpdatePending } = useUpdateUserMutation();
 
@@ -202,7 +201,7 @@ export const UserDetailPage = () => {
                 </FormRow>
               </Stack>
             </Stack>
-            
+
             {(errors.name ||
               errors.address ||
               errors.contact ||

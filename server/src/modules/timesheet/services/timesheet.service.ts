@@ -119,11 +119,16 @@ const getTimesheets = async ({
   const timesheets = await prisma.timesheet.findMany({
     where,
     include: {
-      entries: true,
+      entries: {
+        orderBy: {
+          timestamp: 'desc',
+        },
+      },
       user: {
         select: {
           id: true,
           name: true,
+          role: true,
         },
       },
     },

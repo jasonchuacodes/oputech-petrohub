@@ -105,14 +105,13 @@ const getTimesheetById = async (req: AuthenticatedRequest, res: Response, next: 
 
 const getUserTimesheets = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
-    const userId = req.user!.id;
-
     const filters = await validateGetTimesheets({
       startDate: req.query.startDate as string,
       endDate: req.query.endDate as string,
+      userId: req.query.userId as string,
     });
 
-    const timesheets = await getTimesheetsService({ userId, ...filters });
+    const timesheets = await getTimesheetsService(filters);
 
     res.status(200).json({
       message: 'Successfully retrieved user timesheets',
@@ -130,7 +129,6 @@ const getAllTimesheets = async (req: AuthenticatedRequest, res: Response, next: 
     const filters = await validateGetTimesheets({
       startDate: req.query.startDate as string,
       endDate: req.query.endDate as string,
-      username: req.query.username as string
     });
 
     const timesheets = await getTimesheetsService(filters);

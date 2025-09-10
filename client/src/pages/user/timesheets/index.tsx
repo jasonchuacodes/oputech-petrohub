@@ -11,13 +11,18 @@ import {
 import dayjs from 'dayjs';
 
 import { CardContainer } from '~/components/dashboard';
+import { useAuthContext } from '~/context/auth/useAuthContext';
 import { DateRangePicker, PageLayout } from '~/components/ui';
 import theme from '~/theme';
 import { useGetUserTimesheetsQuery } from '~/services/timesheet/timesheet.queries';
 import { TimesheetEntryActionMap } from '~/services/timesheet/timesheet.types';
 
 export const TimesheetsPage = () => {
-  const { data: timesheets, isLoading: isLoadingTimesheets } = useGetUserTimesheetsQuery({});
+  const { auth } = useAuthContext();
+  
+  const { data: timesheets, isLoading: isLoadingTimesheets } = useGetUserTimesheetsQuery({
+    userId: auth?.id,
+  });
 
   const latestEntries = timesheets
     ?.flatMap((t) =>

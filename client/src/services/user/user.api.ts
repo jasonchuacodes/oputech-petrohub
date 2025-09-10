@@ -8,8 +8,10 @@ const getAllUsers = () => {
   return axios.get<User[]>('/users');
 };
 
-const getUserById = (id: string) => {
-  return axios.get<User>(`/users/${id}`);
+const getUserById = async (id?: string): Promise<User> => {
+  const res = await axios.get(`/users/${id}`);
+
+  return res.data.data.user;
 };
 
 const createUser = (data: CreateUserPayload) => {

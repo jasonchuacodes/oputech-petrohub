@@ -19,34 +19,38 @@ const useGetTodayTimesheetQuery = (): UseQueryResult<Timesheet> => {
   });
 };
 
-const useGetUserTimesheetsQuery = ({
+const useGetUserTimesheetsQuery = (filters: {
+  userId?: string;
+  startDate?: Dayjs | null;
+  endDate?: Dayjs | null;
+}): UseQueryResult<Timesheet[]> => {
+  return useQuery({
+    queryKey: ['timesheets', { userId: filters?.userId }],
+    queryFn: () => getUserTimesheets(filters),
+  });
+};
+
+const useGetAllTimesheetsQuery = ({
   startDate,
   endDate,
 }: {
   startDate?: Dayjs | null;
   endDate?: Dayjs | null;
-}): UseQueryResult<Timesheet[]> => {
-  return useQuery({
-    queryKey: ['timesheets'],
-    queryFn: () => getUserTimesheets({ endDate, startDate }),
-  });
-};
-
-const useGetAllTimesheetsQuery = (filters: {
-  startDate?: Dayjs | null;
-  endDate?: Dayjs | null;
-  userName?: string;
+  userId?: string;
 }): UseQueryResult<Timesheet[]> => {
   return useQuery({
     queryKey: [
       'timesheets',
       {
-        startDate: filters.startDate?.toISOString(),
-        endDate: filters.endDate?.toISOString(),
-        username: filters.userName,
+        startDate: startDate?.toISOString(),
+        endDate: endDate?.toISOString(),
       },
     ],
-    queryFn: () => getAllTimesheets(filters),
+    queryFn: () =>
+      getAllTimesheets({
+        startDate,
+        endDate,
+      }),
   });
 };
 

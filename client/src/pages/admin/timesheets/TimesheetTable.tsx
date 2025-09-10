@@ -9,8 +9,11 @@ import {
 } from '@mui/material';
 
 import { Link, Paper } from '~/components/ui';
+import { useTenantContext } from '~/context/tenant/useTenantContext';
+import { AdminRoutes } from '~/routes';
 import type { Timesheet } from '~/services/timesheet/timesheet.types';
 import theme from '~/theme';
+import { pathFor } from '~/utils/pathFor';
 
 import { MoreDetailsMenu } from './MoreDetailsMenu';
 
@@ -21,6 +24,8 @@ type GroupedTimesheets = {
 };
 
 export const TimesheetTable = ({ timesheets }: { timesheets: Timesheet[] }) => {
+  const { tenantId } = useTenantContext();
+
   const groupedTimesheets = timesheets?.reduce<Record<string, GroupedTimesheets>>(
     (acc, timesheet) => {
       const key = timesheet.user.id;
@@ -59,7 +64,14 @@ export const TimesheetTable = ({ timesheets }: { timesheets: Timesheet[] }) => {
             return (
               <TableRow key={userId} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                 <TableCell component="th" scope="row" sx={{ maxWidth: 240 }}>
-                  <Link to={userId}>{userName}</Link>
+                  <Link
+                    to={pathFor({
+                      pathname: AdminRoutes.TenantUserTimesheetLogs,
+                      params: { tenantId, userId },
+                    })}
+                  >
+                    {userName}
+                  </Link>
                 </TableCell>
                 <TableCell align="left">{totalHours}</TableCell>
                 <TableCell align="left">
