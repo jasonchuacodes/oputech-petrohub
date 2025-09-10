@@ -27,8 +27,13 @@ export const TimesheetsPage = () => {
 
   const [startDate, setStartDate] = useState<Dayjs | null>(initialRange.startDate);
   const [endDate, setEndDate] = useState<Dayjs | null>(initialRange.endDate);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const { data: timesheets, isLoading } = useGetAllTimesheetsQuery({ startDate, endDate });
+
+  const filteredTimesheets = timesheets?.filter((timesheet) =>
+    timesheet.user.name.toLocaleLowerCase().startsWith(searchTerm.toLowerCase()),
+  );
 
   useEffect(() => {
     if (startDate && endDate) {
@@ -74,8 +79,11 @@ export const TimesheetsPage = () => {
             />
           </Stack>
           <Stack direction="row" alignItems="end" justifyContent="space-between">
-            {/* This is the search input - filter the timesheets */}
-            <SearchInput placeholder="Search employee" />
+            <SearchInput
+              placeholder="Search employee"
+              value={searchTerm}
+              onChange={setSearchTerm}
+            />
             <Button onClick={handleExport} variant="outlined" sx={{ height: 40, flexShrink: 0 }}>
               Export
             </Button>
@@ -84,8 +92,8 @@ export const TimesheetsPage = () => {
             <Box display="flex" justifyContent="center" alignItems="center" pt={10}>
               <LoadingSpinner />
             </Box>
-          ) : timesheets && timesheets.length > 0 ? (
-            <TimesheetTable timesheets={timesheets} />
+          ) : filteredTimesheets && filteredTimesheets.length > 0 ? (
+            <TimesheetTable timesheets={filteredTimesheets} />
           ) : (
             <NoData text="No timesheets data available." />
           )}
