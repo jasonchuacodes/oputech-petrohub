@@ -2,13 +2,14 @@ import { Box, Container, Stack, Typography } from '@mui/material';
 import dayjs, { Dayjs } from 'dayjs';
 import weekday from 'dayjs/plugin/weekday';
 import utc from 'dayjs/plugin/utc';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { SearchInput } from '~/components/form';
 import {
   Button,
   DateRangePicker,
   LoadingSpinner,
+  NoData,
   PageLayout,
   type DateRange,
 } from '~/components/ui';
@@ -19,15 +20,31 @@ import { TimesheetTable } from './TimesheetTable';
 dayjs.extend(weekday);
 dayjs.extend(utc);
 
+const STORAGE_KEY = 'timesheetRange';
+
 export const TimesheetsPage = () => {
-  const [startDate, setStartDate] = useState<Dayjs | null>(dayjs().weekday(0).startOf('day'));
-  const [endDate, setEndDate] = useState<Dayjs | null>(dayjs().weekday(6).endOf('day'));
+  const initialRange = useMemo(getInitialRange, []);
+
+  const [startDate, setStartDate] = useState<Dayjs | null>(initialRange.startDate);
+  const [endDate, setEndDate] = useState<Dayjs | null>(initialRange.endDate);
 
   const { data: timesheets, isLoading } = useGetAllTimesheetsQuery({ startDate, endDate });
 
+  useEffect(() => {
+    if (startDate && endDate) {
+      sessionStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({
+          start: startDate.utc().toISOString(),
+          end: endDate.utc().toISOString(),
+        }),
+      );
+    }
+  }, [startDate, endDate]);
+
   const handleSelectDateRange = ({ start, end }: DateRange) => {
-    const newStart = start ? start.startOf('day') : null;
-    const newEnd = end ? end.endOf('day') : null;
+    const newStart = start?.startOf('day') ?? null;
+    const newEnd = end?.endOf('day') ?? null;
 
     const hasChanged =
       (newStart && !newStart.isSame(startDate)) || (newEnd && !newEnd.isSame(endDate));
@@ -38,7 +55,7 @@ export const TimesheetsPage = () => {
     }
   };
 
-  const handleExport = () => alert('This is feature is pending.');
+  const handleExport = () => alert('This feature is pending.');
 
   return (
     <PageLayout p={3}>
@@ -73,11 +90,29 @@ export const TimesheetsPage = () => {
                   Export
                 </Button>
               </Stack>
-              <TimesheetTable timesheets={timesheets} />
+
+              {timesheets?.length ? <TimesheetTable timesheets={timesheets} /> : <NoData />}
             </>
           )}
         </Stack>
       </Container>
     </PageLayout>
   );
+};
+
+const getInitialRange = () => {
+  const saved = sessionStorage.getItem(STORAGE_KEY);
+
+  if (saved) {
+    const { start, end } = JSON.parse(saved);
+    return {
+      startDate: dayjs(start).startOf('day'),
+      endDate: dayjs(end).endOf('day'),
+    };
+  }
+
+  return {
+    startDate: dayjs().weekday(0).startOf('day'),
+    endDate: dayjs().weekday(6).endOf('day'),
+  };
 };

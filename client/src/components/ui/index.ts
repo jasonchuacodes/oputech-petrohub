@@ -8,6 +8,7 @@ export * from './InfoBox';
 export * from './Form';
 export * from './Link';
 export * from './LoadingSpinner';
+export * from './NoData';
 export * from './PageLayout';
 export * from './Paper';
 export * from './StepNavigation';

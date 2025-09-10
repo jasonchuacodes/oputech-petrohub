@@ -1,10 +1,10 @@
 import { Menu, Stack, Typography } from '@mui/material';
-import { CalendarToday as CalendarOutlined } from '@mui/icons-material';
+import { CalendarToday as CalendarOutlined, RestartAltOutlined } from '@mui/icons-material';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { alpha } from '@mui/material/styles';
-import { Dayjs } from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import { useState } from 'react';
 
 import theme from '~/theme';
@@ -41,8 +41,12 @@ export const DateRangePicker = ({
     setEnd(selectedEnd);
     handleClose();
   };
+  const handleReset = () => {
+    setStart(dayjs().weekday(0).startOf('day'));
+    setEnd(dayjs().weekday(6).endOf('day'));
+  };
   const handleAccept = () => {
-    onAccept({ start: start, end: end });
+    onAccept({ start, end });
     handleClose();
   };
 
@@ -141,7 +145,7 @@ export const DateRangePicker = ({
                   setIsEndOpen(false);
                 }}
                 open={isEndOpen}
-                minDate={selectedStart || undefined}
+                minDate={start || undefined}
                 slotProps={{
                   textField: {
                     size: 'small',
@@ -156,24 +160,29 @@ export const DateRangePicker = ({
             </Stack>
 
             {/* Form Actions */}
-            <Stack direction="row" spacing={1} justifyContent="flex-end">
-              <Button
-                disableElevation={true}
-                onClick={handleCancel}
-                type="button"
-                variant="outlined"
-              >
-                Cancel
+            <Stack direction="row" spacing={1} justifyContent="space-between">
+              <Button onClick={handleReset} startIcon={<RestartAltOutlined fontSize="inherit" />}>
+                Reset
               </Button>
-              <Button
-                disabled={!start || !end}
-                type="submit"
-                variant="contained"
-                onClick={handleAccept}
-                color="primary"
-              >
-                OK
-              </Button>
+              <Stack direction="row" spacing={1}>
+                <Button
+                  disableElevation={true}
+                  onClick={handleCancel}
+                  type="button"
+                  variant="outlined"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  disabled={!start || !end}
+                  type="submit"
+                  variant="contained"
+                  onClick={handleAccept}
+                  color="primary"
+                >
+                  OK
+                </Button>
+              </Stack>
             </Stack>
           </Stack>
         </LocalizationProvider>

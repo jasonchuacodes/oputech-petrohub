@@ -20,6 +20,8 @@ export const TimeLogger = () => {
   const [elapsed, setElapsed] = useState('00:00:00');
 
   const { data: timesheet, isLoading: isLoadingTimesheet } = useGetTodayTimesheetQuery();
+  const { mutate: checkIn, isPending: isPendingCheckIn } = useCheckInMutation();
+  const { mutate: checkOut, isPending: isPendingCheckOut } = useCheckOutMutation();
 
   const latestEntry = useMemo(() => {
     if (!timesheet?.entries?.length) return undefined;
@@ -30,6 +32,13 @@ export const TimeLogger = () => {
   }, [timesheet]);
 
   const isCheckedIn = latestEntry?.action === TimesheetEntryActionEnum.CHECK_IN;
+
+  const styles = {
+    borderColor: isCheckedIn ? theme.palette.success.light : theme.palette.grey[400],
+    bgcolor: isCheckedIn
+      ? alpha(theme.palette.success.dark, 0.1)
+      : alpha(theme.palette.grey[600], 0.2),
+  };
 
   useEffect(() => {
     const getElapsedTime = (timesheet: Timesheet | null): number => {
@@ -67,16 +76,6 @@ export const TimeLogger = () => {
 
     return () => clearInterval(id);
   }, [latestEntry, timesheet]);
-
-  const styles = {
-    borderColor: isCheckedIn ? theme.palette.success.light : theme.palette.grey[400],
-    bgcolor: isCheckedIn
-      ? alpha(theme.palette.success.dark, 0.1)
-      : alpha(theme.palette.grey[600], 0.2),
-  };
-
-  const { mutate: checkIn, isPending: isPendingCheckIn } = useCheckInMutation();
-  const { mutate: checkOut, isPending: isPendingCheckOut } = useCheckOutMutation();
 
   const handleToggle = () => {
     if (!isCheckedIn) {

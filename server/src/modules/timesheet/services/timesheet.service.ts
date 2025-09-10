@@ -112,6 +112,7 @@ const getTimesheets = async ({
       entries: true,
       user: {
         select: {
+          id: true,
           name: true,
         },
       },
