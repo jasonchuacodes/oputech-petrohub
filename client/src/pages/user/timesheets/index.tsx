@@ -49,8 +49,9 @@ export const TimesheetsPage = () => {
         {/* TODO: implement query invalidation on daterange selection */}
         <DateRangePicker
           label="Select Time Period"
-          onSelectStart={() => null}
-          onSelectEnd={() => null}
+          selectedStart={null}
+          selectedEnd={null}
+          onAccept={() => null}
         />
       </Stack>
       <Stack padding={2} bgcolor={alpha(theme.palette.info.dark, 0.2)} borderRadius={1}>

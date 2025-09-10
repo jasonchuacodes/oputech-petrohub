@@ -5,7 +5,13 @@ import utc from 'dayjs/plugin/utc';
 import { useState } from 'react';
 
 import { SearchInput } from '~/components/form';
-import { Button, DateRangePicker, LoadingSpinner, PageLayout } from '~/components/ui';
+import {
+  Button,
+  DateRangePicker,
+  LoadingSpinner,
+  PageLayout,
+  type DateRange,
+} from '~/components/ui';
 import { useGetAllTimesheetsQuery } from '~/services/timesheet/timesheet.queries';
 
 import { TimesheetTable } from './TimesheetTable';
@@ -17,23 +23,19 @@ export const TimesheetsPage = () => {
   const [startDate, setStartDate] = useState<Dayjs | null>(dayjs().weekday(0).startOf('day'));
   const [endDate, setEndDate] = useState<Dayjs | null>(dayjs().weekday(6).endOf('day'));
 
-  // TODO: implement query invalidation on daterange selection
-  const handleSelectStart = (date: Dayjs | null) => {
-    if (!date) {
-      setStartDate(null);
-      return;
-    }
-    setStartDate(date.startOf('day'));
-  };
-
   const { data: timesheets, isLoading } = useGetAllTimesheetsQuery({ startDate, endDate });
 
-  const handleSelectEnd = (date: Dayjs | null) => {
-    if (!date) {
-      setEndDate(null);
-      return;
+  const handleSelectDateRange = ({ start, end }: DateRange) => {
+    const newStart = start ? start.startOf('day') : null;
+    const newEnd = end ? end.endOf('day') : null;
+
+    const hasChanged =
+      (newStart && !newStart.isSame(startDate)) || (newEnd && !newEnd.isSame(endDate));
+
+    if (hasChanged) {
+      setStartDate(newStart);
+      setEndDate(newEnd);
     }
-    setEndDate(date.endOf('day'));
   };
 
   const handleExport = () => alert('This is feature is pending.');
@@ -48,11 +50,10 @@ export const TimesheetsPage = () => {
               Timesheets
             </Typography>
             <DateRangePicker
-              startDate={startDate ?? null}
-              endDate={endDate ?? null}
-              onSelectStart={handleSelectStart}
-              onSelectEnd={handleSelectEnd}
+              selectedStart={startDate}
+              selectedEnd={endDate}
               label="Select Time Period"
+              onAccept={handleSelectDateRange}
             />
           </Stack>
 

@@ -1,16 +1,8 @@
 import { MoreHorizOutlined } from '@mui/icons-material';
 import { Menu, MenuItem, Typography, Divider, Button } from '@mui/material';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-
-import { useTenantContext } from '~/context/tenant/useTenantContext';
-import { AdminRoutes } from '~/routes';
-import { pathFor } from '~/utils/pathFor';
 
 export const MoreDetailsMenu = ({ id }: { id: string }) => {
-  const navigate = useNavigate();
-  const { tenantId } = useTenantContext();
-
   const [anchorElSettingsMenu, setAnchorElSettingsMenu] = useState<null | HTMLElement>(null);
   const isOpenSettingsMenu = Boolean(anchorElSettingsMenu);
 
@@ -18,17 +10,7 @@ export const MoreDetailsMenu = ({ id }: { id: string }) => {
 
   const closeMenu = () => setAnchorElSettingsMenu(null);
 
-  const handleViewDetails = () => {
-    navigate(
-      pathFor({
-        pathname: AdminRoutes.TenantUserDetail,
-        params: {
-          tenantId,
-          userId: id,
-        },
-      }),
-    );
-  };
+  const handleViewDetails = () => console.log('Timesheet ID: ', id);
 
   return (
     <>

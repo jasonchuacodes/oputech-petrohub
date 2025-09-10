@@ -9,30 +9,42 @@ import { useState } from 'react';
 
 import theme from '~/theme';
 import { Button } from '~/components/ui';
+import { formatRange } from '~/utils/dateUtils';
+
+export type DateRange = { start: Dayjs | null; end: Dayjs | null };
 
 type DateRangePickerProps = {
   label?: string;
-  startDate?: Dayjs | null;
-  endDate?: Dayjs | null;
-  onSelectStart: (date: Dayjs | null) => void;
-  onSelectEnd: (date: Dayjs | null) => void;
+  selectedStart: Dayjs | null;
+  selectedEnd: Dayjs | null;
+  onAccept: (value: DateRange) => void;
 };
 
 export const DateRangePicker = ({
   label,
-  startDate,
-  endDate,
-  onSelectStart,
-  onSelectEnd,
+  selectedStart,
+  selectedEnd,
+  onAccept,
 }: DateRangePickerProps) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const isOpen = Boolean(anchorEl);
 
+  const [start, setStart] = useState<Dayjs | null>(selectedStart);
+  const [end, setEnd] = useState<Dayjs | null>(selectedEnd);
   const [isStartOpen, setIsStartOpen] = useState(false);
   const [isEndOpen, setIsEndOpen] = useState(false);
 
   const handleOpen = (e: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(e.currentTarget);
   const handleClose = () => setAnchorEl(null);
+  const handleCancel = () => {
+    setStart(selectedStart);
+    setEnd(selectedEnd);
+    handleClose();
+  };
+  const handleAccept = () => {
+    onAccept({ start: start, end: end });
+    handleClose();
+  };
 
   return (
     <Stack spacing={1}>
@@ -52,12 +64,8 @@ export const DateRangePicker = ({
             Time period:
           </Typography>
 
-          {startDate || endDate ? (
-            <Typography component="span">
-              {startDate ? startDate.format('MM/DD/YY') : 'MM/DD/YY'}
-              {' - '}
-              {endDate ? endDate.format('MM/DD/YY') : 'MM/DD/YY'}
-            </Typography>
+          {selectedStart || selectedEnd ? (
+            <Typography component="span">{formatRange(selectedStart, selectedEnd)}</Typography>
           ) : (
             <Typography component="span">{label}</Typography>
           )}
@@ -93,11 +101,11 @@ export const DateRangePicker = ({
                 Start Date
               </Typography>
               <DatePicker
-                value={startDate}
+                value={start}
                 onOpen={() => setIsStartOpen(true)}
                 onClose={() => setIsStartOpen(false)}
                 onChange={(newValue) => {
-                  onSelectStart(newValue);
+                  setStart(newValue);
                   setIsStartOpen(false);
                 }}
                 open={isStartOpen}
@@ -125,19 +133,15 @@ export const DateRangePicker = ({
                 End Date
               </Typography>
               <DatePicker
-                value={endDate}
+                value={end}
                 onOpen={() => setIsEndOpen(true)}
                 onClose={() => setIsEndOpen(false)}
                 onChange={(newValue) => {
-                  onSelectEnd(newValue);
+                  setEnd(newValue);
                   setIsEndOpen(false);
-
-                  if (startDate) {
-                    handleClose();
-                  }
                 }}
                 open={isEndOpen}
-                minDate={startDate || undefined}
+                minDate={selectedStart || undefined}
                 slotProps={{
                   textField: {
                     size: 'small',
@@ -149,6 +153,27 @@ export const DateRangePicker = ({
                   toolbar: undefined,
                 }}
               />
+            </Stack>
+
+            {/* Form Actions */}
+            <Stack direction="row" spacing={1} justifyContent="flex-end">
+              <Button
+                disableElevation={true}
+                onClick={handleCancel}
+                type="button"
+                variant="outlined"
+              >
+                Cancel
+              </Button>
+              <Button
+                disabled={!start || !end}
+                type="submit"
+                variant="contained"
+                onClick={handleAccept}
+                color="primary"
+              >
+                OK
+              </Button>
             </Stack>
           </Stack>
         </LocalizationProvider>

@@ -40,8 +40,11 @@ const useGetAllTimesheetsQuery = ({
   endDate?: Dayjs | null;
 }): UseQueryResult<Timesheet[]> => {
   return useQuery({
-    queryKey: ['timesheets'],
-    queryFn: () => getAllTimesheets({ endDate, startDate }),
+    queryKey: [
+      'timesheets',
+      { startDate: startDate?.toISOString(), endDate: endDate?.toISOString() },
+    ],
+    queryFn: () => getAllTimesheets({ startDate, endDate }),
   });
 };
 
