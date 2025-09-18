@@ -1,6 +1,6 @@
 import { prisma } from '~/db';
 import { Prisma, TimesheetEntryAction, TimesheetStatus } from '~/db/prisma';
-import { ConflictError, NotFoundError } from '~/errors';
+import { ConflictError, ForbiddenError, NotFoundError } from '~/errors';
 
 import { CreateTimesheetPayload } from '../schema/createTimesheetSchema';
 
@@ -142,7 +142,7 @@ const getTimesheets = async ({
   return timesheets;
 };
 
-export const checkIn = async ({ userId, tenantId }: { userId: string; tenantId: string }) => {
+export const checkIn = async (userId: string) => {
   const startOfDay = new Date();
   startOfDay.setUTCHours(0, 0, 0, 0);
 
@@ -158,6 +158,21 @@ export const checkIn = async ({ userId, tenantId }: { userId: string; tenantId: 
       },
     },
   });
+
+  const userWithTenant = await prisma.user.findFirst({
+    where: {
+      id: userId,
+    },
+    include: {
+      tenants: true,
+    },
+  });
+
+  if (!userWithTenant || userWithTenant.tenants.length === 0) {
+    throw new ForbiddenError('User has no tenant assigned');
+  }
+
+  const tenantId = userWithTenant.tenants[0].tenantId;
 
   if (!timesheet) {
     return await createTimesheet({ userId, tenantId });
@@ -189,7 +204,7 @@ export const checkIn = async ({ userId, tenantId }: { userId: string; tenantId: 
   });
 };
 
-export const checkOut = async ({ userId }: { userId: string }) => {
+export const checkOut = async (userId: string) => {
   const today = new Date();
   today.setUTCHours(0, 0, 0, 0);
 

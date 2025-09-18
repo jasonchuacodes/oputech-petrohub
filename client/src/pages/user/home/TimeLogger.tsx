@@ -13,6 +13,7 @@ import {
 } from '~/services/timesheet/timesheet.queries';
 import { TimesheetEntryActionEnum, type Timesheet } from '~/services/timesheet/timesheet.types';
 import theme from '~/theme';
+import { parseBackendError } from '~/utils/parseBackendError';
 
 dayjs.extend(duration);
 
@@ -82,6 +83,10 @@ export const TimeLogger = () => {
       checkIn(undefined, {
         onSuccess: () => {
           toast.success('Checked in successfully');
+        },
+        onError: (err) => {
+          const errorMessage = parseBackendError(err);
+          toast.error(`Failed to check in: ${errorMessage}`);
         },
       });
     } else {

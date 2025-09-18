@@ -14,12 +14,10 @@ import {
 import { GetTimesheetSchema } from '../schema/getTimesheetSchema';
 import { GetTimesheetsSchema } from '../schema/getTimesheetsSchema';
 import { CreateTimesheetSchema } from '../schema/createTimesheetSchema';
-import { CreateTimesheetEntrySchema } from '../schema/createTimesheetEntrySchema';
 
 const validateGetTimesheet = createSchemaValidator(GetTimesheetSchema);
 const validateGetTimesheets = createSchemaValidator(GetTimesheetsSchema);
 const validateCreateTimesheet = createSchemaValidator(CreateTimesheetSchema);
-const validateCreateTimesheetEntry = createSchemaValidator(CreateTimesheetEntrySchema);
 
 const createTimesheet = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
@@ -44,10 +42,8 @@ const createTimesheet = async (req: AuthenticatedRequest, res: Response, next: N
 const checkIn = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   const userId = req.user!.id;
 
-  const { tenantId } = await validateCreateTimesheetEntry(req.body);
-
   try {
-    const data = await checkInService({ userId, tenantId });
+    const data = await checkInService(userId);
 
     res.status(200).json({
       message: 'Checked in successfully',
@@ -62,7 +58,7 @@ const checkOut = async (req: AuthenticatedRequest, res: Response, next: NextFunc
   const userId = req.user!.id;
 
   try {
-    await checkOutService({ userId });
+    await checkOutService(userId);
 
     res.status(200).json({
       message: 'Checked out successfully',
