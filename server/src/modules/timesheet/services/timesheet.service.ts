@@ -91,14 +91,17 @@ const getTimesheets = async ({
   startDate,
   endDate,
   username,
+  tenantId,
 }: {
   userId?: string;
   startDate?: string;
   endDate?: string;
   username?: string;
+  tenantId?: string;
 }) => {
   const where: Prisma.TimesheetWhereInput = {
     userId,
+    tenantId,
     user: username
       ? {
           name: {

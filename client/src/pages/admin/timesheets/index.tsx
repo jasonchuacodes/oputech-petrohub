@@ -4,6 +4,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import weekday from 'dayjs/plugin/weekday';
 import utc from 'dayjs/plugin/utc';
 import { useEffect, useMemo, useState } from 'react';
+import { useParams } from 'react-router-dom';
 
 import { SearchInput } from '~/components/form';
 import {
@@ -24,13 +25,18 @@ dayjs.extend(utc);
 const STORAGE_KEY = 'timesheetRange';
 
 export const TimesheetsPage = () => {
+  const { tenantId } = useParams();
   const initialRange = useMemo(getInitialRange, []);
 
   const [startDate, setStartDate] = useState<Dayjs | null>(initialRange.startDate);
   const [endDate, setEndDate] = useState<Dayjs | null>(initialRange.endDate);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const { data: timesheets, isLoading } = useGetAllTimesheetsQuery({ startDate, endDate });
+  const { data: timesheets, isLoading } = useGetAllTimesheetsQuery({
+    tenantId,
+    startDate,
+    endDate,
+  });
 
   const filteredTimesheets = timesheets?.filter((timesheet) =>
     timesheet.user.name.toLocaleLowerCase().startsWith(searchTerm.toLowerCase()),

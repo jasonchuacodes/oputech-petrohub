@@ -31,17 +31,19 @@ const useGetUserTimesheetsQuery = (filters: {
 };
 
 const useGetAllTimesheetsQuery = ({
+  tenantId,
   startDate,
   endDate,
 }: {
+  tenantId?: string;
   startDate?: Dayjs | null;
   endDate?: Dayjs | null;
-  userId?: string;
 }): UseQueryResult<Timesheet[]> => {
   return useQuery({
     queryKey: [
       'timesheets',
       {
+        tenantId,
         startDate: startDate?.toISOString(),
         endDate: endDate?.toISOString(),
       },
@@ -50,6 +52,7 @@ const useGetAllTimesheetsQuery = ({
       getAllTimesheets({
         startDate,
         endDate,
+        tenantId,
       }),
   });
 };

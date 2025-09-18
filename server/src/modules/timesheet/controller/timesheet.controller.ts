@@ -136,6 +136,7 @@ const getAllTimesheets = async (req: AuthenticatedRequest, res: Response, next: 
     const filters = await validateGetTimesheets({
       startDate: req.query.startDate as string,
       endDate: req.query.endDate as string,
+      tenantId: req.query.tenantId as string,
     });
 
     const timesheets = await getTimesheetsService(filters);
