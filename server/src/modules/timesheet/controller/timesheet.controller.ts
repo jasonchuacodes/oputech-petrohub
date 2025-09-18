@@ -1,6 +1,5 @@
 import { NextFunction, Response } from 'express';
 
-import { NotFoundError } from '~/errors';
 import { AuthenticatedRequest } from '~/middlewares';
 import { createSchemaValidator } from '~/utils';
 
@@ -14,16 +13,21 @@ import {
 } from '../services/timesheet.service';
 import { GetTimesheetSchema } from '../schema/getTimesheetSchema';
 import { GetTimesheetsSchema } from '../schema/getTimesheetsSchema';
+import { CreateTimesheetSchema } from '../schema/createTimesheetSchema';
+import { CreateTimesheetEntrySchema } from '../schema/createTimesheetEntrySchema';
 
 const validateGetTimesheet = createSchemaValidator(GetTimesheetSchema);
 const validateGetTimesheets = createSchemaValidator(GetTimesheetsSchema);
+const validateCreateTimesheet = createSchemaValidator(CreateTimesheetSchema);
+const validateCreateTimesheetEntry = createSchemaValidator(CreateTimesheetEntrySchema);
 
 const createTimesheet = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
-    const userId = req.user!.id;
+    const { tenantId, userId } = await validateCreateTimesheet(req.body);
 
     const timesheet = await createTimesheetService({
       userId,
+      tenantId,
     });
 
     res.status(200).json({
@@ -40,8 +44,10 @@ const createTimesheet = async (req: AuthenticatedRequest, res: Response, next: N
 const checkIn = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   const userId = req.user!.id;
 
+  const { tenantId } = await validateCreateTimesheetEntry(req.body);
+
   try {
-    const data = await checkInService(userId);
+    const data = await checkInService({ userId, tenantId });
 
     res.status(200).json({
       message: 'Checked in successfully',
@@ -54,8 +60,9 @@ const checkIn = async (req: AuthenticatedRequest, res: Response, next: NextFunct
 
 const checkOut = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   const userId = req.user!.id;
+
   try {
-    await checkOutService(userId);
+    await checkOutService({ userId });
 
     res.status(200).json({
       message: 'Checked out successfully',

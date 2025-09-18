@@ -4,7 +4,7 @@ import { ConflictError, NotFoundError } from '~/errors';
 
 import { CreateTimesheetPayload } from '../schema/createTimesheetSchema';
 
-const createTimesheet = async ({ userId }: CreateTimesheetPayload) => {
+const createTimesheet = async ({ userId, tenantId }: CreateTimesheetPayload) => {
   const startOfToday = new Date();
   startOfToday.setHours(0, 0, 0, 0);
 
@@ -28,6 +28,7 @@ const createTimesheet = async ({ userId }: CreateTimesheetPayload) => {
   return prisma.timesheet.create({
     data: {
       user: { connect: { id: userId } },
+      tenant: { connect: { id: tenantId } },
       entries: {
         create: {
           action: TimesheetEntryAction.CHECK_IN,
@@ -138,7 +139,7 @@ const getTimesheets = async ({
   return timesheets;
 };
 
-export const checkIn = async (userId: string) => {
+export const checkIn = async ({ userId, tenantId }: { userId: string; tenantId: string }) => {
   const startOfDay = new Date();
   startOfDay.setUTCHours(0, 0, 0, 0);
 
@@ -156,7 +157,7 @@ export const checkIn = async (userId: string) => {
   });
 
   if (!timesheet) {
-    return await createTimesheet({ userId });
+    return await createTimesheet({ userId, tenantId });
   }
 
   const latestEntry = await prisma.timesheetEntry.findFirst({
@@ -185,7 +186,7 @@ export const checkIn = async (userId: string) => {
   });
 };
 
-export const checkOut = async (userId: string) => {
+export const checkOut = async ({ userId }: { userId: string }) => {
   const today = new Date();
   today.setUTCHours(0, 0, 0, 0);
 
