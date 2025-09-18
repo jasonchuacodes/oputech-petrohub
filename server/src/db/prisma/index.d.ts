@@ -1508,11 +1508,13 @@ export namespace Prisma {
   export type TenantCountOutputType = {
     documents: number
     users: number
+    timesheets: number
   }
 
   export type TenantCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     documents?: boolean | TenantCountOutputTypeCountDocumentsArgs
     users?: boolean | TenantCountOutputTypeCountUsersArgs
+    timesheets?: boolean | TenantCountOutputTypeCountTimesheetsArgs
   }
 
   // Custom InputTypes
@@ -1538,6 +1540,13 @@ export namespace Prisma {
    */
   export type TenantCountOutputTypeCountUsersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: TenantsOnUsersWhereInput
+  }
+
+  /**
+   * TenantCountOutputType without action
+   */
+  export type TenantCountOutputTypeCountTimesheetsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TimesheetWhereInput
   }
 
 
@@ -3062,6 +3071,7 @@ export namespace Prisma {
     updatedAt?: boolean
     documents?: boolean | Tenant$documentsArgs<ExtArgs>
     users?: boolean | Tenant$usersArgs<ExtArgs>
+    timesheets?: boolean | Tenant$timesheetsArgs<ExtArgs>
     _count?: boolean | TenantCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["tenant"]>
 
@@ -3117,6 +3127,7 @@ export namespace Prisma {
   export type TenantInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     documents?: boolean | Tenant$documentsArgs<ExtArgs>
     users?: boolean | Tenant$usersArgs<ExtArgs>
+    timesheets?: boolean | Tenant$timesheetsArgs<ExtArgs>
     _count?: boolean | TenantCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type TenantIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -3127,6 +3138,7 @@ export namespace Prisma {
     objects: {
       documents: Prisma.$DocumentPayload<ExtArgs>[]
       users: Prisma.$TenantsOnUsersPayload<ExtArgs>[]
+      timesheets: Prisma.$TimesheetPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -3538,6 +3550,7 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     documents<T extends Tenant$documentsArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$documentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     users<T extends Tenant$usersArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$usersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TenantsOnUsersPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    timesheets<T extends Tenant$timesheetsArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$timesheetsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TimesheetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4013,6 +4026,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: TenantsOnUsersScalarFieldEnum | TenantsOnUsersScalarFieldEnum[]
+  }
+
+  /**
+   * Tenant.timesheets
+   */
+  export type Tenant$timesheetsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Timesheet
+     */
+    select?: TimesheetSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Timesheet
+     */
+    omit?: TimesheetOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TimesheetInclude<ExtArgs> | null
+    where?: TimesheetWhereInput
+    orderBy?: TimesheetOrderByWithRelationInput | TimesheetOrderByWithRelationInput[]
+    cursor?: TimesheetWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: TimesheetScalarFieldEnum | TimesheetScalarFieldEnum[]
   }
 
   /**
@@ -7213,6 +7250,7 @@ export namespace Prisma {
   export type TimesheetMinAggregateOutputType = {
     id: string | null
     userId: string | null
+    tenantId: string | null
     totalHours: number | null
     status: $Enums.TimesheetStatus | null
     createdAt: Date | null
@@ -7222,6 +7260,7 @@ export namespace Prisma {
   export type TimesheetMaxAggregateOutputType = {
     id: string | null
     userId: string | null
+    tenantId: string | null
     totalHours: number | null
     status: $Enums.TimesheetStatus | null
     createdAt: Date | null
@@ -7231,6 +7270,7 @@ export namespace Prisma {
   export type TimesheetCountAggregateOutputType = {
     id: number
     userId: number
+    tenantId: number
     totalHours: number
     status: number
     createdAt: number
@@ -7250,6 +7290,7 @@ export namespace Prisma {
   export type TimesheetMinAggregateInputType = {
     id?: true
     userId?: true
+    tenantId?: true
     totalHours?: true
     status?: true
     createdAt?: true
@@ -7259,6 +7300,7 @@ export namespace Prisma {
   export type TimesheetMaxAggregateInputType = {
     id?: true
     userId?: true
+    tenantId?: true
     totalHours?: true
     status?: true
     createdAt?: true
@@ -7268,6 +7310,7 @@ export namespace Prisma {
   export type TimesheetCountAggregateInputType = {
     id?: true
     userId?: true
+    tenantId?: true
     totalHours?: true
     status?: true
     createdAt?: true
@@ -7364,6 +7407,7 @@ export namespace Prisma {
   export type TimesheetGroupByOutputType = {
     id: string
     userId: string
+    tenantId: string
     totalHours: number
     status: $Enums.TimesheetStatus
     createdAt: Date
@@ -7392,11 +7436,13 @@ export namespace Prisma {
   export type TimesheetSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     userId?: boolean
+    tenantId?: boolean
     totalHours?: boolean
     status?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
     entries?: boolean | Timesheet$entriesArgs<ExtArgs>
     _count?: boolean | TimesheetCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["timesheet"]>
@@ -7404,54 +7450,64 @@ export namespace Prisma {
   export type TimesheetSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     userId?: boolean
+    tenantId?: boolean
     totalHours?: boolean
     status?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["timesheet"]>
 
   export type TimesheetSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     userId?: boolean
+    tenantId?: boolean
     totalHours?: boolean
     status?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["timesheet"]>
 
   export type TimesheetSelectScalar = {
     id?: boolean
     userId?: boolean
+    tenantId?: boolean
     totalHours?: boolean
     status?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type TimesheetOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "totalHours" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["timesheet"]>
+  export type TimesheetOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "tenantId" | "totalHours" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["timesheet"]>
   export type TimesheetInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
     entries?: boolean | Timesheet$entriesArgs<ExtArgs>
     _count?: boolean | TimesheetCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type TimesheetIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
   }
   export type TimesheetIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
   }
 
   export type $TimesheetPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Timesheet"
     objects: {
       user: Prisma.$UserPayload<ExtArgs>
+      tenant: Prisma.$TenantPayload<ExtArgs>
       entries: Prisma.$TimesheetEntryPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
       userId: string
+      tenantId: string
       totalHours: number
       status: $Enums.TimesheetStatus
       createdAt: Date
@@ -7851,6 +7907,7 @@ export namespace Prisma {
   export interface Prisma__TimesheetClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    tenant<T extends TenantDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TenantDefaultArgs<ExtArgs>>): Prisma__TenantClient<$Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     entries<T extends Timesheet$entriesArgs<ExtArgs> = {}>(args?: Subset<T, Timesheet$entriesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TimesheetEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -7883,6 +7940,7 @@ export namespace Prisma {
   interface TimesheetFieldRefs {
     readonly id: FieldRef<"Timesheet", 'String'>
     readonly userId: FieldRef<"Timesheet", 'String'>
+    readonly tenantId: FieldRef<"Timesheet", 'String'>
     readonly totalHours: FieldRef<"Timesheet", 'Float'>
     readonly status: FieldRef<"Timesheet", 'TimesheetStatus'>
     readonly createdAt: FieldRef<"Timesheet", 'DateTime'>
@@ -9458,6 +9516,7 @@ export namespace Prisma {
   export const TimesheetScalarFieldEnum: {
     id: 'id',
     userId: 'userId',
+    tenantId: 'tenantId',
     totalHours: 'totalHours',
     status: 'status',
     createdAt: 'createdAt',
@@ -9737,6 +9796,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Tenant"> | Date | string
     documents?: DocumentListRelationFilter
     users?: TenantsOnUsersListRelationFilter
+    timesheets?: TimesheetListRelationFilter
   }
 
   export type TenantOrderByWithRelationInput = {
@@ -9755,6 +9815,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     documents?: DocumentOrderByRelationAggregateInput
     users?: TenantsOnUsersOrderByRelationAggregateInput
+    timesheets?: TimesheetOrderByRelationAggregateInput
   }
 
   export type TenantWhereUniqueInput = Prisma.AtLeast<{
@@ -9776,6 +9837,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Tenant"> | Date | string
     documents?: DocumentListRelationFilter
     users?: TenantsOnUsersListRelationFilter
+    timesheets?: TimesheetListRelationFilter
   }, "id">
 
   export type TenantOrderByWithAggregationInput = {
@@ -9981,22 +10043,26 @@ export namespace Prisma {
     NOT?: TimesheetWhereInput | TimesheetWhereInput[]
     id?: StringFilter<"Timesheet"> | string
     userId?: StringFilter<"Timesheet"> | string
+    tenantId?: StringFilter<"Timesheet"> | string
     totalHours?: FloatFilter<"Timesheet"> | number
     status?: EnumTimesheetStatusFilter<"Timesheet"> | $Enums.TimesheetStatus
     createdAt?: DateTimeFilter<"Timesheet"> | Date | string
     updatedAt?: DateTimeFilter<"Timesheet"> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
     entries?: TimesheetEntryListRelationFilter
   }
 
   export type TimesheetOrderByWithRelationInput = {
     id?: SortOrder
     userId?: SortOrder
+    tenantId?: SortOrder
     totalHours?: SortOrder
     status?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     user?: UserOrderByWithRelationInput
+    tenant?: TenantOrderByWithRelationInput
     entries?: TimesheetEntryOrderByRelationAggregateInput
   }
 
@@ -10006,17 +10072,20 @@ export namespace Prisma {
     OR?: TimesheetWhereInput[]
     NOT?: TimesheetWhereInput | TimesheetWhereInput[]
     userId?: StringFilter<"Timesheet"> | string
+    tenantId?: StringFilter<"Timesheet"> | string
     totalHours?: FloatFilter<"Timesheet"> | number
     status?: EnumTimesheetStatusFilter<"Timesheet"> | $Enums.TimesheetStatus
     createdAt?: DateTimeFilter<"Timesheet"> | Date | string
     updatedAt?: DateTimeFilter<"Timesheet"> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
     entries?: TimesheetEntryListRelationFilter
   }, "id">
 
   export type TimesheetOrderByWithAggregationInput = {
     id?: SortOrder
     userId?: SortOrder
+    tenantId?: SortOrder
     totalHours?: SortOrder
     status?: SortOrder
     createdAt?: SortOrder
@@ -10034,6 +10103,7 @@ export namespace Prisma {
     NOT?: TimesheetScalarWhereWithAggregatesInput | TimesheetScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"Timesheet"> | string
     userId?: StringWithAggregatesFilter<"Timesheet"> | string
+    tenantId?: StringWithAggregatesFilter<"Timesheet"> | string
     totalHours?: FloatWithAggregatesFilter<"Timesheet"> | number
     status?: EnumTimesheetStatusWithAggregatesFilter<"Timesheet"> | $Enums.TimesheetStatus
     createdAt?: DateTimeWithAggregatesFilter<"Timesheet"> | Date | string
@@ -10244,6 +10314,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     documents?: DocumentCreateNestedManyWithoutTenantInput
     users?: TenantsOnUsersCreateNestedManyWithoutTenantInput
+    timesheets?: TimesheetCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateInput = {
@@ -10262,6 +10333,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     documents?: DocumentUncheckedCreateNestedManyWithoutTenantInput
     users?: TenantsOnUsersUncheckedCreateNestedManyWithoutTenantInput
+    timesheets?: TimesheetUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUpdateInput = {
@@ -10280,6 +10352,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     documents?: DocumentUpdateManyWithoutTenantNestedInput
     users?: TenantsOnUsersUpdateManyWithoutTenantNestedInput
+    timesheets?: TimesheetUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateInput = {
@@ -10298,6 +10371,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     documents?: DocumentUncheckedUpdateManyWithoutTenantNestedInput
     users?: TenantsOnUsersUncheckedUpdateManyWithoutTenantNestedInput
+    timesheets?: TimesheetUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantCreateManyInput = {
@@ -10506,12 +10580,14 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutTimesheetsInput
+    tenant: TenantCreateNestedOneWithoutTimesheetsInput
     entries?: TimesheetEntryCreateNestedManyWithoutTimesheetInput
   }
 
   export type TimesheetUncheckedCreateInput = {
     id?: string
     userId: string
+    tenantId: string
     totalHours?: number
     status?: $Enums.TimesheetStatus
     createdAt?: Date | string
@@ -10526,12 +10602,14 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutTimesheetsNestedInput
+    tenant?: TenantUpdateOneRequiredWithoutTimesheetsNestedInput
     entries?: TimesheetEntryUpdateManyWithoutTimesheetNestedInput
   }
 
   export type TimesheetUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
     totalHours?: FloatFieldUpdateOperationsInput | number
     status?: EnumTimesheetStatusFieldUpdateOperationsInput | $Enums.TimesheetStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -10542,6 +10620,7 @@ export namespace Prisma {
   export type TimesheetCreateManyInput = {
     id?: string
     userId: string
+    tenantId: string
     totalHours?: number
     status?: $Enums.TimesheetStatus
     createdAt?: Date | string
@@ -10559,6 +10638,7 @@ export namespace Prisma {
   export type TimesheetUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
     totalHours?: FloatFieldUpdateOperationsInput | number
     status?: EnumTimesheetStatusFieldUpdateOperationsInput | $Enums.TimesheetStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -11005,6 +11085,7 @@ export namespace Prisma {
   export type TimesheetCountOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
+    tenantId?: SortOrder
     totalHours?: SortOrder
     status?: SortOrder
     createdAt?: SortOrder
@@ -11018,6 +11099,7 @@ export namespace Prisma {
   export type TimesheetMaxOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
+    tenantId?: SortOrder
     totalHours?: SortOrder
     status?: SortOrder
     createdAt?: SortOrder
@@ -11027,6 +11109,7 @@ export namespace Prisma {
   export type TimesheetMinOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
+    tenantId?: SortOrder
     totalHours?: SortOrder
     status?: SortOrder
     createdAt?: SortOrder
@@ -11266,6 +11349,13 @@ export namespace Prisma {
     connect?: TenantsOnUsersWhereUniqueInput | TenantsOnUsersWhereUniqueInput[]
   }
 
+  export type TimesheetCreateNestedManyWithoutTenantInput = {
+    create?: XOR<TimesheetCreateWithoutTenantInput, TimesheetUncheckedCreateWithoutTenantInput> | TimesheetCreateWithoutTenantInput[] | TimesheetUncheckedCreateWithoutTenantInput[]
+    connectOrCreate?: TimesheetCreateOrConnectWithoutTenantInput | TimesheetCreateOrConnectWithoutTenantInput[]
+    createMany?: TimesheetCreateManyTenantInputEnvelope
+    connect?: TimesheetWhereUniqueInput | TimesheetWhereUniqueInput[]
+  }
+
   export type DocumentUncheckedCreateNestedManyWithoutTenantInput = {
     create?: XOR<DocumentCreateWithoutTenantInput, DocumentUncheckedCreateWithoutTenantInput> | DocumentCreateWithoutTenantInput[] | DocumentUncheckedCreateWithoutTenantInput[]
     connectOrCreate?: DocumentCreateOrConnectWithoutTenantInput | DocumentCreateOrConnectWithoutTenantInput[]
@@ -11278,6 +11368,13 @@ export namespace Prisma {
     connectOrCreate?: TenantsOnUsersCreateOrConnectWithoutTenantInput | TenantsOnUsersCreateOrConnectWithoutTenantInput[]
     createMany?: TenantsOnUsersCreateManyTenantInputEnvelope
     connect?: TenantsOnUsersWhereUniqueInput | TenantsOnUsersWhereUniqueInput[]
+  }
+
+  export type TimesheetUncheckedCreateNestedManyWithoutTenantInput = {
+    create?: XOR<TimesheetCreateWithoutTenantInput, TimesheetUncheckedCreateWithoutTenantInput> | TimesheetCreateWithoutTenantInput[] | TimesheetUncheckedCreateWithoutTenantInput[]
+    connectOrCreate?: TimesheetCreateOrConnectWithoutTenantInput | TimesheetCreateOrConnectWithoutTenantInput[]
+    createMany?: TimesheetCreateManyTenantInputEnvelope
+    connect?: TimesheetWhereUniqueInput | TimesheetWhereUniqueInput[]
   }
 
   export type DocumentUpdateManyWithoutTenantNestedInput = {
@@ -11308,6 +11405,20 @@ export namespace Prisma {
     deleteMany?: TenantsOnUsersScalarWhereInput | TenantsOnUsersScalarWhereInput[]
   }
 
+  export type TimesheetUpdateManyWithoutTenantNestedInput = {
+    create?: XOR<TimesheetCreateWithoutTenantInput, TimesheetUncheckedCreateWithoutTenantInput> | TimesheetCreateWithoutTenantInput[] | TimesheetUncheckedCreateWithoutTenantInput[]
+    connectOrCreate?: TimesheetCreateOrConnectWithoutTenantInput | TimesheetCreateOrConnectWithoutTenantInput[]
+    upsert?: TimesheetUpsertWithWhereUniqueWithoutTenantInput | TimesheetUpsertWithWhereUniqueWithoutTenantInput[]
+    createMany?: TimesheetCreateManyTenantInputEnvelope
+    set?: TimesheetWhereUniqueInput | TimesheetWhereUniqueInput[]
+    disconnect?: TimesheetWhereUniqueInput | TimesheetWhereUniqueInput[]
+    delete?: TimesheetWhereUniqueInput | TimesheetWhereUniqueInput[]
+    connect?: TimesheetWhereUniqueInput | TimesheetWhereUniqueInput[]
+    update?: TimesheetUpdateWithWhereUniqueWithoutTenantInput | TimesheetUpdateWithWhereUniqueWithoutTenantInput[]
+    updateMany?: TimesheetUpdateManyWithWhereWithoutTenantInput | TimesheetUpdateManyWithWhereWithoutTenantInput[]
+    deleteMany?: TimesheetScalarWhereInput | TimesheetScalarWhereInput[]
+  }
+
   export type DocumentUncheckedUpdateManyWithoutTenantNestedInput = {
     create?: XOR<DocumentCreateWithoutTenantInput, DocumentUncheckedCreateWithoutTenantInput> | DocumentCreateWithoutTenantInput[] | DocumentUncheckedCreateWithoutTenantInput[]
     connectOrCreate?: DocumentCreateOrConnectWithoutTenantInput | DocumentCreateOrConnectWithoutTenantInput[]
@@ -11334,6 +11445,20 @@ export namespace Prisma {
     update?: TenantsOnUsersUpdateWithWhereUniqueWithoutTenantInput | TenantsOnUsersUpdateWithWhereUniqueWithoutTenantInput[]
     updateMany?: TenantsOnUsersUpdateManyWithWhereWithoutTenantInput | TenantsOnUsersUpdateManyWithWhereWithoutTenantInput[]
     deleteMany?: TenantsOnUsersScalarWhereInput | TenantsOnUsersScalarWhereInput[]
+  }
+
+  export type TimesheetUncheckedUpdateManyWithoutTenantNestedInput = {
+    create?: XOR<TimesheetCreateWithoutTenantInput, TimesheetUncheckedCreateWithoutTenantInput> | TimesheetCreateWithoutTenantInput[] | TimesheetUncheckedCreateWithoutTenantInput[]
+    connectOrCreate?: TimesheetCreateOrConnectWithoutTenantInput | TimesheetCreateOrConnectWithoutTenantInput[]
+    upsert?: TimesheetUpsertWithWhereUniqueWithoutTenantInput | TimesheetUpsertWithWhereUniqueWithoutTenantInput[]
+    createMany?: TimesheetCreateManyTenantInputEnvelope
+    set?: TimesheetWhereUniqueInput | TimesheetWhereUniqueInput[]
+    disconnect?: TimesheetWhereUniqueInput | TimesheetWhereUniqueInput[]
+    delete?: TimesheetWhereUniqueInput | TimesheetWhereUniqueInput[]
+    connect?: TimesheetWhereUniqueInput | TimesheetWhereUniqueInput[]
+    update?: TimesheetUpdateWithWhereUniqueWithoutTenantInput | TimesheetUpdateWithWhereUniqueWithoutTenantInput[]
+    updateMany?: TimesheetUpdateManyWithWhereWithoutTenantInput | TimesheetUpdateManyWithWhereWithoutTenantInput[]
+    deleteMany?: TimesheetScalarWhereInput | TimesheetScalarWhereInput[]
   }
 
   export type UserCreateNestedOneWithoutTenantsInput = {
@@ -11398,6 +11523,12 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput
   }
 
+  export type TenantCreateNestedOneWithoutTimesheetsInput = {
+    create?: XOR<TenantCreateWithoutTimesheetsInput, TenantUncheckedCreateWithoutTimesheetsInput>
+    connectOrCreate?: TenantCreateOrConnectWithoutTimesheetsInput
+    connect?: TenantWhereUniqueInput
+  }
+
   export type TimesheetEntryCreateNestedManyWithoutTimesheetInput = {
     create?: XOR<TimesheetEntryCreateWithoutTimesheetInput, TimesheetEntryUncheckedCreateWithoutTimesheetInput> | TimesheetEntryCreateWithoutTimesheetInput[] | TimesheetEntryUncheckedCreateWithoutTimesheetInput[]
     connectOrCreate?: TimesheetEntryCreateOrConnectWithoutTimesheetInput | TimesheetEntryCreateOrConnectWithoutTimesheetInput[]
@@ -11430,6 +11561,14 @@ export namespace Prisma {
     upsert?: UserUpsertWithoutTimesheetsInput
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutTimesheetsInput, UserUpdateWithoutTimesheetsInput>, UserUncheckedUpdateWithoutTimesheetsInput>
+  }
+
+  export type TenantUpdateOneRequiredWithoutTimesheetsNestedInput = {
+    create?: XOR<TenantCreateWithoutTimesheetsInput, TenantUncheckedCreateWithoutTimesheetsInput>
+    connectOrCreate?: TenantCreateOrConnectWithoutTimesheetsInput
+    upsert?: TenantUpsertWithoutTimesheetsInput
+    connect?: TenantWhereUniqueInput
+    update?: XOR<XOR<TenantUpdateToOneWithWhereWithoutTimesheetsInput, TenantUpdateWithoutTimesheetsInput>, TenantUncheckedUpdateWithoutTimesheetsInput>
   }
 
   export type TimesheetEntryUpdateManyWithoutTimesheetNestedInput = {
@@ -11722,11 +11861,13 @@ export namespace Prisma {
     status?: $Enums.TimesheetStatus
     createdAt?: Date | string
     updatedAt?: Date | string
+    tenant: TenantCreateNestedOneWithoutTimesheetsInput
     entries?: TimesheetEntryCreateNestedManyWithoutTimesheetInput
   }
 
   export type TimesheetUncheckedCreateWithoutUserInput = {
     id?: string
+    tenantId: string
     totalHours?: number
     status?: $Enums.TimesheetStatus
     createdAt?: Date | string
@@ -11812,6 +11953,7 @@ export namespace Prisma {
     NOT?: TimesheetScalarWhereInput | TimesheetScalarWhereInput[]
     id?: StringFilter<"Timesheet"> | string
     userId?: StringFilter<"Timesheet"> | string
+    tenantId?: StringFilter<"Timesheet"> | string
     totalHours?: FloatFilter<"Timesheet"> | number
     status?: EnumTimesheetStatusFilter<"Timesheet"> | $Enums.TimesheetStatus
     createdAt?: DateTimeFilter<"Timesheet"> | Date | string
@@ -11884,6 +12026,36 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type TimesheetCreateWithoutTenantInput = {
+    id?: string
+    totalHours?: number
+    status?: $Enums.TimesheetStatus
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutTimesheetsInput
+    entries?: TimesheetEntryCreateNestedManyWithoutTimesheetInput
+  }
+
+  export type TimesheetUncheckedCreateWithoutTenantInput = {
+    id?: string
+    userId: string
+    totalHours?: number
+    status?: $Enums.TimesheetStatus
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    entries?: TimesheetEntryUncheckedCreateNestedManyWithoutTimesheetInput
+  }
+
+  export type TimesheetCreateOrConnectWithoutTenantInput = {
+    where: TimesheetWhereUniqueInput
+    create: XOR<TimesheetCreateWithoutTenantInput, TimesheetUncheckedCreateWithoutTenantInput>
+  }
+
+  export type TimesheetCreateManyTenantInputEnvelope = {
+    data: TimesheetCreateManyTenantInput | TimesheetCreateManyTenantInput[]
+    skipDuplicates?: boolean
+  }
+
   export type DocumentUpsertWithWhereUniqueWithoutTenantInput = {
     where: DocumentWhereUniqueInput
     update: XOR<DocumentUpdateWithoutTenantInput, DocumentUncheckedUpdateWithoutTenantInput>
@@ -11925,6 +12097,22 @@ export namespace Prisma {
   export type TenantsOnUsersUpdateManyWithWhereWithoutTenantInput = {
     where: TenantsOnUsersScalarWhereInput
     data: XOR<TenantsOnUsersUpdateManyMutationInput, TenantsOnUsersUncheckedUpdateManyWithoutTenantInput>
+  }
+
+  export type TimesheetUpsertWithWhereUniqueWithoutTenantInput = {
+    where: TimesheetWhereUniqueInput
+    update: XOR<TimesheetUpdateWithoutTenantInput, TimesheetUncheckedUpdateWithoutTenantInput>
+    create: XOR<TimesheetCreateWithoutTenantInput, TimesheetUncheckedCreateWithoutTenantInput>
+  }
+
+  export type TimesheetUpdateWithWhereUniqueWithoutTenantInput = {
+    where: TimesheetWhereUniqueInput
+    data: XOR<TimesheetUpdateWithoutTenantInput, TimesheetUncheckedUpdateWithoutTenantInput>
+  }
+
+  export type TimesheetUpdateManyWithWhereWithoutTenantInput = {
+    where: TimesheetScalarWhereInput
+    data: XOR<TimesheetUpdateManyMutationInput, TimesheetUncheckedUpdateManyWithoutTenantInput>
   }
 
   export type UserCreateWithoutTenantsInput = {
@@ -11987,6 +12175,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     documents?: DocumentCreateNestedManyWithoutTenantInput
+    timesheets?: TimesheetCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateWithoutUsersInput = {
@@ -12004,6 +12193,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     documents?: DocumentUncheckedCreateNestedManyWithoutTenantInput
+    timesheets?: TimesheetUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantCreateOrConnectWithoutUsersInput = {
@@ -12088,6 +12278,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     documents?: DocumentUpdateManyWithoutTenantNestedInput
+    timesheets?: TimesheetUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutUsersInput = {
@@ -12105,6 +12296,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     documents?: DocumentUncheckedUpdateManyWithoutTenantNestedInput
+    timesheets?: TimesheetUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type UserCreateWithoutSessionsInput = {
@@ -12218,6 +12410,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     users?: TenantsOnUsersCreateNestedManyWithoutTenantInput
+    timesheets?: TimesheetCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateWithoutDocumentsInput = {
@@ -12235,6 +12428,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     users?: TenantsOnUsersUncheckedCreateNestedManyWithoutTenantInput
+    timesheets?: TimesheetUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantCreateOrConnectWithoutDocumentsInput = {
@@ -12268,6 +12462,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     users?: TenantsOnUsersUpdateManyWithoutTenantNestedInput
+    timesheets?: TimesheetUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutDocumentsInput = {
@@ -12285,6 +12480,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     users?: TenantsOnUsersUncheckedUpdateManyWithoutTenantNestedInput
+    timesheets?: TimesheetUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type UserCreateWithoutTimesheetsInput = {
@@ -12330,6 +12526,47 @@ export namespace Prisma {
   export type UserCreateOrConnectWithoutTimesheetsInput = {
     where: UserWhereUniqueInput
     create: XOR<UserCreateWithoutTimesheetsInput, UserUncheckedCreateWithoutTimesheetsInput>
+  }
+
+  export type TenantCreateWithoutTimesheetsInput = {
+    id?: string
+    name: string
+    email: string
+    contact: string
+    address?: string | null
+    description?: string | null
+    sss?: string | null
+    tin?: string | null
+    philhealth?: string | null
+    pagibig?: string | null
+    logoUrl?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    documents?: DocumentCreateNestedManyWithoutTenantInput
+    users?: TenantsOnUsersCreateNestedManyWithoutTenantInput
+  }
+
+  export type TenantUncheckedCreateWithoutTimesheetsInput = {
+    id?: string
+    name: string
+    email: string
+    contact: string
+    address?: string | null
+    description?: string | null
+    sss?: string | null
+    tin?: string | null
+    philhealth?: string | null
+    pagibig?: string | null
+    logoUrl?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    documents?: DocumentUncheckedCreateNestedManyWithoutTenantInput
+    users?: TenantsOnUsersUncheckedCreateNestedManyWithoutTenantInput
+  }
+
+  export type TenantCreateOrConnectWithoutTimesheetsInput = {
+    where: TenantWhereUniqueInput
+    create: XOR<TenantCreateWithoutTimesheetsInput, TenantUncheckedCreateWithoutTimesheetsInput>
   }
 
   export type TimesheetEntryCreateWithoutTimesheetInput = {
@@ -12405,6 +12642,53 @@ export namespace Prisma {
     tenants?: TenantsOnUsersUncheckedUpdateManyWithoutUserNestedInput
   }
 
+  export type TenantUpsertWithoutTimesheetsInput = {
+    update: XOR<TenantUpdateWithoutTimesheetsInput, TenantUncheckedUpdateWithoutTimesheetsInput>
+    create: XOR<TenantCreateWithoutTimesheetsInput, TenantUncheckedCreateWithoutTimesheetsInput>
+    where?: TenantWhereInput
+  }
+
+  export type TenantUpdateToOneWithWhereWithoutTimesheetsInput = {
+    where?: TenantWhereInput
+    data: XOR<TenantUpdateWithoutTimesheetsInput, TenantUncheckedUpdateWithoutTimesheetsInput>
+  }
+
+  export type TenantUpdateWithoutTimesheetsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    contact?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    sss?: NullableStringFieldUpdateOperationsInput | string | null
+    tin?: NullableStringFieldUpdateOperationsInput | string | null
+    philhealth?: NullableStringFieldUpdateOperationsInput | string | null
+    pagibig?: NullableStringFieldUpdateOperationsInput | string | null
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    documents?: DocumentUpdateManyWithoutTenantNestedInput
+    users?: TenantsOnUsersUpdateManyWithoutTenantNestedInput
+  }
+
+  export type TenantUncheckedUpdateWithoutTimesheetsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    contact?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    sss?: NullableStringFieldUpdateOperationsInput | string | null
+    tin?: NullableStringFieldUpdateOperationsInput | string | null
+    philhealth?: NullableStringFieldUpdateOperationsInput | string | null
+    pagibig?: NullableStringFieldUpdateOperationsInput | string | null
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    documents?: DocumentUncheckedUpdateManyWithoutTenantNestedInput
+    users?: TenantsOnUsersUncheckedUpdateManyWithoutTenantNestedInput
+  }
+
   export type TimesheetEntryUpsertWithWhereUniqueWithoutTimesheetInput = {
     where: TimesheetEntryWhereUniqueInput
     update: XOR<TimesheetEntryUpdateWithoutTimesheetInput, TimesheetEntryUncheckedUpdateWithoutTimesheetInput>
@@ -12438,11 +12722,13 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutTimesheetsInput
+    tenant: TenantCreateNestedOneWithoutTimesheetsInput
   }
 
   export type TimesheetUncheckedCreateWithoutEntriesInput = {
     id?: string
     userId: string
+    tenantId: string
     totalHours?: number
     status?: $Enums.TimesheetStatus
     createdAt?: Date | string
@@ -12472,11 +12758,13 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutTimesheetsNestedInput
+    tenant?: TenantUpdateOneRequiredWithoutTimesheetsNestedInput
   }
 
   export type TimesheetUncheckedUpdateWithoutEntriesInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
     totalHours?: FloatFieldUpdateOperationsInput | number
     status?: EnumTimesheetStatusFieldUpdateOperationsInput | $Enums.TimesheetStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12493,6 +12781,7 @@ export namespace Prisma {
 
   export type TimesheetCreateManyUserInput = {
     id?: string
+    tenantId: string
     totalHours?: number
     status?: $Enums.TimesheetStatus
     createdAt?: Date | string
@@ -12533,11 +12822,13 @@ export namespace Prisma {
     status?: EnumTimesheetStatusFieldUpdateOperationsInput | $Enums.TimesheetStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    tenant?: TenantUpdateOneRequiredWithoutTimesheetsNestedInput
     entries?: TimesheetEntryUpdateManyWithoutTimesheetNestedInput
   }
 
   export type TimesheetUncheckedUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
     totalHours?: FloatFieldUpdateOperationsInput | number
     status?: EnumTimesheetStatusFieldUpdateOperationsInput | $Enums.TimesheetStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12547,6 +12838,7 @@ export namespace Prisma {
 
   export type TimesheetUncheckedUpdateManyWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
     totalHours?: FloatFieldUpdateOperationsInput | number
     status?: EnumTimesheetStatusFieldUpdateOperationsInput | $Enums.TimesheetStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12574,6 +12866,15 @@ export namespace Prisma {
 
   export type TenantsOnUsersCreateManyTenantInput = {
     userId: string
+  }
+
+  export type TimesheetCreateManyTenantInput = {
+    id?: string
+    userId: string
+    totalHours?: number
+    status?: $Enums.TimesheetStatus
+    createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
   export type DocumentUpdateWithoutTenantInput = {
@@ -12607,6 +12908,35 @@ export namespace Prisma {
 
   export type TenantsOnUsersUncheckedUpdateManyWithoutTenantInput = {
     userId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type TimesheetUpdateWithoutTenantInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    totalHours?: FloatFieldUpdateOperationsInput | number
+    status?: EnumTimesheetStatusFieldUpdateOperationsInput | $Enums.TimesheetStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutTimesheetsNestedInput
+    entries?: TimesheetEntryUpdateManyWithoutTimesheetNestedInput
+  }
+
+  export type TimesheetUncheckedUpdateWithoutTenantInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    totalHours?: FloatFieldUpdateOperationsInput | number
+    status?: EnumTimesheetStatusFieldUpdateOperationsInput | $Enums.TimesheetStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    entries?: TimesheetEntryUncheckedUpdateManyWithoutTimesheetNestedInput
+  }
+
+  export type TimesheetUncheckedUpdateManyWithoutTenantInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    totalHours?: FloatFieldUpdateOperationsInput | number
+    status?: EnumTimesheetStatusFieldUpdateOperationsInput | $Enums.TimesheetStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type TimesheetEntryCreateManyTimesheetInput = {

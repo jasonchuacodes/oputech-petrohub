@@ -179,6 +179,7 @@ exports.Prisma.DocumentScalarFieldEnum = {
 exports.Prisma.TimesheetScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
+  tenantId: 'tenantId',
   totalHours: 'totalHours',
   status: 'status',
   createdAt: 'createdAt',
