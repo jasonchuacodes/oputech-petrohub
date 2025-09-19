@@ -23,6 +23,7 @@ export const TimesheetLogsPage = () => {
   const { tenantId } = useTenantContext();
 
   const { data: timesheetLogs, isLoading } = useGetUserTimesheetsQuery({
+    tenantId,
     userId,
   });
 

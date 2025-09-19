@@ -14,7 +14,7 @@ export const MoreDetailsMenu = ({ id }: { id: string }) => {
 
   return (
     <>
-      <Button onClick={openMenu} size="small" variant="outlined" sx={{ height: 24, minWidth: 24 }}>
+      <Button onClick={openMenu} size="small" variant="text" sx={{ height: 24, minWidth: 24 }}>
         <MoreHorizOutlined fontSize="inherit" />
       </Button>
       <Menu
