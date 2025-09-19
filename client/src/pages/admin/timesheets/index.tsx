@@ -16,17 +16,18 @@ import {
   type DateRange,
 } from '~/components/ui';
 import { useGetAllTimesheetsQuery } from '~/services/timesheet/timesheet.queries';
+import { getInitialRange } from '~/utils/dateUtils';
 
 import { TimesheetTable } from './TimesheetTable';
 
 dayjs.extend(weekday);
 dayjs.extend(utc);
 
-const STORAGE_KEY = 'timesheetRange';
+const TIMESHEETS_KEY = 'timesheetRange';
 
 export const TimesheetsPage = () => {
   const { tenantId } = useParams();
-  const initialRange = useMemo(getInitialRange, []);
+  const initialRange = useMemo(() => getInitialRange(TIMESHEETS_KEY), []);
 
   const [startDate, setStartDate] = useState<Dayjs | null>(initialRange.startDate);
   const [endDate, setEndDate] = useState<Dayjs | null>(initialRange.endDate);
@@ -45,7 +46,7 @@ export const TimesheetsPage = () => {
   useEffect(() => {
     if (startDate && endDate) {
       sessionStorage.setItem(
-        STORAGE_KEY,
+        TIMESHEETS_KEY,
         JSON.stringify({
           start: startDate.utc().toISOString(),
           end: endDate.utc().toISOString(),
@@ -113,21 +114,4 @@ export const TimesheetsPage = () => {
       </Container>
     </PageLayout>
   );
-};
-
-const getInitialRange = () => {
-  const saved = sessionStorage.getItem(STORAGE_KEY);
-
-  if (saved) {
-    const { start, end } = JSON.parse(saved);
-    return {
-      startDate: dayjs(start).startOf('day'),
-      endDate: dayjs(end).endOf('day'),
-    };
-  }
-
-  return {
-    startDate: dayjs().weekday(0).startOf('day'),
-    endDate: dayjs().weekday(6).endOf('day'),
-  };
 };
