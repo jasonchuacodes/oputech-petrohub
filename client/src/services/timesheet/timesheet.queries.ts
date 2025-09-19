@@ -19,14 +19,23 @@ const useGetTodayTimesheetQuery = (): UseQueryResult<Timesheet> => {
   });
 };
 
-const useGetUserTimesheetsQuery = (filters: {
+const useGetUserTimesheetsQuery = ({
+  tenantId,
+  userId,
+  startDate,
+  endDate,
+}: {
+  tenantId?: string;
   userId?: string;
   startDate?: Dayjs | null;
   endDate?: Dayjs | null;
 }): UseQueryResult<Timesheet[]> => {
   return useQuery({
-    queryKey: ['timesheets', { userId: filters?.userId }],
-    queryFn: () => getUserTimesheets(filters),
+    queryKey: [
+      'timesheets',
+      { userId, startDate: startDate?.toISOString(), endDate: endDate?.toISOString() },
+    ],
+    queryFn: () => getUserTimesheets({ tenantId, userId, startDate, endDate }),
   });
 };
 

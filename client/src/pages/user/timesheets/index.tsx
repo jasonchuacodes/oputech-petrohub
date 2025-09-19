@@ -19,9 +19,13 @@ import { TimesheetEntryActionMap } from '~/services/timesheet/timesheet.types';
 
 export const TimesheetsPage = () => {
   const { auth } = useAuthContext();
-  
+
+  const userId = auth?.id;
+  const tenantId = auth?.tenants[0].id;
+
   const { data: timesheets, isLoading: isLoadingTimesheets } = useGetUserTimesheetsQuery({
-    userId: auth?.id,
+    tenantId,
+    userId,
   });
 
   const latestEntries = timesheets

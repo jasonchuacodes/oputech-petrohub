@@ -18,19 +18,22 @@ const getTimesheet = async (timesheetId: string): Promise<Timesheet> => {
 };
 
 const getUserTimesheets = async ({
+  tenantId,
   userId,
   startDate,
   endDate,
 }: {
+  tenantId?: string;
   userId?: string;
   startDate?: Dayjs | null;
   endDate?: Dayjs | null;
 }): Promise<Timesheet[]> => {
   const res = await axios.get('/timesheets', {
     params: {
+      tenantId,
+      userId,
       startDate: startDate ? startDate.utc().toISOString() : undefined,
       endDate: endDate ? endDate.utc().toISOString() : undefined,
-      userId,
     },
   });
 

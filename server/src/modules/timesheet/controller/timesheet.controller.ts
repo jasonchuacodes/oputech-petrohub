@@ -109,9 +109,10 @@ const getTimesheetById = async (req: AuthenticatedRequest, res: Response, next: 
 const getUserTimesheets = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const filters = await validateGetTimesheets({
+      tenantId: req.query.tenantId as string,
+      userId: req.query.userId as string,
       startDate: req.query.startDate as string,
       endDate: req.query.endDate as string,
-      userId: req.query.userId as string,
     });
 
     const timesheets = await getTimesheetsService(filters);
@@ -130,9 +131,9 @@ const getUserTimesheets = async (req: AuthenticatedRequest, res: Response, next:
 const getAllTimesheets = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const filters = await validateGetTimesheets({
+      tenantId: req.query.tenantId as string,
       startDate: req.query.startDate as string,
       endDate: req.query.endDate as string,
-      tenantId: req.query.tenantId as string,
     });
 
     const timesheets = await getTimesheetsService(filters);
