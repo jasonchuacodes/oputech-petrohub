@@ -1,5 +1,8 @@
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
+  CheckOutlined,
   ChevronRightOutlined,
+  CloseOutlined,
   DeleteOutlineOutlined,
   EditOutlined,
 } from '@mui/icons-material';
@@ -14,8 +17,10 @@ import {
   Typography,
 } from '@mui/material';
 import dayjs from 'dayjs';
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 
+import { UpdateTimesheetSchema, type UpdateTimesheetParams } from '~/schema/updateTimesheetSchema';
 import {
   TimesheetEntryActionEnum,
   TimesheetEntryActionMap,
@@ -25,6 +30,7 @@ import theme from '~/theme';
 
 export const TimesheetRow = ({ createdAt, entries, id, totalHours }: Timesheet) => {
   const [open, setOpen] = useState(false);
+  const [editMode, setEditMode] = useState(false);
 
   const firstCheckIn = entries.find((e) => e.action === TimesheetEntryActionEnum.CHECK_IN);
 
@@ -32,9 +38,34 @@ export const TimesheetRow = ({ createdAt, entries, id, totalHours }: Timesheet) 
     .reverse()
     .find((e) => e.action === TimesheetEntryActionEnum.CHECK_OUT);
 
+  const {
+    register,
+    formState: { isValid },
+    handleSubmit,
+    reset,
+  } = useForm<UpdateTimesheetParams>({
+    defaultValues: {
+      totalHours,
+    },
+    resolver: zodResolver(UpdateTimesheetSchema),
+  });
+
+  const onSubmit = handleSubmit((data: UpdateTimesheetParams) => {
+    reset();
+    setEditMode(false);
+
+    console.log('Update timesheet: ', data);
+  });
+
   return (
-    <React.Fragment>
-      <TableRow key={id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+    <>
+      <TableRow
+        key={id}
+        sx={{
+          height: 80,
+          '&:last-child td, &:last-child th': { border: 0 },
+        }}
+      >
         <TableCell component="th" scope="row" sx={{ maxWidth: 240 }}>
           {dayjs(createdAt).format('MMMM DD, YYYY')}
         </TableCell>
@@ -52,15 +83,62 @@ export const TimesheetRow = ({ createdAt, entries, id, totalHours }: Timesheet) 
             </Typography>
           </Tooltip>
         </TableCell>
-        <TableCell align="left">{totalHours.toFixed(2)} hrs</TableCell>
-        <TableCell align="left">
-          <IconButton onClick={() => null} size="small">
-            <EditOutlined fontSize="inherit" />
-          </IconButton>
+        <TableCell width={200}>
+          {editMode ? (
+            <form
+              onSubmit={onSubmit}
+              style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}
+            >
+              <input
+                {...register('totalHours', { valueAsNumber: true })}
+                type="number"
+                min={0}
+                max={16.0}
+                step="any"
+                placeholder="0.00"
+                style={{
+                  width: 80,
+                  height: 32,
+                  padding: '4px 8px',
+                  border: '1px solid',
+                  borderRadius: '6px',
+                  fontSize: '0.875rem',
+                  fontFamily: 'inherit',
+                  outline: 'none',
+                }}
+              />
+              <Stack direction="row">
+                <IconButton type="submit" disabled={!isValid} size="small">
+                  <CheckOutlined fontSize="inherit" />
+                </IconButton>
+                <IconButton
+                  onClick={() => {
+                    reset();
+                    setEditMode(false);
+                  }}
+                  size="small"
+                >
+                  <CloseOutlined fontSize="inherit" />
+                </IconButton>
+              </Stack>
+            </form>
+          ) : (
+            `${totalHours.toFixed(2)} hrs`
+          )}
+        </TableCell>
+
+        <TableCell>
+          {!editMode && (
+            <IconButton onClick={() => setEditMode(true)} size="small">
+              <EditOutlined fontSize="inherit" />
+            </IconButton>
+          )}
+
           <IconButton onClick={() => null} size="small">
             <DeleteOutlineOutlined fontSize="inherit" />
           </IconButton>
         </TableCell>
+
         <TableCell align="right">
           <IconButton onClick={() => setOpen(!open)} size="small">
             <ChevronRightOutlined fontSize="small" sx={{ rotate: '90deg' }} />
@@ -93,6 +171,8 @@ export const TimesheetRow = ({ createdAt, entries, id, totalHours }: Timesheet) 
           </Collapse>
         </TableCell>
       </TableRow>
-    </React.Fragment>
+
+      {/* TODO: Delete Timesheet Confirmation modal */}
+    </>
   );
 };
