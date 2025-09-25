@@ -10,14 +10,17 @@ import {
   getTimesheets as getTimesheetsService,
   checkIn as checkInService,
   checkOut as checkOutService,
+  updateTimesheet as updateTimesheetService,
 } from '../services/timesheet.service';
 import { GetTimesheetSchema } from '../schema/getTimesheetSchema';
 import { GetTimesheetsSchema } from '../schema/getTimesheetsSchema';
 import { CreateTimesheetSchema } from '../schema/createTimesheetSchema';
+import { UpdateTimesheetSchema } from '../schema/updateTimesheetSchema';
 
 const validateGetTimesheet = createSchemaValidator(GetTimesheetSchema);
 const validateGetTimesheets = createSchemaValidator(GetTimesheetsSchema);
 const validateCreateTimesheet = createSchemaValidator(CreateTimesheetSchema);
+const validateUpdateTimesheet = createSchemaValidator(UpdateTimesheetSchema);
 
 const createTimesheet = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
@@ -149,6 +152,26 @@ const getAllTimesheets = async (req: AuthenticatedRequest, res: Response, next: 
   }
 };
 
+const updateTimesheet = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const { timesheetId, totalHours } = await validateUpdateTimesheet(req.body);
+
+    const timesheets = await updateTimesheetService({
+      timesheetId,
+      totalHours: Number(totalHours),
+    });
+
+    res.status(200).json({
+      message: 'Successfully retrieved timesheets',
+      data: {
+        timesheets,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export {
   createTimesheet,
   checkIn,
@@ -157,4 +180,5 @@ export {
   getTimesheetById,
   getUserTimesheets,
   getAllTimesheets,
+  updateTimesheet,
 };

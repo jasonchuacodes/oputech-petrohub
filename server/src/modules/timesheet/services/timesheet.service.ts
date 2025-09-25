@@ -3,6 +3,7 @@ import { Prisma, TimesheetEntryAction, TimesheetStatus } from '~/db/prisma';
 import { ConflictError, ForbiddenError, NotFoundError } from '~/errors';
 
 import { CreateTimesheetPayload } from '../schema/createTimesheetSchema';
+import { UpdateTimesheetInput } from '../schema/updateTimesheetSchema';
 
 const createTimesheet = async ({ userId, tenantId }: CreateTimesheetPayload) => {
   const startOfToday = new Date();
@@ -256,4 +257,17 @@ export const checkOut = async (userId: string) => {
   return checkOutEntry;
 };
 
-export { createTimesheet, getTodayTimesheet, getTimesheet, getTimesheets };
+const updateTimesheet = async ({ timesheetId, totalHours }: UpdateTimesheetInput) => {
+  const updatedTimesheet = await prisma.timesheet.update({
+    where: {
+      id: timesheetId,
+    },
+    data: {
+      totalHours,
+    },
+  });
+
+  return updatedTimesheet;
+};
+
+export { createTimesheet, getTodayTimesheet, getTimesheet, getTimesheets, updateTimesheet };
