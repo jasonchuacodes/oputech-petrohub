@@ -73,4 +73,27 @@ const checkOut = async () => {
   return res.data.message;
 };
 
-export { getTodayTimesheet, getTimesheet, getUserTimesheets, getAllTimesheets, checkIn, checkOut };
+const updateTimesheet = async ({
+  timesheetId,
+  totalHours,
+}: {
+  timesheetId: string;
+  totalHours: number;
+}): Promise<Timesheet> => {
+  const res = await axios.put('/timesheets/update', {
+    timesheetId,
+    totalHours,
+  });
+
+  return res.data.message;
+};
+
+export {
+  getTodayTimesheet,
+  getTimesheet,
+  getUserTimesheets,
+  getAllTimesheets,
+  checkIn,
+  checkOut,
+  updateTimesheet,
+};

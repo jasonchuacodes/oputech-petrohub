@@ -19,16 +19,19 @@ import {
 import dayjs from 'dayjs';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
 
 import { UpdateTimesheetSchema, type UpdateTimesheetParams } from '~/schema/updateTimesheetSchema';
+import { useUpdateTimesheetMutation } from '~/services/timesheet/timesheet.queries';
 import {
   TimesheetEntryActionEnum,
   TimesheetEntryActionMap,
   type Timesheet,
 } from '~/services/timesheet/timesheet.types';
 import theme from '~/theme';
+import { parseBackendError } from '~/utils/parseBackendError';
 
-export const TimesheetRow = ({ createdAt, entries, id, totalHours }: Timesheet) => {
+export const TimesheetRow = ({ createdAt, entries, id: timesheetId, totalHours }: Timesheet) => {
   const [open, setOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
 
@@ -50,17 +53,33 @@ export const TimesheetRow = ({ createdAt, entries, id, totalHours }: Timesheet) 
     resolver: zodResolver(UpdateTimesheetSchema),
   });
 
-  const onSubmit = handleSubmit((data: UpdateTimesheetParams) => {
-    reset();
-    setEditMode(false);
+  const { mutate: updateTimesheet, isPending: isUpdateTimesheetPending } =
+    useUpdateTimesheetMutation();
 
-    console.log('Update timesheet: ', data);
+  const onSubmit = handleSubmit(({ totalHours }: UpdateTimesheetParams) => {
+    updateTimesheet(
+      {
+        timesheetId,
+        totalHours,
+      },
+      {
+        onSuccess: () => {
+          toast.success('Successfully updated timesheet');
+          reset();
+          setEditMode(false);
+        },
+        onError: (err) => {
+          const parsedErr = parseBackendError(err);
+          toast.error(`Faield to update timesheet: ${parsedErr}`);
+        },
+      },
+    );
   });
 
   return (
     <>
       <TableRow
-        key={id}
+        key={timesheetId}
         sx={{
           height: 80,
           '&:last-child td, &:last-child th': { border: 0 },
@@ -108,7 +127,11 @@ export const TimesheetRow = ({ createdAt, entries, id, totalHours }: Timesheet) 
                 }}
               />
               <Stack direction="row">
-                <IconButton type="submit" disabled={!isValid} size="small">
+                <IconButton
+                  type="submit"
+                  disabled={!isValid || isUpdateTimesheetPending}
+                  size="small"
+                >
                   <CheckOutlined fontSize="inherit" />
                 </IconButton>
                 <IconButton

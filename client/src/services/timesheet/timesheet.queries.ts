@@ -8,6 +8,7 @@ import {
   getUserTimesheets,
   getTodayTimesheet,
   getAllTimesheets,
+  updateTimesheet,
 } from './timesheet.api';
 import type { Timesheet } from './timesheet.types';
 
@@ -100,6 +101,17 @@ const useCheckOutMutation = () => {
   });
 };
 
+const useUpdateTimesheetMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: updateTimesheet,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['timesheets'] });
+    },
+  });
+};
+
 export {
   useGetTodayTimesheetQuery,
   useGetUserTimesheetsQuery,
@@ -107,4 +119,5 @@ export {
   useGetTimesheetByIdQuery,
   useCheckInMutation,
   useCheckOutMutation,
+  useUpdateTimesheetMutation,
 };

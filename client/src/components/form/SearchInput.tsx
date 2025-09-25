@@ -5,8 +5,8 @@ import { TextField } from '~/components/form';
 
 type SearchInputProps = {
   placeholder?: string;
-  value: string | null;
-  onChange: (value: string) => void;
+  value?: string | null;
+  onChange?: (value: string) => void;
 };
 
 export const SearchInput = ({ placeholder = 'Search', value, onChange }: SearchInputProps) => {
@@ -18,7 +18,7 @@ export const SearchInput = ({ placeholder = 'Search', value, onChange }: SearchI
         size="small"
         fullWidth={true}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => onChange && onChange(e.target.value)}
         sx={{ bgcolor: 'background.paper', height: 40 }}
         slotProps={{
           input: {
