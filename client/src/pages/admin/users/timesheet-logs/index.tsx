@@ -23,13 +23,13 @@ import { getInitialRange } from '~/utils/dateUtils';
 import { TimesheetLogsTable } from './TimesheetLogsTable';
 import { UserHeader } from './UserHeader';
 
-const TIMESHEET_LOGS_KEY = 'timesheetLogsRange';
+const TIMESHEETS_KEY = 'timesheetRange';
 
 export const TimesheetLogsPage = () => {
   const { userId } = useParams();
   const { tenantId } = useTenantContext();
 
-  const initialRange = useMemo(() => getInitialRange(TIMESHEET_LOGS_KEY), []);
+  const initialRange = useMemo(() => getInitialRange(TIMESHEETS_KEY), []);
 
   const [startDate, setStartDate] = useState<Dayjs | null>(initialRange.startDate);
   const [endDate, setEndDate] = useState<Dayjs | null>(initialRange.endDate);
@@ -61,7 +61,7 @@ export const TimesheetLogsPage = () => {
   useEffect(() => {
     if (startDate && endDate) {
       sessionStorage.setItem(
-        TIMESHEET_LOGS_KEY,
+        TIMESHEETS_KEY,
         JSON.stringify({
           start: startDate.utc().toISOString(),
           end: endDate.utc().toISOString(),
