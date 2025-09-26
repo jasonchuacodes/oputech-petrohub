@@ -34,7 +34,7 @@ export type NavItem = {
   to: string;
 };
 
-const Sidebar = () => {
+const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { auth } = useAuthContext();
@@ -58,11 +58,21 @@ const Sidebar = () => {
     },
   ];
 
+  // ✅ centralize titles here, including settings
+  const routeTitles: Record<string, string> = {
+    [UserRoutes.Home]: 'Dashboard',
+    [UserRoutes.Timesheets]: 'Timesheets',
+    [UserRoutes.Settings]: 'Settings',
+  };
+
   const currentTenant = auth?.tenants[0];
-  const currentNavItem = navItems.find((item) =>
-    matchPath({ path: item.to, end: item.to === '/' }, location.pathname),
+
+  // find matching title by path
+  const matchedRoute = Object.keys(routeTitles).find((route) =>
+    matchPath({ path: route, end: route === '/' }, location.pathname),
   );
-  const pageTitle = currentNavItem?.label ?? '';
+
+  const pageTitle = matchedRoute ? routeTitles[matchedRoute] : '';
 
   const handleNavigate = (to: string) => {
     setOpen(false);
@@ -150,4 +160,4 @@ const Sidebar = () => {
   );
 };
 
-export default Sidebar;
+export default Navbar
