@@ -20,6 +20,7 @@ import { Login } from '~/pages/auth/login';
 import { Register } from '~/pages/auth/register';
 import { HomePage as UserHomePage } from '~/pages/user/home';
 import { TimesheetsPage as UserTimesheetsPage } from '~/pages/user/timesheets';
+import { SettingsPage as UserSettingsPage } from '~/pages/user/settings';
 import { NotFoundPage } from '~/pages/NotFound';
 import { UnauthorizedPage } from '~/pages/Unauthorized';
 import { UserRoleEnum } from '~/services/user/user.types';
@@ -46,6 +47,7 @@ export const AdminRoutes = {
 export const UserRoutes = {
   Home: '/',
   Timesheets: '/timesheets',
+  Settings: '/settings',
 };
 
 export const router = createBrowserRouter(
@@ -60,6 +62,7 @@ export const router = createBrowserRouter(
         <Route element={<UserMainLayout />}>
           <Route index element={<UserHomePage />} />
           <Route path={UserRoutes.Timesheets} element={<UserTimesheetsPage />} />
+          <Route path={UserRoutes.Settings} element={<UserSettingsPage />} />
         </Route>
       </Route>
 
@@ -90,7 +93,7 @@ export const router = createBrowserRouter(
             <Route path="timesheets" element={<TimesheetsPage />} />
             <Route path="users" element={<UsersPage />} />
             <Route path="users/:userId" element={<UserDetailPage />} />
-            <Route path="users/:userId/timesheets" element={<TimesheetLogsPage />} /> 
+            <Route path="users/:userId/timesheets" element={<TimesheetLogsPage />} />
             <Route path="create-tenant" element={<CreateTenant />} />
           </Route>
         </Route>

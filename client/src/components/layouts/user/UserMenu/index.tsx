@@ -6,10 +6,12 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '~/components/ui';
 import { useAuthContext } from '~/context/auth/useAuthContext';
 import { useLogoutMutation } from '~/services/auth/auth.queries';
+import { UserRoutes } from '~/routes';
 import theme from '~/theme';
+import { pathFor } from '~/utils/pathFor';
 import { toTitleCase } from '~/utils/textUtils';
 
-const UserMenu = () => {
+const UserMenu = ({ onNavigate }: { onNavigate: (to: string) => void }) => {
   const { auth } = useAuthContext();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -19,6 +21,16 @@ const UserMenu = () => {
 
   const [anchorElSettingsMenu, setAnchorElSettingsMenu] = useState<null | HTMLElement>(null);
   const isOpenMenu = Boolean(anchorElSettingsMenu);
+
+  const handleNavigateToSettings = () => {
+    onNavigate(
+      pathFor({
+        pathname: UserRoutes.Settings,
+      }),
+    );
+
+    setAnchorElSettingsMenu(null);
+  };
 
   const handleLogout = () => {
     logout(undefined, {
@@ -78,7 +90,7 @@ const UserMenu = () => {
           },
         }}
       >
-        <MenuItem dense onClick={() => null}>
+        <MenuItem dense onClick={handleNavigateToSettings}>
           <Typography>Settings</Typography>
         </MenuItem>
         <MenuItem dense onClick={() => null}>

@@ -116,7 +116,7 @@ const Sidebar = () => {
         </List>
       </Box>
 
-      <UserMenu />
+      <UserMenu onNavigate={handleNavigate} />
     </Box>
   );
 
