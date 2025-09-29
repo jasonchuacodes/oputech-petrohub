@@ -3,7 +3,8 @@ import z from 'zod';
 import { Role } from '@prisma';
 
 export const UpdateUserSchema = z.object({
-  name: z.string(),
+  name: z.string().min(1),
+  email: z.string().email().optional().nullable(),
   contact: z
     .string()
     .regex(/^\d{11}$/, {

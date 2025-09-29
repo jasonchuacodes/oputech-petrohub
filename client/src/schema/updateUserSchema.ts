@@ -3,7 +3,7 @@ import z from 'zod';
 import { UserRoleEnum } from '../services/user/user.types';
 
 export const UpdateUserSchema = z.object({
-  name: z.string(),
+  name: z.string().min(1, { message: 'Name is required' }),
   contact: z
     .string()
     .regex(/^\d{11}$/, {
@@ -12,7 +12,8 @@ export const UpdateUserSchema = z.object({
     .optional()
     .nullable(),
   role: z.nativeEnum(UserRoleEnum).optional(),
-  birthday: z.string().optional().nullable(),
+  email: z.string().email().optional().nullable(),
+  birthday: z.date().optional().nullable(),
   address: z.string().optional().nullable(),
   tin: z
     .string()

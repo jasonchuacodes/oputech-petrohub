@@ -1,95 +1,215 @@
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Avatar, Divider, Stack, Typography } from '@mui/material';
-import { useForm } from 'react-hook-form';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import dayjs from 'dayjs';
+import { useEffect } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 
 import { InputWithFormat, TextField } from '~/components/form';
-import { Button, PageLayout } from '~/components/ui';
+import { Button, Form, PageLayout } from '~/components/ui';
+import { useAuthContext } from '~/context/auth/useAuthContext';
+import { UpdateUserSchema, type UpdateUserPayload } from '~/schema/updateUserSchema';
+import { useGetUserQuery, useUpdateUserMutation } from '~/services/user/user.queries';
+import { parseBackendError } from '~/utils/parseBackendError';
+
+const initialValues = {
+  name: '',
+  address: null,
+  email: null,
+  contact: null,
+  birthday: null,
+  pagibig: null,
+  philhealth: null,
+  sss: null,
+  tin: null,
+};
 
 export const SettingsPage = () => {
-  const { control } = useForm();
+  const { auth } = useAuthContext();
+  const navigate = useNavigate();
+
+  const userId = auth?.id;
+  const tenantId = auth?.tenants[0].id;
+
+  const {
+    control,
+    register,
+    handleSubmit,
+    reset,
+    formState: { isValid },
+  } = useForm<UpdateUserPayload>({
+    defaultValues: initialValues,
+    resolver: zodResolver(UpdateUserSchema),
+    mode: 'onBlur',
+  });
+
+  const { data: user, isLoading: isLoadingUser } = useGetUserQuery({
+    tenantId,
+    userId,
+  });
+
+  const { mutateAsync: updateUser, isPending: isUpdatePending } = useUpdateUserMutation();
+
+  useEffect(() => {
+    if (isLoadingUser) return;
+
+    reset({
+      name: user?.name ?? '',
+      email: user?.email ?? null,
+      address: user?.address ?? null,
+      contact: user?.contact ?? null,
+      birthday: user?.birthday ?? null,
+      pagibig: user?.pagibig ?? null,
+      philhealth: user?.philhealth ?? null,
+      sss: user?.sss ?? null,
+      tin: user?.tin ?? null,
+    });
+  }, [isLoadingUser, user, reset]);
+
+  const handleCancel = () => {
+    reset();
+    navigate(-1);
+  };
+
+  const onSubmit = async (data: UpdateUserPayload) => {
+    if (!tenantId || !userId) return;
+
+    try {
+      await updateUser({ data, tenantId, userId });
+
+      toast.success('User updated successfully');
+    } catch (err) {
+      const parsedError = parseBackendError(err);
+      toast.error(`Failed to update user: ${parsedError}`);
+    }
+  };
 
   return (
     <PageLayout p={2} spacing={2}>
-      <Stack justifyContent="center" alignItems="center" spacing={2} pb={2}>
-        <Stack width="100%" spacing={0.5}>
-          <Typography fontWeight="bold" color="text.secondary">
-            Personal Information:
-          </Typography>
-          <Typography variant="subtitle2" color="text.secondary">
-            Manage your basic account information here.
-          </Typography>
-        </Stack>
-
-        {/* TODO: avatar uploader */}
-        <Avatar alt="profile-picture" sx={{ width: 64, height: 64 }}>
-          <Typography fontSize="inherit">U</Typography>
-        </Avatar>
-
-        <Stack width="100%" spacing={1}>
-          <TextField name="name" label="Full name" placeholder="Enter first name" />
-          <TextField name="email" label="Email" placeholder="abc@gmail.com" />
-          <TextField name="address" label="Address" placeholder="123 Main Street, ABC City, ..." />
-          <InputWithFormat
-            control={control}
-            name="contact"
-            label="Contact"
-            pattern="9999-999-9999"
-            placeholder="0912-345-6789"
-          />
-        </Stack>
-
-        <Divider sx={{ width: '100%' }} />
-        {/* Government */}
-        <Stack width="100%" spacing={2}>
-          <Stack spacing={0.5}>
+      <Form onSubmit={handleSubmit(onSubmit)}>
+        <Stack justifyContent="center" alignItems="center" spacing={2} pb={2}>
+          <Stack width="100%" spacing={0.5}>
             <Typography fontWeight="bold" color="text.secondary">
-              Government Information:
+              Personal Information:
             </Typography>
             <Typography variant="subtitle2" color="text.secondary">
-              Government-issued identification numbers linked to the user for verification and
-              record-keeping.
+              Manage your basic account information here.
             </Typography>
           </Stack>
-          <InputWithFormat
-            control={control}
-            label="TIN"
-            name="tin"
-            pattern="999-999-999-999"
-            placeholder="123-456-789-101"
-          />
-          <InputWithFormat
-            control={control}
-            label="SSS"
-            name="sss"
-            pattern="99-9999999-9"
-            placeholder="12-3456789-0"
-          />
-          <InputWithFormat
-            control={control}
-            label="PAGIBIG"
-            name="pagibig"
-            pattern="99-9999999999-9"
-            placeholder="12-3456789012-3"
-          />
-          <InputWithFormat
-            control={control}
-            label="PHILHEALTH"
-            name="philhealth"
-            pattern="9999-9999-9999"
-            placeholder="1234-5678-9012"
-          />
-        </Stack>
 
-        <Divider sx={{ width: '100%' }} />
+          {/* TODO: avatar uploader */}
+          <Avatar alt="profile-picture" sx={{ width: 64, height: 64 }}>
+            <Typography fontSize="inherit">U</Typography>
+          </Avatar>
 
-        <Stack width="100%" direction="row" spacing={1}>
-          <Button disableElevation={true} onClick={() => null} type="button" variant="outlined">
-            Cancel
-          </Button>
-          <Button type="submit" variant="contained" onClick={() => null}>
-            Save
-          </Button>
+          <Stack width="100%" spacing={1}>
+            <TextField
+              required
+              register={register}
+              name="name"
+              label="Full name"
+              placeholder="Enter first name"
+            />
+            <TextField register={register} name="email" label="Email" placeholder="abc@gmail.com" />
+            <TextField
+              register={register}
+              name="address"
+              label="Address"
+              placeholder="123 Main Street, ABC City, ..."
+            />
+            <InputWithFormat
+              control={control}
+              name="contact"
+              label="Contact"
+              pattern="9999-999-9999"
+              placeholder="0912-345-6789"
+            />
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <Controller
+                control={control}
+                name="birthday"
+                render={({ field: { value, onChange } }) => (
+                  <Stack spacing={0.5}>
+                    <Typography fontWeight="bold" color="text.secondary">
+                      Birthday
+                    </Typography>
+                    <DatePicker
+                      value={value ? dayjs(value) : null}
+                      onChange={(date) => onChange(date ? date.toDate() : null)}
+                      closeOnSelect
+                      slotProps={{
+                        textField: {
+                          size: 'small',
+                          sx: { minWidth: 168 },
+                        },
+                        actionBar: { actions: ['clear'] },
+                      }}
+                      slots={{ toolbar: undefined }}
+                    />
+                  </Stack>
+                )}
+              />
+            </LocalizationProvider>
+          </Stack>
+
+          <Divider sx={{ width: '100%' }} />
+          {/* Government */}
+          <Stack width="100%" spacing={2}>
+            <Stack spacing={0.5}>
+              <Typography fontWeight="bold" color="text.secondary">
+                Government Information:
+              </Typography>
+              <Typography variant="subtitle2" color="text.secondary">
+                Government-issued identification numbers linked to the user for verification and
+                record-keeping.
+              </Typography>
+            </Stack>
+            <InputWithFormat
+              control={control}
+              label="TIN"
+              name="tin"
+              pattern="999-999-999-999"
+              placeholder="123-456-789-101"
+            />
+            <InputWithFormat
+              control={control}
+              label="SSS"
+              name="sss"
+              pattern="99-9999999-9"
+              placeholder="12-3456789-0"
+            />
+            <InputWithFormat
+              control={control}
+              label="PAGIBIG"
+              name="pagibig"
+              pattern="99-9999999999-9"
+              placeholder="12-3456789012-3"
+            />
+            <InputWithFormat
+              control={control}
+              label="PHILHEALTH"
+              name="philhealth"
+              pattern="9999-9999-9999"
+              placeholder="1234-5678-9012"
+            />
+          </Stack>
+
+          <Divider sx={{ width: '100%' }} />
+
+          <Stack width="100%" direction="row" spacing={1}>
+            <Button disableElevation={true} onClick={handleCancel} type="button" variant="outlined">
+              Cancel
+            </Button>
+            <Button disabled={!isValid || isUpdatePending} type="submit" variant="contained">
+              Update
+            </Button>
+          </Stack>
         </Stack>
-      </Stack>
+      </Form>
     </PageLayout>
   );
 };
