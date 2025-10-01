@@ -3,7 +3,13 @@ import express from 'express';
 import { requireAuth } from '~/middlewares';
 import { asyncHandler } from '~/utils';
 
-import { getMe, loginUser, logoutUser, registerUser } from '../controller/auth.controller';
+import {
+  getMe,
+  loginUser,
+  logoutUser,
+  registerUser,
+  updatePassword,
+} from '../controller/auth.controller';
 
 const router = express.Router();
 
@@ -13,6 +19,7 @@ router.post('/login', asyncHandler(loginUser));
 
 // Protected routes
 router.post('/logout', logoutUser);
+router.put('/change-password', requireAuth, asyncHandler(updatePassword));
 router.get('/me', requireAuth, asyncHandler(getMe));
 
 export default router;

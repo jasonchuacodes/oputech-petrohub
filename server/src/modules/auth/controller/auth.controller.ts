@@ -10,11 +10,14 @@ import { createSchemaValidator } from '~/utils';
 import { registerUser as registerUserService } from '../services/register.service';
 import { RegisterUserSchema } from '../schema/registerUserSchema';
 import { LoginUserSchema } from '../schema/loginUserSchema';
+import { UpdatePasswordSchema } from '../schema/updatePasswordSchema';
+import { updatePassword as updatePasswordService } from '../services/auth.service';
 import { loginUser as loginUserService } from '../services/login.service';
 import { logoutSession } from '../services/logout.service';
 
 const validateUserRegister = createSchemaValidator(RegisterUserSchema);
 const validateUserLogin = createSchemaValidator(LoginUserSchema);
+const validateUpdatePassword = createSchemaValidator(UpdatePasswordSchema);
 
 const getMe = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
@@ -113,4 +116,28 @@ const logoutUser = async (req: AuthenticatedRequest, res: Response, next: NextFu
   }
 };
 
-export { getMe, loginUser, logoutUser, registerUser };
+const updatePassword = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const data = await validateUpdatePassword(req.body);
+
+    await updatePasswordService(data);
+
+    res.clearCookie('accessToken', {
+      httpOnly: true,
+      sameSite: 'strict',
+      secure: isProduction,
+    });
+
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      sameSite: 'strict',
+      secure: isProduction,
+    });
+
+    res.status(200).json({ message: 'Successfully updated password' });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export { getMe, loginUser, logoutUser, registerUser, updatePassword };
