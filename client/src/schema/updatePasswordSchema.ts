@@ -2,6 +2,7 @@ import z from 'zod';
 
 export const UpdatePasswordSchema = z
   .object({
+    id: z.string().uuid().optional(),
     oldPassword: z.string(),
     newPassword: z
       .string()
@@ -27,3 +28,4 @@ export const UpdatePasswordSchema = z
   });
 
 export type UpdatePasswordInput = z.infer<typeof UpdatePasswordSchema>;
+export type UpdatePasswordPayload = Omit<UpdatePasswordInput, 'confirmPassword'>;

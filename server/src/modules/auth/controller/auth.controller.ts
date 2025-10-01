@@ -1,7 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 
 import { isProduction } from '~/config/environment';
-import { NotFoundError } from '~/errors';
+import { Role } from '~/db/prisma';
+import { ForbiddenError, NotFoundError } from '~/errors';
 import { AuthenticatedRequest } from '~/middlewares';
 import { getUserById as getUserService } from '~/modules/user/services/user.service';
 import { REFRESH_TOKEN_EXPIRY_IN_DAYS } from '~/shared/constants';
@@ -118,9 +119,27 @@ const logoutUser = async (req: AuthenticatedRequest, res: Response, next: NextFu
 
 const updatePassword = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
-    const data = await validateUpdatePassword(req.body);
+    let targetUserId: string;
+    const userId = req.user!.id;
+    const userRole = req.user!.role;
 
-    await updatePasswordService(data);
+    const { id, oldPassword, newPassword } = await validateUpdatePassword(req.body);
+
+    if (userRole === Role.ADMIN) {
+      targetUserId = id ?? userId;
+    } else {
+      if (id && id !== userId) {
+        throw new ForbiddenError('You cannot change the password of another user');
+      }
+
+      targetUserId = userId;
+    }
+
+    await updatePasswordService({
+      newPassword: newPassword,
+      oldPassword: oldPassword,
+      id: targetUserId,
+    });
 
     res.clearCookie('accessToken', {
       httpOnly: true,

@@ -1,8 +1,10 @@
 import { z } from 'zod';
 
 export const UpdatePasswordSchema = z.object({
-  id: z.string().uuid(),
-  oldPassword: z.string(),
+  id: z.string().uuid().optional(),
+  oldPassword: z.string({
+    message: 'Old password is required',
+  }),
   newPassword: z
     .string()
     .min(8, 'Password must be at least 8 characters')

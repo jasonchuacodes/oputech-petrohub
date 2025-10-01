@@ -1,15 +1,21 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { VisibilityOffOutlined, VisibilityOutlined } from '@mui/icons-material';
 import { Divider, IconButton, List, OutlinedInput, Stack, Typography } from '@mui/material';
+import { useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import toast from 'react-hot-toast';
 
 import { Button, Form, InfoBox } from '~/components/ui';
 import { UpdatePasswordSchema, type UpdatePasswordInput } from '~/schema/updatePasswordSchema';
+import { useUpdatePasswordMutation } from '~/services/auth/auth.queries';
+import { parseBackendError } from '~/utils/parseBackendError';
 
 export const SecuritySettings = () => {
   const navigate = useNavigate();
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const queryClient = useQueryClient();
 
   const [isShowOldPassword, setIsShowOldPassword] = useState(false);
   const [isShowNewPassword, setIsShowNewPassword] = useState(false);
@@ -20,9 +26,13 @@ export const SecuritySettings = () => {
     reset,
     handleSubmit,
     formState: { isValid },
-  } = useForm({
+  } = useForm<UpdatePasswordInput>({
     resolver: zodResolver(UpdatePasswordSchema),
+    mode: 'onChange',
   });
+
+  const { mutate: updatePassword, isPending: isUpdatePasswordPending } =
+    useUpdatePasswordMutation();
 
   const handleCancel = () => {
     reset();
@@ -30,8 +40,51 @@ export const SecuritySettings = () => {
   };
 
   const onSubmit = handleSubmit((data: UpdatePasswordInput) => {
-    console.log('PASSWORD DATA: ', data);
-    reset()
+    const { oldPassword, newPassword } = data;
+
+    updatePassword(
+      { oldPassword, newPassword },
+      {
+        onSuccess: () => {
+          let countdown = 5;
+
+          const toastId = toast.success(
+            `Password updated successfully! Logging you out in ${countdown} seconds.`,
+            { duration: 5000 },
+          );
+
+          intervalRef.current = setInterval(() => {
+            countdown--;
+
+            if (countdown > 0) {
+              toast.success(
+                `Password updated successfully! Logging you out in ${countdown} second${
+                  countdown !== 1 ? 's' : ''
+                }.`,
+                { id: toastId },
+              );
+            } else {
+              clearInterval(intervalRef.current!);
+              intervalRef.current = null;
+              toast.dismiss(toastId);
+
+              sessionStorage.clear();
+
+              queryClient.setQueryData(['auth'], null);
+              queryClient.cancelQueries();
+
+              navigate('/login');
+            }
+          }, 1000);
+
+          reset();
+        },
+        onError: (err) => {
+          const errorMessage = parseBackendError(err);
+          toast.error(`Failed to update password: ${errorMessage}`);
+        },
+      },
+    );
   });
 
   return (
@@ -134,7 +187,11 @@ export const SecuritySettings = () => {
             <Button disableElevation={true} onClick={handleCancel} type="button" variant="outlined">
               Cancel
             </Button>
-            <Button disabled={!isValid} type="submit" variant="contained">
+            <Button
+              disabled={!isValid || isUpdatePasswordPending}
+              type="submit"
+              variant="contained"
+            >
               Change Password
             </Button>
           </Stack>

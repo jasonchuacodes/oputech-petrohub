@@ -2,6 +2,7 @@ import axios from '~/lib/axiosInstance';
 import { UserRoleEnum, type User } from '~/services/user/user.types';
 import type { LoginUserInput } from '~/schema/loginUserSchema';
 import type { RegisterUserPayload } from '~/schema/registerUserSchema';
+import type { UpdatePasswordPayload } from '~/schema/updatePasswordSchema';
 import type { ApiResponse } from '~/types/api';
 
 // Queries
@@ -19,6 +20,12 @@ const registerUser = (data: RegisterUserPayload) => {
   });
 };
 
+const updatePassword = (data: UpdatePasswordPayload) => {
+  return axios.put('/auth/change-password', {
+    ...data,
+  });
+};
+
 const loginUser = async (data: LoginUserInput) => {
   const res = await axios.post<ApiResponse<{ user: User }>>('/auth/login', data);
 
@@ -29,4 +36,4 @@ const logoutUser = () => {
   return axios.post('/auth/logout');
 };
 
-export { loginUser, logoutUser, getMe, registerUser };
+export { loginUser, logoutUser, getMe, registerUser, updatePassword };
