@@ -23,6 +23,7 @@ type Props = ModalProps & {
   maxWidth?: number;
   loading?: boolean;
   submitText?: string;
+  cancelText?: string;
   onCancel?: () => void;
   onSubmit?: () => void;
 };
@@ -35,6 +36,7 @@ export const CustomModal = ({
   loading,
   maxWidth,
   submitText = 'Submit',
+  cancelText = 'Cancel',
   onCancel,
   onClose,
   onSubmit,
@@ -51,7 +53,7 @@ export const CustomModal = ({
             maxHeight: 720,
             top: '50%',
             left: '50%',
-            width: '75%',
+            width: '95%',
             transform: 'translate(-50%, -50%)',
           }}
         >
@@ -80,7 +82,7 @@ export const CustomModal = ({
               type="button"
               variant="outlined"
             >
-              Cancel
+              {cancelText}
             </Button>
             <Button
               disabled={disabled}

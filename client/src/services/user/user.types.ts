@@ -18,6 +18,8 @@ export type User = {
   updatedAt: Date;
   role: UserRole;
 
+  shouldChangePassword: boolean;
+
   hasTenant: boolean;
   tenants: Tenant[];
 

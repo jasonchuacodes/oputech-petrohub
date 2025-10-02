@@ -35,10 +35,11 @@ const UserMenu = ({ onNavigate }: { onNavigate: (to: string) => void }) => {
   const handleLogout = () => {
     logout(undefined, {
       onSuccess: () => {
+        sessionStorage.clear();
+        
         queryClient.setQueryData(['auth'], null);
         queryClient.cancelQueries();
-      },
-      onSettled: () => {
+
         navigate('/login');
       },
     });

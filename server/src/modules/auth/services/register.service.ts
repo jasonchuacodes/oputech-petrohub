@@ -31,7 +31,12 @@ const registerUser = async (data: RegisterUserInput) => {
   }
 
   try {
-    return await prisma.user.create({ data: userData });
+    return await prisma.user.create({
+      data: {
+        ...userData,
+        shouldChangePassword: false,
+      },
+    });
   } catch (err) {
     if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
       const fields = (err.meta?.target as string[]) ?? [];

@@ -12,13 +12,18 @@ import { registerUser as registerUserService } from '../services/register.servic
 import { RegisterUserSchema } from '../schema/registerUserSchema';
 import { LoginUserSchema } from '../schema/loginUserSchema';
 import { UpdatePasswordSchema } from '../schema/updatePasswordSchema';
-import { updatePassword as updatePasswordService } from '../services/auth.service';
+import {
+  forceUpdatePassword as forceUpdatePasswordService,
+  updatePassword as updatePasswordService,
+} from '../services/auth.service';
 import { loginUser as loginUserService } from '../services/login.service';
 import { logoutSession } from '../services/logout.service';
+import { ForceUpdatePasswordSchema } from '../schema/forceUpdatePasswordSchema';
 
 const validateUserRegister = createSchemaValidator(RegisterUserSchema);
 const validateUserLogin = createSchemaValidator(LoginUserSchema);
 const validateUpdatePassword = createSchemaValidator(UpdatePasswordSchema);
+const validateForceUpdatePassword = createSchemaValidator(ForceUpdatePasswordSchema);
 
 const getMe = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
@@ -37,6 +42,7 @@ const getMe = async (req: AuthenticatedRequest, res: Response, next: NextFunctio
       username: user.username,
       hasTenant: user.tenants.length > 0,
       role: user.role,
+      shouldChangePassword: user.shouldChangePassword,
 
       tenants: user.tenants.map(({ tenant }) => ({
         id: tenant.id,
@@ -159,4 +165,25 @@ const updatePassword = async (req: AuthenticatedRequest, res: Response, next: Ne
   }
 };
 
-export { getMe, loginUser, logoutUser, registerUser, updatePassword };
+const forceUpdatePassword = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  const userId = req.user!.id;
+
+  try {
+    const { newPassword } = await validateForceUpdatePassword(req.body);
+
+    await forceUpdatePasswordService({
+      id: userId,
+      newPassword: newPassword,
+    });
+
+    res.status(200).json({ message: 'Successfully updated password' });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export { getMe, loginUser, logoutUser, registerUser, updatePassword, forceUpdatePassword };

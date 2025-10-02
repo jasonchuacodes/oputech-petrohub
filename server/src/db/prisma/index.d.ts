@@ -1609,6 +1609,7 @@ export namespace Prisma {
     tin: string | null
     philhealth: string | null
     pagibig: string | null
+    shouldChangePassword: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -1627,6 +1628,7 @@ export namespace Prisma {
     tin: string | null
     philhealth: string | null
     pagibig: string | null
+    shouldChangePassword: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -1645,6 +1647,7 @@ export namespace Prisma {
     tin: number
     philhealth: number
     pagibig: number
+    shouldChangePassword: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -1665,6 +1668,7 @@ export namespace Prisma {
     tin?: true
     philhealth?: true
     pagibig?: true
+    shouldChangePassword?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -1683,6 +1687,7 @@ export namespace Prisma {
     tin?: true
     philhealth?: true
     pagibig?: true
+    shouldChangePassword?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -1701,6 +1706,7 @@ export namespace Prisma {
     tin?: true
     philhealth?: true
     pagibig?: true
+    shouldChangePassword?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -1792,6 +1798,7 @@ export namespace Prisma {
     tin: string | null
     philhealth: string | null
     pagibig: string | null
+    shouldChangePassword: boolean
     createdAt: Date
     updatedAt: Date
     _count: UserCountAggregateOutputType | null
@@ -1827,6 +1834,7 @@ export namespace Prisma {
     tin?: boolean
     philhealth?: boolean
     pagibig?: boolean
+    shouldChangePassword?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     sessions?: boolean | User$sessionsArgs<ExtArgs>
@@ -1849,6 +1857,7 @@ export namespace Prisma {
     tin?: boolean
     philhealth?: boolean
     pagibig?: boolean
+    shouldChangePassword?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["user"]>
@@ -1867,6 +1876,7 @@ export namespace Prisma {
     tin?: boolean
     philhealth?: boolean
     pagibig?: boolean
+    shouldChangePassword?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["user"]>
@@ -1885,11 +1895,12 @@ export namespace Prisma {
     tin?: boolean
     philhealth?: boolean
     pagibig?: boolean
+    shouldChangePassword?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "username" | "email" | "name" | "password" | "role" | "birthday" | "contact" | "address" | "sss" | "tin" | "philhealth" | "pagibig" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "username" | "email" | "name" | "password" | "role" | "birthday" | "contact" | "address" | "sss" | "tin" | "philhealth" | "pagibig" | "shouldChangePassword" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     sessions?: boolean | User$sessionsArgs<ExtArgs>
     timesheets?: boolean | User$timesheetsArgs<ExtArgs>
@@ -1920,6 +1931,7 @@ export namespace Prisma {
       tin: string | null
       philhealth: string | null
       pagibig: string | null
+      shouldChangePassword: boolean
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["user"]>
@@ -2361,6 +2373,7 @@ export namespace Prisma {
     readonly tin: FieldRef<"User", 'String'>
     readonly philhealth: FieldRef<"User", 'String'>
     readonly pagibig: FieldRef<"User", 'String'>
+    readonly shouldChangePassword: FieldRef<"User", 'Boolean'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
     readonly updatedAt: FieldRef<"User", 'DateTime'>
   }
@@ -9456,6 +9469,7 @@ export namespace Prisma {
     tin: 'tin',
     philhealth: 'philhealth',
     pagibig: 'pagibig',
+    shouldChangePassword: 'shouldChangePassword',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -9608,6 +9622,13 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'Boolean'
+   */
+  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+  /**
    * Reference to a field of type 'Float'
    */
   export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -9683,6 +9704,7 @@ export namespace Prisma {
     tin?: StringNullableFilter<"User"> | string | null
     philhealth?: StringNullableFilter<"User"> | string | null
     pagibig?: StringNullableFilter<"User"> | string | null
+    shouldChangePassword?: BoolFilter<"User"> | boolean
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     sessions?: SessionListRelationFilter
@@ -9704,6 +9726,7 @@ export namespace Prisma {
     tin?: SortOrderInput | SortOrder
     philhealth?: SortOrderInput | SortOrder
     pagibig?: SortOrderInput | SortOrder
+    shouldChangePassword?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     sessions?: SessionOrderByRelationAggregateInput
@@ -9728,6 +9751,7 @@ export namespace Prisma {
     tin?: StringNullableFilter<"User"> | string | null
     philhealth?: StringNullableFilter<"User"> | string | null
     pagibig?: StringNullableFilter<"User"> | string | null
+    shouldChangePassword?: BoolFilter<"User"> | boolean
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     sessions?: SessionListRelationFilter
@@ -9749,6 +9773,7 @@ export namespace Prisma {
     tin?: SortOrderInput | SortOrder
     philhealth?: SortOrderInput | SortOrder
     pagibig?: SortOrderInput | SortOrder
+    shouldChangePassword?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: UserCountOrderByAggregateInput
@@ -9773,6 +9798,7 @@ export namespace Prisma {
     tin?: StringNullableWithAggregatesFilter<"User"> | string | null
     philhealth?: StringNullableWithAggregatesFilter<"User"> | string | null
     pagibig?: StringNullableWithAggregatesFilter<"User"> | string | null
+    shouldChangePassword?: BoolWithAggregatesFilter<"User"> | boolean
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
   }
@@ -10174,6 +10200,7 @@ export namespace Prisma {
     tin?: string | null
     philhealth?: string | null
     pagibig?: string | null
+    shouldChangePassword?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     sessions?: SessionCreateNestedManyWithoutUserInput
@@ -10195,6 +10222,7 @@ export namespace Prisma {
     tin?: string | null
     philhealth?: string | null
     pagibig?: string | null
+    shouldChangePassword?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
@@ -10216,6 +10244,7 @@ export namespace Prisma {
     tin?: NullableStringFieldUpdateOperationsInput | string | null
     philhealth?: NullableStringFieldUpdateOperationsInput | string | null
     pagibig?: NullableStringFieldUpdateOperationsInput | string | null
+    shouldChangePassword?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     sessions?: SessionUpdateManyWithoutUserNestedInput
@@ -10237,6 +10266,7 @@ export namespace Prisma {
     tin?: NullableStringFieldUpdateOperationsInput | string | null
     philhealth?: NullableStringFieldUpdateOperationsInput | string | null
     pagibig?: NullableStringFieldUpdateOperationsInput | string | null
+    shouldChangePassword?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
@@ -10258,6 +10288,7 @@ export namespace Prisma {
     tin?: string | null
     philhealth?: string | null
     pagibig?: string | null
+    shouldChangePassword?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -10276,6 +10307,7 @@ export namespace Prisma {
     tin?: NullableStringFieldUpdateOperationsInput | string | null
     philhealth?: NullableStringFieldUpdateOperationsInput | string | null
     pagibig?: NullableStringFieldUpdateOperationsInput | string | null
+    shouldChangePassword?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -10294,6 +10326,7 @@ export namespace Prisma {
     tin?: NullableStringFieldUpdateOperationsInput | string | null
     philhealth?: NullableStringFieldUpdateOperationsInput | string | null
     pagibig?: NullableStringFieldUpdateOperationsInput | string | null
+    shouldChangePassword?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -10741,6 +10774,11 @@ export namespace Prisma {
     not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
   }
 
+  export type BoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
   export type DateTimeFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -10801,6 +10839,7 @@ export namespace Prisma {
     tin?: SortOrder
     philhealth?: SortOrder
     pagibig?: SortOrder
+    shouldChangePassword?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -10819,6 +10858,7 @@ export namespace Prisma {
     tin?: SortOrder
     philhealth?: SortOrder
     pagibig?: SortOrder
+    shouldChangePassword?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -10837,6 +10877,7 @@ export namespace Prisma {
     tin?: SortOrder
     philhealth?: SortOrder
     pagibig?: SortOrder
+    shouldChangePassword?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -10899,6 +10940,14 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedDateTimeNullableFilter<$PrismaModel>
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
+  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
@@ -11245,6 +11294,10 @@ export namespace Prisma {
 
   export type NullableDateTimeFieldUpdateOperationsInput = {
     set?: Date | string | null
+  }
+
+  export type BoolFieldUpdateOperationsInput = {
+    set?: boolean
   }
 
   export type DateTimeFieldUpdateOperationsInput = {
@@ -11663,6 +11716,11 @@ export namespace Prisma {
     not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
   }
 
+  export type NestedBoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
   export type NestedDateTimeFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -11752,6 +11810,14 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedDateTimeNullableFilter<$PrismaModel>
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
+  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
@@ -12129,6 +12195,7 @@ export namespace Prisma {
     tin?: string | null
     philhealth?: string | null
     pagibig?: string | null
+    shouldChangePassword?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     sessions?: SessionCreateNestedManyWithoutUserInput
@@ -12149,6 +12216,7 @@ export namespace Prisma {
     tin?: string | null
     philhealth?: string | null
     pagibig?: string | null
+    shouldChangePassword?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
@@ -12226,6 +12294,7 @@ export namespace Prisma {
     tin?: NullableStringFieldUpdateOperationsInput | string | null
     philhealth?: NullableStringFieldUpdateOperationsInput | string | null
     pagibig?: NullableStringFieldUpdateOperationsInput | string | null
+    shouldChangePassword?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     sessions?: SessionUpdateManyWithoutUserNestedInput
@@ -12246,6 +12315,7 @@ export namespace Prisma {
     tin?: NullableStringFieldUpdateOperationsInput | string | null
     philhealth?: NullableStringFieldUpdateOperationsInput | string | null
     pagibig?: NullableStringFieldUpdateOperationsInput | string | null
+    shouldChangePassword?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
@@ -12313,6 +12383,7 @@ export namespace Prisma {
     tin?: string | null
     philhealth?: string | null
     pagibig?: string | null
+    shouldChangePassword?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     timesheets?: TimesheetCreateNestedManyWithoutUserInput
@@ -12333,6 +12404,7 @@ export namespace Prisma {
     tin?: string | null
     philhealth?: string | null
     pagibig?: string | null
+    shouldChangePassword?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     timesheets?: TimesheetUncheckedCreateNestedManyWithoutUserInput
@@ -12369,6 +12441,7 @@ export namespace Prisma {
     tin?: NullableStringFieldUpdateOperationsInput | string | null
     philhealth?: NullableStringFieldUpdateOperationsInput | string | null
     pagibig?: NullableStringFieldUpdateOperationsInput | string | null
+    shouldChangePassword?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     timesheets?: TimesheetUpdateManyWithoutUserNestedInput
@@ -12389,6 +12462,7 @@ export namespace Prisma {
     tin?: NullableStringFieldUpdateOperationsInput | string | null
     philhealth?: NullableStringFieldUpdateOperationsInput | string | null
     pagibig?: NullableStringFieldUpdateOperationsInput | string | null
+    shouldChangePassword?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     timesheets?: TimesheetUncheckedUpdateManyWithoutUserNestedInput
@@ -12497,6 +12571,7 @@ export namespace Prisma {
     tin?: string | null
     philhealth?: string | null
     pagibig?: string | null
+    shouldChangePassword?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     sessions?: SessionCreateNestedManyWithoutUserInput
@@ -12517,6 +12592,7 @@ export namespace Prisma {
     tin?: string | null
     philhealth?: string | null
     pagibig?: string | null
+    shouldChangePassword?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
@@ -12616,6 +12692,7 @@ export namespace Prisma {
     tin?: NullableStringFieldUpdateOperationsInput | string | null
     philhealth?: NullableStringFieldUpdateOperationsInput | string | null
     pagibig?: NullableStringFieldUpdateOperationsInput | string | null
+    shouldChangePassword?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     sessions?: SessionUpdateManyWithoutUserNestedInput
@@ -12636,6 +12713,7 @@ export namespace Prisma {
     tin?: NullableStringFieldUpdateOperationsInput | string | null
     philhealth?: NullableStringFieldUpdateOperationsInput | string | null
     pagibig?: NullableStringFieldUpdateOperationsInput | string | null
+    shouldChangePassword?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput

@@ -3,6 +3,34 @@ import { BadInputError } from '~/errors';
 import { generateHash, verify } from '~/utils';
 
 import { UpdatePasswordInput } from '../schema/updatePasswordSchema';
+import { ForceUpdatePasswordInput } from '../schema/forceUpdatePasswordSchema';
+
+const forceUpdatePassword = async (data: ForceUpdatePasswordInput) => {
+  const { id: userId, newPassword } = data;
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      password: true,
+    },
+  });
+
+  if (!user) {
+    throw new Error('User not found');
+  }
+
+  const newPasswordHash = await generateHash(newPassword);
+
+  return await prisma.user.update({
+    where: {
+      id: userId,
+    },
+    data: {
+      password: newPasswordHash,
+      shouldChangePassword: false,
+    },
+  });
+};
 
 const updatePassword = async (data: UpdatePasswordInput) => {
   const { id: userId, oldPassword, newPassword } = data;
@@ -32,8 +60,9 @@ const updatePassword = async (data: UpdatePasswordInput) => {
     },
     data: {
       password: newPasswordHash,
+      shouldChangePassword: false,
     },
   });
 };
 
-export { updatePassword };
+export { forceUpdatePassword, updatePassword };

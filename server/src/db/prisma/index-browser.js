@@ -134,6 +134,7 @@ exports.Prisma.UserScalarFieldEnum = {
   tin: 'tin',
   philhealth: 'philhealth',
   pagibig: 'pagibig',
+  shouldChangePassword: 'shouldChangePassword',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };

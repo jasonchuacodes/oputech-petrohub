@@ -12,6 +12,7 @@ export type JwtUserPayload = {
   username: string;
   email: string | null;
   role: Role;
+  shouldChangePassword: boolean,
 };
 
 export type JwtSessionPayload = {

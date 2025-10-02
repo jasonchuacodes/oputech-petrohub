@@ -1,5 +1,6 @@
 import axios from '~/lib/axiosInstance';
 import { UserRoleEnum, type User } from '~/services/user/user.types';
+import type { ForceUpdatePasswordPayload } from '~/schema/forceUpdatePassword';
 import type { LoginUserInput } from '~/schema/loginUserSchema';
 import type { RegisterUserPayload } from '~/schema/registerUserSchema';
 import type { UpdatePasswordPayload } from '~/schema/updatePasswordSchema';
@@ -26,6 +27,12 @@ const updatePassword = (data: UpdatePasswordPayload) => {
   });
 };
 
+const forceUpdatePassword = (data: ForceUpdatePasswordPayload) => {
+  return axios.put('/auth/force-change-password', {
+    ...data,
+  });
+};
+
 const loginUser = async (data: LoginUserInput) => {
   const res = await axios.post<ApiResponse<{ user: User }>>('/auth/login', data);
 
@@ -36,4 +43,4 @@ const logoutUser = () => {
   return axios.post('/auth/logout');
 };
 
-export { loginUser, logoutUser, getMe, registerUser, updatePassword };
+export { loginUser, logoutUser, getMe, registerUser, updatePassword, forceUpdatePassword };

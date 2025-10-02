@@ -39,7 +39,9 @@ const loginUser = async (data: LoginUserInput) => {
     email: user.email,
     username: user.username,
     role: user.role,
+    shouldChangePassword: user.shouldChangePassword,
   });
+
   const token = generateToken();
   const refreshTokenHash = await generateHash(token);
 
