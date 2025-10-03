@@ -52,7 +52,9 @@ const updateTenant = async (req: AuthenticatedRequest, res: Response, next: Next
     const data = await validateUpdateTenant(req.body);
 
     if (role !== Role.ADMIN) {
-      throw new UnauthorizedError('You are not authorized to update this tenant');
+      throw new UnauthorizedError(
+        'Unauthorized. You do not have permissions to update the tenant information.',
+      );
     }
 
     const tenant = await updateTenantService({

@@ -69,6 +69,7 @@ const UserMenu = ({ onNavigate }: { onNavigate: (to: string) => void }) => {
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               width: '100%',
+              textAlign: 'start',
             }}
           >
             {auth?.name}

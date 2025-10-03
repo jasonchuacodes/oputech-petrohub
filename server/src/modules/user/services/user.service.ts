@@ -29,9 +29,23 @@ const createUser = async (data: CreateUserInput) => {
   });
 };
 
-const getAllUsers = async () => {
-  return await prisma.user.findMany();
-};
+const getAllUsers = () => prisma.user.findMany();
+
+const getUsersByTenantId = (tenantId: string) =>
+  prisma.user.findMany({
+    where: {
+      tenants: {
+        some: { tenantId },
+      },
+    },
+    orderBy: { createdAt: 'desc' },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      createdAt: true,
+    },
+  });
 
 const getUserById = async (id: string) => {
   const user = await prisma.user.findFirst({
@@ -83,4 +97,11 @@ const deleteUser = async (id: string) => {
   });
 };
 
-export { createUser, getAllUsers, getUserById, updateUser, deleteUser };
+export {
+  createUser,
+  getAllUsers,
+  getUsersByTenantId,
+  getUserById,
+  updateUser,
+  deleteUser,
+};

@@ -143,7 +143,45 @@ const getTimesheets = async ({
   return timesheets;
 };
 
-export const checkIn = async (userId: string) => {
+const getLatestTimesheets = (tenantId: string) => {
+  const startOfDay = new Date();
+  startOfDay.setUTCHours(0, 0, 0, 0);
+
+  const endOfDay = new Date();
+  endOfDay.setUTCHours(23, 59, 59, 999);
+
+  return prisma.timesheet.findMany({
+    where: {
+      tenantId,
+      createdAt: {
+        gte: startOfDay,
+        lte: endOfDay,
+      },
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+    select: {
+      id: true,
+      userId: true,
+      user: {
+        select: {
+          name: true,
+        },
+      },
+      entries: {
+        select: {
+          timestamp: true,
+          action: true,
+        },
+      },
+      totalHours: true,
+      createdAt: true,
+    },
+  });
+};
+
+const checkIn = async (userId: string) => {
   const startOfDay = new Date();
   startOfDay.setUTCHours(0, 0, 0, 0);
 
@@ -205,7 +243,7 @@ export const checkIn = async (userId: string) => {
   });
 };
 
-export const checkOut = async (userId: string) => {
+const checkOut = async (userId: string) => {
   const today = new Date();
   today.setUTCHours(0, 0, 0, 0);
 
@@ -270,4 +308,13 @@ const updateTimesheet = async ({ timesheetId, totalHours }: UpdateTimesheetInput
   return updatedTimesheet;
 };
 
-export { createTimesheet, getTodayTimesheet, getTimesheet, getTimesheets, updateTimesheet };
+export {
+  createTimesheet,
+  checkIn,
+  checkOut,
+  getTodayTimesheet,
+  getTimesheet,
+  getTimesheets,
+  updateTimesheet,
+  getLatestTimesheets,
+};
