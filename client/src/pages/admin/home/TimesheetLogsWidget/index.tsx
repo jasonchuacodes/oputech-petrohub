@@ -1,8 +1,6 @@
-import { OpenInNewOutlined } from '@mui/icons-material';
 import {
   alpha,
   Box,
-  IconButton,
   Paper,
   Stack,
   Table,
@@ -16,28 +14,25 @@ import {
 } from '@mui/material';
 import dayjs from 'dayjs';
 
+import { Widget } from '~/components/ui/Widget';
+import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { TimesheetEntryActionEnum, timesheets } from '~/data/mockAllTimesheets';
+import { AdminRoutes } from '~/routes';
 import theme from '~/theme';
+import { pathFor } from '~/utils/pathFor';
 
-export const Widget = () => {
+export const TimesheetLogsWidget = () => {
+  const { tenantId } = useTenantContext();
+
+  const navigateTo = pathFor({
+    pathname: AdminRoutes.TenantTimesheets,
+    params: {
+      tenantId,
+    },
+  });
+
   return (
-    <Stack
-      bgcolor="background.paper"
-      border="1px solid"
-      borderColor="divider"
-      borderRadius={1}
-      p={2}
-      spacing={2}
-    >
-      <Stack direction="row" justifyContent="space-between">
-        <Typography fontWeight="medium" variant="body1">
-          Timesheet Logs
-        </Typography>
-        <IconButton onClick={() => null} size="small">
-          <OpenInNewOutlined fontSize="inherit" />
-        </IconButton>
-      </Stack>
-      {/* Content */}
+    <Widget title="Timesheet Logs" to={navigateTo}>
       <TableContainer
         component={Paper}
         elevation={0}
@@ -117,6 +112,6 @@ export const Widget = () => {
           </TableBody>
         </Table>
       </TableContainer>
-    </Stack>
+    </Widget>
   );
 };

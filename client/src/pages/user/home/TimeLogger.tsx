@@ -4,8 +4,7 @@ import duration from 'dayjs/plugin/duration';
 import { useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 
-import { CardContainer } from '~/components/dashboard';
-import { Switch } from '~/components/ui';
+import { CardContainer, Switch } from '~/components/ui';
 import {
   useCheckInMutation,
   useCheckOutMutation,

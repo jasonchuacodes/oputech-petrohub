@@ -2,7 +2,8 @@ import { Container, Stack, Typography } from '@mui/material';
 
 import { PageLayout } from '~/components/ui';
 
-import { Widget } from './Widget';
+import { TimesheetLogsWidget } from './TimesheetLogsWidget';
+import { UsersWidget } from './UserWidget';
 
 export const HomePage = () => {
   return (
@@ -16,7 +17,8 @@ export const HomePage = () => {
             </Typography>
           </Stack>
 
-          <Widget />
+          <TimesheetLogsWidget />
+          <UsersWidget />
         </Stack>
       </Container>
     </PageLayout>

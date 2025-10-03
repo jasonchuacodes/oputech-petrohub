@@ -2,7 +2,7 @@ import { Typography } from '@mui/material';
 import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
 
-import { CardContainer } from '~/components/dashboard';
+import { CardContainer } from '~/components/ui';
 
 export const DateTimeDisplay = () => {
   const [dateTime, setDateTime] = useState(dayjs());

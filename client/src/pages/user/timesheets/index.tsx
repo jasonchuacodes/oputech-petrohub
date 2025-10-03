@@ -11,9 +11,8 @@ import {
 import dayjs, { Dayjs } from 'dayjs';
 import { useEffect, useMemo, useState } from 'react';
 
-import { CardContainer } from '~/components/dashboard';
+import { CardContainer, DateRangePicker, PageLayout, type DateRange } from '~/components/ui';
 import { useAuthContext } from '~/context/auth/useAuthContext';
-import { DateRangePicker, PageLayout, type DateRange } from '~/components/ui';
 import { useGetUserTimesheetsQuery } from '~/services/timesheet/timesheet.queries';
 import { TimesheetEntryActionMap } from '~/services/timesheet/timesheet.types';
 import theme from '~/theme';

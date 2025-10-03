@@ -10,8 +10,7 @@ import {
 } from '@mui/material';
 import dayjs from 'dayjs';
 
-import { CardContainer } from '~/components/dashboard';
-import { Link } from '~/components/ui';
+import { CardContainer, Link } from '~/components/ui';
 import { useGetTodayTimesheetQuery } from '~/services/timesheet/timesheet.queries';
 import { TimesheetEntryActionMap } from '~/services/timesheet/timesheet.types';
 
