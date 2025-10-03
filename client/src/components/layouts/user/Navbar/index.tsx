@@ -102,27 +102,46 @@ const Navbar = () => {
 
       <Box flex={1}>
         <List>
-          {navItems.map(({ icon, to, label }, index) => (
-            <ListItem key={index} disablePadding sx={{ height: 40 }}>
-              <ListItemButton
-                onClick={() => handleNavigate(to)}
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  mx: 1,
-                  px: 1,
-                  gap: 1,
-                  height: '100%',
-                  borderRadius: 1,
-                }}
-              >
-                <ListItemIcon sx={{ color: 'inherit', minWidth: 0 }}>
-                  <Icon component={icon} fontSize="small" />
-                </ListItemIcon>
-                <ListItemText>{label}</ListItemText>
-              </ListItemButton>
-            </ListItem>
-          ))}
+          {navItems.map(({ icon, to, label }, index) => {
+            const active = location.pathname === to;
+
+            return (
+              <ListItem key={index} disablePadding sx={{ height: 40 }}>
+                <ListItemButton
+                  onClick={() => handleNavigate(to)}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    mx: 1,
+                    px: 1,
+                    gap: 1,
+                    height: '100%',
+                    borderRadius: 1,
+                    bgcolor: active ? 'action.selected' : 'transparent',
+                  }}
+                >
+                  <ListItemIcon
+                    sx={{
+                      '.MuiListItemIcon-root': { fontWeight: active ? 'medium' : 'regular' },
+                      color: 'inherit',
+                      minWidth: 0,
+                    }}
+                  >
+                    <Icon component={icon} fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText
+                    sx={{
+                      '.MuiListItemText-primary': {
+                        fontWeight: active ? 'medium' : 'regular',
+                      },
+                    }}
+                  >
+                    {label}
+                  </ListItemText>
+                </ListItemButton>
+              </ListItem>
+            );
+          })}
         </List>
       </Box>
 
@@ -160,4 +179,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar
+export default Navbar;
