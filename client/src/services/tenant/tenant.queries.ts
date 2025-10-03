@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 
-import { createTenant, getTenant, getTenants, getTenantUsers } from './tenant.api';
+import { createTenant, getTenant, getTenants, getTenantUsers, updateTenant } from './tenant.api';
 import type { Tenant } from './tenant.types';
 
 // Queries
@@ -41,8 +41,20 @@ const useCreateTenantMutation = () => {
   });
 };
 
+const useUpdateTenantMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: updateTenant,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tenants'] });
+    },
+  });
+};
+
 export {
   useCreateTenantMutation,
+  useUpdateTenantMutation,
   useGetTenantByIdQuery,
   useGetTenantsQuery,
   useGetTenantUsersQuery,

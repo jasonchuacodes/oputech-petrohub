@@ -1,6 +1,7 @@
 import axios from '~/lib/axiosInstance';
 
 import type { CreateTenantInput } from '~/schema/createTenantSchema';
+import type { UpdateTenantPayload } from '~/schema/updateTenantSchema';
 
 import type { User } from '../user/user.types';
 import type { Tenant } from './tenant.types';
@@ -31,4 +32,10 @@ const createTenant = async (data: CreateTenantInput): Promise<Tenant> => {
   return res.data.data.tenant;
 };
 
-export { createTenant, getTenant, getTenants, getTenantUsers };
+const updateTenant = async (data: UpdateTenantPayload): Promise<Tenant> => {
+  const res = await axios.put('/tenants/update', data);
+
+  return res.data.data.tenant;
+};
+
+export { createTenant, updateTenant, getTenant, getTenants, getTenantUsers };

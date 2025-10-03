@@ -35,3 +35,4 @@ export const UpdateTenantSchema = z.object({
 });
 
 export type UpdateTenantInput = z.infer<typeof UpdateTenantSchema>;
+export type UpdateTenantPayload = UpdateTenantInput & {tenantId: string}

@@ -4,11 +4,15 @@ import { AddOutlined } from '@mui/icons-material';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
+import toast from 'react-hot-toast';
 
 import { FormRow, InputWithFormat, TextField } from '~/components/form';
 import { Button, Form, PageLayout } from '~/components/ui';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { UpdateTenantSchema, type UpdateTenantInput } from '~/schema/updateTenantSchema';
+import { useUpdateTenantMutation } from '~/services/tenant/tenant.queries';
+import type { Tenant } from '~/services/tenant/tenant.types';
+import { parseBackendError } from '~/utils/parseBackendError';
 
 const initialValues = {
   name: '',
@@ -24,7 +28,7 @@ const initialValues = {
 
 export const TenantSettingsPage = () => {
   const navigate = useNavigate();
-  const { tenant } = useTenantContext();
+  const { tenant, setTenant, tenantId } = useTenantContext();
 
   const {
     control,
@@ -36,6 +40,8 @@ export const TenantSettingsPage = () => {
     defaultValues: initialValues,
     resolver: zodResolver(UpdateTenantSchema),
   });
+
+  const { mutate: updateTenant, isPending: isUpdatePending } = useUpdateTenantMutation();
 
   useEffect(() => {
     if (tenant) {
@@ -55,14 +61,27 @@ export const TenantSettingsPage = () => {
 
   const handleBack = () => navigate(-1);
 
-  useEffect(() => {
-    console.log('VALIDITY:', isValid);
-    console.log('ERRORS:', errors);
-  }, [isValid, errors]);
-
   const onSubmit = async (data: UpdateTenantInput) => {
-    console.log('UPDATE DATA: ', data);
-    reset();
+    if (!tenantId) return;
+
+    updateTenant(
+      {
+        tenantId,
+        ...data,
+      },
+      {
+        onSuccess: (data: Tenant) => {
+          toast.success('Successfully created tenant.');
+
+          setTenant(data);
+          reset();
+        },
+        onError: (err) => {
+          const errorMessage = parseBackendError(err);
+          toast.error(`Failed to create tenant: ${errorMessage}`);
+        },
+      },
+    );
   };
 
   return (
@@ -202,7 +221,11 @@ export const TenantSettingsPage = () => {
                 Cancel
               </Button>
             )}
-            <Button disabled={!isValid || !isDirty} variant="contained" type="submit">
+            <Button
+              disabled={!isValid || !isDirty || isUpdatePending}
+              variant="contained"
+              type="submit"
+            >
               Save
             </Button>
           </Stack>
