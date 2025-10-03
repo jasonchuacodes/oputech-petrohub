@@ -61,6 +61,18 @@ const TenantSelector = () => {
     handleCloseMenu();
   };
 
+  const handleSettings = () => {
+     navigate(
+      pathFor({
+        pathname: AdminRoutes.TenantSettings,
+        params: {
+          tenantId,
+        },
+      }),
+    );
+    handleCloseMenu();
+  }
+
   const handleSelectTenant = (id: string) => {
     navigate(
       pathFor({
@@ -181,7 +193,7 @@ const TenantSelector = () => {
               </ListItemIcon>
               <Typography>Create tenant</Typography>
             </MenuItem>
-            <MenuItem onClick={() => null}>
+            <MenuItem onClick={handleSettings}>
               <ListItemIcon>
                 <SettingsOutlined fontSize="small" />
               </ListItemIcon>

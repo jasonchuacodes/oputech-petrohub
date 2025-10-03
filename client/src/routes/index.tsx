@@ -7,8 +7,9 @@ import { RequireTenant } from '~/components/auth/RequireTenant';
 import { AdminMainLayout, UserMainLayout, SetupLayout } from '~/components/layouts';
 import { TenantProvider } from '~/context/tenant/TenantContext';
 import { DashboardPage } from '~/pages/admin/dashboard';
-import { CreateTenant } from '~/pages/admin/tenant/create';
+import { CreateTenantPage } from '~/pages/admin/tenant/create';
 import { CreateTenantFlow } from '~/pages/admin/tenant/create-flow';
+import { TenantSettingsPage } from '~/pages/admin/tenant/settings';
 import { TimesheetsPage } from '~/pages/admin/timesheets';
 import { UsersPage } from '~/pages/admin/users';
 import { BootstrapPage } from '~/pages/admin/bootstrap';
@@ -35,6 +36,7 @@ export const AdminRoutes = {
   Bootstrap: '/',
   TenantCreateFlow: '/create-tenant',
   TenantHome: '/tenants/:tenantId',
+  TenantSettings: '/tenants/:tenantId/settings',
   TenantCreate: '/tenants/:tenantId/create-tenant',
   TenantDashboard: '/tenants/:tenantId/dashboard',
   TenantReports: '/tenants/:tenantId/reports',
@@ -94,7 +96,8 @@ export const router = createBrowserRouter(
             <Route path="users" element={<UsersPage />} />
             <Route path="users/:userId" element={<UserDetailPage />} />
             <Route path="users/:userId/timesheets" element={<TimesheetLogsPage />} />
-            <Route path="create-tenant" element={<CreateTenant />} />
+            <Route path="create-tenant" element={<CreateTenantPage />} />
+            <Route path="settings" element={<TenantSettingsPage />} />
           </Route>
         </Route>
       </Route>

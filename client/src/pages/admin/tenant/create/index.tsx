@@ -11,7 +11,7 @@ import { CreateTenantSchema, type CreateTenantInput } from '~/schema/createTenan
 import { useCreateTenantMutation } from '~/services/tenant/tenant.queries';
 import { parseBackendError } from '~/utils/parseBackendError';
 
-export const CreateTenant = () => {
+export const CreateTenantPage = () => {
   const navigate = useNavigate();
 
   const {

@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 
 import { LoadingScreen } from '~/components/layouts/admin/LoadingScreen';
@@ -7,11 +8,17 @@ import { useGetTenantByIdQuery } from '~/services/tenant/tenant.queries';
 import { pathFor } from '~/utils/pathFor';
 
 export const RequireTenant = () => {
-  const { tenantId } = useTenantContext();
+  const { tenantId, setTenant } = useTenantContext();
 
   const { data: tenant, isLoading } = useGetTenantByIdQuery({
     tenantId,
   });
+
+  useEffect(() => {
+    if (!isLoading && tenant) {
+      setTenant(tenant);
+    }
+  }, [tenant, setTenant, isLoading]);
 
   if (isLoading) {
     return <LoadingScreen />;
