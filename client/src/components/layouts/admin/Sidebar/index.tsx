@@ -22,10 +22,11 @@ import { useNavigate } from 'react-router-dom';
 
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { AdminRoutes } from '~/routes';
+import theme from '~/theme';
 import { pathFor } from '~/utils/pathFor';
-import theme from '../../../../theme';
 
 export type NavItem = {
+  disabled: boolean;
   label: string;
   icon: ComponentType;
   to: string;
@@ -40,6 +41,7 @@ const Sidebar = () => {
   const navItems: NavItem[] = [
     {
       label: 'Home',
+      disabled: false,
       icon: HomeOutlined,
       to: pathFor({
         pathname: AdminRoutes.TenantHome,
@@ -48,6 +50,7 @@ const Sidebar = () => {
     },
     {
       label: 'Dashboard',
+      disabled: true,
       icon: DashboardOutlined,
       to: pathFor({
         pathname: AdminRoutes.TenantDashboard,
@@ -56,6 +59,7 @@ const Sidebar = () => {
     },
     {
       label: 'Reports',
+      disabled: true,
       icon: AssessmentOutlined,
       to: pathFor({
         pathname: AdminRoutes.TenantReports,
@@ -64,6 +68,7 @@ const Sidebar = () => {
     },
     {
       label: 'Timesheets',
+      disabled: false,
       icon: CalendarTodayOutlined,
       to: pathFor({
         pathname: AdminRoutes.TenantTimesheets,
@@ -72,6 +77,7 @@ const Sidebar = () => {
     },
     {
       label: 'Users',
+      disabled: false,
       icon: GroupOutlined,
       to: pathFor({
         pathname: AdminRoutes.TenantUsers,
@@ -97,12 +103,13 @@ const Sidebar = () => {
       }}
     >
       <List>
-        {navItems.map(({ icon, label, to }, index) => {
+        {navItems.map(({ disabled, icon, label, to }, index) => {
           const active = location.pathname === to;
 
           return (
             <ListItem key={index} disablePadding sx={{ height: 40 }}>
               <ListItemButton
+                disabled={disabled}
                 onClick={() => handleNavigate(to)}
                 sx={{
                   display: 'flex',
