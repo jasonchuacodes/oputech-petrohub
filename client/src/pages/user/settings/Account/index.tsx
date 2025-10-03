@@ -3,6 +3,7 @@ import { Avatar, Divider, Stack, Typography } from '@mui/material';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 import { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -31,6 +32,7 @@ const initialValues = {
 export const AccountSettings = () => {
   const { auth } = useAuthContext();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const userId = auth?.id;
   const tenantId = auth?.tenants[0].id;
@@ -81,6 +83,10 @@ export const AccountSettings = () => {
     try {
       await updateUser({ data, tenantId, userId });
 
+      queryClient.invalidateQueries({
+        queryKey: ['auth'],
+      });
+      
       toast.success('User updated successfully');
     } catch (err) {
       const parsedError = parseBackendError(err);

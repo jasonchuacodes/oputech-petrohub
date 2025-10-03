@@ -36,7 +36,7 @@ const UserMenu = ({ onNavigate }: { onNavigate: (to: string) => void }) => {
     logout(undefined, {
       onSuccess: () => {
         sessionStorage.clear();
-        
+
         queryClient.setQueryData(['auth'], null);
         queryClient.cancelQueries();
 
@@ -49,19 +49,30 @@ const UserMenu = ({ onNavigate }: { onNavigate: (to: string) => void }) => {
     <Box p={1} borderTop="1px solid" borderColor="divider">
       <Button
         onClick={(e) => setAnchorElSettingsMenu(e.currentTarget)}
-        fullWidth={true}
+        fullWidth
         sx={{
           justifyContent: 'flex-start',
           gap: 1,
           p: 1,
+          minWidth: 0,
           bgcolor: isOpenMenu ? alpha(theme.palette.primary.light, 0.1) : '',
         }}
       >
         <Avatar alt="profile-picture" sx={{ width: 32, height: 32 }}>
           <Typography>{userInitials}</Typography>
         </Avatar>
-        <Stack justifyContent="start" alignItems="start">
-          <Typography variant="body1">{auth?.name}</Typography>
+        <Stack justifyContent="start" alignItems="start" overflow="hidden" minWidth={0} flex={1}>
+          <Typography
+            variant="body1"
+            sx={{
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              width: '100%',
+            }}
+          >
+            {auth?.name}
+          </Typography>
           <Typography color="text.secondary" variant="subtitle2" lineHeight={1}>
             {toTitleCase(auth?.role)}
           </Typography>
@@ -95,7 +106,7 @@ const UserMenu = ({ onNavigate }: { onNavigate: (to: string) => void }) => {
           <Typography>Settings</Typography>
         </MenuItem>
         <MenuItem dense onClick={() => null}>
-          <Typography>Help </Typography>
+          <Typography>Help</Typography>
         </MenuItem>
         <Divider />
         <MenuItem dense onClick={handleLogout}>
