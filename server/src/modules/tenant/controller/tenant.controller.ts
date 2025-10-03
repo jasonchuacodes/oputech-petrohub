@@ -1,11 +1,13 @@
 import { NextFunction, Request, Response } from 'express';
 
-import { NotFoundError } from '~/errors';
+import { Role } from '~/db/prisma';
+import { NotFoundError, UnauthorizedError } from '~/errors';
 import { AuthenticatedRequest } from '~/middlewares';
 import { createSchemaValidator } from '~/utils';
 
 import {
   createTenant as createTenantService,
+  updateTenant as updateTenantService,
   getTenants as getTenantsService,
   getTenantById as getTenantByIdService,
   getTenantUsers as getTenantUsersService,
@@ -13,8 +15,10 @@ import {
 import { CreateTenantSchema } from '../schema/createTenantSchema';
 import { GetTenantUsersSchema } from '../schema/getTenantUsersSchema';
 import { GetTenantByIdSchema } from '../schema/getTenantByIdSchema';
+import { UpdateTenantSchema } from '../schema/updateTenantSchema';
 
 const validateCreateTenant = createSchemaValidator(CreateTenantSchema);
+const validateUpdateTenant = createSchemaValidator(UpdateTenantSchema);
 const validateGetTenantUsers = createSchemaValidator(GetTenantUsersSchema);
 const validateGetTenantById = createSchemaValidator(GetTenantByIdSchema);
 
@@ -34,6 +38,31 @@ const createTenant = async (req: AuthenticatedRequest, res: Response, next: Next
       data: {
         tenant,
       },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const updateTenant = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const { role } = req.user!;
+    const { tenantId } = req.params;
+
+    const data = await validateUpdateTenant(req.body);
+
+    if (role !== Role.ADMIN) {
+      throw new UnauthorizedError('You are not authorized to update this tenant');
+    }
+
+    const tenant = await updateTenantService({
+      id: tenantId,
+      ...data,
+    });
+
+    res.status(200).json({
+      message: 'Tenant updated successfully',
+      data: { tenant },
     });
   } catch (err) {
     next(err);
@@ -64,7 +93,6 @@ const getTenantById = async (req: AuthenticatedRequest, res: Response, next: Nex
 const getTenants = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const userId = req.user!.id;
-    
     const tenants = await getTenantsService(userId);
 
     if (tenants.length === 0) {
@@ -99,4 +127,4 @@ const getTenantUsers = async (req: Request, res: Response, next: NextFunction) =
   }
 };
 
-export { createTenant, getTenantById, getTenantUsers, getTenants };
+export { createTenant, updateTenant, getTenantById, getTenantUsers, getTenants };

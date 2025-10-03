@@ -2,6 +2,7 @@ import { prisma } from '~/db/index';
 import { ForbiddenError, NotFoundError } from '~/errors';
 
 import { CreateTenantPayload } from '../schema/createTenantSchema';
+import { UpdateTenantPayload } from '../schema/updateTenantSchema';
 
 const createTenant = async (data: CreateTenantPayload) => {
   const { createdById, ...tenantData } = data;
@@ -14,6 +15,21 @@ const createTenant = async (data: CreateTenantPayload) => {
           user: { connect: { id: createdById } },
         },
       },
+    },
+  });
+
+  return tenant;
+};
+
+const updateTenant = async (data: UpdateTenantPayload) => {
+  const { tenantId, ...updateData } = data;
+
+  const tenant = await prisma.tenant.update({
+    where: {
+      id: tenantId,
+    },
+    data: {
+      ...updateData,
     },
   });
 
@@ -70,4 +86,4 @@ const getTenantUsers = async (tenantId: string) => {
   return tenantWithUsers.users.map((u) => u.user) ?? [];
 };
 
-export { createTenant, getTenantById, getTenants, getTenantUsers };
+export { createTenant, updateTenant, getTenantById, getTenants, getTenantUsers };
