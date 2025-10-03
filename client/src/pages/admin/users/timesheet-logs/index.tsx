@@ -18,7 +18,7 @@ import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { FileDownloadOutlined } from '@mui/icons-material';
 import { useGetUserTimesheetsQuery } from '~/services/timesheet/timesheet.queries';
 import { useGetUserQuery } from '~/services/user/user.queries';
-import { getInitialRange } from '~/utils/dateUtils';
+import { getInitialDateRange } from '~/utils/dateUtils';
 
 import { TimesheetLogsTable } from './TimesheetLogsTable';
 import { UserHeader } from './UserHeader';
@@ -29,7 +29,7 @@ export const TimesheetLogsPage = () => {
   const { userId } = useParams();
   const { tenantId } = useTenantContext();
 
-  const initialRange = useMemo(() => getInitialRange(TIMESHEETS_KEY), []);
+  const initialRange = useMemo(() => getInitialDateRange(TIMESHEETS_KEY), []);
 
   const [startDate, setStartDate] = useState<Dayjs | null>(initialRange.startDate);
   const [endDate, setEndDate] = useState<Dayjs | null>(initialRange.endDate);

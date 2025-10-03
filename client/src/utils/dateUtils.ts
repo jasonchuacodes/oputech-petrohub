@@ -9,7 +9,7 @@ export const formatRange = (start: Dayjs | null, end: Dayjs | null) => {
   return `${start ? start.format('MM/DD/YY') : 'MM/DD/YY'} - ${end ? end.format('MM/DD/YY') : 'MM/DD/YY'}`;
 };
 
-export const getInitialRange = (key: string) => {
+export const getInitialDateRange = (key: string) => {
   const saved = sessionStorage.getItem(key);
 
   if (saved) {

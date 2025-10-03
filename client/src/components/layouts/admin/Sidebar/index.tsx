@@ -7,6 +7,7 @@ import {
   KeyboardDoubleArrowRightOutlined,
 } from '@mui/icons-material';
 import {
+  alpha,
   Icon,
   IconButton,
   List,
@@ -22,6 +23,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { AdminRoutes } from '~/routes';
 import { pathFor } from '~/utils/pathFor';
+import theme from '../../../../theme';
 
 export type NavItem = {
   label: string;
@@ -110,7 +112,7 @@ const Sidebar = () => {
                   gap: 1,
                   height: '100%',
                   borderRadius: 1,
-                  bgcolor: active ? 'action.selected' : 'transparent',
+                  bgcolor: active ? alpha(theme.palette.primary.main, 0.5) : 'transparent',
                 }}
               >
                 <ListItemIcon
@@ -125,7 +127,7 @@ const Sidebar = () => {
                   <ListItemText
                     sx={{
                       '.MuiListItemText-primary': {
-                        fontWeight: active ? 'medium' : 'light',
+                        fontWeight: active ? 'medium' : 'regular',
                       },
                     }}
                   >

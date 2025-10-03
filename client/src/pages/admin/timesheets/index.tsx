@@ -16,7 +16,7 @@ import {
   type DateRange,
 } from '~/components/ui';
 import { useGetAllTimesheetsQuery } from '~/services/timesheet/timesheet.queries';
-import { getInitialRange } from '~/utils/dateUtils';
+import { getInitialDateRange } from '~/utils/dateUtils';
 
 import { TimesheetTable } from './TimesheetTable';
 
@@ -27,7 +27,7 @@ const TIMESHEETS_KEY = 'timesheetRange';
 
 export const TimesheetsPage = () => {
   const { tenantId } = useParams();
-  const initialRange = useMemo(() => getInitialRange(TIMESHEETS_KEY), []);
+  const initialRange = useMemo(() => getInitialDateRange(TIMESHEETS_KEY), []);
 
   const [startDate, setStartDate] = useState<Dayjs | null>(initialRange.startDate);
   const [endDate, setEndDate] = useState<Dayjs | null>(initialRange.endDate);

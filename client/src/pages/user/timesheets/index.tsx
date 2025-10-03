@@ -8,17 +8,25 @@ import {
   alpha,
   Skeleton,
 } from '@mui/material';
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
+import { useEffect, useMemo, useState } from 'react';
 
 import { CardContainer } from '~/components/dashboard';
 import { useAuthContext } from '~/context/auth/useAuthContext';
-import { DateRangePicker, PageLayout } from '~/components/ui';
-import theme from '~/theme';
+import { DateRangePicker, PageLayout, type DateRange } from '~/components/ui';
 import { useGetUserTimesheetsQuery } from '~/services/timesheet/timesheet.queries';
 import { TimesheetEntryActionMap } from '~/services/timesheet/timesheet.types';
+import theme from '~/theme';
+import { getInitialDateRange } from '~/utils/dateUtils';
+
+const TIMESHEETS_KEY = 'timesheetRange';
 
 export const TimesheetsPage = () => {
   const { auth } = useAuthContext();
+  const initialRange = useMemo(() => getInitialDateRange(TIMESHEETS_KEY), []);
+
+  const [startDate, setStartDate] = useState<Dayjs | null>(initialRange.startDate);
+  const [endDate, setEndDate] = useState<Dayjs | null>(initialRange.endDate);
 
   const userId = auth?.id;
   const tenantId = auth?.tenants[0].id;
@@ -52,15 +60,39 @@ export const TimesheetsPage = () => {
     {} as Record<string, { entries: typeof latestEntries; totalHours: number }>,
   );
 
+  useEffect(() => {
+    if (startDate && endDate) {
+      sessionStorage.setItem(
+        TIMESHEETS_KEY,
+        JSON.stringify({
+          start: startDate.utc().toISOString(),
+          end: endDate.utc().toISOString(),
+        }),
+      );
+    }
+  }, [startDate, endDate]);
+
+  const handleSelectDateRange = ({ start, end }: DateRange) => {
+    const newStart = start?.startOf('day') ?? null;
+    const newEnd = end?.endOf('day') ?? null;
+
+    const hasChanged =
+      (newStart && !newStart.isSame(startDate)) || (newEnd && !newEnd.isSame(endDate));
+
+    if (hasChanged) {
+      setStartDate(newStart);
+      setEndDate(newEnd);
+    }
+  };
+
   return (
     <PageLayout p={2} spacing={2}>
       <Stack direction="row" justifyContent="space-between">
-        {/* TODO: implement query invalidation on daterange selection */}
         <DateRangePicker
           label="Select Time Period"
-          selectedStart={null}
-          selectedEnd={null}
-          onAccept={() => null}
+          selectedStart={startDate}
+          selectedEnd={endDate}
+          onAccept={handleSelectDateRange}
         />
       </Stack>
       <Stack padding={2} bgcolor={alpha(theme.palette.info.dark, 0.2)} borderRadius={1}>

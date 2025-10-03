@@ -181,11 +181,11 @@ export const CreateTenant = () => {
             ))}
           </FormHelperText>
           <Stack justifyContent="end" direction="row" spacing={1} my={5}>
-            <Button disabled={!isValid} variant="contained" type="submit">
-              Create Tenant
-            </Button>
             <Button variant="outlined" onClick={handleBack}>
               Cancel
+            </Button>
+            <Button disabled={!isValid} variant="contained" type="submit">
+              Create Tenant
             </Button>
           </Stack>
         </Form>
