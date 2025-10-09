@@ -13,7 +13,7 @@ export const HomePage = () => {
           {/* Header */}
           <Stack spacing={0.5}>
             <Typography fontWeight="bold" variant="h5">
-              Users
+              Dashboard
             </Typography>
             <Typography variant="body2" color="text.secondary">
               Get a comprehensive overview of your company&apos;s performance.

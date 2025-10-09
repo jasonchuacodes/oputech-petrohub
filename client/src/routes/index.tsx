@@ -37,7 +37,6 @@ export const AdminRoutes = {
   TenantHome: '/tenants/:tenantId',
   TenantSettings: '/tenants/:tenantId/settings',
   TenantCreate: '/tenants/:tenantId/create-tenant',
-  TenantDashboard: '/tenants/:tenantId/dashboard',
   TenantReports: '/tenants/:tenantId/reports',
   TenantTimesheets: '/tenants/:tenantId/timesheets',
   TenantUsers: '/tenants/:tenantId/users',

@@ -1,7 +1,6 @@
 import {
   AssessmentOutlined,
   CalendarTodayOutlined,
-  DashboardOutlined,
   GroupOutlined,
   HomeOutlined,
   KeyboardDoubleArrowRightOutlined,
@@ -45,15 +44,6 @@ const Sidebar = () => {
       icon: HomeOutlined,
       to: pathFor({
         pathname: AdminRoutes.TenantHome,
-        params: { tenantId },
-      }),
-    },
-    {
-      label: 'Dashboard',
-      disabled: true,
-      icon: DashboardOutlined,
-      to: pathFor({
-        pathname: AdminRoutes.TenantDashboard,
         params: { tenantId },
       }),
     },
