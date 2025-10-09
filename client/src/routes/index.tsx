@@ -6,7 +6,6 @@ import { RequireNoTenant } from '~/components/auth/RequireNoTenant';
 import { RequireTenant } from '~/components/auth/RequireTenant';
 import { AdminMainLayout, UserMainLayout, SetupLayout } from '~/components/layouts';
 import { TenantProvider } from '~/context/tenant/TenantContext';
-import { DashboardPage } from '~/pages/admin/dashboard';
 import { CreateTenantPage } from '~/pages/admin/tenant/create';
 import { CreateTenantFlow } from '~/pages/admin/tenant/create-flow';
 import { TenantSettingsPage } from '~/pages/admin/tenant/settings';
@@ -90,7 +89,6 @@ export const router = createBrowserRouter(
         >
           <Route element={<AdminMainLayout />}>
             <Route index element={<HomePage />} />
-            <Route path="dashboard" element={<DashboardPage />} />
             <Route path="reports" element={<ReportsPage />} />
             <Route path="timesheets" element={<TimesheetsPage />} />
             <Route path="users" element={<UsersPage />} />

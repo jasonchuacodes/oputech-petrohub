@@ -1,5 +1,4 @@
 import {
-  alpha,
   Table,
   TableBody,
   TableCell,
@@ -10,7 +9,6 @@ import {
 
 import { Link, Paper } from '~/components/ui';
 import type { User } from '~/services/user/user.types';
-import theme from '~/theme';
 
 import { MoreDetailsMenu } from './MoreDetailsMenu';
 
@@ -20,7 +18,7 @@ export const UserList = ({ users, onDeleteRequest }: UserListProps) => {
   return (
     <TableContainer component={Paper} sx={{ border: '1px solid', borderColor: 'divider' }}>
       <Table sx={{ minWidth: 650 }}>
-        <TableHead sx={{ bgcolor: alpha(theme.palette.primary.light, 0.1) }}>
+        <TableHead>
           <TableRow>
             <TableCell sx={{ maxWidth: 560 }}>Name</TableCell>
             <TableCell align="left">Roles</TableCell>

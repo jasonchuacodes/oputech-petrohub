@@ -1,7 +1,8 @@
 import { OpenInNewOutlined } from '@mui/icons-material';
-import { IconButton, Stack, Typography } from '@mui/material';
+import { Box, IconButton, Stack, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import type React from 'react';
+
 import { CardContainer } from '../CardContainer';
 
 type WidgetProps = {
@@ -14,8 +15,16 @@ export const Widget = ({ title, to, children }: WidgetProps) => {
   const navigate = useNavigate();
 
   return (
-    <CardContainer spacing={1}>
-      <Stack direction="row" justifyContent="space-between">
+    <CardContainer
+      maxHeight={560}
+      spacing={1}
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+      }}
+    >
+      <Stack direction="row" justifyContent="space-between" alignItems="center">
         <Typography fontWeight="medium" variant="body1">
           {title}
         </Typography>
@@ -24,8 +33,7 @@ export const Widget = ({ title, to, children }: WidgetProps) => {
         </IconButton>
       </Stack>
 
-      {/* Content */}
-      {children}
+      <Box sx={{ flex: 1, minHeight: 0 }}>{children}</Box>
     </CardContainer>
   );
 };

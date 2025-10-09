@@ -1,24 +1,37 @@
-import { Container, Stack, Typography } from '@mui/material';
+import { Container, Grid, Stack, Typography } from '@mui/material';
 
-import { PageLayout } from '~/components/ui';
+import { DateTimeDisplay, PageLayout } from '~/components/ui';
 
-import { TimesheetLogsWidget } from './TimesheetLogsWidget';
+import { AttendanceWidget } from './AttendanceWidget';
 import { UsersWidget } from './UserWidget';
 
 export const HomePage = () => {
   return (
     <PageLayout p={3}>
       <Container maxWidth="lg" disableGutters>
-        <Stack spacing={2}>
+        <Stack spacing={3}>
           {/* Header */}
-          <Stack spacing={3} alignItems="start">
+          <Stack spacing={0.5}>
             <Typography fontWeight="bold" variant="h5">
-              Dashboard
+              Users
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Get a comprehensive overview of your company&apos;s performance.
             </Typography>
           </Stack>
 
-          <TimesheetLogsWidget />
-          <UsersWidget />
+          <Grid container spacing={2}>
+            <Grid size={{ xs: 12, md: 12, lg: 4 }}>
+              <DateTimeDisplay />
+            </Grid>
+            <Grid size={{ xs: 12, md: 12, lg: 8 }}>
+              <AttendanceWidget />
+            </Grid>
+            <Grid size={{ xs: 12, md: 6, lg: 4 }}>
+              <UsersWidget />
+            </Grid>
+          </Grid>
+          
         </Stack>
       </Container>
     </PageLayout>

@@ -1,18 +1,17 @@
 import {
-  alpha,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  Typography,
 } from '@mui/material';
 
 import { Link, Paper } from '~/components/ui';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { AdminRoutes } from '~/routes';
 import type { Timesheet } from '~/services/timesheet/timesheet.types';
-import theme from '~/theme';
 import { pathFor } from '~/utils/pathFor';
 
 import { MoreDetailsMenu } from './MoreDetailsMenu';
@@ -50,7 +49,7 @@ export const TimesheetTable = ({ timesheets }: { timesheets: Timesheet[] }) => {
   return (
     <TableContainer component={Paper} sx={{ border: '1px solid', borderColor: 'divider' }}>
       <Table sx={{ minWidth: 650 }}>
-        <TableHead sx={{ bgcolor: alpha(theme.palette.primary.light, 0.1) }}>
+        <TableHead>
           <TableRow>
             <TableCell sx={{ maxWidth: 240 }}>Name</TableCell>
             <TableCell align="left">Total Hours</TableCell>
@@ -70,7 +69,7 @@ export const TimesheetTable = ({ timesheets }: { timesheets: Timesheet[] }) => {
                       params: { tenantId, userId },
                     })}
                   >
-                    {userName}
+                    <Typography fontSize={14}>{userName}</Typography>
                   </Link>
                 </TableCell>
                 <TableCell align="left">{totalHours}</TableCell>

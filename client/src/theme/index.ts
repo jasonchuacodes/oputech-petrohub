@@ -1,24 +1,6 @@
-import { createTheme } from '@mui/material';
+import { createTheme } from '@mui/material/styles';
 
 const theme = createTheme({
-  components: {
-    MuiCssBaseline: {
-      styleOverrides: {
-        body: {
-          scrollbarColor: '#b1b9c2 transparent',
-        },
-      },
-    },
-    MuiTableCell: {
-      styleOverrides: {
-        head: {
-          fontWeight: 600,
-          paddingBottom: 8,
-          paddingTop: 8,
-        },
-      },
-    },
-  },
   palette: {
     mode: 'light',
 
@@ -39,6 +21,7 @@ const theme = createTheme({
     background: {
       default: '#fafbfc',
       paper: '#ffffff',
+      surface: '#f4f7f9ff',
     },
 
     text: {
@@ -73,6 +56,26 @@ const theme = createTheme({
       light: '#81c784',
       dark: '#1b5e20',
       contrastText: '#fff',
+    },
+  },
+
+  components: {
+    MuiCssBaseline: {
+      styleOverrides: {
+        body: {
+          scrollbarColor: '#b1b9c2 transparent',
+        },
+      },
+    },
+    MuiTableCell: {
+      styleOverrides: {
+        head: ({ theme }) => ({
+          color: theme.palette.text.secondary,
+          paddingBottom: 6,
+          paddingTop: 6,
+          backgroundColor: theme.palette.background.surface,
+        }),
+      },
     },
   },
 });

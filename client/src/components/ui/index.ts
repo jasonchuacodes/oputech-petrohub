@@ -5,6 +5,7 @@ export * from './CardContainer'
 export * from './ContentCard';
 export * from './CustomModal';
 export * from './DateRangePicker';
+export * from './DateTimeDisplay';
 export * from './InfoBox';
 export * from './Form';
 export * from './Link';

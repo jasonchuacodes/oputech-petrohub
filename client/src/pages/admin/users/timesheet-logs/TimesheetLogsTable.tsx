@@ -1,5 +1,4 @@
 import {
-  alpha,
   Table,
   TableBody,
   TableCell,
@@ -9,7 +8,6 @@ import {
 } from '@mui/material';
 
 import { Paper } from '~/components/ui';
-import theme from '~/theme';
 import { type Timesheet } from '~/services/timesheet/timesheet.types';
 
 import { TimesheetRow } from './TimesheetRow';
@@ -18,7 +16,7 @@ export const TimesheetLogsTable = ({ timesheets }: { timesheets: Timesheet[] }) 
   return (
     <TableContainer component={Paper} sx={{ border: '1px solid', borderColor: 'divider' }}>
       <Table sx={{ minWidth: 650 }}>
-        <TableHead sx={{ bgcolor: alpha(theme.palette.primary.light, 0.1) }}>
+        <TableHead>
           <TableRow>
             <TableCell sx={{ maxWidth: 240 }}>Date</TableCell>
             <TableCell align="left">Check In</TableCell>

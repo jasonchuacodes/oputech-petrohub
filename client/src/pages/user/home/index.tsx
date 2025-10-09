@@ -1,10 +1,9 @@
 import { Stack } from '@mui/material';
 import { useEffect, useState } from 'react';
 
-import { PageLayout } from '~/components/ui';
+import { DateTimeDisplay, PageLayout } from '~/components/ui';
 import { useAuthContext } from '~/context/auth/useAuthContext';
 
-import { DateTimeDisplay } from './DateTimeDisplay';
 import { PasswordChangeModal } from './PasswordChangeModal';
 import { TimeLogger } from './TimeLogger';
 import { TimesheetsSection } from './TimesheetsSection';
