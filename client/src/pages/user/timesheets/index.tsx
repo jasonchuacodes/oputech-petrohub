@@ -11,7 +11,13 @@ import {
 import dayjs, { Dayjs } from 'dayjs';
 import { useEffect, useMemo, useState } from 'react';
 
-import { CardContainer, DateRangePicker, PageLayout, type DateRange } from '~/components/ui';
+import {
+  CardContainer,
+  DateRangePicker,
+  PageLayout,
+  SkeletonList,
+  type DateRange,
+} from '~/components/ui';
 import { useAuthContext } from '~/context/auth/useAuthContext';
 import { useGetUserTimesheetsQuery } from '~/services/timesheet/timesheet.queries';
 import { TimesheetEntryActionMap } from '~/services/timesheet/timesheet.types';
@@ -107,9 +113,7 @@ export const TimesheetsPage = () => {
       <List>
         {isLoadingTimesheets ? (
           <Stack spacing={1}>
-            {Array.from({ length: 3 }).map((_, index) => {
-              return <Skeleton key={index} height={160} variant="rounded" />;
-            })}
+            <SkeletonList height={160} rows={3} />
           </Stack>
         ) : (
           <Stack spacing={1}>

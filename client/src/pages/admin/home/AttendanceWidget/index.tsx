@@ -12,7 +12,7 @@ import {
   Typography,
 } from '@mui/material';
 
-import { Widget } from '~/components/ui/Widget';
+import { Widget } from '~/components/ui';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { users } from '~/data/mockUsers';
 import { AdminRoutes } from '~/routes';

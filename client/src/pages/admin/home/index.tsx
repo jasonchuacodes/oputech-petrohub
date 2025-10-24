@@ -21,17 +21,16 @@ export const HomePage = () => {
           </Stack>
 
           <Grid container spacing={2}>
-            <Grid size={{ xs: 12, md: 12, lg: 4 }}>
+            <Grid size={{ xs: 12, md: 12, lg: 12 }}>
               <DateTimeDisplay />
             </Grid>
             <Grid size={{ xs: 12, md: 12, lg: 8 }}>
               <AttendanceWidget />
             </Grid>
-            <Grid size={{ xs: 12, md: 6, lg: 4 }}>
+            <Grid size={{ xs: 12, md: 12, lg: 4 }}>
               <UsersWidget />
             </Grid>
           </Grid>
-          
         </Stack>
       </Container>
     </PageLayout>

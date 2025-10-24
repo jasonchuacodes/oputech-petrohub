@@ -13,14 +13,13 @@ import {
   Menu,
   MenuItem,
   MenuList,
-  Skeleton,
   Stack,
   Typography,
 } from '@mui/material';
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { Button } from '~/components/ui';
+import { Button, SkeletonList } from '~/components/ui';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { AdminRoutes } from '~/routes';
 import { useGetTenantsQuery } from '~/services/tenant/tenant.queries';
@@ -62,7 +61,7 @@ const TenantSelector = () => {
   };
 
   const handleSettings = () => {
-     navigate(
+    navigate(
       pathFor({
         pathname: AdminRoutes.TenantSettings,
         params: {
@@ -71,7 +70,7 @@ const TenantSelector = () => {
       }),
     );
     handleCloseMenu();
-  }
+  };
 
   const handleSelectTenant = (id: string) => {
     navigate(
@@ -143,9 +142,7 @@ const TenantSelector = () => {
             </Stack>
             {isLoadingTenants ? (
               <Stack spacing={0.5}>
-                {Array.from({ length: 3 }).map((_, index) => {
-                  return <Skeleton key={index} height={40} variant="rounded" />;
-                })}
+                <SkeletonList rows={3} />
               </Stack>
             ) : (
               <Stack flex={1} overflow="auto">
