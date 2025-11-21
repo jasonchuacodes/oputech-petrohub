@@ -1,18 +1,9 @@
 import { prisma } from '~/db';
 import { UnauthenticatedError } from '~/errors/unauthenticated.error';
 import { REFRESH_TOKEN_EXPIRY_IN_DAYS } from '~/shared/constants';
-import {
-  verify,
-  signJwt,
-  generateToken,
-  generateHash,
-  JwtSessionPayload,
-  JwtUserPayload,
-} from '~/utils';
+import { verify, signJwt, JwtSessionPayload, JwtUserPayload } from '~/utils';
 
 import { LoginUserInput } from '../schema/loginUserSchema';
-
-const expiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRY_IN_DAYS * 24 * 60 * 60 * 1000);
 
 const loginUser = async (data: LoginUserInput) => {
   const { password, username } = data;
@@ -42,12 +33,10 @@ const loginUser = async (data: LoginUserInput) => {
     shouldChangePassword: user.shouldChangePassword,
   });
 
-  const token = generateToken();
-  const refreshTokenHash = await generateHash(token);
+  const expiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRY_IN_DAYS * 24 * 60 * 60 * 1000);
 
   const { id: sessionId } = await prisma.session.create({
     data: {
-      refreshTokenHash,
       userId: user.id,
       expiresAt,
     },

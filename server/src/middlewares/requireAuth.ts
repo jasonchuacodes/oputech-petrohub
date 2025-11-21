@@ -1,15 +1,12 @@
 import { NextFunction, Request, Response } from 'express';
 
-import {
-  generateHash,
-  generateToken,
-  JwtSessionPayload,
-  JwtUserPayload,
-  signJwt,
-  verifyJwt,
-} from '~/utils';
+import { JwtSessionPayload, JwtUserPayload, signJwt, verifyJwt } from '~/utils';
 import { UnauthorizedError, ForbiddenError } from '~/errors';
 import { prisma } from '../db';
+import { REFRESH_TOKEN_EXPIRY_IN_DAYS } from '~/shared/constants';
+
+const ACCESS_TOKEN_MAX_AGE = 15 * 60 * 1000; // 15 minutes
+const REFRESH_TOKEN_MAX_AGE = REFRESH_TOKEN_EXPIRY_IN_DAYS * 24 * 60 * 60 * 1000; // 30 days
 
 export interface AuthenticatedRequest extends Request {
   user?: JwtUserPayload;
@@ -55,34 +52,30 @@ export const requireAuth = async (req: AuthenticatedRequest, res: Response, next
     }
 
     // Generate new tokens
-    const newAccessToken = signJwt({
+    const newAccessToken = signJwt<JwtUserPayload>({
       id: session.user.id,
       name: session.user.name,
       email: session.user.email,
+      username: session.user.username,
+      role: session.user.role,
+      shouldChangePassword: session.user.shouldChangePassword,
     });
-    const newRefreshToken = signJwt({ sessionId });
+    const newRefreshToken = signJwt<JwtSessionPayload>({ sessionId });
 
-    // 4. Save hashed version of newRefreshToken to the session in DB
-    const token = generateToken();
-    const refreshTokenHash = await generateHash(token);
-
-    // 5. Update the session's refreshTokenHash
+    // Extend session expiry (sliding expiration)
+    const newExpiresAt = new Date(Date.now() + REFRESH_TOKEN_MAX_AGE);
     await prisma.session.update({
-      where: {
-        id: sessionId,
-      },
-      data: {
-        refreshTokenHash,
-      },
+      where: { id: sessionId },
+      data: { expiresAt: newExpiresAt },
     });
 
     res.cookie('accessToken', newAccessToken, {
       httpOnly: true,
-      maxAge: 5 * 1000,
+      maxAge: ACCESS_TOKEN_MAX_AGE,
     });
     res.cookie('refreshToken', newRefreshToken, {
       httpOnly: true,
-      maxAge: 15 * 1000,
+      maxAge: REFRESH_TOKEN_MAX_AGE,
     });
 
     req.user = {
