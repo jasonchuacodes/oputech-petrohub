@@ -3,8 +3,7 @@ import axios from '~/lib/axiosInstance';
 import type { CreateTenantInput } from '~/schema/createTenantSchema';
 import type { UpdateTenantPayload } from '~/schema/updateTenantSchema';
 
-import type { User } from '../user/user.types';
-import type { Tenant } from './tenant.types';
+import type { Tenant, TenantUser } from './tenant.types';
 
 // Queries
 const getTenant = async (tenantId: string): Promise<Tenant> => {
@@ -19,7 +18,7 @@ const getTenants = async (): Promise<Tenant[]> => {
   return res.data.data.tenants;
 };
 
-const getTenantUsers = async (tenantId: string): Promise<User[]> => {
+const getTenantUsers = async (tenantId: string): Promise<TenantUser[]> => {
   const res = await axios.get(`/tenants/${tenantId}/users`);
 
   return res.data.data.users;

@@ -1,3 +1,7 @@
+import type { ValueOf } from '~/utils/valueOf';
+
+import type { User } from '../user/user.types';
+
 export type Tenant = {
   id: string;
   name: string;
@@ -12,4 +16,15 @@ export type Tenant = {
   pagibig?: string;
 
   logoUrl?: string;
+};
+
+export const UserStatusEnum = {
+  IN: 'IN',
+  OUT: 'OUT',
+} as const;
+
+export type UserStatus = ValueOf<typeof UserStatusEnum>;
+
+export type TenantUser = User & {
+  status: UserStatus;
 };

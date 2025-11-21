@@ -14,23 +14,22 @@ import {
 
 import { Widget } from '~/components/ui';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
-import { users } from '~/data/mockUsers';
+import { useGetTenantUsersQuery } from '~/services/tenant/tenant.queries';
+import { UserStatusEnum } from '~/services/tenant/tenant.types';
 import { AdminRoutes } from '~/routes';
 import { pathFor } from '~/utils/pathFor';
 
 export const AttendanceWidget = () => {
   const { tenantId } = useTenantContext();
+  const { data: users = [] } = useGetTenantUsersQuery({ tenantId });
 
   const navigateTo = pathFor({
     pathname: AdminRoutes.TenantTimesheets,
     params: { tenantId },
   });
 
-  const inUsers = users.filter(
-    (u) => u.status === 'online' || u.status === 'busy' || u.status === 'break',
-  );
-
-  const offlineUsers = users.filter((u) => u.status === 'offline' || u.status === 'out');
+  const inUsers = users.filter((user) => user.status === UserStatusEnum.IN);
+  const offlineUsers = users.filter((user) => user.status === UserStatusEnum.OUT);
 
   const renderStatusRow = (label: string, color: string) => (
     <Stack direction="row" alignItems="center" spacing={1}>

@@ -3,6 +3,7 @@ import { ForbiddenError, NotFoundError } from '~/errors';
 
 import { CreateTenantPayload } from '../schema/createTenantSchema';
 import { UpdateTenantPayload } from '../schema/updateTenantSchema';
+import { UserStatus } from '../types';
 
 const createTenant = async (data: CreateTenantPayload) => {
   const { createdById, ...tenantData } = data;
@@ -68,12 +69,34 @@ const getTenantById = async (userId: string, tenantId: string) => {
 };
 
 const getTenantUsers = async (tenantId: string) => {
+  const startOfDay = new Date();
+  startOfDay.setHours(0, 0, 0, 0);
+
+  const endOfDay = new Date();
+  endOfDay.setHours(23, 59, 59, 999);
+
   const tenantWithUsers = await prisma.tenant.findUnique({
     where: { id: tenantId },
     include: {
       users: {
         include: {
-          user: true,
+          user: {
+            include: {
+              timesheets: {
+                where: { tenantId },
+                include: {
+                  entries: {
+                    where: {
+                      timestamp: { gte: startOfDay, lte: endOfDay },
+                    },
+                    orderBy: { timestamp: 'desc' },
+                    take: 1,
+                  },
+                },
+                take: 1,
+              },
+            },
+          },
         },
       },
     },
@@ -83,7 +106,19 @@ const getTenantUsers = async (tenantId: string) => {
     throw new NotFoundError('Tenant not found');
   }
 
-  return tenantWithUsers.users.map((u) => u.user) ?? [];
+  const usersWithStatus = tenantWithUsers.users.map((u) => {
+    const { timesheets, ...user } = u.user;
+    const latestEntry = timesheets[0]?.entries[0];
+    const status = latestEntry?.action === 'CHECK_IN' ? UserStatus.IN : UserStatus.OUT;
+    return { ...user, status };
+  });
+
+  // Sort: IN users first, then OUT users
+  return usersWithStatus.sort((a, b) => {
+    if (a.status === UserStatus.IN && b.status === UserStatus.OUT) return -1;
+    if (a.status === UserStatus.OUT && b.status === UserStatus.IN) return 1;
+    return 0;
+  });
 };
 
 export { createTenant, updateTenant, getTenantById, getTenants, getTenantUsers };
