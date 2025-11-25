@@ -30,4 +30,9 @@ export type User = {
   tin?: string;
   philhealth?: string;
   pagibig?: string;
+
+  shiftSchedule?: {
+    shiftStart: Date;
+    shiftEnd: Date;
+  } | null;
 };

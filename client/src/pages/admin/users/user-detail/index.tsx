@@ -6,11 +6,12 @@ import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useParams } from 'react-router-dom';
 
-import { FormRow, InputWithFormat, TextField } from '~/components/form';
+import { FormRow, InputWithFormat, TextField, TimePicker } from '~/components/form';
 import { Button, BackButton, Form, PageLayout } from '~/components/ui';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { AdminRoutes } from '~/routes';
 import { useGetUserQuery, useUpdateUserMutation } from '~/services/user/user.queries';
+import { UserRoleEnum } from '~/services/user/user.types';
 import { UpdateUserSchema, type UpdateUserPayload } from '~/schema/updateUserSchema';
 import theme from '~/theme';
 import { pathFor } from '~/utils/pathFor';
@@ -30,6 +31,8 @@ export const UserDetailPage = () => {
     philhealth: null,
     sss: null,
     tin: null,
+    shiftStart: null,
+    shiftEnd: null,
   };
 
   const {
@@ -64,6 +67,10 @@ export const UserDetailPage = () => {
       philhealth: user?.philhealth ?? null,
       sss: user?.sss ?? null,
       tin: user?.tin ?? null,
+      shiftStart: user?.shiftSchedule?.shiftStart
+        ? new Date(user.shiftSchedule.shiftStart)
+        : null,
+      shiftEnd: user?.shiftSchedule?.shiftEnd ? new Date(user.shiftSchedule.shiftEnd) : null,
     });
   }, [isLoadingUser, user, reset]);
 
@@ -72,7 +79,13 @@ export const UserDetailPage = () => {
   const onSubmit = async (data: UpdateUserPayload) => {
     if (!tenantId || !userId) return;
     try {
-      await updateUser({ data, tenantId, userId });
+      const payload = {
+        ...data,
+        shiftStart: data.shiftStart ? data.shiftStart.toISOString() : null,
+        shiftEnd: data.shiftEnd ? data.shiftEnd.toISOString() : null,
+      };
+
+      await updateUser({ data: payload as UpdateUserPayload, tenantId, userId });
 
       setMode('view');
       toast.success('User updated successfully');
@@ -222,6 +235,41 @@ export const UserDetailPage = () => {
               </Stack>
             </Stack>
 
+            {user?.role === UserRoleEnum.USER && (
+              <Stack
+                width="100%"
+                px={4}
+                py={2}
+                border={1}
+                borderColor="divider"
+                borderRadius={1}
+                spacing={1}
+              >
+                <Stack>
+                  <Typography variant="h6" fontWeight="bold">
+                    Shift Schedule
+                  </Typography>
+                  <Typography variant="subtitle2" color="text.secondary">
+                    Define work shift hours for this user. Hours outside shift times will not be
+                    credited.
+                  </Typography>
+                </Stack>
+                <Stack width="100%" spacing={1}>
+                  <FormRow label="Shift Start">
+                    <TimePicker
+                      control={control}
+                      name="shiftStart"
+                      label="Shift Start"
+                      mode={mode}
+                    />
+                  </FormRow>
+                  <FormRow label="Shift End">
+                    <TimePicker control={control} name="shiftEnd" label="Shift End" mode={mode} />
+                  </FormRow>
+                </Stack>
+              </Stack>
+            )}
+
             {(errors.name ||
               errors.address ||
               errors.contact ||
@@ -229,7 +277,9 @@ export const UserDetailPage = () => {
               errors.sss ||
               errors.pagibig ||
               errors.philhealth ||
-              errors.birthday) && (
+              errors.birthday ||
+              errors.shiftStart ||
+              errors.shiftEnd) && (
               <Box
                 sx={{
                   border: '1px solid',
@@ -247,7 +297,9 @@ export const UserDetailPage = () => {
                     errors.sss?.message ||
                     errors.pagibig?.message ||
                     errors.philhealth?.message ||
-                    errors.birthday?.message}
+                    errors.birthday?.message ||
+                    errors.shiftStart?.message ||
+                    errors.shiftEnd?.message}
                 </Typography>
               </Box>
             )}

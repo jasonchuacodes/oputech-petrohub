@@ -8,8 +8,9 @@ const getAllUsers = () => {
   return axios.get<User[]>('/users');
 };
 
-const getUserById = async (id?: string): Promise<User> => {
-  const res = await axios.get(`/users/${id}`);
+const getUserById = async (id?: string, tenantId?: string): Promise<User> => {
+  const params = tenantId ? { tenantId } : undefined;
+  const res = await axios.get(`/users/${id}`, { params });
 
   return res.data.data.user;
 };
@@ -18,8 +19,9 @@ const createUser = (data: CreateUserPayload) => {
   return axios.post('/users', data);
 };
 
-const updateUser = (id: string, data: UpdateUserPayload) => {
-  return axios.put(`/users/${id}`, data);
+const updateUser = (id: string, data: UpdateUserPayload, tenantId?: string) => {
+  const params = tenantId ? { tenantId } : undefined;
+  return axios.put(`/users/${id}`, data, { params });
 };
 
 const deleteUser = (id: string) => {

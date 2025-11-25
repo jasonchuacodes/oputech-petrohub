@@ -8,7 +8,7 @@ import type { UpdateUserPayload } from '~/schema/updateUserSchema';
 const useGetUserQuery = ({ tenantId, userId }: { tenantId?: string; userId?: string }) => {
   return useQuery({
     queryKey: ['tenantUser', tenantId, userId],
-    queryFn: () => getUserById(userId),
+    queryFn: () => getUserById(userId, tenantId),
   });
 };
 
@@ -28,10 +28,18 @@ const useUpdateUserMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ userId, data }: { userId: string; tenantId: string; data: UpdateUserPayload }) =>
-      updateUser(userId, data),
+    mutationFn: ({
+      userId,
+      data,
+      tenantId,
+    }: {
+      userId: string;
+      tenantId: string;
+      data: UpdateUserPayload;
+    }) => updateUser(userId, data, tenantId),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['tenantUsers', variables.tenantId] });
+      queryClient.invalidateQueries({ queryKey: ['tenantUser', variables.tenantId, variables.userId] });
     },
   });
 };
