@@ -1,18 +1,15 @@
 import { prisma } from '~/db';
 import { Prisma, TimesheetEntryAction, TimesheetStatus } from '~/db/prisma';
 import { ConflictError, ForbiddenError, NotFoundError } from '~/errors';
-import { getEndOfDayUTC, getStartOfDayUTC } from '~/utils';
+import { getEndOfDay, getStartOfDay } from '~/utils';
 
 import { CreateTimesheetPayload } from '../schema/createTimesheetSchema';
 import { UpdateTimesheetInput } from '../schema/updateTimesheetSchema';
 import { calculateHoursBetween, calculateShiftBasedHours } from '../utils/shift-calculator';
 
 const createTimesheet = async ({ userId, tenantId }: CreateTimesheetPayload) => {
-  const startOfToday = new Date();
-  startOfToday.setHours(0, 0, 0, 0);
-
-  const endOfToday = new Date();
-  endOfToday.setHours(23, 59, 59, 999);
+  const startOfToday = getStartOfDay();
+  const endOfToday = getEndOfDay();
 
   const existingTimesheet = await prisma.timesheet.findFirst({
     where: {
@@ -46,8 +43,8 @@ const createTimesheet = async ({ userId, tenantId }: CreateTimesheetPayload) => 
 };
 
 const getTodayTimesheet = (userId: string) => {
-  const startOfDay = getStartOfDayUTC();
-  const endOfDay = getEndOfDayUTC();
+  const startOfDay = getStartOfDay();
+  const endOfDay = getEndOfDay();
 
   const timesheet = prisma.timesheet.findFirst({
     where: {
@@ -143,8 +140,8 @@ const getTimesheets = async ({
 };
 
 const getLatestTimesheets = (tenantId: string) => {
-  const startOfDay = getStartOfDayUTC();
-  const endOfDay = getEndOfDayUTC();
+  const startOfDay = getStartOfDay();
+  const endOfDay = getEndOfDay();
 
   return prisma.timesheet.findMany({
     where: {
@@ -178,8 +175,8 @@ const getLatestTimesheets = (tenantId: string) => {
 };
 
 const getAttendance = async (tenantId: string) => {
-  const startOfDay = getStartOfDayUTC();
-  const endOfDay = getEndOfDayUTC();
+  const startOfDay = getStartOfDay();
+  const endOfDay = getEndOfDay();
 
   const tenantWithUsers = await prisma.tenant.findUnique({
     where: { id: tenantId },
@@ -233,8 +230,8 @@ const getAttendance = async (tenantId: string) => {
 };
 
 const checkIn = async (userId: string) => {
-  const startOfDay = getStartOfDayUTC();
-  const endOfDay = getEndOfDayUTC();
+  const startOfDay = getStartOfDay();
+  const endOfDay = getEndOfDay();
 
   let timesheet = await prisma.timesheet.findFirst({
     where: {
@@ -292,13 +289,14 @@ const checkIn = async (userId: string) => {
 };
 
 const checkOut = async (userId: string) => {
-  // Find today's timeshet
-  const today = getStartOfDayUTC();
+  // Find today's timesheet
+  const startOfDay = getStartOfDay();
+  const endOfDay = getEndOfDay();
 
   const timesheet = await prisma.timesheet.findFirst({
     where: {
       userId,
-      createdAt: { gte: today },
+      createdAt: { gte: startOfDay, lte: endOfDay },
     },
   });
 

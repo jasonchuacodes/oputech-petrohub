@@ -8,11 +8,11 @@ import {
   Skeleton,
   Divider,
 } from '@mui/material';
-import dayjs from 'dayjs';
 
 import { CardContainer, Link } from '~/components/ui';
 import { useGetTodayTimesheetQuery } from '~/services/timesheet/timesheet.queries';
 import { TimesheetEntryActionMap } from '~/services/timesheet/timesheet.types';
+import { formatDate } from '~/utils/dateUtils';
 
 export const TimesheetsSection = () => {
   const { data: todayTimesheet, isLoading: isLoadingTimesheet } = useGetTodayTimesheetQuery();
@@ -41,7 +41,7 @@ export const TimesheetsSection = () => {
                     <ListItem disablePadding>
                       <Stack direction="row" width="100%" justifyContent="space-between">
                         <Typography variant="body2" color="text.secondary">
-                          {dayjs(todayTimesheet?.createdAt).format('MMM D, YYYY')}
+                          {formatDate(todayTimesheet?.createdAt, 'MMM D, YYYY')}
                         </Typography>
                       </Stack>
                     </ListItem>
@@ -61,7 +61,7 @@ export const TimesheetsSection = () => {
                                   variant="outlined"
                                 />
                                 <Typography variant="caption" color="text.secondary">
-                                  {dayjs(entry.timestamp).format('hh:mm A')}
+                                  {formatDate(entry.timestamp, 'hh:mm A')}
                                 </Typography>
                               </Stack>
                             }

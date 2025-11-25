@@ -1,17 +1,21 @@
-/**
- * Get UTC start of day (00:00:00.000)
- */
-export function getStartOfDayUTC(date: Date = new Date()): Date {
-  const start = new Date(date);
-  start.setUTCHours(0, 0, 0, 0);
-  return start;
-}
+import { toZonedTime, fromZonedTime } from 'date-fns-tz';
+
+const APP_TZ = process.env.TZ || 'Asia/Manila';
 
 /**
- * Get UTC end of day (23:59:59.999)
+ * Get start of local day as a UTC Date
  */
-export function getEndOfDayUTC(date: Date = new Date()): Date {
-  const end = new Date(date);
-  end.setUTCHours(23, 59, 59, 999);
-  return end;
-}
+export const getStartOfDay = (date: Date = new Date()): Date => {
+  const local = toZonedTime(date, APP_TZ);
+  local.setHours(0, 0, 0, 0);
+  return fromZonedTime(local, APP_TZ);
+};
+
+/**
+ * Get end of local day as a UTC Date
+ */
+export const getEndOfDay = (date: Date = new Date()): Date => {
+  const local = toZonedTime(date, APP_TZ);
+  local.setHours(23, 59, 59, 999);
+  return fromZonedTime(local, APP_TZ);
+};

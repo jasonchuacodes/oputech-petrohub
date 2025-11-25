@@ -12,6 +12,7 @@ import {
 } from '~/services/timesheet/timesheet.queries';
 import { TimesheetEntryActionEnum, type Timesheet } from '~/services/timesheet/timesheet.types';
 import theme from '~/theme';
+import { dayjsLocal } from '~/utils/dateUtils';
 import { parseBackendError } from '~/utils/parseBackendError';
 
 dayjs.extend(duration);
@@ -47,8 +48,8 @@ export const TimeLogger = () => {
       let totalSeconds = timesheet.totalHours * 3600;
 
       if (latestEntry?.action === TimesheetEntryActionEnum.CHECK_IN) {
-        const startTime = dayjs(latestEntry.timestamp);
-        const now = dayjs();
+        const startTime = dayjsLocal(latestEntry.timestamp);
+        const now = dayjsLocal();
         totalSeconds += now.diff(startTime, 'second');
       }
 
