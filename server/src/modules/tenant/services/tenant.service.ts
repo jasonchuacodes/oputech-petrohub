@@ -81,21 +81,10 @@ const getTenantUsers = async (tenantId: string) => {
       users: {
         include: {
           user: {
-            include: {
-              timesheets: {
-                where: { tenantId },
-                include: {
-                  entries: {
-                    where: {
-                      timestamp: { gte: startOfDay, lte: endOfDay },
-                    },
-                    orderBy: { timestamp: 'desc' },
-                    take: 1,
-                  },
-                },
-                take: 1,
-              },
-            },
+            select :{
+              name: true,
+              role: true
+            }
           },
         },
       },
@@ -106,19 +95,7 @@ const getTenantUsers = async (tenantId: string) => {
     throw new NotFoundError('Tenant not found');
   }
 
-  const usersWithStatus = tenantWithUsers.users.map((u) => {
-    const { timesheets, ...user } = u.user;
-    const latestEntry = timesheets[0]?.entries[0];
-    const status = latestEntry?.action === 'CHECK_IN' ? UserStatus.IN : UserStatus.OUT;
-    return { ...user, status };
-  });
-
-  // Sort: IN users first, then OUT users
-  return usersWithStatus.sort((a, b) => {
-    if (a.status === UserStatus.IN && b.status === UserStatus.OUT) return -1;
-    if (a.status === UserStatus.OUT && b.status === UserStatus.IN) return 1;
-    return 0;
-  });
+  return tenantWithUsers.users.map((u) => u.user);
 };
 
 export { createTenant, updateTenant, getTenantById, getTenants, getTenantUsers };

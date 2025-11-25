@@ -39,3 +39,14 @@ export type TimesheetEntry = {
   createdAt: string;
   updatedAt: string;
 };
+
+export const UserStatusEnum = {
+  IN: 'IN',
+  OUT: 'OUT',
+} as const;
+
+export type UserStatus = ValueOf<typeof UserStatusEnum>;
+
+export type AttendanceUser = User & {
+  status: UserStatus;
+};

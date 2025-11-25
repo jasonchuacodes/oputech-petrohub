@@ -14,14 +14,14 @@ import {
 
 import { Widget } from '~/components/ui';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
-import { useGetTenantUsersQuery } from '~/services/tenant/tenant.queries';
-import { UserStatusEnum } from '~/services/tenant/tenant.types';
+import { useGetTenantAttendanceQuery } from '~/services/timesheet/timesheet.queries';
+import { UserStatusEnum } from '~/services/timesheet/timesheet.types';
 import { AdminRoutes } from '~/routes';
 import { pathFor } from '~/utils/pathFor';
 
 export const AttendanceWidget = () => {
   const { tenantId } = useTenantContext();
-  const { data: users = [] } = useGetTenantUsersQuery({ tenantId });
+  const { data: users = [] } = useGetTenantAttendanceQuery({ tenantId });
 
   const navigateTo = pathFor({
     pathname: AdminRoutes.TenantTimesheets,

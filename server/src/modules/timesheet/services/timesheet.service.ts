@@ -308,6 +308,64 @@ const updateTimesheet = async ({ timesheetId, totalHours }: UpdateTimesheetInput
   return updatedTimesheet;
 };
 
+const getAttendance = async (tenantId: string) => {
+  const startOfDay = new Date();
+  startOfDay.setUTCHours(0, 0, 0, 0);
+
+  const endOfDay = new Date();
+  endOfDay.setUTCHours(23, 59, 59, 999);
+
+  const tenantWithUsers = await prisma.tenant.findUnique({
+    where: { id: tenantId },
+    select: {
+      users: {
+        select: {
+          user: {
+            select: { id: true, name: true, email: true, role: true },
+          },
+        },
+      },
+    },
+  });
+
+  if (!tenantWithUsers) {
+    throw new NotFoundError('Tenant not found');
+  }
+
+  const todayTimesheets = await prisma.timesheet.findMany({
+    where: {
+      tenantId,
+      createdAt: { gte: startOfDay, lte: endOfDay },
+    },
+    select: {
+      userId: true,
+      entries: {
+        where: { timestamp: { gte: startOfDay, lte: endOfDay } },
+        orderBy: { timestamp: 'desc' },
+        take: 1,
+        select: { action: true },
+      },
+    },
+  });
+
+  const statusMap = new Map<string, 'IN' | 'OUT'>();
+  todayTimesheets.forEach((ts) => {
+    const latestEntry = ts.entries[0];
+    statusMap.set(ts.userId, latestEntry?.action === 'CHECK_IN' ? 'IN' : 'OUT');
+  });
+
+  const usersWithStatus = tenantWithUsers.users.map(({ user }) => ({
+    ...user,
+    status: statusMap.get(user.id) || 'OUT',
+  }));
+
+  return usersWithStatus.sort((a, b) => {
+    if (a.status === 'IN' && b.status === 'OUT') return -1;
+    if (a.status === 'OUT' && b.status === 'IN') return 1;
+    return 0;
+  });
+};
+
 export {
   createTimesheet,
   checkIn,
@@ -317,4 +375,5 @@ export {
   getTimesheets,
   updateTimesheet,
   getLatestTimesheets,
+  getAttendance,
 };

@@ -12,6 +12,7 @@ import {
   checkIn,
   checkOut,
   updateTimesheet,
+  getAttendance,
 } from '../controller/timesheet.controller';
 
 const router = express.Router();
@@ -23,6 +24,7 @@ router.get('/', requireAuth, asyncHandler(getUserTimesheets));
 
 router.get('/today', requireAuth, asyncHandler(getTodayTimesheet));
 router.get('/all', requireAuth, asyncHandler(getAllTimesheets));
+router.get('/attendance', requireAuth, asyncHandler(getAttendance));
 
 router.post('/create', requireAuth, asyncHandler(createTimesheet));
 router.put('/update', requireAuth, asyncHandler(updateTimesheet));

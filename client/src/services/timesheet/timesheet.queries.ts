@@ -9,8 +9,9 @@ import {
   getTodayTimesheet,
   getAllTimesheets,
   updateTimesheet,
+  getTenantAttendance,
 } from './timesheet.api';
-import type { Timesheet } from './timesheet.types';
+import type { AttendanceUser, Timesheet } from './timesheet.types';
 
 // Queries
 const useGetTodayTimesheetQuery = (): UseQueryResult<Timesheet> => {
@@ -76,6 +77,18 @@ const useGetTimesheetByIdQuery = ({ timesheetId }: { timesheetId?: string }) => 
   });
 };
 
+const useGetTenantAttendanceQuery = ({
+  tenantId,
+}: {
+  tenantId?: string;
+}): UseQueryResult<AttendanceUser[]> => {
+  return useQuery({
+    queryKey: ['attendance', tenantId],
+    queryFn: () => getTenantAttendance(tenantId!),
+    enabled: !!tenantId,
+  });
+};
+
 // Mutations
 const useCheckInMutation = () => {
   const queryClient = useQueryClient();
@@ -85,6 +98,7 @@ const useCheckInMutation = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['timesheets'] });
       queryClient.invalidateQueries({ queryKey: ['timesheet', 'today'] });
+      queryClient.invalidateQueries({ queryKey: ['attendance'] });
     },
   });
 };
@@ -97,6 +111,7 @@ const useCheckOutMutation = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['timesheets'] });
       queryClient.invalidateQueries({ queryKey: ['timesheet', 'today'] });
+      queryClient.invalidateQueries({ queryKey: ['attendance'] });
     },
   });
 };
@@ -117,6 +132,7 @@ export {
   useGetUserTimesheetsQuery,
   useGetAllTimesheetsQuery,
   useGetTimesheetByIdQuery,
+  useGetTenantAttendanceQuery,
   useCheckInMutation,
   useCheckOutMutation,
   useUpdateTimesheetMutation,

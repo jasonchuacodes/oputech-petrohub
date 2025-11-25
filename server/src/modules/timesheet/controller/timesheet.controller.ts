@@ -11,16 +11,19 @@ import {
   checkIn as checkInService,
   checkOut as checkOutService,
   updateTimesheet as updateTimesheetService,
+  getAttendance as getAttendanceService,
 } from '../services/timesheet.service';
 import { GetTimesheetSchema } from '../schema/getTimesheetSchema';
 import { GetTimesheetsSchema } from '../schema/getTimesheetsSchema';
 import { CreateTimesheetSchema } from '../schema/createTimesheetSchema';
 import { UpdateTimesheetSchema } from '../schema/updateTimesheetSchema';
+import { GetAttendanceSchema } from '../schema/getAttendanceSchema';
 
 const validateGetTimesheet = createSchemaValidator(GetTimesheetSchema);
 const validateGetTimesheets = createSchemaValidator(GetTimesheetsSchema);
 const validateCreateTimesheet = createSchemaValidator(CreateTimesheetSchema);
 const validateUpdateTimesheet = createSchemaValidator(UpdateTimesheetSchema);
+const validateGetAttendance = createSchemaValidator(GetAttendanceSchema);
 
 const createTimesheet = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
@@ -172,6 +175,25 @@ const updateTimesheet = async (req: AuthenticatedRequest, res: Response, next: N
   }
 };
 
+const getAttendance = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const { tenantId } = await validateGetAttendance({
+      tenantId: req.query.tenantId as string,
+    });
+
+    const users = await getAttendanceService(tenantId);
+
+    res.status(200).json({
+      message: 'Successfully retrieved attendance',
+      data: {
+        users,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export {
   createTimesheet,
   checkIn,
@@ -181,4 +203,5 @@ export {
   getUserTimesheets,
   getAllTimesheets,
   updateTimesheet,
+  getAttendance,
 };

@@ -2,7 +2,7 @@ import type { Dayjs } from 'dayjs';
 
 import axios from '~/lib/axiosInstance';
 
-import type { Timesheet } from './timesheet.types';
+import type { AttendanceUser, Timesheet } from './timesheet.types';
 
 // Queries
 const getTodayTimesheet = async (): Promise<Timesheet> => {
@@ -60,6 +60,14 @@ const getAllTimesheets = async ({
   return res.data.data.timesheets;
 };
 
+const getTenantAttendance = async (tenantId: string): Promise<AttendanceUser[]> => {
+  const res = await axios.get('/timesheets/attendance', {
+    params: { tenantId },
+  });
+
+  return res.data.data.users;
+};
+
 // Mutations
 const checkIn = async () => {
   const res = await axios.post('/timesheets/check-in');
@@ -88,6 +96,8 @@ const updateTimesheet = async ({
   return res.data.message;
 };
 
+
+
 export {
   getTodayTimesheet,
   getTimesheet,
@@ -96,4 +106,5 @@ export {
   checkIn,
   checkOut,
   updateTimesheet,
+  getTenantAttendance,
 };
