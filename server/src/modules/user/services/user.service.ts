@@ -47,7 +47,7 @@ const getUsersByTenantId = (tenantId: string) =>
     },
   });
 
-const getUserById = async (id: string) => {
+const getUserById = async (id: string, tenantId?: string) => {
   const user = await prisma.user.findFirst({
     where: { id },
     include: {
@@ -63,10 +63,33 @@ const getUserById = async (id: string) => {
     throw new NotFoundError('User not found');
   }
 
-  return user;
+  let shiftSchedule = null;
+  if (tenantId) {
+    const tenantUser = await prisma.tenantsOnUsers.findUnique({
+      where: {
+        userId_tenantId: {
+          userId: id,
+          tenantId,
+        },
+      },
+      select: {
+        shiftStart: true,
+        shiftEnd: true,
+      },
+    });
+
+    if (tenantUser?.shiftStart && tenantUser?.shiftEnd) {
+      shiftSchedule = {
+        shiftStart: tenantUser.shiftStart,
+        shiftEnd: tenantUser.shiftEnd,
+      };
+    }
+  }
+
+  return { ...user, shiftSchedule };
 };
 
-const updateUser = async (id: string, data: UpdateUserPayload) => {
+const updateUser = async (id: string, data: UpdateUserPayload, tenantId?: string) => {
   const existingUser = await prisma.user.findUnique({
     where: { id },
   });
@@ -75,10 +98,32 @@ const updateUser = async (id: string, data: UpdateUserPayload) => {
     throw new NotFoundError('User not found');
   }
 
+  const { shiftStart, shiftEnd, ...userData } = data as UpdateUserPayload & {
+    shiftStart?: string;
+    shiftEnd?: string;
+  };
+
   const updatedUser = await prisma.user.update({
     where: { id },
-    data,
+    data: userData,
   });
+
+  if (tenantId && (shiftStart !== undefined || shiftEnd !== undefined)) {
+    await prisma.tenantsOnUsers.update({
+      where: {
+        userId_tenantId: {
+          userId: id,
+          tenantId,
+        },
+      },
+      data: {
+        ...(shiftStart !== undefined && {
+          shiftStart: shiftStart ? new Date(shiftStart) : null,
+        }),
+        ...(shiftEnd !== undefined && { shiftEnd: shiftEnd ? new Date(shiftEnd) : null }),
+      },
+    });
+  }
 
   return updatedUser;
 };

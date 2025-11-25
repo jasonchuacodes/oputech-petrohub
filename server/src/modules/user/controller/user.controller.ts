@@ -42,8 +42,9 @@ const getAllUsers = async (_req: Request, res: Response, next: NextFunction) => 
 const getUserById = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
+    const { tenantId } = req.query;
 
-    const user = await userService.getUserById(id);
+    const user = await userService.getUserById(id, tenantId as string | undefined);
 
     res.status(201).json({
       message: 'Successfully retrieved user details',
@@ -57,10 +58,11 @@ const getUserById = async (req: Request, res: Response, next: NextFunction) => {
 const updateUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
+    const { tenantId } = req.query;
 
     const data = await validateUpdateUser(req.body);
 
-    const updatedUser = await userService.updateUser(id, data);
+    const updatedUser = await userService.updateUser(id, data, tenantId as string | undefined);
 
     res.status(201).json({
       message: 'User updated successfully',

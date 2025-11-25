@@ -82,6 +82,7 @@ const getTenantUsers = async (tenantId: string) => {
         include: {
           user: {
             select :{
+              id: true,
               name: true,
               role: true
             }

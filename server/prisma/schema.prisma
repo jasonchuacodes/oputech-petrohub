@@ -80,6 +80,9 @@ model TenantsOnUsers {
   tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   tenantId String
 
+  shiftStart DateTime?
+  shiftEnd   DateTime?
+
   @@id([userId, tenantId])
 }
 
