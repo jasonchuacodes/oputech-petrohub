@@ -287,7 +287,7 @@ const checkOut = async (userId: string) => {
   await prisma.timesheet.update({
     where: { id: timesheet.id },
     data: {
-      totalHours: timesheet.totalHours + sessionHours,
+      totalHours: Math.min(timesheet.totalHours + sessionHours, 8),
       status: TimesheetStatus.PENDING,
     },
   });
