@@ -98,61 +98,81 @@ export const UserDetailPage = () => {
                 })}
               />
               <Stack
-                direction="row"
-                justifyContent="space-between"
-                alignItems="center"
                 width="100%"
+                px={4}
+                py={2}
+                border={1}
+                borderColor="divider"
+                borderRadius={1}
+                spacing={1}
               >
-                <Stack>
-                  <Typography variant="h6" fontWeight="bold">
-                    General
-                  </Typography>
-                  <Typography variant="subtitle2" color="text.secondary">
-                    Basic information about the user. This helps identify the individual and keep
-                    their profile up to date.
-                  </Typography>
+                <Stack
+                  direction="row"
+                  justifyContent="space-between"
+                  alignItems="center"
+                  width="100%"
+                  spacing={4}
+                >
+                  <Stack>
+                    <Typography variant="h6" fontWeight="bold">
+                      General
+                    </Typography>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      Basic information about the user. This helps identify the individual and keep
+                      their profile up to date.
+                    </Typography>
+                  </Stack>
+                  {mode === 'view' && (
+                    <Button
+                      onClick={handleToggleMode}
+                      variant="contained"
+                      startIcon={<EditOutlined fontSize="small" />}
+                    >
+                      Edit
+                    </Button>
+                  )}
                 </Stack>
-                {mode === 'view' && (
-                  <Button
-                    onClick={handleToggleMode}
-                    variant="contained"
-                    startIcon={<EditOutlined fontSize="small" />}
-                  >
-                    Edit
-                  </Button>
-                )}
-              </Stack>
-              <Stack width="100%" spacing={1}>
-                <FormRow label="Full Name">
-                  <TextField
-                    register={register}
-                    mode={mode}
-                    value={name}
-                    name="name"
-                    placeholder="Juan Dela Cruz"
-                  />
-                </FormRow>
-                <FormRow label="Contact Number">
-                  <InputWithFormat
-                    mode={mode}
-                    control={control}
-                    name="contact"
-                    pattern="9999-999-9999"
-                    placeholder="0912-345-6789"
-                  />
-                </FormRow>
-                <FormRow label="Address">
-                  <TextField
-                    register={register}
-                    mode={mode}
-                    value={address}
-                    name="address"
-                    placeholder="123 Main Street..."
-                  />
-                </FormRow>
+                <Stack width="100%" spacing={1}>
+                  <FormRow label="Full Name">
+                    <TextField
+                      register={register}
+                      mode={mode}
+                      value={name}
+                      name="name"
+                      placeholder="Juan Dela Cruz"
+                    />
+                  </FormRow>
+                  <FormRow label="Contact Number">
+                    <InputWithFormat
+                      mode={mode}
+                      control={control}
+                      name="contact"
+                      pattern="9999-999-9999"
+                      placeholder="0912-345-6789"
+                    />
+                  </FormRow>
+                  <FormRow label="Address">
+                    <TextField
+                      register={register}
+                      mode={mode}
+                      value={address}
+                      name="address"
+                      placeholder="123 Main Street..."
+                    />
+                  </FormRow>
+                </Stack>
               </Stack>
             </Stack>
-            <Stack spacing={2} justifyContent="start" alignItems="start">
+
+            <Stack
+              width="100%"
+              px={4}
+              py={2}
+              border={1}
+              borderColor="divider"
+              borderRadius={1}
+              spacing={1}
+            >
               <Stack>
                 <Typography variant="h6" fontWeight="bold">
                   Government IDs
