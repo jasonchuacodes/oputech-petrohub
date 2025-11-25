@@ -1,9 +1,11 @@
 import { prisma } from '~/db';
 import { Prisma, TimesheetEntryAction, TimesheetStatus } from '~/db/prisma';
 import { ConflictError, ForbiddenError, NotFoundError } from '~/errors';
+import { getEndOfDayUTC, getStartOfDayUTC } from '~/utils';
 
 import { CreateTimesheetPayload } from '../schema/createTimesheetSchema';
 import { UpdateTimesheetInput } from '../schema/updateTimesheetSchema';
+import { calculateHoursBetween, calculateShiftBasedHours } from '../utils/shift-calculator';
 
 const createTimesheet = async ({ userId, tenantId }: CreateTimesheetPayload) => {
   const startOfToday = new Date();
@@ -44,11 +46,8 @@ const createTimesheet = async ({ userId, tenantId }: CreateTimesheetPayload) => 
 };
 
 const getTodayTimesheet = (userId: string) => {
-  const startOfDay = new Date();
-  startOfDay.setUTCHours(0, 0, 0, 0);
-
-  const endOfDay = new Date();
-  endOfDay.setUTCHours(23, 59, 59, 999);
+  const startOfDay = getStartOfDayUTC();
+  const endOfDay = getEndOfDayUTC();
 
   const timesheet = prisma.timesheet.findFirst({
     where: {
@@ -144,11 +143,8 @@ const getTimesheets = async ({
 };
 
 const getLatestTimesheets = (tenantId: string) => {
-  const startOfDay = new Date();
-  startOfDay.setUTCHours(0, 0, 0, 0);
-
-  const endOfDay = new Date();
-  endOfDay.setUTCHours(23, 59, 59, 999);
+  const startOfDay = getStartOfDayUTC();
+  const endOfDay = getEndOfDayUTC();
 
   return prisma.timesheet.findMany({
     where: {
@@ -181,12 +177,64 @@ const getLatestTimesheets = (tenantId: string) => {
   });
 };
 
-const checkIn = async (userId: string) => {
-  const startOfDay = new Date();
-  startOfDay.setUTCHours(0, 0, 0, 0);
+const getAttendance = async (tenantId: string) => {
+  const startOfDay = getStartOfDayUTC();
+  const endOfDay = getEndOfDayUTC();
 
-  const endOfDay = new Date();
-  endOfDay.setUTCHours(23, 59, 59, 999);
+  const tenantWithUsers = await prisma.tenant.findUnique({
+    where: { id: tenantId },
+    select: {
+      users: {
+        select: {
+          user: {
+            select: { id: true, name: true, email: true, role: true },
+          },
+        },
+      },
+    },
+  });
+
+  if (!tenantWithUsers) {
+    throw new NotFoundError('Tenant not found');
+  }
+
+  const todayTimesheets = await prisma.timesheet.findMany({
+    where: {
+      tenantId,
+      createdAt: { gte: startOfDay, lte: endOfDay },
+    },
+    select: {
+      userId: true,
+      entries: {
+        where: { timestamp: { gte: startOfDay, lte: endOfDay } },
+        orderBy: { timestamp: 'desc' },
+        take: 1,
+        select: { action: true },
+      },
+    },
+  });
+
+  const statusMap = new Map<string, 'IN' | 'OUT'>();
+  todayTimesheets.forEach((ts) => {
+    const latestEntry = ts.entries[0];
+    statusMap.set(ts.userId, latestEntry?.action === 'CHECK_IN' ? 'IN' : 'OUT');
+  });
+
+  const usersWithStatus = tenantWithUsers.users.map(({ user }) => ({
+    ...user,
+    status: statusMap.get(user.id) || 'OUT',
+  }));
+
+  return usersWithStatus.sort((a, b) => {
+    if (a.status === 'IN' && b.status === 'OUT') return -1;
+    if (a.status === 'OUT' && b.status === 'IN') return 1;
+    return 0;
+  });
+};
+
+const checkIn = async (userId: string) => {
+  const startOfDay = getStartOfDayUTC();
+  const endOfDay = getEndOfDayUTC();
 
   let timesheet = await prisma.timesheet.findFirst({
     where: {
@@ -244,31 +292,31 @@ const checkIn = async (userId: string) => {
 };
 
 const checkOut = async (userId: string) => {
-  const today = new Date();
-  today.setUTCHours(0, 0, 0, 0);
+  // Find today's timeshet
+  const today = getStartOfDayUTC();
 
   const timesheet = await prisma.timesheet.findFirst({
     where: {
       userId,
-      createdAt: {
-        gte: today,
-      },
+      createdAt: { gte: today },
     },
   });
 
   if (!timesheet) {
-    throw new Error('No timesheet for today');
+    throw new NotFoundError('No timesheet for today');
   }
 
+  // Validate last entry was CHECK_IN
   const lastEntry = await prisma.timesheetEntry.findFirst({
     where: { timesheetId: timesheet.id },
     orderBy: { timestamp: 'desc' },
   });
 
   if (!lastEntry || lastEntry.action !== TimesheetEntryAction.CHECK_IN) {
-    throw new Error('No active check-in entry for today');
+    throw new NotFoundError('No active check-in entry for today');
   }
 
+  // Create CHECK_OUT entry
   const checkOutEntry = await prisma.timesheetEntry.create({
     data: {
       timesheetId: timesheet.id,
@@ -277,17 +325,53 @@ const checkOut = async (userId: string) => {
     },
   });
 
-  const sessionHours = Number(
-    (
-      (checkOutEntry.timestamp.getTime() - lastEntry.timestamp.getTime()) /
-      (1000 * 60 * 60)
-    ).toFixed(2),
-  );
+  // Fetch user shift schedule
+  const userWithShift = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      role: true,
+      tenants: {
+        where: { tenantId: timesheet.tenantId },
+        select: {
+          shiftStart: true,
+          shiftEnd: true,
+        },
+      },
+    },
+  });
 
+  // Calculate session hours and cap
+  const hasShiftSchedule =
+    userWithShift?.role === 'USER' &&
+    userWithShift.tenants[0]?.shiftStart &&
+    userWithShift.tenants[0]?.shiftEnd;
+
+  let sessionHours: number;
+  let hoursCap: number;
+
+  if (hasShiftSchedule) {
+    const result = calculateShiftBasedHours(
+      {
+        shiftStart: userWithShift.tenants[0].shiftStart!,
+        shiftEnd: userWithShift.tenants[0].shiftEnd!,
+      },
+      {
+        checkIn: lastEntry.timestamp,
+        checkOut: checkOutEntry.timestamp,
+      },
+    );
+    sessionHours = result.sessionHours;
+    hoursCap = result.hoursCap;
+  } else {
+    sessionHours = calculateHoursBetween(lastEntry.timestamp, checkOutEntry.timestamp);
+    hoursCap = 8;
+  }
+
+  // Update timesheet with capped total hours
   await prisma.timesheet.update({
     where: { id: timesheet.id },
     data: {
-      totalHours: Math.min(timesheet.totalHours + sessionHours, 8),
+      totalHours: Math.min(timesheet.totalHours + sessionHours, hoursCap),
       status: TimesheetStatus.PENDING,
     },
   });
@@ -306,64 +390,6 @@ const updateTimesheet = async ({ timesheetId, totalHours }: UpdateTimesheetInput
   });
 
   return updatedTimesheet;
-};
-
-const getAttendance = async (tenantId: string) => {
-  const startOfDay = new Date();
-  startOfDay.setUTCHours(0, 0, 0, 0);
-
-  const endOfDay = new Date();
-  endOfDay.setUTCHours(23, 59, 59, 999);
-
-  const tenantWithUsers = await prisma.tenant.findUnique({
-    where: { id: tenantId },
-    select: {
-      users: {
-        select: {
-          user: {
-            select: { id: true, name: true, email: true, role: true },
-          },
-        },
-      },
-    },
-  });
-
-  if (!tenantWithUsers) {
-    throw new NotFoundError('Tenant not found');
-  }
-
-  const todayTimesheets = await prisma.timesheet.findMany({
-    where: {
-      tenantId,
-      createdAt: { gte: startOfDay, lte: endOfDay },
-    },
-    select: {
-      userId: true,
-      entries: {
-        where: { timestamp: { gte: startOfDay, lte: endOfDay } },
-        orderBy: { timestamp: 'desc' },
-        take: 1,
-        select: { action: true },
-      },
-    },
-  });
-
-  const statusMap = new Map<string, 'IN' | 'OUT'>();
-  todayTimesheets.forEach((ts) => {
-    const latestEntry = ts.entries[0];
-    statusMap.set(ts.userId, latestEntry?.action === 'CHECK_IN' ? 'IN' : 'OUT');
-  });
-
-  const usersWithStatus = tenantWithUsers.users.map(({ user }) => ({
-    ...user,
-    status: statusMap.get(user.id) || 'OUT',
-  }));
-
-  return usersWithStatus.sort((a, b) => {
-    if (a.status === 'IN' && b.status === 'OUT') return -1;
-    if (a.status === 'OUT' && b.status === 'IN') return 1;
-    return 0;
-  });
 };
 
 export {
