@@ -1,5 +1,5 @@
 import { OpenInNewOutlined } from '@mui/icons-material';
-import { Box, IconButton, Stack, Typography } from '@mui/material';
+import { Box, IconButton, Stack, Typography, type StackProps } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import type React from 'react';
 
@@ -9,9 +9,10 @@ type WidgetProps = {
   title: string;
   to: string;
   children: React.ReactNode;
+  props?: StackProps;
 };
 
-export const Widget = ({ title, to, children }: WidgetProps) => {
+export const Widget = ({ title, to, children, props }: WidgetProps) => {
   const navigate = useNavigate();
 
   return (
@@ -21,8 +22,8 @@ export const Widget = ({ title, to, children }: WidgetProps) => {
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        height: '100%',
       }}
+      {...props}
     >
       <Stack direction="row" justifyContent="space-between" alignItems="center">
         <Typography fontWeight="medium" variant="body1">

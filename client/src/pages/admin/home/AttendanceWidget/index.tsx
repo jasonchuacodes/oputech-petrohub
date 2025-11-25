@@ -48,7 +48,16 @@ export const AttendanceWidget = () => {
   );
 
   return (
-    <Widget title="Attendance" to={navigateTo}>
+    <Widget
+      title="Attendance"
+      to={navigateTo}
+      props={{
+        height: {
+          xs: 720,
+          md: '100%'
+        },
+      }}
+    >
       <Grid
         container
         spacing={2}
