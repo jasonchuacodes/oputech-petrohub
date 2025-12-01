@@ -35,6 +35,7 @@ model User {
   birthday   DateTime?
   contact    String?
   address    String?
+  position   String?
   sss        String?
   tin        String?
   philhealth String?

@@ -5,6 +5,7 @@ import { UserRoleEnum } from '~/services/user/user.types';
 export const CreateUserSchema = z.object({
   name: z.string().min(1),
   username: z.string().min(1, 'Username is required').max(20).trim(),
+  position: z.string().max(30).optional(),
   role: z.nativeEnum(UserRoleEnum),
 });
 

@@ -16,6 +16,7 @@ export const UpdateUserSchema = z
     email: z.string().email().optional().nullable(),
     birthday: z.date().optional().nullable(),
     address: z.string().optional().nullable(),
+    position: z.string().max(30).optional().nullable(),
     tin: z
       .string()
       .trim()

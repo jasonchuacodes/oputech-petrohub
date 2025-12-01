@@ -16,6 +16,7 @@ export const UpdateUserSchema = z
     role: z.nativeEnum(Role).optional(),
     birthday: z.string().optional().nullable(),
     address: z.string().optional().nullable(),
+    position: z.string().max(30).optional().nullable(),
     tin: z
       .string()
       .trim()

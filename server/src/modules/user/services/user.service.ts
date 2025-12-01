@@ -43,6 +43,7 @@ const getUsersByTenantId = (tenantId: string) =>
       id: true,
       name: true,
       email: true,
+      position: true,
       createdAt: true,
     },
   });

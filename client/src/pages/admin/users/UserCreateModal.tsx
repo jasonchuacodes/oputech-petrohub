@@ -94,16 +94,22 @@ export const UserCreateModal = ({ open, setOpen }: Props) => {
           label="Username"
           placeholder="johndoe123"
         />
-
-        <Select
-          required
+          <Select
+            required
+            register={register}
+            name="role"
+            label="Role"
+            onChange={handleSelectRole}
+            selected={selectedRole}
+            options={roleOptions}
+          />
+        <TextField
           register={register}
-          name="role"
-          label="Role"
-          onChange={handleSelectRole}
-          selected={selectedRole}
-          options={roleOptions}
+          name="position"
+          label="Position"
+          placeholder="Manager"
         />
+
       </Stack>
     </CustomModal>
   );

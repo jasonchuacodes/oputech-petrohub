@@ -26,6 +26,7 @@ export const UserDetailPage = () => {
   const initialValues = {
     name: '',
     address: null,
+    position: null,
     contact: null,
     pagibig: null,
     philhealth: null,
@@ -47,7 +48,7 @@ export const UserDetailPage = () => {
     mode: 'onBlur',
   });
 
-  const { name, address } = useWatch({ control });
+  const { name, address, position } = useWatch({ control });
 
   const { data: user, isLoading: isLoadingUser } = useGetUserQuery({
     tenantId,
@@ -62,6 +63,7 @@ export const UserDetailPage = () => {
     reset({
       name: user?.name ?? '',
       address: user?.address ?? null,
+      position: user?.position ?? null,
       contact: user?.contact ?? null,
       pagibig: user?.pagibig ?? null,
       philhealth: user?.philhealth ?? null,
@@ -173,6 +175,15 @@ export const UserDetailPage = () => {
                       placeholder="123 Main Street..."
                     />
                   </FormRow>
+                  <FormRow label="Position">
+                    <TextField
+                      register={register}
+                      mode={mode}
+                      value={position}
+                      name="position"
+                      placeholder="Manager"
+                    />
+                  </FormRow>
                 </Stack>
               </Stack>
             </Stack>
@@ -272,6 +283,7 @@ export const UserDetailPage = () => {
 
             {(errors.name ||
               errors.address ||
+              errors.position ||
               errors.contact ||
               errors.tin ||
               errors.sss ||
@@ -292,6 +304,7 @@ export const UserDetailPage = () => {
                 <Typography fontSize="small" color="error">
                   {errors.name?.message ||
                     errors.address?.message ||
+                    errors.position?.message ||
                     errors.contact?.message ||
                     errors.tin?.message ||
                     errors.sss?.message ||

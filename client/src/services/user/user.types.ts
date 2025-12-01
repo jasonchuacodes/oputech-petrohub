@@ -26,6 +26,7 @@ export type User = {
   birthday?: Date;
   contact?: string;
   address?: string;
+  position?: string;
   sss?: string;
   tin?: string;
   philhealth?: string;

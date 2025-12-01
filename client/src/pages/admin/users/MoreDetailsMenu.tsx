@@ -1,8 +1,9 @@
 import { MoreHorizOutlined } from '@mui/icons-material';
-import { Menu, MenuItem, Typography, Divider, Button } from '@mui/material';
+import { Menu, MenuItem, Typography, Divider } from '@mui/material';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { Button } from '~/components/ui';
 import { useAuthContext } from '~/context/auth/useAuthContext';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { AdminRoutes } from '~/routes';
@@ -47,8 +48,13 @@ export const MoreDetailsMenu = ({
 
   return (
     <>
-      <Button onClick={openMenu} size="small" variant="outlined" sx={{ height: 24, minWidth: 24 }}>
-        <MoreHorizOutlined fontSize="inherit" />
+      <Button
+        onClick={openMenu}
+        size="small"
+        variant="outlined"
+        sx={{ borderColor: 'divider', height: 24, minWidth: 24 }}
+      >
+        <MoreHorizOutlined fontSize="inherit" sx={{color: 'text.secondary'}}/>
       </Button>
       <Menu
         anchorEl={anchorElSettingsMenu}

@@ -84,7 +84,8 @@ const getTenantUsers = async (tenantId: string) => {
             select :{
               id: true,
               name: true,
-              role: true
+              role: true,
+              position: true,
             }
           },
         },
