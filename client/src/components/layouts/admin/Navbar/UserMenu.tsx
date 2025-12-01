@@ -80,7 +80,7 @@ const UserMenu = () => {
         >
           <Typography>Settings</Typography>
         </MenuItem>
-        <MenuItem onClick={() => null}>
+        <MenuItem disabled onClick={() => null}>
           <Typography>Help </Typography>
         </MenuItem>
         <Divider />
