@@ -1,4 +1,4 @@
-import { Box, Container, Tab, Tabs } from '@mui/material';
+import { Box, Container, Stack, Tab, Tabs, Typography } from '@mui/material';
 import { useState } from 'react';
 
 import { PageLayout } from '~/components/ui';
@@ -15,15 +15,21 @@ export const AdminSettingsPage = () => {
   };
 
   return (
-    <PageLayout spacing={2}>
+    <PageLayout spacing={2} p={3}>
+      <Stack spacing={0.5}>
+        <Typography fontWeight="bold" variant="h5">
+          Account Settings
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Manage your company profile and preferences.
+        </Typography>
+      </Stack>
       <Box
         sx={{
-          position: 'sticky',
-          top: 0,
-          px: 2,
-          backgroundColor: 'background.paper',
           borderBottom: '1px solid',
           borderColor: 'divider',
+          position: 'sticky',
+          top: 0,
           zIndex: 1,
         }}
       >
@@ -34,13 +40,12 @@ export const AdminSettingsPage = () => {
       </Box>
 
       <Container maxWidth="md" disableGutters>
-
-      <SettingsTabPanel index={0} value={value}>
-        <AccountSettings />
-      </SettingsTabPanel>
-      <SettingsTabPanel index={1} value={value}>
-        <SecuritySettings />
-      </SettingsTabPanel>
+        <SettingsTabPanel index={0} value={value}>
+          <AccountSettings />
+        </SettingsTabPanel>
+        <SettingsTabPanel index={1} value={value}>
+          <SecuritySettings />
+        </SettingsTabPanel>
       </Container>
     </PageLayout>
   );
