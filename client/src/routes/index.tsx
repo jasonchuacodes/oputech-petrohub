@@ -21,6 +21,7 @@ import { Register } from '~/pages/auth/register';
 import { HomePage as UserHomePage } from '~/pages/user/home';
 import { TimesheetsPage as UserTimesheetsPage } from '~/pages/user/timesheets';
 import { SettingsPage as UserSettingsPage } from '~/pages/user/settings';
+import { AdminSettingsPage } from '~/pages/admin/settings';
 import { NotFoundPage } from '~/pages/NotFound';
 import { UnauthorizedPage } from '~/pages/Unauthorized';
 import { UserRoleEnum } from '~/services/user/user.types';
@@ -42,6 +43,7 @@ export const AdminRoutes = {
   TenantUsers: '/tenants/:tenantId/users',
   TenantUserDetail: '/tenants/:tenantId/users/:userId',
   TenantUserTimesheetLogs: '/tenants/:tenantId/users/:userId/timesheets',
+  TenantAccountSettings: '/tenants/:tenantId/account-settings',
 };
 
 export const UserRoutes = {
@@ -95,6 +97,7 @@ export const router = createBrowserRouter(
             <Route path="users/:userId/timesheets" element={<TimesheetLogsPage />} />
             <Route path="create-tenant" element={<CreateTenantPage />} />
             <Route path="settings" element={<TenantSettingsPage />} />
+            <Route path="account-settings" element={<AdminSettingsPage />} />
           </Route>
         </Route>
       </Route>

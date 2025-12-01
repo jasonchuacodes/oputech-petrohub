@@ -1,11 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { VisibilityOffOutlined, VisibilityOutlined } from '@mui/icons-material';
 import { Divider, IconButton, List, OutlinedInput, Stack, Typography } from '@mui/material';
-import { useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
-import { useRef, useState } from 'react';
 import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 
 import { Button, Form, InfoBox } from '~/components/ui';
 import { UpdatePasswordSchema, type UpdatePasswordInput } from '~/schema/updatePasswordSchema';
@@ -14,13 +13,12 @@ import { parseBackendError } from '~/utils/parseBackendError';
 
 export const SecuritySettings = () => {
   const navigate = useNavigate();
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const queryClient = useQueryClient();
 
-  const [isShowOldPassword, setIsShowOldPassword] = useState(false);
-  const [isShowNewPassword, setIsShowNewPassword] = useState(false);
-  const [isShowConfirmPassword, setIsShowConfirmPassword] = useState(false);
-
+  const [showPassword, setShowPassword] = useState({
+    oldPassword: false,
+    newPassword: false,
+    confirmPassword: false,
+  });
   const {
     register,
     reset,
@@ -34,6 +32,9 @@ export const SecuritySettings = () => {
   const { mutate: updatePassword, isPending: isUpdatePasswordPending } =
     useUpdatePasswordMutation();
 
+  const togglePasswordVisibility = (field: keyof typeof showPassword) => {
+    setShowPassword((prev) => ({ ...prev, [field]: !prev[field] }));
+  };
   const handleCancel = () => {
     reset();
     navigate(-1);
@@ -46,37 +47,7 @@ export const SecuritySettings = () => {
       { oldPassword, newPassword },
       {
         onSuccess: () => {
-          let countdown = 5;
-
-          const toastId = toast.success(
-            `Password updated successfully! Logging you out in ${countdown} seconds.`,
-            { duration: 5000 },
-          );
-
-          intervalRef.current = setInterval(() => {
-            countdown--;
-
-            if (countdown > 0) {
-              toast.success(
-                `Password updated successfully! Logging you out in ${countdown} second${
-                  countdown !== 1 ? 's' : ''
-                }.`,
-                { id: toastId },
-              );
-            } else {
-              clearInterval(intervalRef.current!);
-              intervalRef.current = null;
-              toast.dismiss(toastId);
-
-              sessionStorage.clear();
-
-              queryClient.setQueryData(['auth'], null);
-              queryClient.cancelQueries();
-
-              navigate('/login');
-            }
-          }, 1000);
-
+          toast.success('Password updated successfully!');
           reset();
         },
         onError: (err) => {
@@ -103,15 +74,15 @@ export const SecuritySettings = () => {
               <OutlinedInput
                 {...register('oldPassword')}
                 size="small"
-                type={isShowOldPassword ? 'text' : 'password'}
+                type={showPassword.oldPassword ? 'text' : 'password'}
                 placeholder="Enter your old password"
                 endAdornment={
                   <IconButton
                     size="small"
-                    onClick={() => setIsShowOldPassword(!isShowOldPassword)}
+                    onClick={() => togglePasswordVisibility('oldPassword')}
                     edge="end"
                   >
-                    {isShowOldPassword ? <VisibilityOutlined /> : <VisibilityOffOutlined />}
+                    {showPassword.oldPassword ? <VisibilityOutlined /> : <VisibilityOffOutlined />}
                   </IconButton>
                 }
               />
@@ -128,15 +99,15 @@ export const SecuritySettings = () => {
               <OutlinedInput
                 {...register('newPassword')}
                 size="small"
-                type={isShowNewPassword ? 'text' : 'password'}
+                type={showPassword.newPassword ? 'text' : 'password'}
                 placeholder="Enter your new password"
                 endAdornment={
                   <IconButton
                     size="small"
-                    onClick={() => setIsShowNewPassword(!isShowNewPassword)}
+                    onClick={() => togglePasswordVisibility('newPassword')}
                     edge="end"
                   >
-                    {isShowNewPassword ? <VisibilityOutlined /> : <VisibilityOffOutlined />}
+                    {showPassword.newPassword ? <VisibilityOutlined /> : <VisibilityOffOutlined />}
                   </IconButton>
                 }
               />
@@ -167,15 +138,19 @@ export const SecuritySettings = () => {
               <OutlinedInput
                 {...register('confirmPassword')}
                 size="small"
-                type={isShowConfirmPassword ? 'text' : 'password'}
+                type={showPassword.confirmPassword ? 'text' : 'password'}
                 placeholder="Enter you confirm new password"
                 endAdornment={
                   <IconButton
                     size="small"
-                    onClick={() => setIsShowConfirmPassword(!isShowConfirmPassword)}
+                    onClick={() => togglePasswordVisibility('confirmPassword')}
                     edge="end"
                   >
-                    {isShowConfirmPassword ? <VisibilityOutlined /> : <VisibilityOffOutlined />}
+                    {showPassword.confirmPassword ? (
+                      <VisibilityOutlined />
+                    ) : (
+                      <VisibilityOffOutlined />
+                    )}
                   </IconButton>
                 }
               />

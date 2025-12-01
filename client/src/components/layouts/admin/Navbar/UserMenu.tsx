@@ -4,10 +4,14 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useAuthContext } from '~/context/auth/useAuthContext';
+import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { useLogoutMutation } from '~/services/auth/auth.queries';
+import { pathFor } from '~/utils/pathFor';
+import { AdminRoutes } from '~/routes';
 
 const UserMenu = () => {
   const { auth } = useAuthContext();
+  const { tenantId } = useTenantContext();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { mutate: logout } = useLogoutMutation();
@@ -63,7 +67,17 @@ const UserMenu = () => {
           },
         }}
       >
-        <MenuItem onClick={() => null}>
+        <MenuItem
+          onClick={() => {
+            setAnchorElSettingsMenu(null);
+            navigate(
+              pathFor({
+                pathname: AdminRoutes.TenantAccountSettings,
+                params: { tenantId },
+              }),
+            );
+          }}
+        >
           <Typography>Settings</Typography>
         </MenuItem>
         <MenuItem onClick={() => null}>

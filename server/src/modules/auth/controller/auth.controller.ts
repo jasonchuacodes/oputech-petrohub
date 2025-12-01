@@ -147,18 +147,6 @@ const updatePassword = async (req: AuthenticatedRequest, res: Response, next: Ne
       id: targetUserId,
     });
 
-    res.clearCookie('accessToken', {
-      httpOnly: true,
-      sameSite: 'strict',
-      secure: isProduction,
-    });
-
-    res.clearCookie('refreshToken', {
-      httpOnly: true,
-      sameSite: 'strict',
-      secure: isProduction,
-    });
-
     res.status(200).json({ message: 'Successfully updated password' });
   } catch (err) {
     next(err);
