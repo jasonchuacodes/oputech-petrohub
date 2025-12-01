@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
-import { TextField, Select } from '~/components/form';
+import { TextField, Select, PasswordField } from '~/components/form';
 import { CustomModal } from '~/components/ui';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { UserRoleEnum, type UserRole } from '~/services/user/user.types';
@@ -38,6 +38,7 @@ export const UserCreateModal = ({ open, setOpen }: Props) => {
     handleSubmit,
     register,
     reset,
+    control,
     formState: { isValid },
   } = useForm<CreateUserInput>({
     resolver: zodResolver(CreateUserSchema),
@@ -54,7 +55,7 @@ export const UserCreateModal = ({ open, setOpen }: Props) => {
 
   const onSubmit = handleSubmit((data: CreateUserInput) => {
     if (!tenantId) return;
-    
+
     createUser(
       {
         ...data,
@@ -94,22 +95,24 @@ export const UserCreateModal = ({ open, setOpen }: Props) => {
           label="Username"
           placeholder="johndoe123"
         />
-          <Select
-            required
-            register={register}
-            name="role"
-            label="Role"
-            onChange={handleSelectRole}
-            selected={selectedRole}
-            options={roleOptions}
-          />
-        <TextField
-          register={register}
-          name="position"
-          label="Position"
-          placeholder="Manager"
+        <PasswordField
+          required
+          control={control}
+          name="password"
+          label="Password"
+          placeholder="*******"
+          copiable
+          randomizer
         />
-
+        <Select
+          required
+          register={register}
+          name="role"
+          label="Role"
+          onChange={handleSelectRole}
+          selected={selectedRole}
+          options={roleOptions}
+        />
       </Stack>
     </CustomModal>
   );
