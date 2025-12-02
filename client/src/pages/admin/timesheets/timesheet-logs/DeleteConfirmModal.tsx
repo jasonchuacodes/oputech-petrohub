@@ -23,7 +23,7 @@ export const DeleteConfirmModal = ({
       type="danger"
       title="Delete Timesheet Confirmation"
       submitText="Delete"
-      maxWidth={520}
+      maxWidth={400}
       loading={loading}
     >
       <Typography>

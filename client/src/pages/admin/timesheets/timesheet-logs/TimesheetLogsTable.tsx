@@ -8,6 +8,7 @@ import {
 } from '@mui/material';
 
 import { Paper } from '~/components/ui';
+import { TimesheetLogProvider } from '~/context/timesheetLog';
 import { type Timesheet } from '~/services/timesheet/timesheet.types';
 
 import { TimesheetRow } from './TimesheetRow';
@@ -28,9 +29,11 @@ export const TimesheetLogsTable = ({ timesheets }: { timesheets: Timesheet[] }) 
         </TableHead>
 
         <TableBody>
-          {timesheets?.map((timesheet) => {
-            return <TimesheetRow key={timesheet.id} {...timesheet} />;
-          })}
+          {timesheets?.map((timesheet) => (
+            <TimesheetLogProvider key={timesheet.id} timesheetLog={timesheet}>
+              <TimesheetRow />
+            </TimesheetLogProvider>
+          ))}
         </TableBody>
       </Table>
     </TableContainer>

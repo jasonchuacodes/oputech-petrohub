@@ -61,11 +61,19 @@ export const CustomModal = ({
             onClose={onClose}
             subheader={subheader}
             title={title}
+            slotProps={{
+              title: {
+                fontSize: '1.25rem',
+                color: 'text.primary',
+                fontWeight: 'medium',
+              },
+            }}
             action={
               <IconButton aria-label="close" onClick={onClose}>
                 <Close />
               </IconButton>
             }
+            sx={{ borderBottom: '1px solid', borderColor: 'divider' }}
           />
           <CardContent
             sx={{

@@ -22,16 +22,21 @@ export const TextField = <T extends object>({
   ...muiProps
 }: Props<T>) => {
   return (
-    <Stack justifyContent="center" spacing={0.5} width="100%">
-      <Typography fontWeight="bold" color="text.secondary">
-        {label}
-        {required && (
-          <Typography component="span" color="error">
-            {' '}
-            *
+    <Stack justifyContent="center" spacing={0.5}>
+      {label && (
+        <>
+          <Typography fontWeight="bold" color="text.secondary">
+            {label}
+            {required && (
+              <Typography component="span" color="error">
+                {' '}
+                *
+              </Typography>
+            )}
           </Typography>
-        )}
-      </Typography>
+        </>
+      )}
+
       {mode === 'edit' ? (
         <MUITextField
           {...(register ? register(name) : {})}
