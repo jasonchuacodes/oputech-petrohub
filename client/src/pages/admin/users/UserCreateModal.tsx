@@ -87,9 +87,17 @@ export const UserCreateModal = ({ open, setOpen }: Props) => {
       onSubmit={onSubmit}
     >
       <Stack spacing={2} justifyContent="start" alignItems="start">
-        <TextField required register={register} name="name" label="Name" placeholder="John Doe" />
         <TextField
           required
+          fullWidth
+          register={register}
+          name="name"
+          label="Name"
+          placeholder="John Doe"
+        />
+        <TextField
+          required
+          fullWidth
           register={register}
           name="username"
           label="Username"

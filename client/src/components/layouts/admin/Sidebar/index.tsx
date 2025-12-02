@@ -122,6 +122,7 @@ const Sidebar = () => {
                 </ListItemIcon>
                 {open && (
                   <ListItemText
+                    primaryTypographyProps={{ variant: 'body2' }}
                     sx={{
                       '.MuiListItemText-primary': {
                         fontWeight: active ? 'medium' : 'regular',

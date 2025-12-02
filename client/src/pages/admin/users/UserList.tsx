@@ -5,11 +5,13 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  Typography,
 } from '@mui/material';
 
 import { Link, Paper } from '~/components/ui';
 import { UserProvider } from '~/context/user/UserContext';
 import type { User } from '~/services/user/user.types';
+import { toTitleCase } from '~/utils/textUtils';
 
 import { MoreDetailsMenu } from './MoreDetailsMenu';
 
@@ -33,10 +35,16 @@ export const UserList = ({ users }: UserListProps) => {
               <UserProvider key={id} userId={id}>
                 <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                   <TableCell component="th" scope="row" sx={{ maxWidth: 560 }}>
-                    <Link to={id}>{name}</Link>
+                    <Link to={id}>
+                      <Typography variant="body2">{name}</Typography>
+                    </Link>
                   </TableCell>
-                  <TableCell align="left">{role}</TableCell>
-                  <TableCell align="left">{position || '—'}</TableCell>
+                  <TableCell align="left">
+                    <Typography variant="body2">{toTitleCase(role)}</Typography>
+                  </TableCell>
+                  <TableCell align="left">
+                    <Typography variant="body2">{position || '—'}</Typography>
+                  </TableCell>
                   <TableCell align="left">
                     <MoreDetailsMenu />
                   </TableCell>

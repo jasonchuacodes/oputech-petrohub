@@ -112,7 +112,7 @@ export const CreateTenantFlow = () => {
         ) : (
           <ContentCard sx={{ maxWidth: 'sm', gap: 4 }}>
             <Stack spacing={1}>
-              <Typography variant="h5" fontWeight="bold" textAlign="start">
+              <Typography variant="h6" textAlign="start">
                 Create Tenant
               </Typography>
               <RadioGroup

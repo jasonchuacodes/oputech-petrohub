@@ -17,7 +17,7 @@ export const AdminSettingsPage = () => {
   return (
     <PageLayout spacing={2} p={3}>
       <Stack spacing={0.5}>
-        <Typography fontWeight="bold" variant="h5">
+        <Typography variant="h6">
           Account Settings
         </Typography>
         <Typography variant="body2" color="text.secondary">

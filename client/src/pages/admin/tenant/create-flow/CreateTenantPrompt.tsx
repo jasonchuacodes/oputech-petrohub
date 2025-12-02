@@ -5,7 +5,7 @@ import { Button, ContentCard } from '~/components/ui';
 export const CreateTenantPrompt = ({ onStart }: { onStart: () => void }) => {
   return (
     <ContentCard>
-      <Typography variant="h5" fontWeight="bold">
+      <Typography variant="h6">
         Welcome, Admin!
       </Typography>
 

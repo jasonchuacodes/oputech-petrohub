@@ -129,10 +129,10 @@ export const UserDetailPage = () => {
                   spacing={4}
                 >
                   <Stack>
-                    <Typography variant="h6" fontWeight="bold">
+                    <Typography variant="body1" fontWeight="medium">
                       General
                     </Typography>
-                    <Typography variant="subtitle2" color="text.secondary">
+                    <Typography variant="body2" color="text.secondary">
                       Basic information about the user. This helps identify the individual and keep
                       their profile up to date.
                     </Typography>
@@ -198,10 +198,10 @@ export const UserDetailPage = () => {
               spacing={1}
             >
               <Stack>
-                <Typography variant="h6" fontWeight="bold">
+                <Typography variant="body1" fontWeight="medium">
                   Government IDs
                 </Typography>
-                <Typography variant="subtitle2" color="text.secondary">
+                <Typography variant="body2" color="text.secondary">
                   Government-issued identification numbers linked to the user for verification and
                   record-keeping.
                 </Typography>
@@ -257,10 +257,10 @@ export const UserDetailPage = () => {
                 spacing={1}
               >
                 <Stack>
-                  <Typography variant="h6" fontWeight="bold">
+                  <Typography variant="body1" fontWeight="medium">
                     Shift Schedule
                   </Typography>
-                  <Typography variant="subtitle2" color="text.secondary">
+                  <Typography variant="body2" color="text.secondary">
                     Define work shift hours for this user. Hours outside shift times will not be
                     credited.
                   </Typography>

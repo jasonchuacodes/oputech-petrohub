@@ -74,7 +74,7 @@ export const Login = () => {
             gap: 4,
           }}
         >
-          <Typography variant="h4" fontWeight="bold">
+          <Typography fontWeight="bold" variant="h5">
             Welcome to Business
           </Typography>
           <Stack spacing={3} width="100%" maxWidth={{ xs: '100%', sm: 400 }} px={2}>
@@ -99,9 +99,10 @@ export const Login = () => {
                 name="username"
                 label="Username"
                 placeholder="Enter username"
+                sx={{ fontSize: 'body2.fontSize' }}
               />
               <Stack spacing={0.5}>
-                <Typography fontWeight="bold" color="text.secondary">
+                <Typography variant="body2" fontWeight="medium" color="text.secondary">
                   Password
                 </Typography>
                 <OutlinedInput
@@ -140,7 +141,7 @@ export const Login = () => {
             </Button>
           </Stack>
           <Stack direction="row" spacing={1}>
-            <Typography>New here?</Typography>
+            <Typography variant="body2">New here?</Typography>
             <Link to="/register" color="info">
               Create an account
             </Link>

@@ -64,14 +64,18 @@ export const DateRangePicker = ({
         startIcon={<CalendarOutlined fontSize="small" />}
       >
         <Stack direction="row" spacing={1}>
-          <Typography component="span" color="text.secondary">
+          <Typography component="span" variant="body2" color="text.secondary">
             Time period:
           </Typography>
 
           {selectedStart || selectedEnd ? (
-            <Typography component="span">{formatRange(selectedStart, selectedEnd)}</Typography>
+            <Typography component="span" variant="body2">
+              {formatRange(selectedStart, selectedEnd)}
+            </Typography>
           ) : (
-            <Typography component="span">{label}</Typography>
+            <Typography component="span" variant="body2">
+              {label}
+            </Typography>
           )}
         </Stack>
       </Button>
@@ -98,8 +102,8 @@ export const DateRangePicker = ({
             <Stack direction="row" alignItems="center" spacing={1.5}>
               <Typography
                 variant="body2"
-                fontWeight={500}
                 color="text.secondary"
+                fontWeight="medium"
                 sx={{ minWidth: 70 }}
               >
                 Start Date
@@ -117,6 +121,9 @@ export const DateRangePicker = ({
                   textField: {
                     size: 'small',
                     sx: { width: 168 },
+                    InputProps: {
+                      sx: { fontSize: 'body2.fontSize' },
+                    },
                   },
                   actionBar: { actions: ['clear'] },
                 }}
@@ -130,8 +137,8 @@ export const DateRangePicker = ({
             <Stack direction="row" alignItems="center" spacing={1.5}>
               <Typography
                 variant="body2"
-                fontWeight={500}
                 color="text.secondary"
+                fontWeight="medium"
                 sx={{ minWidth: 70 }}
               >
                 End Date
@@ -150,6 +157,9 @@ export const DateRangePicker = ({
                   textField: {
                     size: 'small',
                     sx: { width: 168 },
+                    InputProps: {
+                      sx: { fontSize: 'body2.fontSize' },
+                    },
                   },
                   actionBar: { actions: ['clear'] },
                 }}

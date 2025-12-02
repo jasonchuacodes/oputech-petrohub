@@ -78,14 +78,14 @@ const UserMenu = () => {
             );
           }}
         >
-          <Typography>Settings</Typography>
+          <Typography variant="body2">Settings</Typography>
         </MenuItem>
         <MenuItem disabled onClick={() => null}>
-          <Typography>Help </Typography>
+          <Typography variant="body2">Help </Typography>
         </MenuItem>
         <Divider />
         <MenuItem onClick={handleLogout}>
-          <Typography>Logout</Typography>
+          <Typography variant="body2">Logout</Typography>
         </MenuItem>
       </Menu>
     </>

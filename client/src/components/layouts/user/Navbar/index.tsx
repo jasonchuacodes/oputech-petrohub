@@ -130,6 +130,7 @@ const Navbar = () => {
                     <Icon component={icon} fontSize="small" />
                   </ListItemIcon>
                   <ListItemText
+                    primaryTypographyProps={{ variant: 'body2' }}
                     sx={{
                       '.MuiListItemText-primary': {
                         fontWeight: active ? 'medium' : 'regular',

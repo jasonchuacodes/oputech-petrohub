@@ -26,7 +26,7 @@ export const DeleteConfirmModal = ({
       maxWidth={400}
       loading={loading}
     >
-      <Typography>
+      <Typography variant='body2'>
         Are you sure you want to delete this timesheet? All associated entries will be permanently
         deleted.
       </Typography>

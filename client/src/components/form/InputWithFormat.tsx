@@ -37,7 +37,7 @@ export const InputWithFormat = <T extends object>({
 
         return (
           <Stack spacing={0.5} width="100%">
-            <Typography fontWeight="bold" color="text.secondary">
+            <Typography variant="body2" fontWeight="medium" color="text.secondary">
               {label}
               {required && (
                 <Typography component="span" color="error">
@@ -60,9 +60,16 @@ export const InputWithFormat = <T extends object>({
                   const slicedRaw = rawDigits.slice(0, maxRawLength);
                   onChange(slicedRaw === '' ? null : slicedRaw);
                 }}
+                slotProps={{
+                  htmlInput: {
+                    sx: {
+                      fontSize: 'body2.fontSize',
+                    },
+                  },
+                }}
               />
             ) : (
-              <Typography height={40}>
+              <Typography variant="body2" height={40}>
                 {formatted === '' || formatted === null ? 'N/A' : formatted}
               </Typography>
             )}

@@ -54,7 +54,7 @@ export const CreateTenantPage = () => {
             mb={4}
           >
             <Stack>
-              <Typography fontWeight="bold" variant="h5">
+              <Typography variant="h6">
                 Create Tenant
               </Typography>
               <Typography variant="subtitle2" color="text.secondary">

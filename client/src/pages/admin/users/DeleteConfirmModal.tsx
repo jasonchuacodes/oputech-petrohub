@@ -8,7 +8,12 @@ type DeleteConfirmModalProps = {
   loading?: boolean;
 };
 
-export const DeleteConfirmModal = ({ open, onClose, onConfirm, loading }: DeleteConfirmModalProps) => {
+export const DeleteConfirmModal = ({
+  open,
+  onClose,
+  onConfirm,
+  loading,
+}: DeleteConfirmModalProps) => {
   return (
     <CustomModal
       onSubmit={onConfirm}
@@ -20,7 +25,7 @@ export const DeleteConfirmModal = ({ open, onClose, onConfirm, loading }: Delete
       maxWidth={520}
       loading={loading}
     >
-      <Typography>Are you sure you want to delete this user?</Typography>
+      <Typography variant="body2">Are you sure you want to delete this user?</Typography>
     </CustomModal>
   );
 };

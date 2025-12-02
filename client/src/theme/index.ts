@@ -59,6 +59,10 @@ const theme = createTheme({
     },
   },
 
+  typography: {
+    fontSize: 14,
+  },
+
   components: {
     MuiCssBaseline: {
       styleOverrides: {
@@ -75,6 +79,18 @@ const theme = createTheme({
           paddingTop: 6,
           backgroundColor: theme.palette.background.surface,
         }),
+      },
+    },
+    MuiTypography: {
+      styleOverrides: {
+        h6: {
+          fontWeight: 500,
+        },
+      },
+    },
+    MuiSvgIcon: {
+      defaultProps: {
+        fontSize: 'small',
       },
     },
   },

@@ -28,9 +28,7 @@ export const TimePicker = ({ control, name, label, mode, disabled }: TimePickerP
       control={control}
       render={({ field: { onChange, value }, fieldState: { error } }) => {
         if (mode === 'view') {
-          const displayValue = value
-            ? dayjs(value).format('h:mm A')
-            : '-';
+          const displayValue = value ? dayjs(value).format('h:mm A') : '-';
           return (
             <div>
               <Typography variant="body2" color="text.secondary" gutterBottom>
@@ -46,7 +44,6 @@ export const TimePicker = ({ control, name, label, mode, disabled }: TimePickerP
         return (
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <MuiTimePicker
-              label={label}
               value={dayjsValue}
               disabled={disabled}
               onChange={(newValue: Dayjs | null) => {
@@ -69,6 +66,12 @@ export const TimePicker = ({ control, name, label, mode, disabled }: TimePickerP
                   error: !!error,
                   helperText: error?.message,
                   fullWidth: true,
+                  size: 'small',
+                  InputProps: {
+                    sx: {
+                      fontSize: 'body2.fontSize',
+                    },
+                  },
                 },
               }}
             />

@@ -154,7 +154,7 @@ const TenantSelector = () => {
                       onClick={() => handleSelectTenant(id)}
                       sx={{ borderRadius: 1 }}
                     >
-                      <Typography fontWeight={id === tenantId ? 'bold' : 'normal'}>
+                      <Typography variant="body2" fontWeight={id === tenantId ? 'bold' : 'normal'}>
                         {name}
                       </Typography>
                     </MenuItem>
@@ -182,19 +182,19 @@ const TenantSelector = () => {
               <ListItemIcon>
                 <CachedOutlined fontSize="small" />
               </ListItemIcon>
-              <Typography>Switch Tenant</Typography>
+              <Typography variant="body2">Switch Tenant</Typography>
             </MenuItem>
             <MenuItem onClick={handleCreateTenant}>
               <ListItemIcon>
                 <AddBoxOutlined fontSize="small" />
               </ListItemIcon>
-              <Typography>Create tenant</Typography>
+              <Typography variant="body2">Create tenant</Typography>
             </MenuItem>
             <MenuItem onClick={handleSettings}>
               <ListItemIcon>
                 <SettingsOutlined fontSize="small" />
               </ListItemIcon>
-              <Typography>Settings</Typography>
+              <Typography variant="body2">Settings</Typography>
             </MenuItem>
           </MenuList>
         )}

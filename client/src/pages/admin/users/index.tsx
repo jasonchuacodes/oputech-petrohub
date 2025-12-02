@@ -24,12 +24,12 @@ export const UsersPage = () => {
           {/* Header */}
           <Stack alignItems="center" direction="row" justifyContent="space-between" width="100%">
             <Stack spacing={0.5}>
-              <Typography fontWeight="bold" variant="h5">
+              <Typography variant="h6">
                 Users
               </Typography>
               {!isLoading && (
                 <Typography variant="body2" color="text.secondary">
-                  Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatum, voluptatibus.
+                  View and manage users in your organization
                 </Typography>
               )}
             </Stack>

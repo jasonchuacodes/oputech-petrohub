@@ -64,7 +64,7 @@ export const SecuritySettings = () => {
         <Stack justifyContent="center" alignItems="center" spacing={2} pb={2}>
           <Stack spacing={1} width="100%">
             <Stack spacing={0.5}>
-              <Typography fontWeight="bold" color="text.secondary">
+              <Typography variant="body2" fontWeight="medium" color="text.secondary">
                 Old Password
                 <Typography component="span" color="error">
                   {' '}
@@ -76,6 +76,7 @@ export const SecuritySettings = () => {
                 size="small"
                 type={showPassword.oldPassword ? 'text' : 'password'}
                 placeholder="Enter your old password"
+                sx={{ fontSize: 'body2.fontSize' }}
                 endAdornment={
                   <IconButton
                     size="small"
@@ -89,7 +90,7 @@ export const SecuritySettings = () => {
             </Stack>
 
             <Stack spacing={0.5}>
-              <Typography fontWeight="bold" color="text.secondary">
+              <Typography variant="body2" fontWeight="medium" color="text.secondary">
                 New Password
                 <Typography component="span" color="error">
                   {' '}
@@ -98,9 +99,6 @@ export const SecuritySettings = () => {
               </Typography>
               <OutlinedInput
                 {...register('newPassword')}
-                size="small"
-                type={showPassword.newPassword ? 'text' : 'password'}
-                placeholder="Enter your new password"
                 endAdornment={
                   <IconButton
                     size="small"
@@ -110,6 +108,10 @@ export const SecuritySettings = () => {
                     {showPassword.newPassword ? <VisibilityOutlined /> : <VisibilityOffOutlined />}
                   </IconButton>
                 }
+                size="small"
+                type={showPassword.newPassword ? 'text' : 'password'}
+                placeholder="Enter your new password"
+                sx={{ fontSize: 'body2.fontSize' }}
               />
             </Stack>
             <InfoBox variant="info" title="Password requirements:">
@@ -128,7 +130,7 @@ export const SecuritySettings = () => {
               </List>
             </InfoBox>
             <Stack spacing={0.5}>
-              <Typography fontWeight="bold" color="text.secondary">
+              <Typography variant="body2" fontWeight="medium" color="text.secondary">
                 Confirm Password
                 <Typography component="span" color="error">
                   {' '}
@@ -137,9 +139,6 @@ export const SecuritySettings = () => {
               </Typography>
               <OutlinedInput
                 {...register('confirmPassword')}
-                size="small"
-                type={showPassword.confirmPassword ? 'text' : 'password'}
-                placeholder="Enter you confirm new password"
                 endAdornment={
                   <IconButton
                     size="small"
@@ -153,6 +152,10 @@ export const SecuritySettings = () => {
                     )}
                   </IconButton>
                 }
+                size="small"
+                type={showPassword.confirmPassword ? 'text' : 'password'}
+                placeholder="Enter you confirm new password"
+                sx={{ fontSize: 'body2.fontSize' }}
               />
             </Stack>
           </Stack>

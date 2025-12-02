@@ -103,14 +103,14 @@ export const MoreDetailsMenu = () => {
         }}
       >
         <MenuItem onClick={handleViewDetails}>
-          <Typography>View Details</Typography>
+          <Typography variant="body2">View Details</Typography>
         </MenuItem>
         <Divider />
         <MenuItem onClick={() => null}>
-          <Typography>Assign Roles</Typography>
+          <Typography variant="body2">Assign Roles</Typography>
         </MenuItem>
         <MenuItem disabled={isDeleteDisabled} onClick={handleDelete}>
-          <Typography>Delete</Typography>
+          <Typography variant="body2">Delete</Typography>
         </MenuItem>
       </Menu>
 

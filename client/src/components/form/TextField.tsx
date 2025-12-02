@@ -22,10 +22,10 @@ export const TextField = <T extends object>({
   ...muiProps
 }: Props<T>) => {
   return (
-    <Stack justifyContent="center" spacing={0.5}>
+    <Stack justifyContent="center" spacing={0.5} width="100%">
       {label && (
         <>
-          <Typography fontWeight="bold" color="text.secondary">
+          <Typography variant="body2" fontWeight="medium" color="text.secondary">
             {label}
             {required && (
               <Typography component="span" color="error">
@@ -44,9 +44,16 @@ export const TextField = <T extends object>({
           fullWidth
           placeholder={placeholder}
           size="small"
+          slotProps={{
+            htmlInput: {
+              sx: {
+                fontSize: 'body2.fontSize',
+              },
+            },
+          }}
         />
       ) : (
-        <Typography sx={{ height: 40 }}>
+        <Typography variant="body2" sx={{ height: 40, display: 'flex', alignItems: 'center' }}>
           {value === '' || value === null ? 'N/A' : value}
         </Typography>
       )}

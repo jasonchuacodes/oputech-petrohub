@@ -16,10 +16,10 @@ export const Link = ({ to, children, sx, ...props }: Props) => {
   };
   return (
     <Typography
-      component="button"
-      type='button'
       onClick={handleRedirect}
-      {...props}
+      component="button"
+      type="button"
+      variant="body2"
       sx={{
         color: 'info.main',
         background: 'none',
@@ -28,6 +28,7 @@ export const Link = ({ to, children, sx, ...props }: Props) => {
         cursor: 'pointer',
         ...sx,
       }}
+      {...props}
     >
       {children}
     </Typography>

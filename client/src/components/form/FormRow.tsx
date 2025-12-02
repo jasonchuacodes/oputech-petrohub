@@ -6,17 +6,23 @@ type FormRowProps = {
   children: ReactNode;
   required?: boolean;
   labelWidth?: number;
-  alignLabel?: string
+  alignLabel?: string;
 };
 
-export const FormRow = ({ alignLabel = 'center', label, required, children, labelWidth = 240 }: FormRowProps) => {
+export const FormRow = ({
+  alignLabel = 'center',
+  label,
+  required,
+  children,
+  labelWidth = 240,
+}: FormRowProps) => {
   return (
     <Stack direction="row" alignItems={alignLabel} spacing={2} width="100%">
       <Box width={labelWidth}>
-        <Typography textAlign="start" fontWeight="bold" color="text.secondary">
+        <Typography variant="body2" textAlign="start" fontWeight="medium" color="text.secondary">
           {label}
           {required && (
-            <Typography component="span" color="error">
+            <Typography variant='body2' component="span" color="error">
               {' '}
               *
             </Typography>

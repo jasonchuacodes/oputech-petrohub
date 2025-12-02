@@ -96,7 +96,7 @@ export const TenantSettingsPage = () => {
             width="100%"
             mb={4}
           >
-            <Typography fontWeight="bold" variant="h5">
+            <Typography variant="h6">
               Tenant Settings
             </Typography>
           </Stack>
@@ -107,8 +107,8 @@ export const TenantSettingsPage = () => {
                 <Typography variant="h6" fontWeight="bold">
                   General
                 </Typography>
-                <Typography variant="subtitle2" color="text.secondary">
-                  Provide your company’s basic details. This information helps identify and
+                <Typography variant="body2" fontWeight="regular" color="text.secondary">
+                  Provide your company's basic details. This information helps identify and
                   distinguish your organization within the platform.
                 </Typography>
               </Stack>
@@ -139,7 +139,7 @@ export const TenantSettingsPage = () => {
                 <Typography variant="h6" fontWeight="bold">
                   Government
                 </Typography>
-                <Typography variant="subtitle2" color="text.secondary">
+                <Typography variant="body2" fontWeight="regular" color="text.secondary">
                   Basic information about your company. Lorem ipsum dolor sit amet consectetur
                   adipisicing elit. Dolore, vitae.
                 </Typography>
@@ -187,7 +187,7 @@ export const TenantSettingsPage = () => {
                 <Typography variant="h6" fontWeight="bold">
                   Additional Information
                 </Typography>
-                <Typography variant="subtitle2" color="text.secondary">
+                <Typography variant="body2" fontWeight="regular" color="text.secondary">
                   Basic information about your company. Lorem ipsum dolor sit amet consectetur
                   adipisicing elit. Dolore, vitae.
                 </Typography>

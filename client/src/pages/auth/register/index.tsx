@@ -91,7 +91,7 @@ export const Register = () => {
       justifyContent="center"
       mt={10}
     >
-      <Typography variant="h4" fontWeight="bold">
+      <Typography fontWeight="bold" variant="h5">
         Register
       </Typography>
       <Card
@@ -128,7 +128,7 @@ export const Register = () => {
                 placeholder="Enter username"
               />
               <Stack spacing={0.5}>
-                <Typography fontWeight="bold" color="text.secondary">
+                <Typography variant="body2" fontWeight="medium" color="text.secondary">
                   Password
                   <Typography component="span" color="error">
                     {' '}
@@ -137,9 +137,6 @@ export const Register = () => {
                 </Typography>
                 <OutlinedInput
                   {...register('password')}
-                  size="small"
-                  type={isShowPassword ? 'text' : 'password'}
-                  placeholder="Password"
                   endAdornment={
                     <IconButton
                       size="small"
@@ -149,10 +146,16 @@ export const Register = () => {
                       {isShowPassword ? <VisibilityOutlined /> : <VisibilityOffOutlined />}
                     </IconButton>
                   }
+                  size="small"
+                  type={isShowPassword ? 'text' : 'password'}
+                  placeholder="Password"
+                  sx={{
+                    fontSize: 'body2.fontSize',
+                  }}
                 />
               </Stack>
               <Stack spacing={0.5}>
-                <Typography fontWeight="bold" color="text.secondary">
+                <Typography variant="body2" fontWeight="medium" color="text.secondary">
                   Confirm Password
                   <Typography component="span" color="error">
                     {' '}
@@ -161,9 +164,6 @@ export const Register = () => {
                 </Typography>
                 <OutlinedInput
                   {...register('confirmPassword')}
-                  size="small"
-                  type={isShowConfirmPassword ? 'text' : 'password'}
-                  placeholder="Confirm Password"
                   endAdornment={
                     <IconButton
                       size="small"
@@ -173,6 +173,12 @@ export const Register = () => {
                       {isShowConfirmPassword ? <VisibilityOutlined /> : <VisibilityOffOutlined />}
                     </IconButton>
                   }
+                  size="small"
+                  type={isShowConfirmPassword ? 'text' : 'password'}
+                  placeholder="Confirm Password"
+                  sx={{
+                    fontSize: 'body2.fontSize',
+                  }}
                 />
               </Stack>
             </Stack>
@@ -215,7 +221,7 @@ export const Register = () => {
               Create Account
             </Button>
             <Stack direction="row" spacing={1} alignSelf="center">
-              <Typography>Already have an account?</Typography>
+              <Typography variant="body2">Already have an account?</Typography>
               <Link to="/" color="info">
                 Go to Login
               </Link>

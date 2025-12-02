@@ -76,9 +76,14 @@ const TimesheetsPageContent = () => {
           <Stack spacing={2}>
             {/* Header */}
             <Stack spacing={3} alignItems="start">
-              <Typography fontWeight="bold" variant="h5">
-                Timesheets
-              </Typography>
+              <Stack spacing={0.5}>
+                <Typography variant="h6">
+                  Timesheets
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  View and manage timesheet records for your team
+                </Typography>
+              </Stack>
               <DateRangePicker
                 selectedStart={startDate}
                 selectedEnd={endDate}
