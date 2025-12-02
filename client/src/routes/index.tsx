@@ -15,7 +15,6 @@ import { BootstrapPage } from '~/pages/admin/bootstrap';
 import { HomePage } from '~/pages/admin/home';
 import { ReportsPage } from '~/pages/admin/reports';
 import { UserDetailPage } from '~/pages/admin/users/user-detail';
-import { TimesheetLogsPage } from '~/pages/admin/users/timesheet-logs';
 import { Login } from '~/pages/auth/login';
 import { Register } from '~/pages/auth/register';
 import { HomePage as UserHomePage } from '~/pages/user/home';
@@ -94,7 +93,6 @@ export const router = createBrowserRouter(
             <Route path="timesheets" element={<TimesheetsPage />} />
             <Route path="users" element={<UsersPage />} />
             <Route path="users/:userId" element={<UserDetailPage />} />
-            <Route path="users/:userId/timesheets" element={<TimesheetLogsPage />} />
             <Route path="create-tenant" element={<CreateTenantPage />} />
             <Route path="settings" element={<TenantSettingsPage />} />
             <Route path="account-settings" element={<AdminSettingsPage />} />

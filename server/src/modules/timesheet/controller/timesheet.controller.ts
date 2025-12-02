@@ -155,6 +155,25 @@ const getAllTimesheets = async (req: AuthenticatedRequest, res: Response, next: 
   }
 };
 
+const getAttendance = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const { tenantId } = await validateGetAttendance({
+      tenantId: req.query.tenantId as string,
+    });
+
+    const users = await getAttendanceService(tenantId);
+
+    res.status(200).json({
+      message: 'Successfully retrieved attendance',
+      data: {
+        users,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 const updateTimesheet = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const { timesheetId, totalHours } = await validateUpdateTimesheet(req.body);
@@ -168,25 +187,6 @@ const updateTimesheet = async (req: AuthenticatedRequest, res: Response, next: N
       message: 'Successfully retrieved timesheets',
       data: {
         timesheets,
-      },
-    });
-  } catch (err) {
-    next(err);
-  }
-};
-
-const getAttendance = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-  try {
-    const { tenantId } = await validateGetAttendance({
-      tenantId: req.query.tenantId as string,
-    });
-
-    const users = await getAttendanceService(tenantId);
-
-    res.status(200).json({
-      message: 'Successfully retrieved attendance',
-      data: {
-        users,
       },
     });
   } catch (err) {

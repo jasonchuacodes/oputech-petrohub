@@ -20,7 +20,7 @@ import { useGetUserTimesheetsQuery } from '~/services/timesheet/timesheet.querie
 import { useGetUserQuery } from '~/services/user/user.queries';
 import { getInitialDateRange } from '~/utils/dateUtils';
 
-import { TimesheetLogsTable } from './TimesheetLogsTable';
+import { TimesheetLogsTable } from '../../timesheets/timesheet-logs/TimesheetLogsTable';
 import { UserHeader } from './UserHeader';
 
 const TIMESHEETS_KEY = 'timesheetRange';

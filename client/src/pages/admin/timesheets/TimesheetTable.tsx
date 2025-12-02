@@ -1,3 +1,4 @@
+import { ChevronRightOutlined } from '@mui/icons-material';
 import {
   Table,
   TableBody,
@@ -8,13 +9,9 @@ import {
   Typography,
 } from '@mui/material';
 
-import { Link, Paper } from '~/components/ui';
-import { useTenantContext } from '~/context/tenant/useTenantContext';
-import { AdminRoutes } from '~/routes';
+import { Paper } from '~/components/ui';
+import { useTimesheetContext } from '~/context/timesheet/useTimesheetContext';
 import type { Timesheet } from '~/services/timesheet/timesheet.types';
-import { pathFor } from '~/utils/pathFor';
-
-import { MoreDetailsMenu } from './MoreDetailsMenu';
 
 type GroupedTimesheets = {
   userId: string;
@@ -23,8 +20,7 @@ type GroupedTimesheets = {
 };
 
 export const TimesheetTable = ({ timesheets }: { timesheets: Timesheet[] }) => {
-  const { tenantId } = useTenantContext();
-
+  const { setSelectedUserId } = useTimesheetContext();
   const groupedTimesheets = timesheets?.reduce<Record<string, GroupedTimesheets>>(
     (acc, timesheet) => {
       const key = timesheet.user.id;
@@ -53,7 +49,7 @@ export const TimesheetTable = ({ timesheets }: { timesheets: Timesheet[] }) => {
           <TableRow>
             <TableCell sx={{ maxWidth: 240 }}>Name</TableCell>
             <TableCell align="left">Total Hours</TableCell>
-            <TableCell align="left" />
+            <TableCell />
           </TableRow>
         </TableHead>
         <TableBody>
@@ -61,20 +57,31 @@ export const TimesheetTable = ({ timesheets }: { timesheets: Timesheet[] }) => {
             const totalHours = timesheets.reduce((sum, t) => sum + t.totalHours, 0);
 
             return (
-              <TableRow key={userId} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+              <TableRow
+                key={userId}
+                onClick={() => setSelectedUserId(userId)}
+                sx={{
+                  cursor: 'pointer',
+                  '&:hover': {
+                    bgcolor: 'action.hover',
+                  },
+                  '&:last-child td, &:last-child th': { border: 0 },
+                }}
+              >
                 <TableCell component="th" scope="row" sx={{ maxWidth: 240 }}>
-                  <Link
-                    to={pathFor({
-                      pathname: AdminRoutes.TenantUserTimesheetLogs,
-                      params: { tenantId, userId },
-                    })}
-                  >
-                    <Typography fontSize={14}>{userName}</Typography>
-                  </Link>
+                  <Typography fontSize={14}>{userName}</Typography>
                 </TableCell>
                 <TableCell align="left">{totalHours}</TableCell>
-                <TableCell align="left">
-                  <MoreDetailsMenu id={userId} />
+                <TableCell align="right">
+                  <ChevronRightOutlined
+                    fontSize="small"
+                    sx={{
+                      '.MuiTableRow-root:hover &': { opacity: 1 },
+                      color: 'text.secondary',
+                      opacity: 0.6,
+                      transition: 'opacity 0.2s',
+                    }}
+                  />
                 </TableCell>
               </TableRow>
             );
