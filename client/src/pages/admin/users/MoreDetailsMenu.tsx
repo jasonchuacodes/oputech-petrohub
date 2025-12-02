@@ -2,28 +2,32 @@ import { MoreHorizOutlined } from '@mui/icons-material';
 import { Menu, MenuItem, Typography, Divider } from '@mui/material';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 import { Button } from '~/components/ui';
 import { useAuthContext } from '~/context/auth/useAuthContext';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
+import { useUserContext } from '~/context/user/useUserContext';
 import { AdminRoutes } from '~/routes';
+import { useDeleteUserMutation } from '~/services/user/user.queries';
+import { parseBackendError } from '~/utils/parseBackendError';
 import { pathFor } from '~/utils/pathFor';
 
-export const MoreDetailsMenu = ({
-  id,
-  onDelete,
-}: {
-  id: string;
-  onDelete: (id: string) => void;
-}) => {
+import { DeleteConfirmModal } from './DeleteConfirmModal';
+
+export const MoreDetailsMenu = () => {
   const navigate = useNavigate();
   const { auth } = useAuthContext();
   const { tenantId } = useTenantContext();
+  const { userId } = useUserContext();
 
   const [anchorElSettingsMenu, setAnchorElSettingsMenu] = useState<null | HTMLElement>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const isOpenSettingsMenu = Boolean(anchorElSettingsMenu);
 
-  const isDeleteDisabled = auth?.id === id;
+  const { mutateAsync: deleteUser, isPending: isDeletePending } = useDeleteUserMutation();
+
+  const isDeleteDisabled = auth?.id === userId;
 
   const openMenu = (e: React.MouseEvent<HTMLElement>) => setAnchorElSettingsMenu(e.currentTarget);
 
@@ -35,15 +39,34 @@ export const MoreDetailsMenu = ({
         pathname: AdminRoutes.TenantUserDetail,
         params: {
           tenantId,
-          userId: id,
+          userId,
         },
       }),
     );
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = () => {
     closeMenu();
-    onDelete(id);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!tenantId) return;
+
+    if (auth?.id === userId) {
+      toast.error('You cannot delete your own account');
+      return;
+    }
+
+    try {
+      await deleteUser({ userId, tenantId });
+      toast.success('Successfully deleted user');
+    } catch (err) {
+      const parsedErr = parseBackendError(err);
+      toast.error(`Failed to delete user: ${parsedErr}`);
+    } finally {
+      setIsDeleteModalOpen(false);
+    }
   };
 
   return (
@@ -86,10 +109,17 @@ export const MoreDetailsMenu = ({
         <MenuItem onClick={() => null}>
           <Typography>Assign Roles</Typography>
         </MenuItem>
-        <MenuItem disabled={isDeleteDisabled} onClick={() => handleDelete(id)}>
+        <MenuItem disabled={isDeleteDisabled} onClick={handleDelete}>
           <Typography>Delete</Typography>
         </MenuItem>
       </Menu>
+
+      <DeleteConfirmModal
+        open={isDeleteModalOpen}
+        loading={isDeletePending}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+      />
     </>
   );
 };
