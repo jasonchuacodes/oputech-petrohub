@@ -102,52 +102,59 @@ export const TimesheetRow = ({ createdAt, entries, id: timesheetId, totalHours }
             </Typography>
           </Tooltip>
         </TableCell>
-        <TableCell width={200}>
-          {editMode ? (
-            <form
-              onSubmit={onSubmit}
-              style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}
-            >
-              <input
-                {...register('totalHours', { valueAsNumber: true })}
-                type="number"
-                min={0}
-                max={16.0}
-                step="any"
-                placeholder="0.00"
+        <TableCell>
+          <Stack direction="row" alignItems="center" sx={{ minWidth: 180 }}>
+            {editMode ? (
+              <form
+                onSubmit={onSubmit}
                 style={{
-                  width: 80,
-                  height: 32,
-                  padding: '4px 8px',
-                  border: '1px solid',
-                  borderRadius: '6px',
-                  fontSize: '0.875rem',
-                  fontFamily: 'inherit',
-                  outline: 'none',
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  width: '100%',
                 }}
-              />
-              <Stack direction="row">
-                <IconButton
-                  type="submit"
-                  disabled={!isValid || isUpdateTimesheetPending}
-                  size="small"
-                >
-                  <CheckOutlined fontSize="inherit" />
-                </IconButton>
-                <IconButton
-                  onClick={() => {
-                    reset();
-                    setEditMode(false);
+              >
+                <input
+                  {...register('totalHours', { valueAsNumber: true })}
+                  type="number"
+                  min={0}
+                  max={16.0}
+                  step="any"
+                  placeholder="0.00"
+                  style={{
+                    width: 80,
+                    height: 32,
+                    padding: '4px 8px',
+                    border: '1px solid',
+                    borderRadius: '6px',
+                    fontSize: '0.875rem',
+                    fontFamily: 'inherit',
+                    outline: 'none',
                   }}
-                  size="small"
-                >
-                  <CloseOutlined fontSize="inherit" />
-                </IconButton>
-              </Stack>
-            </form>
-          ) : (
-            `${totalHours.toFixed(2)} hrs`
-          )}
+                />
+                <Stack direction="row" marginLeft={1}>
+                  <IconButton
+                    type="submit"
+                    disabled={!isValid || isUpdateTimesheetPending}
+                    size="small"
+                  >
+                    <CheckOutlined fontSize="inherit" />
+                  </IconButton>
+                  <IconButton
+                    onClick={() => {
+                      reset();
+                      setEditMode(false);
+                    }}
+                    size="small"
+                  >
+                    <CloseOutlined fontSize="inherit" />
+                  </IconButton>
+                </Stack>
+              </form>
+            ) : (
+              <Typography variant="body2">{`${totalHours.toFixed(2)} hrs`}</Typography>
+            )}
+          </Stack>
         </TableCell>
 
         <TableCell>
@@ -180,7 +187,9 @@ export const TimesheetRow = ({ createdAt, entries, id: timesheetId, totalHours }
         <TableCell sx={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Stack margin={1} spacing={1}>
-              <Typography variant="body1">Timesheet entries:</Typography>
+              <Typography variant="body2" color="text.secondary">
+                Timesheet entries:
+              </Typography>
               {entries.map(({ id, timestamp, action }) => {
                 return (
                   <Stack key={id} direction="row" spacing={2} paddingLeft={2}>

@@ -3,6 +3,7 @@ import { Box, Container, Stack, Typography } from '@mui/material';
 import dayjs from 'dayjs';
 import weekday from 'dayjs/plugin/weekday';
 import utc from 'dayjs/plugin/utc';
+import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { SearchInput } from '~/components/form';
@@ -25,9 +26,8 @@ dayjs.extend(weekday);
 dayjs.extend(utc);
 
 const TimesheetsPageContent = () => {
-  const { tenantId } = useParams();
+  const { tenantId, userId } = useParams();
   const {
-    selectedUserId,
     startDate,
     endDate,
     setStartDate,
@@ -46,6 +46,12 @@ const TimesheetsPageContent = () => {
     timesheet.user.name.toLocaleLowerCase().startsWith(searchTerm.toLowerCase()),
   );
 
+  useEffect(() => {
+    if (userId) {
+      setSearchTerm('');
+    }
+  }, [userId, setSearchTerm]);
+
   const handleSelectDateRange = ({ start, end }: DateRange) => {
     const newStart = start?.startOf('day') ?? null;
     const newEnd = end?.endOf('day') ?? null;
@@ -63,7 +69,7 @@ const TimesheetsPageContent = () => {
 
   return (
     <PageLayout p={3}>
-      {selectedUserId ? (
+      {userId ? (
         <TimesheetLogsView />
       ) : (
         <Container maxWidth="lg" disableGutters>

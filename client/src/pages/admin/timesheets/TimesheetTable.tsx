@@ -8,10 +8,13 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 import { Paper } from '~/components/ui';
-import { useTimesheetContext } from '~/context/timesheet/useTimesheetContext';
+import { useTenantContext } from '~/context/tenant/useTenantContext';
+import { AdminRoutes } from '~/routes';
 import type { Timesheet } from '~/services/timesheet/timesheet.types';
+import { pathFor } from '~/utils/pathFor';
 
 type GroupedTimesheets = {
   userId: string;
@@ -20,7 +23,18 @@ type GroupedTimesheets = {
 };
 
 export const TimesheetTable = ({ timesheets }: { timesheets: Timesheet[] }) => {
-  const { setSelectedUserId } = useTimesheetContext();
+  const navigate = useNavigate();
+  const { tenantId } = useTenantContext();
+
+  const handleRowClick = (userId: string) => {
+    navigate(
+      pathFor({
+        pathname: AdminRoutes.TenantTimesheets,
+        params: { tenantId, userId },
+      }),
+    );
+  };
+
   const groupedTimesheets = timesheets?.reduce<Record<string, GroupedTimesheets>>(
     (acc, timesheet) => {
       const key = timesheet.user.id;
@@ -59,7 +73,7 @@ export const TimesheetTable = ({ timesheets }: { timesheets: Timesheet[] }) => {
             return (
               <TableRow
                 key={userId}
-                onClick={() => setSelectedUserId(userId)}
+                onClick={() => handleRowClick(userId)}
                 sx={{
                   cursor: 'pointer',
                   '&:hover': {

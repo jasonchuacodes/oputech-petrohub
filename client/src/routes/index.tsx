@@ -38,7 +38,7 @@ export const AdminRoutes = {
   TenantSettings: '/tenants/:tenantId/settings',
   TenantCreate: '/tenants/:tenantId/create-tenant',
   TenantReports: '/tenants/:tenantId/reports',
-  TenantTimesheets: '/tenants/:tenantId/timesheets',
+  TenantTimesheets: '/tenants/:tenantId/timesheets/:userId?',
   TenantUsers: '/tenants/:tenantId/users',
   TenantUserDetail: '/tenants/:tenantId/users/:userId',
   TenantUserTimesheetLogs: '/tenants/:tenantId/users/:userId/timesheets',
@@ -90,7 +90,7 @@ export const router = createBrowserRouter(
           <Route element={<AdminMainLayout />}>
             <Route index element={<HomePage />} />
             <Route path="reports" element={<ReportsPage />} />
-            <Route path="timesheets" element={<TimesheetsPage />} />
+            <Route path="timesheets/:userId?" element={<TimesheetsPage />} />
             <Route path="users" element={<UsersPage />} />
             <Route path="users/:userId" element={<UserDetailPage />} />
             <Route path="create-tenant" element={<CreateTenantPage />} />

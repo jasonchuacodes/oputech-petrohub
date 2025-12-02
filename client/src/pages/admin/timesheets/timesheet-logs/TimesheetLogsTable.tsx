@@ -21,8 +21,8 @@ export const TimesheetLogsTable = ({ timesheets }: { timesheets: Timesheet[] }) 
             <TableCell sx={{ maxWidth: 240 }}>Date</TableCell>
             <TableCell align="left">Check In</TableCell>
             <TableCell align="left">Check Out</TableCell>
-            <TableCell align="left" sx={{ width: 200 }}>Total Hours</TableCell>
-            <TableCell align="left">Actions</TableCell>
+            <TableCell align="left" sx={{ width: 256 }}>Total Hours</TableCell>
+            <TableCell align="left" sx={{ width: 120}}>Actions</TableCell>
             <TableCell />
           </TableRow>
         </TableHead>

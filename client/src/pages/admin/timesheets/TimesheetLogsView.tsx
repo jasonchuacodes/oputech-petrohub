@@ -1,5 +1,6 @@
 import { FileDownloadOutlined } from '@mui/icons-material';
 import { Box, Container, Divider, Stack, Typography } from '@mui/material';
+import { useParams, useNavigate } from 'react-router-dom';
 
 import {
   BackButton,
@@ -20,17 +21,18 @@ import { TimesheetLogsTable } from './timesheet-logs/TimesheetLogsTable';
 import { UserHeader } from './timesheet-logs/UserHeader';
 
 export const TimesheetLogsView = () => {
+  const { userId } = useParams();
+  const navigate = useNavigate();
   const { tenantId } = useTenantContext();
-  const { selectedUserId, startDate, endDate, setSelectedUserId, setStartDate, setEndDate } =
-    useTimesheetContext();
+  const { startDate, endDate, setStartDate, setEndDate } = useTimesheetContext();
 
   const { data: user, isLoading: isLoadingUser } = useGetUserQuery({
-    userId: selectedUserId,
+    userId,
   });
 
   const { data: timesheetLogs, isLoading } = useGetUserTimesheetsQuery({
     tenantId,
-    userId: selectedUserId,
+    userId,
     startDate,
     endDate,
   });
@@ -48,17 +50,28 @@ export const TimesheetLogsView = () => {
     }
   };
 
+  const handleGoBack = () => {
+    navigate(
+      pathFor({
+        pathname: AdminRoutes.TenantTimesheets,
+        params: { tenantId },
+      }),
+    );
+  };
+
+  if (!userId) {
+    return null;
+  }
+
   return (
     <Container maxWidth="md" disableGutters>
       <Stack spacing={3} justifyContent="start" alignItems="stretch">
         <BackButton
           text="Go back"
-          onClick={() => setSelectedUserId(undefined)}
+          onClick={handleGoBack}
           to={pathFor({
             pathname: AdminRoutes.TenantTimesheets,
-            params: {
-              tenantId,
-            },
+            params: { tenantId },
           })}
         />
 
