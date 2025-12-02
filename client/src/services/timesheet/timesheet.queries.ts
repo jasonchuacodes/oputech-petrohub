@@ -9,6 +9,7 @@ import {
   getTodayTimesheet,
   getAllTimesheets,
   updateTimesheet,
+  deleteTimesheet,
   getTenantAttendance,
 } from './timesheet.api';
 import type { AttendanceUser, Timesheet } from './timesheet.types';
@@ -127,6 +128,22 @@ const useUpdateTimesheetMutation = () => {
   });
 };
 
+const useDeleteTimesheetMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ timesheetId }: { timesheetId: string; tenantId?: string }) =>
+      deleteTimesheet(timesheetId),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['timesheets'] });
+      queryClient.invalidateQueries({ queryKey: ['timesheet', variables.timesheetId] });
+      if (variables.tenantId) {
+        queryClient.invalidateQueries({ queryKey: ['attendance', variables.tenantId] });
+      }
+    },
+  });
+};
+
 export {
   useGetTodayTimesheetQuery,
   useGetUserTimesheetsQuery,
@@ -136,4 +153,5 @@ export {
   useCheckInMutation,
   useCheckOutMutation,
   useUpdateTimesheetMutation,
+  useDeleteTimesheetMutation,
 };

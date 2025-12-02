@@ -96,7 +96,9 @@ const updateTimesheet = async ({
   return res.data.message;
 };
 
-
+const deleteTimesheet = async (timesheetId: string) => {
+  return axios.delete(`/timesheets/${timesheetId}`);
+};
 
 export {
   getTodayTimesheet,
@@ -106,5 +108,6 @@ export {
   checkIn,
   checkOut,
   updateTimesheet,
+  deleteTimesheet,
   getTenantAttendance,
 };

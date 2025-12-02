@@ -21,8 +21,12 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
+import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { UpdateTimesheetSchema, type UpdateTimesheetParams } from '~/schema/updateTimesheetSchema';
-import { useUpdateTimesheetMutation } from '~/services/timesheet/timesheet.queries';
+import {
+  useDeleteTimesheetMutation,
+  useUpdateTimesheetMutation,
+} from '~/services/timesheet/timesheet.queries';
 import {
   TimesheetEntryActionEnum,
   TimesheetEntryActionMap,
@@ -31,9 +35,12 @@ import {
 import theme from '~/theme';
 import { parseBackendError } from '~/utils/parseBackendError';
 
+import { DeleteConfirmModal } from './DeleteConfirmModal';
+
 export const TimesheetRow = ({ createdAt, entries, id: timesheetId, totalHours }: Timesheet) => {
   const [open, setOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const firstCheckIn = entries.find((e) => e.action === TimesheetEntryActionEnum.CHECK_IN);
 
@@ -53,8 +60,13 @@ export const TimesheetRow = ({ createdAt, entries, id: timesheetId, totalHours }
     resolver: zodResolver(UpdateTimesheetSchema),
   });
 
+  const { tenantId } = useTenantContext();
+
   const { mutate: updateTimesheet, isPending: isUpdateTimesheetPending } =
     useUpdateTimesheetMutation();
+
+  const { mutateAsync: deleteTimesheet, isPending: isDeletePending } =
+    useDeleteTimesheetMutation();
 
   const onSubmit = handleSubmit(({ totalHours }: UpdateTimesheetParams) => {
     updateTimesheet(
@@ -75,6 +87,22 @@ export const TimesheetRow = ({ createdAt, entries, id: timesheetId, totalHours }
       },
     );
   });
+
+  const handleDelete = () => {
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    try {
+      await deleteTimesheet({ timesheetId, tenantId });
+      toast.success('Successfully deleted timesheet');
+    } catch (err) {
+      const parsedErr = parseBackendError(err);
+      toast.error(`Failed to delete timesheet: ${parsedErr}`);
+    } finally {
+      setIsDeleteModalOpen(false);
+    }
+  };
 
   return (
     <>
@@ -164,7 +192,7 @@ export const TimesheetRow = ({ createdAt, entries, id: timesheetId, totalHours }
             </IconButton>
           )}
 
-          <IconButton onClick={() => null} size="small">
+          <IconButton onClick={handleDelete} size="small">
             <DeleteOutlineOutlined fontSize="inherit" />
           </IconButton>
         </TableCell>
@@ -204,7 +232,12 @@ export const TimesheetRow = ({ createdAt, entries, id: timesheetId, totalHours }
         </TableCell>
       </TableRow>
 
-      {/* TODO: Delete Timesheet Confirmation modal */}
+      <DeleteConfirmModal
+        open={isDeleteModalOpen}
+        loading={isDeletePending}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+      />
     </>
   );
 };

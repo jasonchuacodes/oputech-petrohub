@@ -12,6 +12,7 @@ import {
   checkIn,
   checkOut,
   updateTimesheet,
+  deleteTimesheet,
   getAttendance,
 } from '../controller/timesheet.controller';
 
@@ -32,5 +33,6 @@ router.post('/check-in', requireAuth, asyncHandler(checkIn));
 router.post('/check-out', requireAuth, asyncHandler(checkOut));
 
 router.get('/:timesheetId', requireAuth, asyncHandler(getTimesheetById));
+router.delete('/:timesheetId', requireAuth, asyncHandler(deleteTimesheet));
 
 export default router;

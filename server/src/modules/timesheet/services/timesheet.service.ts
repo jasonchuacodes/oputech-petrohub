@@ -390,6 +390,24 @@ const updateTimesheet = async ({ timesheetId, totalHours }: UpdateTimesheetInput
   return updatedTimesheet;
 };
 
+const deleteTimesheet = async (timesheetId: string, userId: string, userRole: string) => {
+  const timesheet = await prisma.timesheet.findUnique({
+    where: { id: timesheetId },
+    select: { id: true, userId: true },
+  });
+
+  if (!timesheet) {
+    throw new NotFoundError('Timesheet not found');
+  }
+
+  // Admins can delete any, users only their own
+  if (userRole !== 'ADMIN' && timesheet.userId !== userId) {
+    throw new ForbiddenError('Not authorized to delete this timesheet');
+  }
+
+  return prisma.timesheet.delete({ where: { id: timesheetId } });
+};
+
 export {
   createTimesheet,
   checkIn,
@@ -398,6 +416,7 @@ export {
   getTimesheet,
   getTimesheets,
   updateTimesheet,
+  deleteTimesheet,
   getLatestTimesheets,
   getAttendance,
 };

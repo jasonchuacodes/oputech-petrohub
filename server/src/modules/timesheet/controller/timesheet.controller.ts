@@ -11,18 +11,21 @@ import {
   checkIn as checkInService,
   checkOut as checkOutService,
   updateTimesheet as updateTimesheetService,
+  deleteTimesheet as deleteTimesheetService,
   getAttendance as getAttendanceService,
 } from '../services/timesheet.service';
 import { GetTimesheetSchema } from '../schema/getTimesheetSchema';
 import { GetTimesheetsSchema } from '../schema/getTimesheetsSchema';
 import { CreateTimesheetSchema } from '../schema/createTimesheetSchema';
 import { UpdateTimesheetSchema } from '../schema/updateTimesheetSchema';
+import { DeleteTimesheetSchema } from '../schema/deleteTimesheetSchema';
 import { GetAttendanceSchema } from '../schema/getAttendanceSchema';
 
 const validateGetTimesheet = createSchemaValidator(GetTimesheetSchema);
 const validateGetTimesheets = createSchemaValidator(GetTimesheetsSchema);
 const validateCreateTimesheet = createSchemaValidator(CreateTimesheetSchema);
 const validateUpdateTimesheet = createSchemaValidator(UpdateTimesheetSchema);
+const validateDeleteTimesheet = createSchemaValidator(DeleteTimesheetSchema);
 const validateGetAttendance = createSchemaValidator(GetAttendanceSchema);
 
 const createTimesheet = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
@@ -194,6 +197,25 @@ const updateTimesheet = async (req: AuthenticatedRequest, res: Response, next: N
   }
 };
 
+const deleteTimesheet = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const { timesheetId } = await validateDeleteTimesheet({
+      timesheetId: req.params.timesheetId,
+    });
+
+    const userId = req.user!.id;
+    const userRole = req.user!.role;
+
+    await deleteTimesheetService(timesheetId, userId, userRole);
+
+    res.status(204).json({
+      message: 'Timesheet deleted successfully',
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export {
   createTimesheet,
   checkIn,
@@ -203,5 +225,6 @@ export {
   getUserTimesheets,
   getAllTimesheets,
   updateTimesheet,
+  deleteTimesheet,
   getAttendance,
 };
