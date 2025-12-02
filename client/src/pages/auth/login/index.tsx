@@ -107,9 +107,6 @@ export const Login = () => {
                 </Typography>
                 <OutlinedInput
                   {...register('password')}
-                  size="small"
-                  type={isShowPassword ? 'text' : 'password'}
-                  placeholder="Enter Password"
                   endAdornment={
                     <IconButton
                       size="small"
@@ -119,6 +116,10 @@ export const Login = () => {
                       {isShowPassword ? <VisibilityOutlined /> : <VisibilityOffOutlined />}
                     </IconButton>
                   }
+                  size="small"
+                  type={isShowPassword ? 'text' : 'password'}
+                  placeholder="Enter Password"
+                  sx={{ fontSize: 'body2.fontSize' }}
                 />
               </Stack>
               <Link
