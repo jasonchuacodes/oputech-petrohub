@@ -282,39 +282,37 @@ export const UserDetailPage = () => {
               </Stack>
             </Stack>
 
-            <Stack
-              width="100%"
-              px={4}
-              py={2}
-              border={1}
-              borderColor="divider"
-              borderRadius={1}
-              spacing={1}
-            >
-              <Stack>
-                <Typography variant="body1" fontWeight="medium">
-                  Security
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Manage account security settings and password controls.
-                </Typography>
-              </Stack>
-              <Stack width="100%" spacing={2} pt={1}>
-                <Button
-                  onClick={() => setIsResetPasswordModalOpen(true)}
-                  disabled={auth?.id === userId}
-                  variant="outlined"
-                  sx={{ width: 'fit-content' }}
-                >
-                  Reset Password
-                </Button>
-                {auth?.id === userId && (
-                  <Typography variant="caption" color="text.secondary">
-                    You cannot reset your own password
+            {user?.role === UserRoleEnum.USER && (
+              <Stack
+                width="100%"
+                px={4}
+                py={2}
+                border={1}
+                borderColor="divider"
+                borderRadius={1}
+                spacing={1}
+              >
+                <Stack>
+                  <Typography variant="body1" fontWeight="medium">
+                    Security
                   </Typography>
-                )}
+                  <Typography variant="body2" color="text.secondary">
+                    Manage account security settings and password controls.
+                  </Typography>
+                </Stack>
+                <Stack width="100%" spacing={2} pt={1}>
+                  <Button
+                    onClick={() => setIsResetPasswordModalOpen(true)}
+                    disabled={auth?.id === userId}
+                    color="error"
+                    variant="outlined"
+                    sx={{ width: 'fit-content' }}
+                  >
+                    Reset Password
+                  </Button>
+                </Stack>
               </Stack>
-            </Stack>
+            )}
 
             {(errors.name ||
               errors.address ||

@@ -3,17 +3,7 @@ import { NextFunction, Response } from 'express';
 import { AuthenticatedRequest } from '~/middlewares';
 import { createSchemaValidator } from '~/utils';
 
-import {
-  createTimesheet as createTimesheetService,
-  getTodayTimesheet as getTodayTimesheetService,
-  getTimesheet as getTimesheetService,
-  getTimesheets as getTimesheetsService,
-  checkIn as checkInService,
-  checkOut as checkOutService,
-  updateTimesheet as updateTimesheetService,
-  deleteTimesheet as deleteTimesheetService,
-  getAttendance as getAttendanceService,
-} from '../services/timesheet.service';
+import * as timesheetService from '../services/timesheet.service';
 import { GetTimesheetSchema } from '../schema/getTimesheetSchema';
 import { GetTimesheetsSchema } from '../schema/getTimesheetsSchema';
 import { CreateTimesheetSchema } from '../schema/createTimesheetSchema';
@@ -32,7 +22,7 @@ const createTimesheet = async (req: AuthenticatedRequest, res: Response, next: N
   try {
     const { tenantId, userId } = await validateCreateTimesheet(req.body);
 
-    const timesheet = await createTimesheetService({
+    const timesheet = await timesheetService.createTimesheet({
       userId,
       tenantId,
     });
@@ -52,7 +42,7 @@ const checkIn = async (req: AuthenticatedRequest, res: Response, next: NextFunct
   const userId = req.user!.id;
 
   try {
-    const data = await checkInService(userId);
+    const data = await timesheetService.checkIn(userId);
 
     res.status(200).json({
       message: 'Checked in successfully',
@@ -67,7 +57,7 @@ const checkOut = async (req: AuthenticatedRequest, res: Response, next: NextFunc
   const userId = req.user!.id;
 
   try {
-    await checkOutService(userId);
+    await timesheetService.checkOut(userId);
 
     res.status(200).json({
       message: 'Checked out successfully',
@@ -81,7 +71,7 @@ const getTodayTimesheet = async (req: AuthenticatedRequest, res: Response, next:
   const userId = req.user!.id;
 
   try {
-    const timesheet = await getTodayTimesheetService(userId);
+    const timesheet = await timesheetService.getTodayTimesheet(userId);
 
     res.status(200).json({
       message: "Successfully retrieved today's timesheet",
@@ -102,7 +92,7 @@ const getTimesheetById = async (req: AuthenticatedRequest, res: Response, next: 
   const userId = req.user!.id;
 
   try {
-    const timesheet = await getTimesheetService(userId, timesheetId);
+    const timesheet = await timesheetService.getTimesheet(userId, timesheetId);
 
     res.status(200).json({
       message: 'Successfully retrieved timesheet',
@@ -124,7 +114,7 @@ const getUserTimesheets = async (req: AuthenticatedRequest, res: Response, next:
       endDate: req.query.endDate as string,
     });
 
-    const timesheets = await getTimesheetsService(filters);
+    const timesheets = await timesheetService.getTimesheets(filters);
 
     res.status(200).json({
       message: 'Successfully retrieved user timesheets',
@@ -145,7 +135,7 @@ const getAllTimesheets = async (req: AuthenticatedRequest, res: Response, next: 
       endDate: req.query.endDate as string,
     });
 
-    const timesheets = await getTimesheetsService(filters);
+    const timesheets = await timesheetService.getTimesheets(filters);
 
     res.status(200).json({
       message: 'Successfully retrieved timesheets',
@@ -164,7 +154,7 @@ const getAttendance = async (req: AuthenticatedRequest, res: Response, next: Nex
       tenantId: req.query.tenantId as string,
     });
 
-    const users = await getAttendanceService(tenantId);
+    const users = await timesheetService.getAttendance(tenantId);
 
     res.status(200).json({
       message: 'Successfully retrieved attendance',
@@ -181,7 +171,7 @@ const updateTimesheet = async (req: AuthenticatedRequest, res: Response, next: N
   try {
     const { timesheetId, totalHours } = await validateUpdateTimesheet(req.body);
 
-    const timesheets = await updateTimesheetService({
+    const timesheets = await timesheetService.updateTimesheet({
       timesheetId,
       totalHours: Number(totalHours),
     });
@@ -206,7 +196,7 @@ const deleteTimesheet = async (req: AuthenticatedRequest, res: Response, next: N
     const userId = req.user!.id;
     const userRole = req.user!.role;
 
-    await deleteTimesheetService(timesheetId, userId, userRole);
+    await timesheetService.deleteTimesheet(timesheetId, userId, userRole);
 
     res.status(204).json({
       message: 'Timesheet deleted successfully',

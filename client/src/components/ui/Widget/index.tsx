@@ -17,6 +17,7 @@ export const Widget = ({ title, to, children, props }: WidgetProps) => {
 
   return (
     <CardContainer
+      minHeight={320}
       maxHeight={560}
       spacing={1}
       sx={{

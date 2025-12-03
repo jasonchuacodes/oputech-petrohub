@@ -4,7 +4,7 @@ import { Role } from '~/db/prisma';
 import { UnauthorizedError } from '~/errors';
 import { AuthenticatedRequest } from '~/middlewares';
 
-import { getDashboardData as getDashboardDataService } from '../services/dashboard.service';
+import * as dashboardService from '../services/dashboard.service';
 
 const getDashboardData = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
@@ -18,7 +18,7 @@ const getDashboardData = async (req: AuthenticatedRequest, res: Response, next: 
       );
     }
 
-    const dashboardData = await getDashboardDataService({ tenantId });
+    const dashboardData = await dashboardService.getDashboardData({ tenantId });
 
     res.status(201).json({
       message: 'Successfully retrieved dashboard data',

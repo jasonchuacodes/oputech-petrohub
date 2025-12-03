@@ -8,14 +8,11 @@ import { getUserById as getUserService, getUserByUsername } from '~/modules/user
 import { REFRESH_TOKEN_EXPIRY_IN_DAYS } from '~/shared/constants';
 import { createSchemaValidator } from '~/utils';
 
-import { registerUser as registerUserService } from '../services/register.service';
+import * as registerService from '../services/register.service';
 import { RegisterUserSchema } from '../schema/registerUserSchema';
 import { LoginUserSchema } from '../schema/loginUserSchema';
 import { UpdatePasswordSchema } from '../schema/updatePasswordSchema';
-import {
-  forceUpdatePassword as forceUpdatePasswordService,
-  updatePassword as updatePasswordService,
-} from '../services/auth.service';
+import * as authService from '../services/auth.service';
 import { loginUser as loginUserService } from '../services/login.service';
 import { logoutSession } from '../services/logout.service';
 import { ForceUpdatePasswordSchema } from '../schema/forceUpdatePasswordSchema';
@@ -69,7 +66,7 @@ const registerUser = async (req: Request, res: Response, next: NextFunction) => 
   try {
     const data = await validateUserRegister(req.body);
 
-    const user = await registerUserService(data);
+    const user = await registerService.registerUser(data);
 
     res.status(200).json({ message: 'Registered successfully', data: { user } });
   } catch (err) {
@@ -145,7 +142,7 @@ const updatePassword = async (req: AuthenticatedRequest, res: Response, next: Ne
       targetUserId = userId;
     }
 
-    await updatePasswordService({
+    await authService.updatePassword({
       newPassword: newPassword,
       oldPassword: oldPassword,
       id: targetUserId,
@@ -167,7 +164,7 @@ const forceUpdatePassword = async (
   try {
     const { newPassword } = await validateForceUpdatePassword(req.body);
 
-    await forceUpdatePasswordService({
+    await authService.forceUpdatePassword({
       id: userId,
       newPassword: newPassword,
     });

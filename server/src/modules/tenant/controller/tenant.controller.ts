@@ -5,13 +5,7 @@ import { NotFoundError, UnauthorizedError } from '~/errors';
 import { AuthenticatedRequest } from '~/middlewares';
 import { createSchemaValidator } from '~/utils';
 
-import {
-  createTenant as createTenantService,
-  updateTenant as updateTenantService,
-  getTenants as getTenantsService,
-  getTenantById as getTenantByIdService,
-  getTenantUsers as getTenantUsersService,
-} from '../services/tenant.service';
+import * as tenantService from '../services/tenant.service';
 import { CreateTenantSchema } from '../schema/createTenantSchema';
 import { GetTenantUsersSchema } from '../schema/getTenantUsersSchema';
 import { GetTenantByIdSchema } from '../schema/getTenantByIdSchema';
@@ -28,7 +22,7 @@ const createTenant = async (req: AuthenticatedRequest, res: Response, next: Next
 
     const data = await validateCreateTenant(req.body);
 
-    const tenant = await createTenantService({
+    const tenant = await tenantService.createTenant({
       createdById: userId,
       ...data,
     });
@@ -57,7 +51,7 @@ const updateTenant = async (req: AuthenticatedRequest, res: Response, next: Next
       );
     }
 
-    const tenant = await updateTenantService({
+    const tenant = await tenantService.updateTenant({
       id: tenantId,
       ...data,
     });
@@ -79,7 +73,7 @@ const getTenantById = async (req: AuthenticatedRequest, res: Response, next: Nex
       tenantId: req.params.tenantId,
     });
 
-    const tenant = await getTenantByIdService(userId, tenantId);
+    const tenant = await tenantService.getTenantById(userId, tenantId);
 
     res.status(200).json({
       message: 'Successfully retrieved tenant',
@@ -95,7 +89,7 @@ const getTenantById = async (req: AuthenticatedRequest, res: Response, next: Nex
 const getTenants = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const userId = req.user!.id;
-    const tenants = await getTenantsService(userId);
+    const tenants = await tenantService.getTenants(userId);
 
     if (tenants.length === 0) {
       throw new NotFoundError('No tenants found');
@@ -116,7 +110,7 @@ const getTenantUsers = async (req: Request, res: Response, next: NextFunction) =
   try {
     const { tenantId } = await validateGetTenantUsers({ tenantId: req.params.tenantId });
 
-    const users = await getTenantUsersService(tenantId);
+    const users = await tenantService.getTenantUsers(tenantId);
 
     res.status(200).json({
       message: 'Successfully retrieved tenant users',
