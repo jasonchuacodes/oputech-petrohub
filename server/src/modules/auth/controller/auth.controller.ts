@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
 
 import { isProduction } from '~/config/environment';
-import { Role } from '~/db/prisma';
+import { Role, NotificationType, Prisma } from '~/db/prisma';
 import { ForbiddenError, NotFoundError } from '~/errors';
 import { AuthenticatedRequest } from '~/middlewares';
-import { getUserById as getUserService } from '~/modules/user/services/user.service';
+import { getUserById as getUserService, getUserByUsername } from '~/modules/user/services/user.service';
 import { REFRESH_TOKEN_EXPIRY_IN_DAYS } from '~/shared/constants';
 import { createSchemaValidator } from '~/utils';
 
@@ -19,11 +19,15 @@ import {
 import { loginUser as loginUserService } from '../services/login.service';
 import { logoutSession } from '../services/logout.service';
 import { ForceUpdatePasswordSchema } from '../schema/forceUpdatePasswordSchema';
+import { ForgotPasswordSchema } from '~/modules/notification/schema/forgotPasswordSchema';
+import { createNotification } from '~/modules/notification/services/notification.service';
+import { prisma } from '~/db/index';
 
 const validateUserRegister = createSchemaValidator(RegisterUserSchema);
 const validateUserLogin = createSchemaValidator(LoginUserSchema);
 const validateUpdatePassword = createSchemaValidator(UpdatePasswordSchema);
 const validateForceUpdatePassword = createSchemaValidator(ForceUpdatePasswordSchema);
+const validateForgotPassword = createSchemaValidator(ForgotPasswordSchema);
 
 const getMe = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
@@ -174,4 +178,56 @@ const forceUpdatePassword = async (
   }
 };
 
-export { getMe, loginUser, logoutUser, registerUser, updatePassword, forceUpdatePassword };
+const forgotPassword = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { username } = await validateForgotPassword(req.body);
+    const user = await getUserByUsername(username);
+
+    const userTenants = await prisma.tenantsOnUsers.findMany({
+      where: { userId: user.id },
+      select: { tenantId: true },
+    });
+
+    const tenantIds = userTenants.map((t) => t.tenantId);
+
+    const admins = await prisma.user.findMany({
+      where: {
+        role: Role.ADMIN,
+        tenants: {
+          some: {
+            tenantId: { in: tenantIds },
+          },
+        },
+      },
+      select: { id: true },
+    });
+
+    const recipientIds = admins.map((admin) => admin.id);
+
+    await createNotification(
+      NotificationType.PASSWORD_RESET_REQUEST,
+      {
+        userId: user.id,
+        username: user.username,
+        requestedAt: new Date().toISOString(),
+      },
+      recipientIds,
+    );
+
+    res.status(200).json({
+      message: 'We have notified the admin of your request for password reset',
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export {
+  getMe,
+  loginUser,
+  logoutUser,
+  registerUser,
+  updatePassword,
+  forceUpdatePassword,
+  forgotPassword,
+};

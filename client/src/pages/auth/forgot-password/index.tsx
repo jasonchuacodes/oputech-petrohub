@@ -1,0 +1,97 @@
+import { Stack, Typography } from '@mui/material';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
+
+import { TextField } from '~/components/form';
+import { Button, Form, Link, PageLayout } from '~/components/ui';
+import { useAuthContext } from '~/context/auth/useAuthContext';
+import { ForgotPasswordSchema, type ForgotPasswordInput } from '~/schema/forgotPasswordSchema';
+import { useForgotPasswordMutation } from '~/services/auth/auth.queries';
+import { parseBackendError } from '~/utils/parseBackendError';
+
+export const ForgotPassword = () => {
+  const { auth, loading } = useAuthContext();
+  const navigate = useNavigate();
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isValid },
+  } = useForm<ForgotPasswordInput>({
+    resolver: zodResolver(ForgotPasswordSchema),
+  });
+
+  const { mutate: forgotPassword, isPending } = useForgotPasswordMutation();
+
+  const onSubmit = (data: ForgotPasswordInput) => {
+    forgotPassword(data, {
+      onSuccess: () => {
+        toast.success('We have notified the admin of your request for password reset');
+        reset();
+      },
+      onError: (err) => {
+        const parsedErr = parseBackendError(err);
+        toast.error(`Failed to request password reset: ${parsedErr}`);
+      },
+    });
+  };
+
+  useEffect(() => {
+    if (!loading && auth) {
+      navigate('/', { replace: true });
+    }
+  }, [auth, loading, navigate]);
+
+  if (loading || auth) return null;
+
+  return (
+    <PageLayout height="100vh">
+      <Stack direction="row" height="100%">
+        <Form
+          onSubmit={handleSubmit(onSubmit)}
+          sx={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: 4,
+          }}
+        >
+          <Typography fontWeight="bold" variant="h5">
+            Forgot Password
+          </Typography>
+          <Stack spacing={3} width="100%" maxWidth={{ xs: '100%', sm: 400 }} px={2}>
+            <TextField
+              register={register}
+              name="username"
+              label="Username"
+              placeholder="Enter your username"
+              error={!!errors.username}
+              helperText={errors.username?.message}
+              sx={{ fontSize: 'body2.fontSize' }}
+            />
+            <Button
+              disabled={!isValid}
+              loading={isPending}
+              fullWidth={true}
+              variant="contained"
+              type="submit"
+              size="large"
+            >
+              Request Password Reset
+            </Button>
+          </Stack>
+          <Stack direction="row" spacing={1}>
+            <Typography variant="body2">Remember your password?</Typography>
+            <Link to="/login" color="info">
+              Back to login
+            </Link>
+          </Stack>
+        </Form>
+      </Stack>
+    </PageLayout>
+  );
+};

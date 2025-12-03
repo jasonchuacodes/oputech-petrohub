@@ -15,6 +15,7 @@ import { BootstrapPage } from '~/pages/admin/bootstrap';
 import { HomePage } from '~/pages/admin/home';
 import { ReportsPage } from '~/pages/admin/reports';
 import { UserDetailPage } from '~/pages/admin/users/user-detail';
+import { ForgotPassword } from '~/pages/auth/forgot-password';
 import { Login } from '~/pages/auth/login';
 import { Register } from '~/pages/auth/register';
 import { HomePage as UserHomePage } from '~/pages/user/home';
@@ -28,6 +29,7 @@ import { UserRoleEnum } from '~/services/user/user.types';
 export const PublicRoutes = {
   Login: '/login',
   Register: '/register',
+  ForgotPassword: '/forgot-password',
   Unauthorized: '/unauthorized',
 };
 
@@ -57,6 +59,7 @@ export const router = createBrowserRouter(
       {/* Public Routes */}
       <Route path={PublicRoutes.Login} element={<Login />} />
       <Route path={PublicRoutes.Register} element={<Register />} />
+      <Route path={PublicRoutes.ForgotPassword} element={<ForgotPassword />} />
 
       {/* User Routes */}
       <Route path="/" element={<ProtectedRoute allowedRoles={[UserRoleEnum.USER]} />}>

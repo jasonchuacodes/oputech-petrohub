@@ -1,12 +1,13 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 
 import {
+  forgotPassword,
+  forceUpdatePassword,
+  getMe,
   loginUser,
   logoutUser,
-  getMe,
   registerUser,
   updatePassword,
-  forceUpdatePassword,
 } from './auth.api';
 import type { User } from '../user/user.types';
 
@@ -47,11 +48,17 @@ const useLogoutMutation = () =>
     mutationFn: logoutUser,
   });
 
+const useForgotPasswordMutation = () =>
+  useMutation({
+    mutationFn: forgotPassword,
+  });
+
 export {
-  useRegisterUserMutation,
-  useUpdatePasswordMutation,
+  useForgotPasswordMutation,
   useForceUpdatePasswordMutation,
+  useGetMe,
   useLoginMutation,
   useLogoutMutation,
-  useGetMe,
+  useRegisterUserMutation,
+  useUpdatePasswordMutation,
 };

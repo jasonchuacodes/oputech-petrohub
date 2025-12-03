@@ -5,6 +5,7 @@ import { asyncHandler } from '~/utils';
 
 import {
   forceUpdatePassword,
+  forgotPassword,
   getMe,
   loginUser,
   logoutUser,
@@ -17,6 +18,7 @@ const router = express.Router();
 // Public routes
 router.post('/register', asyncHandler(registerUser));
 router.post('/login', asyncHandler(loginUser));
+router.post('/forgot-password', asyncHandler(forgotPassword));
 
 // Protected routes
 router.post('/logout', logoutUser);

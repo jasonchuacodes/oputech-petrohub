@@ -171,6 +171,18 @@ const resetUserPassword = async (userId: string, tenantId: string, newPassword: 
   });
 };
 
+const getUserByUsername = async (username: string) => {
+  const user = await prisma.user.findUnique({
+    where: { username },
+  });
+
+  if (!user) {
+    throw new NotFoundError('User not found');
+  }
+
+  return user;
+};
+
 export {
   createUser,
   getAllUsers,
@@ -179,4 +191,5 @@ export {
   updateUser,
   deleteUser,
   resetUserPassword,
+  getUserByUsername,
 };
