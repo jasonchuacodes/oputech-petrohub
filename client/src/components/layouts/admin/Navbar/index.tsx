@@ -1,6 +1,6 @@
-import { Divider, IconButton, Stack } from '@mui/material';
-import { NotificationsOutlined } from '@mui/icons-material';
+import { Divider, Stack } from '@mui/material';
 
+import { NotificationMenu } from './NotificationMenu';
 import TenantSelector from './TenantSelector';
 import NavbarUserMenu from './UserMenu';
 
@@ -34,9 +34,7 @@ const Navbar = () => {
           />
         }
       >
-        <IconButton>
-          <NotificationsOutlined />
-        </IconButton>
+        <NotificationMenu />
         <NavbarUserMenu />
       </Stack>
     </Stack>

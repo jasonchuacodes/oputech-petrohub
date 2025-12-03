@@ -13,7 +13,7 @@ import { parseBackendError } from '~/utils/parseBackendError';
 type Props = {
   open: boolean;
   onClose: () => void;
-  userId: string;
+  userId?: string;
 };
 
 export const ResetPasswordModal = ({ open, onClose, userId }: Props) => {
@@ -36,7 +36,7 @@ export const ResetPasswordModal = ({ open, onClose, userId }: Props) => {
   };
 
   const onSubmit = handleSubmit((data: ResetPasswordInput) => {
-    if (!tenantId) return;
+    if (!tenantId || !userId) return;
 
     resetPassword(
       {

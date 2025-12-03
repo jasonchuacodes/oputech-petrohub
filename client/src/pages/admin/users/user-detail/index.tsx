@@ -4,10 +4,10 @@ import { alpha, Box, Container, Stack, Typography } from '@mui/material';
 import { useForm, useWatch } from 'react-hook-form';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { useParams } from 'react-router-dom';
 
 import { FormRow, InputWithFormat, TextField, TimePicker } from '~/components/form';
 import { Button, BackButton, Form, PageLayout } from '~/components/ui';
+import { useAuthContext } from '~/context/auth/useAuthContext';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { AdminRoutes } from '~/routes';
 import { useGetUserQuery, useUpdateUserMutation } from '~/services/user/user.queries';
@@ -17,11 +17,16 @@ import theme from '~/theme';
 import { pathFor } from '~/utils/pathFor';
 import { parseBackendError } from '~/utils/parseBackendError';
 
+import { ResetPasswordModal } from '../ResetPasswordModal';
+import { useParams } from 'react-router-dom';
+
 export const UserDetailPage = () => {
   const { userId } = useParams();
+  const { auth } = useAuthContext();
   const { tenantId } = useTenantContext();
 
   const [mode, setMode] = useState<'view' | 'edit'>('view');
+  const [isResetPasswordModalOpen, setIsResetPasswordModalOpen] = useState(false);
 
   const initialValues = {
     name: '',
@@ -69,9 +74,7 @@ export const UserDetailPage = () => {
       philhealth: user?.philhealth ?? null,
       sss: user?.sss ?? null,
       tin: user?.tin ?? null,
-      shiftStart: user?.shiftSchedule?.shiftStart
-        ? new Date(user.shiftSchedule.shiftStart)
-        : null,
+      shiftStart: user?.shiftSchedule?.shiftStart ? new Date(user.shiftSchedule.shiftStart) : null,
       shiftEnd: user?.shiftSchedule?.shiftEnd ? new Date(user.shiftSchedule.shiftEnd) : null,
     });
   }, [isLoadingUser, user, reset]);
@@ -187,7 +190,40 @@ export const UserDetailPage = () => {
                 </Stack>
               </Stack>
             </Stack>
-
+            {user?.role === UserRoleEnum.USER && (
+              <Stack
+                width="100%"
+                px={4}
+                py={2}
+                border={1}
+                borderColor="divider"
+                borderRadius={1}
+                spacing={1}
+              >
+                <Stack>
+                  <Typography variant="body1" fontWeight="medium">
+                    Shift Schedule
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Define work shift hours for this user. Hours outside shift times will not be
+                    credited.
+                  </Typography>
+                </Stack>
+                <Stack width="100%" spacing={1}>
+                  <FormRow label="Shift Start">
+                    <TimePicker
+                      control={control}
+                      name="shiftStart"
+                      label="Shift Start"
+                      mode={mode}
+                    />
+                  </FormRow>
+                  <FormRow label="Shift End">
+                    <TimePicker control={control} name="shiftEnd" label="Shift End" mode={mode} />
+                  </FormRow>
+                </Stack>
+              </Stack>
+            )}
             <Stack
               width="100%"
               px={4}
@@ -246,40 +282,39 @@ export const UserDetailPage = () => {
               </Stack>
             </Stack>
 
-            {user?.role === UserRoleEnum.USER && (
-              <Stack
-                width="100%"
-                px={4}
-                py={2}
-                border={1}
-                borderColor="divider"
-                borderRadius={1}
-                spacing={1}
-              >
-                <Stack>
-                  <Typography variant="body1" fontWeight="medium">
-                    Shift Schedule
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Define work shift hours for this user. Hours outside shift times will not be
-                    credited.
-                  </Typography>
-                </Stack>
-                <Stack width="100%" spacing={1}>
-                  <FormRow label="Shift Start">
-                    <TimePicker
-                      control={control}
-                      name="shiftStart"
-                      label="Shift Start"
-                      mode={mode}
-                    />
-                  </FormRow>
-                  <FormRow label="Shift End">
-                    <TimePicker control={control} name="shiftEnd" label="Shift End" mode={mode} />
-                  </FormRow>
-                </Stack>
+            <Stack
+              width="100%"
+              px={4}
+              py={2}
+              border={1}
+              borderColor="divider"
+              borderRadius={1}
+              spacing={1}
+            >
+              <Stack>
+                <Typography variant="body1" fontWeight="medium">
+                  Security
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Manage account security settings and password controls.
+                </Typography>
               </Stack>
-            )}
+              <Stack width="100%" spacing={2} pt={1}>
+                <Button
+                  onClick={() => setIsResetPasswordModalOpen(true)}
+                  disabled={auth?.id === userId}
+                  variant="outlined"
+                  sx={{ width: 'fit-content' }}
+                >
+                  Reset Password
+                </Button>
+                {auth?.id === userId && (
+                  <Typography variant="caption" color="text.secondary">
+                    You cannot reset your own password
+                  </Typography>
+                )}
+              </Stack>
+            </Stack>
 
             {(errors.name ||
               errors.address ||
@@ -335,6 +370,12 @@ export const UserDetailPage = () => {
           )}
         </Form>
       </Container>
+
+      <ResetPasswordModal
+        open={isResetPasswordModalOpen}
+        onClose={() => setIsResetPasswordModalOpen(false)}
+        userId={userId}
+      />
     </PageLayout>
   );
 };
