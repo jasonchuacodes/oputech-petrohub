@@ -14,6 +14,7 @@ import { parseBackendError } from '~/utils/parseBackendError';
 import { pathFor } from '~/utils/pathFor';
 
 import { DeleteConfirmModal } from './DeleteConfirmModal';
+import { ResetPasswordModal } from './ResetPasswordModal';
 
 export const MoreDetailsMenu = () => {
   const navigate = useNavigate();
@@ -23,6 +24,7 @@ export const MoreDetailsMenu = () => {
 
   const [anchorElSettingsMenu, setAnchorElSettingsMenu] = useState<null | HTMLElement>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isResetPasswordModalOpen, setIsResetPasswordModalOpen] = useState(false);
   const isOpenSettingsMenu = Boolean(anchorElSettingsMenu);
 
   const { mutateAsync: deleteUser, isPending: isDeletePending } = useDeleteUserMutation();
@@ -43,6 +45,11 @@ export const MoreDetailsMenu = () => {
         },
       }),
     );
+  };
+
+  const handleResetPassword = () => {
+    closeMenu();
+    setIsResetPasswordModalOpen(true);
   };
 
   const handleDelete = () => {
@@ -105,6 +112,9 @@ export const MoreDetailsMenu = () => {
         <MenuItem onClick={handleViewDetails}>
           <Typography variant="body2">View Details</Typography>
         </MenuItem>
+        <MenuItem disabled={isDeleteDisabled} onClick={handleResetPassword}>
+          <Typography variant="body2">Reset Password</Typography>
+        </MenuItem>
         <Divider />
         <MenuItem onClick={() => null}>
           <Typography variant="body2">Assign Roles</Typography>
@@ -113,6 +123,12 @@ export const MoreDetailsMenu = () => {
           <Typography variant="body2">Delete</Typography>
         </MenuItem>
       </Menu>
+
+      <ResetPasswordModal
+        open={isResetPasswordModalOpen}
+        onClose={() => setIsResetPasswordModalOpen(false)}
+        userId={userId}
+      />
 
       <DeleteConfirmModal
         open={isDeleteModalOpen}
