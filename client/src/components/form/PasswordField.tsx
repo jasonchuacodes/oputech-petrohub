@@ -68,7 +68,7 @@ export const PasswordField = <T extends object>({
 
         return (
           <Stack justifyContent="center" spacing={0.5} width="100%">
-            <Typography fontWeight="bold" color="text.secondary">
+            <Typography variant='body2' fontWeight="medium" color="text.secondary">
               {label}
               {required && (
                 <Typography component="span" color="error">
@@ -84,6 +84,13 @@ export const PasswordField = <T extends object>({
                 type={isVisible ? 'text' : 'password'}
                 placeholder={placeholder}
                 fullWidth
+                slotProps={{
+                  input: {
+                    sx: {
+                      fontSize: 'body2.fontSize',
+                    },
+                  },
+                }}
                 endAdornment={
                   <IconButton size="small" onClick={() => setIsVisible(!isVisible)} edge="end">
                     {isVisible ? (

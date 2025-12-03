@@ -34,7 +34,7 @@ export const Select = <T extends object>({
 }: SelectProps<T>) => {
   return (
     <Stack spacing={0.5} width="100%">
-      <Typography fontWeight="bold" color="text.secondary">
+      <Typography variant='body2' fontWeight="medium" color="text.secondary">
         {label}
         {required && (
           <Typography component="span" color="error">
@@ -48,6 +48,13 @@ export const Select = <T extends object>({
         onChange={onChange}
         value={selected}
         size="small"
+        slotProps={{
+          input: {
+            sx: {
+              fontSize: 'body2.fontSize',
+            },
+          },
+        }}
       >
         {options.map(({ label, value }: SelectOption) => (
           <MenuItem key={`option-${value}`} value={value}>
