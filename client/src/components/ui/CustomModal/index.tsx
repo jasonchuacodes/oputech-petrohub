@@ -63,7 +63,7 @@ export const CustomModal = ({
             title={title}
             slotProps={{
               title: {
-                fontSize: 'body1.fontSize',
+                fontSize: 'h6.fontSize',
                 color: 'text.primary',
                 fontWeight: 'medium',
               },

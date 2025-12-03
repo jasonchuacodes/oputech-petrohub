@@ -40,11 +40,11 @@ export const Register = () => {
   const onSubmit = (data: RegisterUserPayload) => {
     registerUser(data, {
       onSuccess: () => {
-        let countdown = 5;
+        let countdown = 3;
 
         const toastId = toast.success(
           `Successfully registered user! Redirecting to login in ${countdown} seconds.`,
-          { duration: 5000 },
+          { duration: 3000 },
         );
 
         intervalRef.current = setInterval(() => {
