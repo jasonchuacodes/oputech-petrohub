@@ -1,5 +1,6 @@
 import { prisma } from '~/db/index';
-import { ConflictError, NotFoundError } from '~/errors';
+import { ConflictError, NotFoundError, ForbiddenError } from '~/errors';
+import { generateHash } from '~/utils';
 
 import { CreateUserInput } from '../schema/createUserSchema';
 import { UpdateUserPayload } from '../schema/updateUserSchema';
@@ -143,6 +144,33 @@ const deleteUser = async (id: string) => {
   });
 };
 
+const resetUserPassword = async (userId: string, tenantId: string, newPassword: string) => {
+  // Validate user exists and belongs to tenant
+  const userInTenant = await prisma.tenantsOnUsers.findUnique({
+    where: {
+      userId_tenantId: {
+        userId,
+        tenantId,
+      },
+    },
+  });
+
+  if (!userInTenant) {
+    throw new ForbiddenError('User does not belong to this tenant');
+  }
+
+  // Hash password and update
+  const hashedPassword = await generateHash(newPassword);
+
+  return await prisma.user.update({
+    where: { id: userId },
+    data: {
+      password: hashedPassword,
+      shouldChangePassword: true,
+    },
+  });
+};
+
 export {
   createUser,
   getAllUsers,
@@ -150,4 +178,5 @@ export {
   getUserById,
   updateUser,
   deleteUser,
+  resetUserPassword,
 };

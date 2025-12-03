@@ -1,14 +1,18 @@
 import { NextFunction, Request, Response } from 'express';
 
+import { Role } from '~/db/prisma';
 import { AuthenticatedRequest } from '~/middlewares';
 import { createSchemaValidator, generateHash } from '~/utils';
+import { BadInputError, UnauthorizedError } from '~/errors';
 
 import * as userService from '../services/user.service';
 import { CreateUserSchema } from '../schema/createUserSchema';
 import { UpdateUserSchema } from '../schema/updateUserSchema';
+import { ResetPasswordSchema } from '../schema/resetPasswordSchema';
 
 const validateCreateUser = createSchemaValidator(CreateUserSchema);
 const validateUpdateUser = createSchemaValidator(UpdateUserSchema);
+const validateResetPassword = createSchemaValidator(ResetPasswordSchema);
 
 const createUser = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
@@ -85,4 +89,31 @@ const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export { createUser, getAllUsers, getUserById, updateUser, deleteUser };
+const resetPassword = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const { id: userId } = req.params;
+    const { tenantId } = req.query;
+    const userRole = req.user!.role;
+
+    // Only admins can reset passwords
+    if (userRole !== Role.ADMIN) {
+      throw new UnauthorizedError('Only administrators can reset user passwords');
+    }
+
+    if (!tenantId) {
+      throw new BadInputError('tenantId is required');
+    }
+
+    const { password } = await validateResetPassword(req.body);
+
+    await userService.resetUserPassword(userId, tenantId as string, password);
+
+    res.status(200).json({
+      message: 'Password reset successfully. User must change password on next login.',
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export { createUser, getAllUsers, getUserById, updateUser, deleteUser, resetPassword };
