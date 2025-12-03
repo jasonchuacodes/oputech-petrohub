@@ -28,4 +28,8 @@ const deleteUser = (id: string) => {
   return axios.delete(`/users/${id}`);
 };
 
-export { getAllUsers, getUserById, createUser, updateUser, deleteUser };
+const resetPassword = (userId: string, password: string, tenantId: string) => {
+  return axios.put(`/users/${userId}/reset-password`, { password }, { params: { tenantId } });
+};
+
+export { getAllUsers, getUserById, createUser, updateUser, deleteUser, resetPassword };
