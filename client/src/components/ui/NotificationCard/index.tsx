@@ -1,29 +1,28 @@
-import { CheckCircleOutlined, DeleteOutlined, OpenInNewOutlined } from '@mui/icons-material';
-import { Box, Card, CardContent, IconButton, Stack, Typography } from '@mui/material';
-import { formatDistanceToNow } from 'date-fns';
+import { CheckCircleOutlined, CloseOutlined } from '@mui/icons-material';
+import { Card, CardContent, IconButton, Stack } from '@mui/material';
 
-import type {
-  Notification,
-  PasswordResetRequestMetadata,
-} from '~/services/notification/notification.types';
+import type { Notification } from '~/services/notification/notification.types';
+import { NotificationType } from '~/services/notification/notification.types';
+
+import { DefaultNotification } from './DefaultNotification';
+import { PasswordResetNotification } from './PasswordResetNotification';
 
 interface NotificationCardProps {
   notification: Notification;
   onMarkRead: (id: string) => void;
   onDelete: (id: string) => void;
-  onNavigateToUser: (userId: string) => void;
+  onClick?: (notification: Notification) => void;
 }
 
 export const NotificationCard = ({
   notification,
   onMarkRead,
   onDelete,
-  onNavigateToUser,
+  onClick,
 }: NotificationCardProps) => {
-  const metadata = notification.metadata as PasswordResetRequestMetadata;
-
   const handleCardClick = () => {
-    onNavigateToUser(metadata.userId);
+    onClick?.(notification);
+    onMarkRead(notification.id);
   };
 
   const handleMarkRead = (e: React.MouseEvent) => {
@@ -34,6 +33,16 @@ export const NotificationCard = ({
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     onDelete(notification.id);
+  };
+
+  const renderNotification = (notification: Notification) => {
+    switch (notification.type) {
+      case NotificationType.PASSWORD_RESET_REQUEST:
+        return <PasswordResetNotification notification={notification} />;
+
+      case NotificationType.DEFAULT:
+        return <DefaultNotification notification={notification} />;
+    }
   };
 
   return (
@@ -52,32 +61,16 @@ export const NotificationCard = ({
       <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
         <Stack direction="row" justifyContent="space-between" spacing={1}>
           <Stack spacing={0.5} flex={1}>
-            <Typography
-              variant="body2"
-              fontWeight={notification.status === 'UNREAD' ? 'bold' : 'normal'}
-            >
-              Password reset request from{' '}
-              <Box component="span" color="secondary.main">
-                {metadata.username}
-              </Box>
-            </Typography>
-            <Stack direction="row" spacing={0.5} alignItems="center">
-              <Typography variant="caption" color="text.secondary">
-                {formatDistanceToNow(new Date(metadata.requestedAt), { addSuffix: true })}
-              </Typography>
-              <Typography variant="caption" color="primary.main">
-                • Go to user <OpenInNewOutlined sx={{ height: 12, width: 12 }} />
-              </Typography>
-            </Stack>
+            {renderNotification(notification)}
           </Stack>
-          <Stack direction="row" spacing={0.5} alignItems="flex-start">
+          <Stack direction="row" spacing={0.5} alignItems="center">
             {notification.status === 'UNREAD' && (
               <IconButton size="small" onClick={handleMarkRead}>
                 <CheckCircleOutlined fontSize="small" />
               </IconButton>
             )}
             <IconButton size="small" onClick={handleDelete}>
-              <DeleteOutlined fontSize="small" />
+              <CloseOutlined fontSize="small" />
             </IconButton>
           </Stack>
         </Stack>

@@ -12,6 +12,8 @@ import {
   useGetNotificationsQuery,
   useMarkAsReadMutation,
 } from '~/services/notification/notification.queries';
+import type { Notification } from '~/services/notification/notification.types';
+import { NotificationType } from '~/services/notification/notification.types';
 import { pathFor } from '~/utils/pathFor';
 
 export const NotificationMenu = () => {
@@ -22,12 +24,12 @@ export const NotificationMenu = () => {
 
   const isOpen = Boolean(anchorEl);
 
-  const { data, refetch } = useGetNotificationsQuery();
+  const { data: notificationsData, refetch } = useGetNotificationsQuery();
   const { mutate: markAsRead } = useMarkAsReadMutation();
   const { mutate: deleteNotif } = useDeleteNotificationMutation();
 
-  const notifications = data?.notifications ?? [];
-  const unreadCount = data?.unreadCount ?? 0;
+  const notifications = notificationsData?.notifications ?? [];
+  const unreadCount = notificationsData?.unreadCount ?? 0;
 
   const handleOpen = (e: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(e.currentTarget);
@@ -52,14 +54,17 @@ export const NotificationMenu = () => {
     });
   };
 
-  const handleNavigateToUser = (userId: string) => {
-    navigate(
-      pathFor({
-        pathname: AdminRoutes.TenantUserDetail,
-        params: { tenantId, userId },
-      }),
-    );
-    handleClose();
+  const handleNotificationClick = (notification: Notification) => {
+    if (notification.type === NotificationType.PASSWORD_RESET_REQUEST) {
+      navigate(
+        pathFor({
+          pathname: AdminRoutes.TenantUserDetail,
+          params: { tenantId, userId: notification.metadata.userId },
+        }),
+      );
+      handleClose();
+    }
+    // DEFAULT type: no action
   };
 
   return (
@@ -112,7 +117,7 @@ export const NotificationMenu = () => {
                 notification={notification}
                 onMarkRead={handleMarkRead}
                 onDelete={handleDelete}
-                onNavigateToUser={handleNavigateToUser}
+                onClick={handleNotificationClick}
               />
             ))}
           </Stack>
