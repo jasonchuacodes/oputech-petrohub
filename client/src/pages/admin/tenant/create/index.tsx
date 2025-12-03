@@ -4,12 +4,18 @@ import { AddOutlined } from '@mui/icons-material';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 
 import { FormRow, InputWithFormat, TextField } from '~/components/form';
 import { Button, Form, PageLayout } from '~/components/ui';
 import { CreateTenantSchema, type CreateTenantInput } from '~/schema/createTenantSchema';
 import { useCreateTenantMutation } from '~/services/tenant/tenant.queries';
+import type { Tenant } from '~/services/tenant/tenant.types';
 import { parseBackendError } from '~/utils/parseBackendError';
+import { pathFor } from '~/utils/pathFor';
+import { AdminRoutes } from '~/routes';
+
+import { TenantCreatedSuccessModal } from './TenantCreatedSuccessModal';
 
 export const CreateTenantPage = () => {
   const navigate = useNavigate();
@@ -26,19 +32,39 @@ export const CreateTenantPage = () => {
 
   const { mutate: createTenant } = useCreateTenantMutation();
 
+  const [createdTenant, setCreatedTenant] = useState<Tenant | null>(null);
+
   const handleBack = () => navigate(-1);
 
   const onSubmit = async (data: CreateTenantInput) => {
     createTenant(data, {
-      onSuccess: () => {
-        toast.success('Successfully created tenant.');
-        reset();
+      onSuccess: (tenant: Tenant) => {
+        setCreatedTenant(tenant);
       },
       onError: (err) => {
         const errorMessage = parseBackendError(err);
         toast.error(`Failed to create tenant: ${errorMessage}`);
       },
     });
+  };
+
+  const handleNavigateToTenant = () => {
+    if (!createdTenant) return;
+
+    navigate(
+      pathFor({
+        pathname: AdminRoutes.TenantHome,
+        params: { tenantId: createdTenant.id },
+      }),
+    );
+
+    setCreatedTenant(null);
+  };
+
+  const handleStayOnPage = () => {
+    reset();
+    setCreatedTenant(null);
+    toast.success(`Successfully created ${createdTenant?.name}`);
   };
 
   return (
@@ -54,10 +80,8 @@ export const CreateTenantPage = () => {
             mb={4}
           >
             <Stack>
-              <Typography variant="h6">
-                Create Tenant
-              </Typography>
-              <Typography variant="subtitle2" color="text.secondary">
+              <Typography variant="h6">Create Tenant</Typography>
+              <Typography variant="body2" color="text.secondary">
                 A <strong>tenant</strong> represents your company or organization within the
                 platform. Creating a tenant allows you to manage users, data, and reports
                 independently—ensuring your operations are securely separated from your other
@@ -69,10 +93,10 @@ export const CreateTenantPage = () => {
             {/* General Info */}
             <Stack spacing={2} justifyContent="start" alignItems="start">
               <Stack>
-                <Typography variant="h6" fontWeight="bold">
+                <Typography variant="body1" fontWeight="medium">
                   General
                 </Typography>
-                <Typography variant="subtitle2" color="text.secondary">
+                <Typography variant="body2" color="text.secondary">
                   Provide your company’s basic details. This information helps identify and
                   distinguish your organization within the platform.
                 </Typography>
@@ -101,10 +125,10 @@ export const CreateTenantPage = () => {
             {/* Goverment Info */}
             <Stack spacing={2} justifyContent="start" alignItems="start">
               <Stack>
-                <Typography variant="h6" fontWeight="bold">
+                <Typography variant="body1" fontWeight="medium">
                   Government
                 </Typography>
-                <Typography variant="subtitle2" color="text.secondary">
+                <Typography variant="body2" color="text.secondary">
                   Basic information about your company. Lorem ipsum dolor sit amet consectetur
                   adipisicing elit. Dolore, vitae.
                 </Typography>
@@ -149,10 +173,10 @@ export const CreateTenantPage = () => {
             {/* Other Info */}
             <Stack spacing={2} justifyContent="start" alignItems="start">
               <Stack>
-                <Typography variant="h6" fontWeight="bold">
+                <Typography variant="body1" fontWeight="medium">
                   Additional Information
                 </Typography>
-                <Typography variant="subtitle2" color="text.secondary">
+                <Typography variant="body2" color="text.secondary">
                   Basic information about your company. Lorem ipsum dolor sit amet consectetur
                   adipisicing elit. Dolore, vitae.
                 </Typography>
@@ -189,6 +213,12 @@ export const CreateTenantPage = () => {
             </Button>
           </Stack>
         </Form>
+        <TenantCreatedSuccessModal
+          open={!!createdTenant}
+          tenantName={createdTenant?.name ?? ''}
+          onClose={handleStayOnPage}
+          onNavigateToTenant={handleNavigateToTenant}
+        />
       </Container>
     </PageLayout>
   );

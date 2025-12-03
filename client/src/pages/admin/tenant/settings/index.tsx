@@ -90,24 +90,26 @@ export const TenantSettingsPage = () => {
         <Form onSubmit={handleSubmit(onSubmit)} sx={{ width: '100%' }}>
           {/* Header */}
           <Stack
-            alignItems="center"
-            direction="row"
+            alignItems="start"
+            direction="column"
             justifyContent="space-between"
             width="100%"
             mb={4}
+            spacing={0.5}
           >
-            <Typography variant="h6">
-              Tenant Settings
+            <Typography variant="h6">Tenant Settings</Typography>
+            <Typography variant="body2" color="text.secondary">
+              Manage your organization's profile, contact information, and government registration details.
             </Typography>
           </Stack>
           <Stack spacing={3}>
             {/* General Info */}
             <Stack spacing={2} justifyContent="start" alignItems="start">
               <Stack>
-                <Typography variant="h6" fontWeight="bold">
+                <Typography variant="body1" fontWeight="medium">
                   General
                 </Typography>
-                <Typography variant="body2" fontWeight="regular" color="text.secondary">
+                <Typography variant="body2" color="text.secondary">
                   Provide your company's basic details. This information helps identify and
                   distinguish your organization within the platform.
                 </Typography>
@@ -136,10 +138,10 @@ export const TenantSettingsPage = () => {
             {/* Goverment Info */}
             <Stack spacing={2} justifyContent="start" alignItems="start">
               <Stack>
-                <Typography variant="h6" fontWeight="bold">
+                <Typography variant="body1" fontWeight="medium">
                   Government
                 </Typography>
-                <Typography variant="body2" fontWeight="regular" color="text.secondary">
+                <Typography variant="body2" color="text.secondary">
                   Basic information about your company. Lorem ipsum dolor sit amet consectetur
                   adipisicing elit. Dolore, vitae.
                 </Typography>
@@ -184,10 +186,10 @@ export const TenantSettingsPage = () => {
             {/* Other Info */}
             <Stack spacing={2} justifyContent="start" alignItems="start">
               <Stack>
-                <Typography variant="h6" fontWeight="bold">
+                <Typography variant="body1" fontWeight="medium">
                   Additional Information
                 </Typography>
-                <Typography variant="body2" fontWeight="regular" color="text.secondary">
+                <Typography variant="body2" color="text.secondary">
                   Basic information about your company. Lorem ipsum dolor sit amet consectetur
                   adipisicing elit. Dolore, vitae.
                 </Typography>
