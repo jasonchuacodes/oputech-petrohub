@@ -2,7 +2,7 @@ import type { Dayjs } from 'dayjs';
 
 import axios from '~/lib/axiosInstance';
 
-import type { AttendanceUser, Timesheet } from './timesheet.types';
+import type { AttendanceUser, DailyTimesheetUser, Timesheet } from './timesheet.types';
 
 // Queries
 const getTodayTimesheet = async (): Promise<Timesheet> => {
@@ -68,6 +68,14 @@ const getTenantAttendance = async (tenantId: string): Promise<AttendanceUser[]> 
   return res.data.data.users;
 };
 
+const getDailyTimesheets = async (tenantId: string): Promise<DailyTimesheetUser[]> => {
+  const res = await axios.get('/timesheets/daily', {
+    params: { tenantId },
+  });
+
+  return res.data.data.users;
+};
+
 // Mutations
 const checkIn = async () => {
   const res = await axios.post('/timesheets/check-in');
@@ -110,4 +118,5 @@ export {
   updateTimesheet,
   deleteTimesheet,
   getTenantAttendance,
+  getDailyTimesheets,
 };

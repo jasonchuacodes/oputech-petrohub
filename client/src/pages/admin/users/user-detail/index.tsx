@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { EditOutlined } from '@mui/icons-material';
-import { alpha, Box, Container, Stack, Typography } from '@mui/material';
+import { alpha, Box, Container, Divider, Stack, Typography } from '@mui/material';
 import { useForm, useWatch } from 'react-hook-form';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
@@ -198,7 +198,7 @@ export const UserDetailPage = () => {
                 border={1}
                 borderColor="divider"
                 borderRadius={1}
-                spacing={1}
+                spacing={2}
               >
                 <Stack>
                   <Typography variant="body1" fontWeight="medium">
@@ -209,18 +209,10 @@ export const UserDetailPage = () => {
                     credited.
                   </Typography>
                 </Stack>
-                <Stack width="100%" spacing={1}>
-                  <FormRow label="Shift Start">
-                    <TimePicker
-                      control={control}
-                      name="shiftStart"
-                      label="Shift Start"
-                      mode={mode}
-                    />
-                  </FormRow>
-                  <FormRow label="Shift End">
+                <Stack alignItems='center' direction='row' width="100%" spacing={2}>
+                    <TimePicker control={control} name="shiftStart" label="Shift Start" mode={mode} />
+                    <Divider sx={{ width: 120}} />
                     <TimePicker control={control} name="shiftEnd" label="Shift End" mode={mode} />
-                  </FormRow>
                 </Stack>
               </Stack>
             )}

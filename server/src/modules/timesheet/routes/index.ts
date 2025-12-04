@@ -13,7 +13,7 @@ import {
   checkOut,
   updateTimesheet,
   deleteTimesheet,
-  getAttendance,
+  getDailyTimesheets,
 } from '../controller/timesheet.controller';
 
 const router = express.Router();
@@ -25,7 +25,7 @@ router.get('/', requireAuth, asyncHandler(getUserTimesheets));
 
 router.get('/today', requireAuth, asyncHandler(getTodayTimesheet));
 router.get('/all', requireAuth, asyncHandler(getAllTimesheets));
-router.get('/attendance', requireAuth, asyncHandler(getAttendance));
+router.get('/daily', requireAuth, asyncHandler(getDailyTimesheets));
 
 router.post('/create', requireAuth, asyncHandler(createTimesheet));
 router.put('/update', requireAuth, asyncHandler(updateTimesheet));

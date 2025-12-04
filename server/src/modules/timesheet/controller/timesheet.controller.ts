@@ -148,16 +148,16 @@ const getAllTimesheets = async (req: AuthenticatedRequest, res: Response, next: 
   }
 };
 
-const getAttendance = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+const getDailyTimesheets = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const { tenantId } = await validateGetAttendance({
       tenantId: req.query.tenantId as string,
     });
 
-    const users = await timesheetService.getAttendance(tenantId);
+    const users = await timesheetService.getDailyTimesheets(tenantId);
 
     res.status(200).json({
-      message: 'Successfully retrieved attendance',
+      message: 'Successfully retrieved daily timesheets',
       data: {
         users,
       },
@@ -216,5 +216,5 @@ export {
   getAllTimesheets,
   updateTimesheet,
   deleteTimesheet,
-  getAttendance,
+  getDailyTimesheets,
 };

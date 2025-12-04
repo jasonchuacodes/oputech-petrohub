@@ -1,7 +1,7 @@
 import { prisma } from '~/db';
 import { Prisma, TimesheetEntryAction, TimesheetStatus } from '~/db/prisma';
 import { ConflictError, ForbiddenError, NotFoundError } from '~/errors';
-import { getEndOfDay, getStartOfDay } from '~/utils';
+import { applyTimeToDate, getEndOfDay, getStartOfDay } from '~/utils';
 
 import { CreateTimesheetPayload } from '../schema/createTimesheetSchema';
 import { UpdateTimesheetInput } from '../schema/updateTimesheetSchema';
@@ -174,15 +174,19 @@ const getLatestTimesheets = (tenantId: string) => {
   });
 };
 
-const getAttendance = async (tenantId: string) => {
+const getDailyTimesheets = async (tenantId: string) => {
   const startOfDay = getStartOfDay();
   const endOfDay = getEndOfDay();
+  const now = new Date();
 
   const tenantWithUsers = await prisma.tenant.findUnique({
     where: { id: tenantId },
     select: {
       users: {
         select: {
+          userId: true,
+          shiftStart: true,
+          shiftEnd: true,
           user: {
             select: { id: true, name: true, email: true, role: true },
           },
@@ -204,25 +208,48 @@ const getAttendance = async (tenantId: string) => {
       userId: true,
       entries: {
         where: { timestamp: { gte: startOfDay, lte: endOfDay } },
-        orderBy: { timestamp: 'desc' },
-        take: 1,
-        select: { action: true },
+        orderBy: { timestamp: 'asc' },
+        select: { action: true, timestamp: true },
       },
     },
   });
 
-  const statusMap = new Map<string, 'IN' | 'OUT'>();
-  todayTimesheets.forEach((ts) => {
-    const latestEntry = ts.entries[0];
-    statusMap.set(ts.userId, latestEntry?.action === 'CHECK_IN' ? 'IN' : 'OUT');
+  const timesheetMap = new Map(todayTimesheets.map((ts) => [ts.userId, ts.entries]));
+
+  const usersWithTimesheet = tenantWithUsers.users.map(({ user, shiftStart }) => {
+    const entries = timesheetMap.get(user.id) || [];
+
+    const checkInEntry = entries.find((e) => e.action === TimesheetEntryAction.CHECK_IN);
+    const checkOutEntries = entries.filter((e) => e.action === TimesheetEntryAction.CHECK_OUT);
+    const checkOutEntry = checkOutEntries[checkOutEntries.length - 1];
+    const latestEntry = entries[entries.length - 1];
+
+    const status: 'IN' | 'OUT' = latestEntry?.action === 'CHECK_IN' ? 'IN' : 'OUT';
+    const checkIn = checkInEntry?.timestamp || null;
+    const checkOut = checkOutEntry?.timestamp || null;
+
+    let notes = null;
+
+    if (shiftStart) {
+      const expectedCheckIn = applyTimeToDate(shiftStart, now);
+      expectedCheckIn.setMinutes(expectedCheckIn.getMinutes() + 15);
+
+      if (!checkIn && now > expectedCheckIn) {
+        notes = 'Not checked in';
+      }
+    }
+
+    return {
+      ...user,
+      status,
+      checkIn: checkIn?.toISOString() || null,
+      checkOut: checkOut?.toISOString() || null,
+      notes,
+      shiftStart: shiftStart?.toISOString() || null,
+    };
   });
 
-  const usersWithStatus = tenantWithUsers.users.map(({ user }) => ({
-    ...user,
-    status: statusMap.get(user.id) || 'OUT',
-  }));
-
-  return usersWithStatus.sort((a, b) => {
+  return usersWithTimesheet.sort((a, b) => {
     if (a.status === 'IN' && b.status === 'OUT') return -1;
     if (a.status === 'OUT' && b.status === 'IN') return 1;
     return 0;
@@ -418,5 +445,5 @@ export {
   updateTimesheet,
   deleteTimesheet,
   getLatestTimesheets,
-  getAttendance,
+  getDailyTimesheets,
 };

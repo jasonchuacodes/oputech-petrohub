@@ -11,8 +11,9 @@ import {
   updateTimesheet,
   deleteTimesheet,
   getTenantAttendance,
+  getDailyTimesheets,
 } from './timesheet.api';
-import type { AttendanceUser, Timesheet } from './timesheet.types';
+import type { AttendanceUser, DailyTimesheetUser, Timesheet } from './timesheet.types';
 
 // Queries
 const useGetTodayTimesheetQuery = (): UseQueryResult<Timesheet> => {
@@ -90,6 +91,18 @@ const useGetTenantAttendanceQuery = ({
   });
 };
 
+const useGetDailyTimesheetsQuery = ({
+  tenantId,
+}: {
+  tenantId?: string;
+}): UseQueryResult<DailyTimesheetUser[]> => {
+  return useQuery({
+    queryKey: ['daily-timesheets', tenantId],
+    queryFn: () => getDailyTimesheets(tenantId!),
+    enabled: !!tenantId,
+  });
+};
+
 // Mutations
 const useCheckInMutation = () => {
   const queryClient = useQueryClient();
@@ -100,6 +113,7 @@ const useCheckInMutation = () => {
       queryClient.invalidateQueries({ queryKey: ['timesheets'] });
       queryClient.invalidateQueries({ queryKey: ['timesheet', 'today'] });
       queryClient.invalidateQueries({ queryKey: ['attendance'] });
+      queryClient.invalidateQueries({ queryKey: ['daily-timesheets'] });
     },
   });
 };
@@ -113,6 +127,7 @@ const useCheckOutMutation = () => {
       queryClient.invalidateQueries({ queryKey: ['timesheets'] });
       queryClient.invalidateQueries({ queryKey: ['timesheet', 'today'] });
       queryClient.invalidateQueries({ queryKey: ['attendance'] });
+      queryClient.invalidateQueries({ queryKey: ['daily-timesheets'] });
     },
   });
 };
@@ -139,6 +154,7 @@ const useDeleteTimesheetMutation = () => {
       queryClient.invalidateQueries({ queryKey: ['timesheet', variables.timesheetId] });
       if (variables.tenantId) {
         queryClient.invalidateQueries({ queryKey: ['attendance', variables.tenantId] });
+        queryClient.invalidateQueries({ queryKey: ['daily-timesheets', variables.tenantId] });
       }
     },
   });
@@ -150,6 +166,7 @@ export {
   useGetAllTimesheetsQuery,
   useGetTimesheetByIdQuery,
   useGetTenantAttendanceQuery,
+  useGetDailyTimesheetsQuery,
   useCheckInMutation,
   useCheckOutMutation,
   useUpdateTimesheetMutation,

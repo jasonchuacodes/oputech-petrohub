@@ -2,7 +2,7 @@ import { Container, Grid, Stack, Typography } from '@mui/material';
 
 import { DateTimeDisplay, PageLayout } from '~/components/ui';
 
-import { AttendanceWidget } from './AttendanceWidget';
+import { TimesheetWidget } from './TimesheetWidget';
 import { UsersWidget } from './UserWidget';
 
 export const HomePage = () => {
@@ -24,11 +24,11 @@ export const HomePage = () => {
             <Grid size={{ xs: 12, md: 12, lg: 12 }}>
               <DateTimeDisplay />
             </Grid>
-            <Grid size={{ xs: 12, md: 12, lg: 8 }}>
-              <AttendanceWidget />
+            <Grid size= {{ xs: 12, md: 12, lg: 12 }}>
+              <TimesheetWidget />
             </Grid>
-            <Grid size={{ xs: 12, md: 12, lg: 4 }}>
-              <UsersWidget />
+            <Grid size={{ xs: 12, md: 6, lg: 6 }}>
+              <UsersWidget/>
             </Grid>
           </Grid>
         </Stack>

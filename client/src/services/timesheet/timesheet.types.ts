@@ -50,3 +50,11 @@ export type UserStatus = ValueOf<typeof UserStatusEnum>;
 export type AttendanceUser = User & {
   status: UserStatus;
 };
+
+export type DailyTimesheetUser = User & {
+  status: UserStatus;
+  checkIn: string | null;
+  checkOut: string | null;
+  notes: string;
+  shiftStart: string | null;
+};

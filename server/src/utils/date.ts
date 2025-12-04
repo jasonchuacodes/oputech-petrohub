@@ -19,3 +19,21 @@ export const getEndOfDay = (date: Date = new Date()): Date => {
   local.setHours(23, 59, 59, 999);
   return fromZonedTime(local, APP_TZ);
 };
+
+/**
+ * Apply time from source DateTime to target date
+ * Used for shift schedule comparisons (stored as 1970 base, apply to today)
+ */
+export const applyTimeToDate = (sourceTime: Date, targetDate: Date = new Date()): Date => {
+  const sourceLocal = toZonedTime(sourceTime, APP_TZ);
+  const targetLocal = toZonedTime(targetDate, APP_TZ);
+
+  targetLocal.setHours(
+    sourceLocal.getHours(),
+    sourceLocal.getMinutes(),
+    0,
+    0
+  );
+
+  return fromZonedTime(targetLocal, APP_TZ);
+};
