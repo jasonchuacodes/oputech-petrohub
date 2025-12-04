@@ -12,7 +12,6 @@ import {
 } from '~/services/timesheet/timesheet.queries';
 import { TimesheetEntryActionEnum, type Timesheet } from '~/services/timesheet/timesheet.types';
 import theme from '~/theme';
-import { dayjsLocal } from '~/utils/date';
 import { parseBackendError } from '~/utils/parseBackendError';
 
 dayjs.extend(duration);
@@ -43,17 +42,30 @@ export const TimeLogger = () => {
 
   useEffect(() => {
     const getElapsedTime = (timesheet: Timesheet | null): number => {
-      if (!timesheet) return 0;
+      if (!timesheet?.entries?.length) return 0;
 
-      let totalSeconds = timesheet.totalHours * 3600;
+      const entries = timesheet.entries;
+      let totalSeconds = 0;
+      const now = Date.now();
 
-      if (latestEntry?.action === TimesheetEntryActionEnum.CHECK_IN) {
-        const startTime = dayjsLocal(latestEntry.timestamp);
-        const now = dayjsLocal();
-        totalSeconds += now.diff(startTime, 'second');
+      for (let i = 0; i < entries.length; i++) {
+        const entry = entries[i];
+
+        if (entry.action === TimesheetEntryActionEnum.CHECK_IN) {
+          const nextEntry = entries[i + 1];
+          const checkInTime = new Date(entry.timestamp).getTime();
+
+          if (nextEntry?.action === TimesheetEntryActionEnum.CHECK_OUT) {
+            const checkOutTime = new Date(nextEntry.timestamp).getTime();
+            totalSeconds += checkOutTime - checkInTime;
+            i++;
+          } else {
+            totalSeconds += now - checkInTime;
+          }
+        }
       }
 
-      return totalSeconds;
+      return Math.floor(totalSeconds / 1000);
     };
 
     const tick = () => {
@@ -76,7 +88,7 @@ export const TimeLogger = () => {
     const id = setInterval(tick, 1000);
 
     return () => clearInterval(id);
-  }, [latestEntry, timesheet]);
+  }, [timesheet]);
 
   const handleToggle = () => {
     if (!isCheckedIn) {
