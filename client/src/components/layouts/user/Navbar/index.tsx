@@ -58,7 +58,6 @@ const Navbar = () => {
     },
   ];
 
-  // ✅ centralize titles here, including settings
   const routeTitles: Record<string, string> = {
     [UserRoutes.Home]: 'Dashboard',
     [UserRoutes.Timesheets]: 'Timesheets',
@@ -67,7 +66,6 @@ const Navbar = () => {
 
   const currentTenant = auth?.tenants[0];
 
-  // find matching title by path
   const matchedRoute = Object.keys(routeTitles).find((route) =>
     matchPath({ path: route, end: route === '/' }, location.pathname),
   );
@@ -130,7 +128,11 @@ const Navbar = () => {
                     <Icon component={icon} fontSize="small" />
                   </ListItemIcon>
                   <ListItemText
-                    primaryTypographyProps={{ variant: 'body2' }}
+                    slotProps={{
+                      primary: {
+                        variant: 'body2',
+                      },
+                    }}
                     sx={{
                       '.MuiListItemText-primary': {
                         fontWeight: active ? 'medium' : 'regular',

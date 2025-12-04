@@ -58,12 +58,13 @@ const UserMenu = ({ onNavigate }: { onNavigate: (to: string) => void }) => {
           bgcolor: isOpenMenu ? alpha(theme.palette.primary.light, 0.1) : '',
         }}
       >
-        <Avatar alt="profile-picture" sx={{ width: 32, height: 32 }}>
-          <Typography>{userInitials}</Typography>
+        <Avatar alt="profile-picture" variant="rounded" sx={{ width: 32, height: 32 }}>
+          <Typography variant="body1">{userInitials}</Typography>
         </Avatar>
         <Stack justifyContent="start" alignItems="start" overflow="hidden" minWidth={0} flex={1}>
           <Typography
-            variant="body1"
+            variant="body2"
+            fontWeight="medium"
             sx={{
               whiteSpace: 'nowrap',
               overflow: 'hidden',
@@ -74,7 +75,7 @@ const UserMenu = ({ onNavigate }: { onNavigate: (to: string) => void }) => {
           >
             {auth?.name}
           </Typography>
-          <Typography color="text.secondary" variant="subtitle2" lineHeight={1}>
+          <Typography variant="body2" color="text.secondary" lineHeight={1}>
             {toTitleCase(auth?.role)}
           </Typography>
         </Stack>

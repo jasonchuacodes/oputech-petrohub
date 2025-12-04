@@ -17,6 +17,7 @@ import { ReportsPage } from '~/pages/admin/reports';
 import { UserDetailPage } from '~/pages/admin/users/user-detail';
 import { ForgotPassword } from '~/pages/auth/forgot-password';
 import { Login } from '~/pages/auth/login';
+import { LoginAdmin } from '~/pages/auth/admin-login';
 import { Register } from '~/pages/auth/register';
 import { HomePage as UserHomePage } from '~/pages/user/home';
 import { TimesheetsPage as UserTimesheetsPage } from '~/pages/user/timesheets';
@@ -25,7 +26,6 @@ import { AdminSettingsPage } from '~/pages/admin/settings';
 import { NotFoundPage } from '~/pages/NotFound';
 import { UnauthorizedPage } from '~/pages/Unauthorized';
 import { UserRoleEnum } from '~/services/user/user.types';
-import { LoginAdmin } from '../pages/auth/admin-login/LoginAdmin';
 
 export const PublicRoutes = {
   Login: '/login',

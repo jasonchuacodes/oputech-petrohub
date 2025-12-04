@@ -67,9 +67,17 @@ export const Login = () => {
           gap: 4,
         }}
       >
-        <Typography fontWeight="bold" variant="h5">
-          Welcome to Business
-        </Typography>
+       <Stack alignItems="center" spacing={1}>
+            <Typography fontWeight="bold" variant="h4">
+              Sign in to{' '}
+              <Box component="span" color="secondary.main">
+                Buzhub
+              </Box>
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Welcome back! Please enter your details.
+            </Typography>
+          </Stack>
         <Stack spacing={3} width="100%" maxWidth={{ xs: '100%', sm: 400 }} px={2}>
           <Stack spacing={1.5}>
             {(errors.username || errors.password || error) && (
