@@ -58,97 +58,83 @@ export const Login = () => {
 
   return (
     <PageLayout height="100vh">
-      <Stack direction="row" height="100%">
-        <Stack
-          display={{ xs: 'none', md: 'flex' }}
-          bgcolor="primary.light"
-          flex={1}
-          maxWidth="50%"
-        />
-        <Form
-          onSubmit={handleSubmit(onSubmit)}
-          sx={{
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-            gap: 4,
-          }}
-        >
-          <Typography fontWeight="bold" variant="h5">
-            Welcome to Business
-          </Typography>
-          <Stack spacing={3} width="100%" maxWidth={{ xs: '100%', sm: 400 }} px={2}>
-            <Stack spacing={1.5}>
-              {(errors.username || errors.password || error) && (
-                <Box
-                  sx={{
-                    border: '1px solid',
-                    px: 1,
-                    py: 0.5,
-                    bgcolor: alpha(theme.palette.error.main, 0.2),
-                    borderColor: 'error.light',
-                  }}
-                >
-                  <Typography fontSize="small" color="error">
-                    {errors.username?.message || errors.password?.message || error}
-                  </Typography>
-                </Box>
-              )}
-              <TextField
-                register={register}
-                name="username"
-                label="Username"
-                placeholder="Enter username"
+      <Form
+        onSubmit={handleSubmit(onSubmit)}
+        sx={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: 4,
+        }}
+      >
+        <Typography fontWeight="bold" variant="h5">
+          Welcome to Business
+        </Typography>
+        <Stack spacing={3} width="100%" maxWidth={{ xs: '100%', sm: 400 }} px={2}>
+          <Stack spacing={1.5}>
+            {(errors.username || errors.password || error) && (
+              <Box
+                sx={{
+                  border: '1px solid',
+                  px: 1,
+                  py: 0.5,
+                  bgcolor: alpha(theme.palette.error.main, 0.2),
+                  borderColor: 'error.light',
+                }}
+              >
+                <Typography fontSize="small" color="error">
+                  {errors.username?.message || errors.password?.message || error}
+                </Typography>
+              </Box>
+            )}
+            <TextField
+              register={register}
+              name="username"
+              label="Username"
+              placeholder="Enter username"
+              sx={{ fontSize: 'body2.fontSize' }}
+            />
+            <Stack spacing={0.5}>
+              <Typography variant="body2" fontWeight="medium" color="text.secondary">
+                Password
+              </Typography>
+              <OutlinedInput
+                {...register('password')}
+                endAdornment={
+                  <IconButton
+                    size="small"
+                    onClick={() => setIsShowPassword(!isShowPassword)}
+                    edge="end"
+                  >
+                    {isShowPassword ? <VisibilityOutlined /> : <VisibilityOffOutlined />}
+                  </IconButton>
+                }
+                size="small"
+                type={isShowPassword ? 'text' : 'password'}
+                placeholder="Enter Password"
                 sx={{ fontSize: 'body2.fontSize' }}
               />
-              <Stack spacing={0.5}>
-                <Typography variant="body2" fontWeight="medium" color="text.secondary">
-                  Password
-                </Typography>
-                <OutlinedInput
-                  {...register('password')}
-                  endAdornment={
-                    <IconButton
-                      size="small"
-                      onClick={() => setIsShowPassword(!isShowPassword)}
-                      edge="end"
-                    >
-                      {isShowPassword ? <VisibilityOutlined /> : <VisibilityOffOutlined />}
-                    </IconButton>
-                  }
-                  size="small"
-                  type={isShowPassword ? 'text' : 'password'}
-                  placeholder="Enter Password"
-                  sx={{ fontSize: 'body2.fontSize' }}
-                />
-              </Stack>
-              <Link
-                to="/forgot-password"
-                alignSelf="flex-end"
-                sx={{ fontSize: 'small', color: 'text.main' }}
-              >
-                Forgot password?
-              </Link>
             </Stack>
-            <Button
-              disabled={!isValid}
-              loading={isLoginPending}
-              fullWidth={true}
-              variant="contained"
-              type="submit"
-              size="large"
+            <Link
+              to="/forgot-password"
+              alignSelf="flex-end"
+              sx={{ fontSize: 'small', color: 'text.main' }}
             >
-              Login
-            </Button>
-          </Stack>
-          <Stack direction="row" spacing={1}>
-            <Typography variant="body2">New here?</Typography>
-            <Link to="/register" color="info">
-              Create an account
+              Forgot password?
             </Link>
           </Stack>
-        </Form>
-      </Stack>
+          <Button
+            disabled={!isValid}
+            loading={isLoginPending}
+            fullWidth={true}
+            variant="contained"
+            type="submit"
+            size="large"
+          >
+            Login
+          </Button>
+        </Stack>
+      </Form>
     </PageLayout>
   );
 };

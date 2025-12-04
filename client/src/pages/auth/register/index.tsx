@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { TextField } from '~/components/form';
 import { Button, Form, InfoBox, Link, PageLayout } from '~/components/ui';
+import { PublicRoutes } from '~/routes';
 import { useRegisterUserMutation } from '~/services/auth/auth.queries';
 import {
   RegisterUserSchema,
@@ -15,6 +16,7 @@ import {
   type RegisterUserPayload,
 } from '~/schema/registerUserSchema';
 import theme from '~/theme';
+import { pathFor } from '~/utils/pathFor';
 import { parseBackendError } from '~/utils/parseBackendError';
 
 export const Register = () => {
@@ -222,7 +224,12 @@ export const Register = () => {
             </Button>
             <Stack direction="row" spacing={1} alignSelf="center">
               <Typography variant="body2">Already have an account?</Typography>
-              <Link to="/" color="info">
+              <Link
+                to={pathFor({
+                  pathname: PublicRoutes.LoginAdmin,
+                })}
+                color="info"
+              >
                 Go to Login
               </Link>
             </Stack>

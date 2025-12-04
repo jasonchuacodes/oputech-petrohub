@@ -25,9 +25,11 @@ import { AdminSettingsPage } from '~/pages/admin/settings';
 import { NotFoundPage } from '~/pages/NotFound';
 import { UnauthorizedPage } from '~/pages/Unauthorized';
 import { UserRoleEnum } from '~/services/user/user.types';
+import { LoginAdmin } from '../pages/auth/admin-login/LoginAdmin';
 
 export const PublicRoutes = {
   Login: '/login',
+  LoginAdmin: '/admin/login',
   Register: '/register',
   ForgotPassword: '/forgot-password',
   Unauthorized: '/unauthorized',
@@ -58,6 +60,7 @@ export const router = createBrowserRouter(
     <Route element={<App />}>
       {/* Public Routes */}
       <Route path={PublicRoutes.Login} element={<Login />} />
+      <Route path={PublicRoutes.LoginAdmin} element={<LoginAdmin />} />
       <Route path={PublicRoutes.Register} element={<Register />} />
       <Route path={PublicRoutes.ForgotPassword} element={<ForgotPassword />} />
 
