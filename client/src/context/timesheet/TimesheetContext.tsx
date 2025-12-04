@@ -1,7 +1,7 @@
 import { createContext, useState, useEffect, type ReactNode } from 'react';
 import type { Dayjs } from 'dayjs';
 
-import { getInitialDateRange } from '~/utils/dateUtils';
+import { getInitialDateRange } from '~/utils/date';
 
 const TIMESHEETS_KEY = 'timesheetRange';
 

@@ -47,11 +47,13 @@ export const getInitialDateRange = (key: string) => {
   };
 };
 
-/**
- * format date using local timezone.
- */
-export const formatDate = (date: string | Date, format: string): string => {
-  return dayjs(date).tz(APP_TZ).format(format);
+export const formatDate = (date: string | Date, format?: string): string => {
+  return dayjs(date).tz(APP_TZ).format(format ?? 'MMM D, YYYY');
+};
+
+export const formatTime = (timestamp: string | null, format?: string) => {
+  if (!timestamp) return '-';
+  return dayjs(timestamp).tz(APP_TZ).format(format ?? 'h:mm A');
 };
 
 /**
@@ -60,3 +62,4 @@ export const formatDate = (date: string | Date, format: string): string => {
 export const dayjsLocal = (date?: string | Date): Dayjs => {
   return dayjs(date).tz(APP_TZ);
 };
+

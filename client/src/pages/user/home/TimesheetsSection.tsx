@@ -12,7 +12,7 @@ import {
 import { CardContainer, Link } from '~/components/ui';
 import { useGetTodayTimesheetQuery } from '~/services/timesheet/timesheet.queries';
 import { TimesheetEntryActionMap } from '~/services/timesheet/timesheet.types';
-import { formatDate } from '~/utils/dateUtils';
+import { formatDate, formatTime } from '~/utils/date';
 
 export const TimesheetsSection = () => {
   const { data: todayTimesheet, isLoading: isLoadingTimesheet } = useGetTodayTimesheetQuery();
@@ -41,7 +41,7 @@ export const TimesheetsSection = () => {
                     <ListItem disablePadding>
                       <Stack direction="row" width="100%" justifyContent="space-between">
                         <Typography variant="body2" color="text.secondary">
-                          {formatDate(todayTimesheet?.createdAt, 'MMM D, YYYY')}
+                          {formatDate(todayTimesheet?.createdAt)}
                         </Typography>
                       </Stack>
                     </ListItem>
@@ -61,7 +61,7 @@ export const TimesheetsSection = () => {
                                   variant="outlined"
                                 />
                                 <Typography variant="caption" color="text.secondary">
-                                  {formatDate(entry.timestamp, 'hh:mm A')}
+                                  {formatTime(entry.timestamp)}
                                 </Typography>
                               </Stack>
                             }

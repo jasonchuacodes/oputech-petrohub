@@ -2,6 +2,7 @@ import { ChevronRightOutlined } from '@mui/icons-material';
 import {
   alpha,
   Collapse,
+  Divider,
   IconButton,
   Stack,
   TableCell,
@@ -9,7 +10,6 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import dayjs from 'dayjs';
 import { useState } from 'react';
 
 import { useTimesheetLogContext } from '~/context/timesheetLog';
@@ -18,6 +18,7 @@ import {
   TimesheetEntryActionMap,
 } from '~/services/timesheet/timesheet.types';
 import theme from '~/theme';
+import { formatDate, formatTime } from '~/utils/date';
 
 import { TimesheetActions } from './TimesheetActions';
 
@@ -42,19 +43,19 @@ export const TimesheetRow = () => {
         }}
       >
         <TableCell component="th" scope="row" sx={{ maxWidth: 240 }}>
-          {dayjs(createdAt).format('MMMM DD, YYYY')}
+          {formatDate(createdAt)}
         </TableCell>
         <TableCell align="left">
           <Tooltip title="First In">
             <Typography variant="body2">
-              {firstCheckIn ? dayjs(firstCheckIn.timestamp).format('hh:mm A') : '—'}
+              {firstCheckIn ? formatTime(firstCheckIn.timestamp) : '—'}
             </Typography>
           </Tooltip>
         </TableCell>
         <TableCell align="left">
           <Tooltip title="Last Out">
             <Typography variant="body2">
-              {lastCheckOut ? dayjs(lastCheckOut.timestamp).format('hh:mm A') : '—'}
+              {lastCheckOut ? formatTime(lastCheckOut.timestamp) : '—'}
             </Typography>
           </Tooltip>
         </TableCell>
@@ -88,9 +89,9 @@ export const TimesheetRow = () => {
                 Timesheet entries:
               </Typography>
               {entries.map(({ id, timestamp, action }) => (
-                <Stack key={id} direction="row" spacing={2} paddingLeft={2}>
-                  <Typography variant="body2">{dayjs(timestamp).format('hh:mm:ss A')}</Typography>
-                  <Typography sx={{ color: 'text.secondary' }}>&mdash;</Typography>
+                <Stack key={id} direction="row" alignItems="center" spacing={2} paddingLeft={2}>
+                  <Typography variant="body2">{formatTime(timestamp)}</Typography>
+                  <Divider sx={{ width: 120 }} />
                   <Typography variant="body2">{TimesheetEntryActionMap[action]}</Typography>
                 </Stack>
               ))}

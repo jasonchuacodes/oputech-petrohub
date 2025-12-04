@@ -1,5 +1,5 @@
 import { prisma } from '~/db';
-import { Prisma, TimesheetEntryAction, TimesheetStatus } from '~/db/prisma';
+import { Prisma, Role, TimesheetEntryAction, TimesheetStatus } from '~/db/prisma';
 import { ConflictError, ForbiddenError, NotFoundError } from '~/errors';
 import { applyTimeToDate, getEndOfDay, getStartOfDay } from '~/utils';
 
@@ -183,6 +183,11 @@ const getDailyTimesheets = async (tenantId: string) => {
     where: { id: tenantId },
     select: {
       users: {
+        where: {
+          user: {
+            role: Role.USER
+          }
+        },
         select: {
           userId: true,
           shiftStart: true,

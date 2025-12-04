@@ -11,7 +11,7 @@ import { Controller, type Control, type FieldValues, type Path } from 'react-hoo
 import toast from 'react-hot-toast';
 
 import { Button } from '~/components/ui';
-import { generatePassword } from '~/utils/passwordUtils';
+import { generatePassword } from '~/utils/password';
 
 type Props<T extends FieldValues> = {
   name: Path<T>;
@@ -40,15 +40,16 @@ export const PasswordField = <T extends object>({
       name={name}
       control={control}
       render={({ field }) => {
+        const safeValue = field.value ?? '';
+
         const handleCopy = async () => {
-          const value = field.value || '';
-          if (!value) {
+          if (!safeValue) {
             toast.error('No password to copy');
             return;
           }
 
           try {
-            await navigator.clipboard.writeText(value);
+            await navigator.clipboard.writeText(safeValue);
             setShowCheckIcon(true);
             toast.success('Password copied to clipboard');
 
@@ -80,6 +81,7 @@ export const PasswordField = <T extends object>({
             <Stack direction="row" spacing={1}>
               <OutlinedInput
                 {...field}
+                value={safeValue}
                 size="small"
                 type={isVisible ? 'text' : 'password'}
                 placeholder={placeholder}
@@ -103,7 +105,7 @@ export const PasswordField = <T extends object>({
               />
               <ButtonGroup variant="outlined" size="small">
                 {copiable && (
-                  <Button disabled={!field.value} size="small" onClick={handleCopy}>
+                  <Button disabled={!safeValue} size="small" onClick={handleCopy}>
                     {showCheckIcon ? (
                       <CheckOutlined fontSize="inherit" />
                     ) : (

@@ -12,7 +12,7 @@ import {
 } from '~/services/timesheet/timesheet.queries';
 import { TimesheetEntryActionEnum, type Timesheet } from '~/services/timesheet/timesheet.types';
 import theme from '~/theme';
-import { dayjsLocal } from '~/utils/dateUtils';
+import { dayjsLocal } from '~/utils/date';
 import { parseBackendError } from '~/utils/parseBackendError';
 
 dayjs.extend(duration);

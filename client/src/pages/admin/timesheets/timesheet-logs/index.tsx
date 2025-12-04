@@ -18,7 +18,7 @@ import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { FileDownloadOutlined } from '@mui/icons-material';
 import { useGetUserTimesheetsQuery } from '~/services/timesheet/timesheet.queries';
 import { useGetUserQuery } from '~/services/user/user.queries';
-import { getInitialDateRange } from '~/utils/dateUtils';
+import { getInitialDateRange } from '~/utils/date';
 
 import { TimesheetLogsTable } from '../../timesheets/timesheet-logs/TimesheetLogsTable';
 import { UserHeader } from './UserHeader';

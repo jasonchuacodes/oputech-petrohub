@@ -9,7 +9,7 @@ import { useState } from 'react';
 
 import theme from '~/theme';
 import { Button } from '~/components/ui';
-import { formatRange } from '~/utils/dateUtils';
+import { formatRange } from '~/utils/date';
 
 export type DateRange = { start: Dayjs | null; end: Dayjs | null };
 

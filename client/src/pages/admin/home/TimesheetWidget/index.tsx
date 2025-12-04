@@ -18,6 +18,7 @@ import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { useGetDailyTimesheetsQuery } from '~/services/timesheet/timesheet.queries';
 import { UserStatusEnum } from '~/services/timesheet/timesheet.types';
 import { AdminRoutes } from '~/routes';
+import { formatTime } from '~/utils/date';
 import { pathFor } from '~/utils/pathFor';
 
 const STATUS_COLOR_MAP = {
@@ -34,11 +35,7 @@ export const TimesheetWidget = () => {
     params: { tenantId },
   });
 
-  const formatTime = (timestamp: string | null) => {
-    if (!timestamp) return '-';
-    return dayjs(timestamp).format('HH:mm');
-  };
-
+ 
   const renderStatus = (status: string) => {
     const isIn = status === UserStatusEnum.IN;
     const color = isIn ? 'success.main' : 'text.disabled';
@@ -90,12 +87,12 @@ export const TimesheetWidget = () => {
           <TableHead>
             <TableRow>
               <TableCell sx={{ whiteSpace: 'nowrap' }}>Full Name</TableCell>
-              <TableCell sx={{ whiteSpace: 'nowrap' }}>Check-in</TableCell>
-              <TableCell sx={{ whiteSpace: 'nowrap' }}>Check-out</TableCell>
-              <TableCell width={96} sx={{ whiteSpace: 'nowrap' }}>
+              <TableCell sx={{ whiteSpace: 'nowrap' }}>Check In</TableCell>
+              <TableCell sx={{ whiteSpace: 'nowrap' }}>Check Out</TableCell>
+              <TableCell sx={{ whiteSpace: 'nowrap' }}>
                 Status
               </TableCell>
-              <TableCell width={240} sx={{ whiteSpace: 'nowrap' }}>
+              <TableCell sx={{ minWidth: 240, whiteSpace: 'nowrap' }}>
                 Notes
               </TableCell>
             </TableRow>

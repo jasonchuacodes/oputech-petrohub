@@ -22,7 +22,7 @@ import { useAuthContext } from '~/context/auth/useAuthContext';
 import { useGetUserTimesheetsQuery } from '~/services/timesheet/timesheet.queries';
 import { TimesheetEntryActionMap } from '~/services/timesheet/timesheet.types';
 import theme from '~/theme';
-import { getInitialDateRange } from '~/utils/dateUtils';
+import { getInitialDateRange } from '~/utils/date';
 
 const TIMESHEETS_KEY = 'timesheetRange';
 
