@@ -6,7 +6,8 @@ import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 
 import { TextField } from '~/components/form';
-import { Button, Form, Link, PageLayout } from '~/components/ui';
+import { LoginLayout } from '~/components/layouts';
+import { Button, Form, Link } from '~/components/ui';
 import { useAuthContext } from '~/context/auth/useAuthContext';
 import { LoginUserSchema, type LoginUserInput } from '~/schema/loginUserSchema';
 import { useLoginMutation } from '~/services/auth/auth.queries';
@@ -57,7 +58,7 @@ export const LoginAdmin = () => {
   if (loading || auth) return null;
 
   return (
-    <PageLayout height="100vh">
+    <LoginLayout>
       <Stack direction="row" height="100%">
         <Stack
           display={{ xs: 'none', md: 'flex' }}
@@ -157,6 +158,6 @@ export const LoginAdmin = () => {
           </Stack>
         </Form>
       </Stack>
-    </PageLayout>
+    </LoginLayout>
   );
 };
