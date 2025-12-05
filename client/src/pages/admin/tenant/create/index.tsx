@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Container, FormHelperText, Stack, Typography } from '@mui/material';
+import { Container, Divider, Stack, Typography } from '@mui/material';
 import { AddOutlined } from '@mui/icons-material';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
@@ -22,11 +22,12 @@ export const CreateTenantPage = () => {
 
   const {
     control,
-    formState: { isValid, errors },
+    formState: { isValid },
     handleSubmit,
     reset,
   } = useForm<CreateTenantInput>({
     resolver: zodResolver(CreateTenantSchema),
+    mode: 'onTouched',
   });
 
   const { mutate: createTenant } = useCreateTenantMutation();
@@ -88,7 +89,7 @@ export const CreateTenantPage = () => {
               </Typography>
             </Stack>
           </Stack>
-          <Stack spacing={3}>
+          <Stack spacing={2} divider={<Divider />}>
             {/* General Info */}
             <Stack spacing={2} justifyContent="start" alignItems="start">
               <Stack>
@@ -120,7 +121,6 @@ export const CreateTenantPage = () => {
                 <Input control={control} name="address" placeholder="123 Main Street..." />
               </FormRow>
             </Stack>
-
             {/* Goverment Info */}
             <Stack spacing={2} justifyContent="start" alignItems="start">
               <Stack>
@@ -168,7 +168,6 @@ export const CreateTenantPage = () => {
                 />
               </FormRow>
             </Stack>
-
             {/* Other Info */}
             <Stack spacing={2} justifyContent="start" alignItems="start">
               <Stack>
@@ -189,29 +188,27 @@ export const CreateTenantPage = () => {
                 sx={{ textarea: { resize: 'vertical' } }}
               />
               <Stack alignItems="end" direction="row" spacing={1} width="100%">
-                <Button startIcon={<AddOutlined />} variant="outlined">
+                <Button
+                  size="small"
+                  startIcon={<AddOutlined fontSize="inherit" />}
+                  variant="outlined"
+                >
                   Upload Files
                 </Button>
                 <Typography variant="caption">{`(Max 5 files, up to 10MB)`}</Typography>
               </Stack>
             </Stack>
-          </Stack>
-          <FormHelperText error component="div">
-            {Object.values(errors || {}).map((error, index) => (
-              <Typography key={index} component="p" mb={0.5}>
-                {error?.message?.toString()}
-              </Typography>
-            ))}
-          </FormHelperText>
-          <Stack justifyContent="end" direction="row" spacing={1} my={5}>
-            <Button variant="outlined" onClick={handleBack}>
-              Cancel
-            </Button>
-            <Button disabled={!isValid} variant="contained" type="submit">
-              Create Tenant
-            </Button>
+            <Stack justifyContent="end" direction="row" pb={2} spacing={1} width="100%">
+              <Button variant="outlined" onClick={handleBack}>
+                Cancel
+              </Button>
+              <Button disabled={!isValid} variant="contained" type="submit">
+                Create Tenant
+              </Button>
+            </Stack>
           </Stack>
         </Form>
+
         <TenantCreatedSuccessModal
           open={!!createdTenant}
           tenantName={createdTenant?.name ?? ''}

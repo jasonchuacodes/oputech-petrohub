@@ -1,7 +1,6 @@
 export * from './FormRow';
 export * from './Input';
 export * from './InputWithFormat';
-export * from './TextField';
 export * from './PasswordField';
 export * from './SearchInput';
 export * from './Select';

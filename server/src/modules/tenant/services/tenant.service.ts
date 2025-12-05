@@ -3,7 +3,6 @@ import { ForbiddenError, NotFoundError } from '~/errors';
 
 import { CreateTenantPayload } from '../schema/createTenantSchema';
 import { UpdateTenantPayload } from '../schema/updateTenantSchema';
-import { UserStatus } from '../types';
 
 const createTenant = async (data: CreateTenantPayload) => {
   const { createdById, ...tenantData } = data;

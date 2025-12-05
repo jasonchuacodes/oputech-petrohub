@@ -26,7 +26,7 @@ export const InputWithFormat = <T extends object>({
     <Controller
       name={name}
       control={control}
-      render={({ field: { onChange, value, ...field } }) => {
+      render={({ field: { onChange, value, ...field }, fieldState: { error }  }) => {
         const safeValue = value ?? '';
         const maxRawLength = (pattern.match(/9/g) || []).length;
         const rawDigits = safeValue.replace(/\D/g, '').slice(0, maxRawLength);
@@ -65,6 +65,12 @@ export const InputWithFormat = <T extends object>({
                 },
               }}
             />
+
+            {error?.message && (
+              <Typography fontSize="small" color="error">
+                {error.message}
+              </Typography>
+            )}
           </Stack>
         );
       }}

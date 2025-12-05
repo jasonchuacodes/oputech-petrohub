@@ -1,8 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Container, FormHelperText, Stack, Typography } from '@mui/material';
+import { Container, Divider, Stack, Typography } from '@mui/material';
 import { AddOutlined } from '@mui/icons-material';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
 
@@ -27,17 +26,17 @@ const initialValues = {
 };
 
 export const TenantSettingsPage = () => {
-  const navigate = useNavigate();
   const { tenant, setTenant, tenantId } = useTenantContext();
 
   const {
     control,
-    formState: { isValid, isDirty, errors },
+    formState: { isValid, isDirty },
     handleSubmit,
     reset,
   } = useForm<UpdateTenantInput>({
     defaultValues: initialValues,
     resolver: zodResolver(UpdateTenantSchema),
+    mode: 'onTouched',
   });
 
   const { mutate: updateTenant, isPending: isUpdatePending } = useUpdateTenantMutation();
@@ -57,8 +56,6 @@ export const TenantSettingsPage = () => {
       });
     }
   }, [tenant, reset]);
-
-  const handleBack = () => navigate(-1);
 
   const onSubmit = async (data: UpdateTenantInput) => {
     if (!tenantId) return;
@@ -98,10 +95,11 @@ export const TenantSettingsPage = () => {
           >
             <Typography variant="h6">Tenant Settings</Typography>
             <Typography variant="body2" color="text.secondary">
-              Manage your organization's profile, contact information, and government registration details.
+              Manage your organization's profile, contact information, and government registration
+              details.
             </Typography>
           </Stack>
-          <Stack spacing={3}>
+          <Stack spacing={2} divider={<Divider />}>
             {/* General Info */}
             <Stack spacing={2} justifyContent="start" alignItems="start">
               <Stack>
@@ -208,27 +206,21 @@ export const TenantSettingsPage = () => {
                 <Typography variant="caption">{`(Max 5 files, up to 10MB)`}</Typography>
               </Stack>
             </Stack>
-          </Stack>
-          <FormHelperText error component="div">
-            {Object.values(errors || {}).map((error, index) => (
-              <Typography key={index} component="p" mb={0.5}>
-                {error?.message?.toString()}
-              </Typography>
-            ))}
-          </FormHelperText>
-          <Stack justifyContent="end" direction="row" spacing={1} my={5}>
-            {isDirty && (
-              <Button variant="outlined" onClick={handleBack}>
-                Cancel
+
+            <Stack justifyContent="end" direction="row" pb={2} spacing={1} width="100%">
+              {isDirty && (
+                <Button variant="outlined" onClick={() => reset()}>
+                  Cancel
+                </Button>
+              )}
+              <Button
+                disabled={!isValid || !isDirty || isUpdatePending}
+                variant="contained"
+                type="submit"
+              >
+                Save
               </Button>
-            )}
-            <Button
-              disabled={!isValid || !isDirty || isUpdatePending}
-              variant="contained"
-              type="submit"
-            >
-              Save
-            </Button>
+            </Stack>
           </Stack>
         </Form>
       </Container>
