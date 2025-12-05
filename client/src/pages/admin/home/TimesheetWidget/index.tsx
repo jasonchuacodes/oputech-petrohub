@@ -13,7 +13,7 @@ import {
 } from '@mui/material';
 import dayjs from 'dayjs';
 
-import { Widget } from '~/components/ui';
+import { NoData, Widget } from '~/components/ui';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { useGetDailyTimesheetsQuery } from '~/services/timesheet/timesheet.queries';
 import { UserStatusEnum } from '~/services/timesheet/timesheet.types';
@@ -35,7 +35,6 @@ export const TimesheetWidget = () => {
     params: { tenantId },
   });
 
- 
   const renderStatus = (status: string) => {
     const isIn = status === UserStatusEnum.IN;
     const color = isIn ? 'success.main' : 'text.disabled';
@@ -58,10 +57,7 @@ export const TimesheetWidget = () => {
     const checkInTime = dayjs(user.checkIn);
     const shiftTime = dayjs(user.shiftStart);
 
-    const expectedCheckIn = checkInTime
-      .hour(shiftTime.hour())
-      .minute(shiftTime.minute())
-      .second(0);
+    const expectedCheckIn = checkInTime.hour(shiftTime.hour()).minute(shiftTime.minute()).second(0);
 
     const isLate = checkInTime.isAfter(expectedCheckIn);
     const statusConfig = isLate ? STATUS_COLOR_MAP.late : STATUS_COLOR_MAP.onTime;
@@ -73,62 +69,62 @@ export const TimesheetWidget = () => {
 
   return (
     <Widget title="Daily Timesheet" to={navigateTo}>
-      <TableContainer
-        component={Paper}
-        elevation={0}
-        sx={{
-          border: '1px solid',
-          borderColor: 'divider',
-          maxHeight: 450,
-          overflowY: 'auto',
-        }}
-      >
-        <Table stickyHeader>
-          <TableHead>
-            <TableRow>
-              <TableCell sx={{ whiteSpace: 'nowrap' }}>Full Name</TableCell>
-              <TableCell sx={{ whiteSpace: 'nowrap' }}>Check In</TableCell>
-              <TableCell sx={{ whiteSpace: 'nowrap' }}>Check Out</TableCell>
-              <TableCell sx={{ whiteSpace: 'nowrap' }}>
-                Status
-              </TableCell>
-              <TableCell sx={{ minWidth: 240, whiteSpace: 'nowrap' }}>
-                Notes
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {users.map((user) => (
-              <TableRow key={user.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                <TableCell sx={{ whiteSpace: 'nowrap' }}>
-                  <Stack direction="row" alignItems="center" spacing={1}>
-                    <Box component="span">{renderStatus(user.status)}</Box>
-                    <Typography variant="body2" sx={{ whiteSpace: 'nowrap' }}>
-                      {user.name}
-                    </Typography>
-                  </Stack>
-                </TableCell>
-                <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatTime(user.checkIn)}</TableCell>
-                <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatTime(user.checkOut)}</TableCell>
-                <TableCell sx={{ whiteSpace: 'nowrap' }}>{getStatusChip(user)}</TableCell>
-                <TableCell sx={{ whiteSpace: 'nowrap' }}>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: 'error',
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                    }}
-                  >
-                    {user.notes}
-                  </Typography>
-                </TableCell>
+      {users.length > 0 ? (
+        <TableContainer
+          component={Paper}
+          elevation={0}
+          sx={{
+            border: '1px solid',
+            borderColor: 'divider',
+            maxHeight: 450,
+            overflowY: 'auto',
+          }}
+        >
+          <Table stickyHeader>
+            <TableHead>
+              <TableRow>
+                <TableCell sx={{ whiteSpace: 'nowrap' }}>Full Name</TableCell>
+                <TableCell sx={{ whiteSpace: 'nowrap' }}>Check In</TableCell>
+                <TableCell sx={{ whiteSpace: 'nowrap' }}>Check Out</TableCell>
+                <TableCell sx={{ whiteSpace: 'nowrap' }}>Status</TableCell>
+                <TableCell sx={{ minWidth: 240, whiteSpace: 'nowrap' }}>Notes</TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {users.map((user) => (
+                <TableRow key={user.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                    <Stack direction="row" alignItems="center" spacing={1}>
+                      <Box component="span">{renderStatus(user.status)}</Box>
+                      <Typography variant="body2" sx={{ whiteSpace: 'nowrap' }}>
+                        {user.name}
+                      </Typography>
+                    </Stack>
+                  </TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatTime(user.checkIn)}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatTime(user.checkOut)}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{getStatusChip(user)}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: 'error',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}
+                    >
+                      {user.notes}
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      ) : (
+        <NoData text="No users found" />
+      )}
     </Widget>
   );
 };
