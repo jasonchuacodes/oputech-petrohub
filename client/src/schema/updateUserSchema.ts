@@ -1,6 +1,6 @@
 import z from 'zod';
 
-import { UserRoleEnum } from '../services/user/user.types';
+import { UserRole } from '../services/user/user.types';
 
 export const UpdateUserSchema = z
   .object({
@@ -12,7 +12,7 @@ export const UpdateUserSchema = z
       })
       .optional()
       .nullable(),
-    role: z.nativeEnum(UserRoleEnum).optional(),
+    role: z.nativeEnum(UserRole).optional(),
     email: z.string().email().optional().nullable(),
     birthday: z.date().optional().nullable(),
     address: z.string().optional().nullable(),

@@ -2,12 +2,12 @@ import type { ValueOf } from '~/utils/valueOf';
 
 import type { Tenant } from '../tenant/tenant.types';
 
-export const UserRoleEnum = {
+export const UserRole = {
   ADMIN: 'ADMIN',
   USER: 'USER',
 } as const;
 
-export type UserRole = ValueOf<typeof UserRoleEnum>;
+export type UserRole = ValueOf<typeof UserRole>;
 
 export type User = {
   id: string;

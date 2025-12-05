@@ -7,13 +7,13 @@ import toast from 'react-hot-toast';
 import { TextField, Select, PasswordField } from '~/components/form';
 import { CustomModal } from '~/components/ui';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
-import { UserRoleEnum, type UserRole } from '~/services/user/user.types';
+import { UserRole, type UserRole as UserRoleType } from '~/services/user/user.types';
 import { CreateUserSchema, type CreateUserInput } from '~/schema/createUserSchema';
 import { useCreateUserMutation } from '~/services/user/user.queries';
 import { parseBackendError } from '~/utils/parseBackendError';
 import { toTitleCase } from '~/utils/textUtils';
 
-const roleOptions = Object.values(UserRoleEnum).map((value) => {
+const roleOptions = Object.values(UserRole).map((value) => {
   return {
     label: toTitleCase(value),
     value: value,
@@ -28,10 +28,10 @@ type Props = {
 export const UserCreateModal = ({ open, setOpen }: Props) => {
   const { tenantId } = useTenantContext();
 
-  const [selectedRole, setSelectedRole] = useState<UserRole>(UserRoleEnum.USER);
+  const [selectedRole, setSelectedRole] = useState<UserRoleType>(UserRole.USER);
 
   const handleSelectRole = (event: SelectChangeEvent) => {
-    setSelectedRole(event.target.value as UserRole);
+    setSelectedRole(event.target.value as UserRoleType);
   };
 
   const {

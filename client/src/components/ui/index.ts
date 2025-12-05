@@ -8,6 +8,7 @@ export * from './DateRangePicker';
 export * from './DateTimeDisplay';
 export * from './InfoBox';
 export * from './Form';
+export * from './InactivityWarning';
 export * from './Link';
 export * from './LoadingSpinner';
 export * from './NoData';

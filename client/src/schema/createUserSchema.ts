@@ -1,6 +1,6 @@
 import z from 'zod';
 
-import { UserRoleEnum } from '~/services/user/user.types';
+import { UserRole } from '~/services/user/user.types';
 
 export const CreateUserSchema = z.object({
   name: z.string().min(1),
@@ -9,7 +9,7 @@ export const CreateUserSchema = z.object({
     .string()
     .min(6, 'Password must be at least 6 characters')
     .max(20, 'Password must be at most 20 characters'),
-  role: z.nativeEnum(UserRoleEnum),
+  role: z.nativeEnum(UserRole),
 });
 
 export type CreateUserInput = z.infer<typeof CreateUserSchema>;

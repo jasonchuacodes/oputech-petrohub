@@ -1,5 +1,5 @@
 import axios from '~/lib/axiosInstance';
-import { UserRoleEnum, type User } from '~/services/user/user.types';
+import { UserRole, type User } from '~/services/user/user.types';
 import type { ForceUpdatePasswordPayload } from '~/schema/forceUpdatePassword';
 import type { ForgotPasswordInput } from '~/schema/forgotPasswordSchema';
 import type { LoginUserInput } from '~/schema/loginUserSchema';
@@ -18,7 +18,7 @@ const getMe = async () => {
 const registerUser = (data: RegisterUserPayload) => {
   return axios.post('/auth/register', {
     ...data,
-    role: UserRoleEnum.ADMIN,
+    role: UserRole.ADMIN,
   });
 };
 

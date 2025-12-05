@@ -10,7 +10,7 @@ import { pathFor } from '~/utils/pathFor';
 import { AdminRoutes } from '~/routes';
 
 const UserMenu = () => {
-  const { auth } = useAuthContext();
+  const { auth, setIsLoading } = useAuthContext();
   const { tenantId } = useTenantContext();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -22,14 +22,15 @@ const UserMenu = () => {
   const isOpenSettingsMenu = Boolean(anchorElSettingsMenu);
 
   const handleLogout = () => {
+    setIsLoading(true);
+
     logout(undefined, {
-      onSuccess: () => {
+      onSettled: () => {
         sessionStorage.clear();
-        
         queryClient.setQueryData(['auth'], null);
         queryClient.cancelQueries();
-
         navigate('/login');
+        setIsLoading(false);
       },
     });
   };

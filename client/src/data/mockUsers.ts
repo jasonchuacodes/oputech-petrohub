@@ -1,10 +1,10 @@
-import { UserRoleEnum } from "../services/user/user.types";
+import { UserRole } from "../services/user/user.types";
 
 export const users = [
   {
     id: '31f90d7b-f019-4d99-8c91-1bb79b2703f1',
     name: 'Jason Clyde Chua',
-    role: UserRoleEnum.USER,
+    role: UserRole.USER,
     tin: '317452133000',
     philhealth: null,
     pagibig: null,
@@ -17,7 +17,7 @@ export const users = [
   {
     id: '22a04c2a-1b21-44b1-9e7f-7d89cb1af842',
     name: 'Mikay Santos',
-    role: UserRoleEnum.USER,
+    role: UserRole.USER,
     tin: '317452133001',
     philhealth: 'PH-0021341',
     pagibig: null,
@@ -30,7 +30,7 @@ export const users = [
   {
     id: '1b92488f-2ec3-4424-8301-ef1a11b90da7',
     name: 'Bryan Ledesma',
-    role: UserRoleEnum.ADMIN,
+    role: UserRole.ADMIN,
     tin: '317452133002',
     philhealth: null,
     pagibig: null,
@@ -43,7 +43,7 @@ export const users = [
   {
     id: '3c57a9aa-5e8f-41d0-9b21-3131a509b7c2',
     name: 'Ellaine Mendoza',
-    role: UserRoleEnum.USER,
+    role: UserRole.USER,
     tin: '317452133003',
     philhealth: 'PH-0032188',
     pagibig: 'PG-0098871',
@@ -56,7 +56,7 @@ export const users = [
   {
     id: 'd22f93a3-fd19-43b8-8291-91384a1f572b',
     name: 'Angela Reyes',
-    role: UserRoleEnum.USER,
+    role: UserRole.USER,
     tin: '317452133004',
     philhealth: null,
     pagibig: null,
@@ -69,7 +69,7 @@ export const users = [
   {
     id: 'a12de973-9e94-40b0-b4b0-4c63a42b53b8',
     name: 'Rafael Torres',
-    role: UserRoleEnum.USER,
+    role: UserRole.USER,
     tin: '317452133005',
     philhealth: null,
     pagibig: 'PG-0090012',
@@ -82,7 +82,7 @@ export const users = [
   {
     id: 'b41acbb3-9e61-4b64-9ad0-b8f7a2f12b6f',
     name: 'Carla Dizon',
-    role: UserRoleEnum.USER,
+    role: UserRole.USER,
     tin: '317452133006',
     philhealth: 'PH-0078921',
     pagibig: null,
@@ -95,7 +95,7 @@ export const users = [
   {
     id: 'cf3fa183-92ef-46d9-8cb9-4f01767de5b0',
     name: 'Joshua Villanueva',
-    role: UserRoleEnum.ADMIN,
+    role: UserRole.ADMIN,
     tin: '317452133007',
     philhealth: 'PH-0045672',
     pagibig: 'PG-0045578',

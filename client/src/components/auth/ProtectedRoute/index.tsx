@@ -2,10 +2,10 @@ import { Navigate, Outlet } from 'react-router-dom';
 
 import { LoadingScreen } from '~/components/layouts/admin/LoadingScreen';
 import { useAuthContext } from '~/context/auth/useAuthContext';
-import { UserRoleEnum, type UserRole } from '~/services/user/user.types';
+import { UserRole, type UserRole as UserRoleType } from '~/services/user/user.types';
 
 type ProtectedRouteProps = {
-  allowedRoles: UserRole[];
+  allowedRoles: UserRoleType[];
 };
 
 export const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
@@ -16,7 +16,7 @@ export const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
   if (!auth) return <Navigate to="/login" replace />;
   
   if (!allowedRoles.includes(auth.role)) {
-    if (auth.role === UserRoleEnum.ADMIN) {
+    if (auth.role === UserRole.ADMIN) {
       return <Navigate to="/admin" replace />;
     }
 

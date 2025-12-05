@@ -12,7 +12,7 @@ import { pathFor } from '~/utils/pathFor';
 import { toTitleCase } from '~/utils/textUtils';
 
 const UserMenu = ({ onNavigate }: { onNavigate: (to: string) => void }) => {
-  const { auth } = useAuthContext();
+  const { auth, setIsLoading } = useAuthContext();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { mutate: logout } = useLogoutMutation();
@@ -33,14 +33,15 @@ const UserMenu = ({ onNavigate }: { onNavigate: (to: string) => void }) => {
   };
 
   const handleLogout = () => {
-    logout(undefined, {
-      onSuccess: () => {
-        sessionStorage.clear();
+    setIsLoading(true);
 
+    logout(undefined, {
+      onSettled: () => {
+        sessionStorage.clear();
         queryClient.setQueryData(['auth'], null);
         queryClient.cancelQueries();
-
         navigate('/login');
+        setIsLoading(false);
       },
     });
   };

@@ -11,7 +11,7 @@ import { useAuthContext } from '~/context/auth/useAuthContext';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { AdminRoutes } from '~/routes';
 import { useGetUserQuery, useUpdateUserMutation } from '~/services/user/user.queries';
-import { UserRoleEnum } from '~/services/user/user.types';
+import { UserRole } from '~/services/user/user.types';
 import { UpdateUserSchema, type UpdateUserPayload } from '~/schema/updateUserSchema';
 import theme from '~/theme';
 import { pathFor } from '~/utils/pathFor';
@@ -190,7 +190,7 @@ export const UserDetailPage = () => {
                 </Stack>
               </Stack>
             </Stack>
-            {user?.role === UserRoleEnum.USER && (
+            {user?.role === UserRole.USER && (
               <Stack
                 width="100%"
                 px={4}
@@ -274,7 +274,7 @@ export const UserDetailPage = () => {
               </Stack>
             </Stack>
 
-            {user?.role === UserRoleEnum.USER && (
+            {user?.role === UserRole.USER && (
               <Stack
                 width="100%"
                 px={4}

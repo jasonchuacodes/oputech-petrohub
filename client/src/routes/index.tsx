@@ -25,7 +25,7 @@ import { SettingsPage as UserSettingsPage } from '~/pages/user/settings';
 import { AdminSettingsPage } from '~/pages/admin/settings';
 import { NotFoundPage } from '~/pages/NotFound';
 import { UnauthorizedPage } from '~/pages/Unauthorized';
-import { UserRoleEnum } from '~/services/user/user.types';
+import { UserRole } from '~/services/user/user.types';
 
 export const PublicRoutes = {
   Login: '/login',
@@ -65,7 +65,7 @@ export const router = createBrowserRouter(
       <Route path={PublicRoutes.ForgotPassword} element={<ForgotPassword />} />
 
       {/* User Routes */}
-      <Route path="/" element={<ProtectedRoute allowedRoles={[UserRoleEnum.USER]} />}>
+      <Route path="/" element={<ProtectedRoute allowedRoles={[UserRole.USER]} />}>
         <Route element={<UserMainLayout />}>
           <Route index element={<UserHomePage />} />
           <Route path={UserRoutes.Timesheets} element={<UserTimesheetsPage />} />
@@ -74,11 +74,11 @@ export const router = createBrowserRouter(
       </Route>
 
       {/* Admin Routes */}
-      <Route path="/admin" element={<ProtectedRoute allowedRoles={[UserRoleEnum.ADMIN]} />}>
+      <Route path="/admin" element={<ProtectedRoute allowedRoles={[UserRole.ADMIN]} />}>
         <Route index element={<BootstrapPage />} />
       </Route>
 
-      <Route element={<ProtectedRoute allowedRoles={[UserRoleEnum.ADMIN]} />}>
+      <Route element={<ProtectedRoute allowedRoles={[UserRole.ADMIN]} />}>
         <Route element={<RequireNoTenant />}>
           <Route element={<SetupLayout />}>
             <Route path={AdminRoutes.TenantCreateFlow} element={<CreateTenantFlow />} />
