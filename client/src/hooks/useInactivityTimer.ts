@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-const INACTIVITY_TIMEOUT = 0.1 * 60 * 1000;
-const WARNING_DURATION = 15 * 1000;
+const INACTIVITY_TIMEOUT = 2 * 60 * 1000; // 2mins
+const WARNING_DURATION = 20 * 1000; // 20secs
 const THROTTLE_DELAY = 1000;
 const STORAGE_KEY = 'inactivity_last_activity';
 const ACTIVITY_EVENTS = ['mousedown', 'keydown', 'touchstart'];
@@ -30,7 +30,7 @@ export const useInactivityTimer = ({
   const resetTimer = useCallback(() => {
     const now = Date.now();
     lastActivityTimeRef.current = now;
-    
+
     setIsWarningShown(false);
     setRemainingSeconds(WARNING_DURATION / 1000);
 

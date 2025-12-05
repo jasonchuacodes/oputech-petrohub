@@ -1,21 +1,15 @@
 import { Avatar, Menu, MenuItem, Typography, Divider, Box, alpha, Stack } from '@mui/material';
-import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 import { Button } from '~/components/ui';
 import { useAuthContext } from '~/context/auth/useAuthContext';
-import { useLogoutMutation } from '~/services/auth/auth.queries';
 import { UserRoutes } from '~/routes';
 import theme from '~/theme';
 import { pathFor } from '~/utils/pathFor';
 import { toTitleCase } from '~/utils/textUtils';
 
 const UserMenu = ({ onNavigate }: { onNavigate: (to: string) => void }) => {
-  const { auth, setIsLoading } = useAuthContext();
-  const queryClient = useQueryClient();
-  const navigate = useNavigate();
-  const { mutate: logout } = useLogoutMutation();
+  const { auth, logout } = useAuthContext();
 
   const userInitials = auth ? auth.username?.split('')[0].toUpperCase() : 'U';
 
@@ -30,20 +24,6 @@ const UserMenu = ({ onNavigate }: { onNavigate: (to: string) => void }) => {
     );
 
     setAnchorElSettingsMenu(null);
-  };
-
-  const handleLogout = () => {
-    setIsLoading(true);
-
-    logout(undefined, {
-      onSettled: () => {
-        sessionStorage.clear();
-        queryClient.setQueryData(['auth'], null);
-        queryClient.cancelQueries();
-        navigate('/login');
-        setIsLoading(false);
-      },
-    });
   };
 
   return (
@@ -112,7 +92,7 @@ const UserMenu = ({ onNavigate }: { onNavigate: (to: string) => void }) => {
           <Typography variant="body2">Help</Typography>
         </MenuItem>
         <Divider />
-        <MenuItem dense onClick={handleLogout}>
+        <MenuItem dense onClick={logout}>
           <Typography variant="body2">Logout</Typography>
         </MenuItem>
       </Menu>

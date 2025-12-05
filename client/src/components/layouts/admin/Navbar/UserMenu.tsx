@@ -1,39 +1,21 @@
 import { IconButton, Avatar, Menu, MenuItem, Typography, Divider } from '@mui/material';
-import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useAuthContext } from '~/context/auth/useAuthContext';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
-import { useLogoutMutation } from '~/services/auth/auth.queries';
 import { pathFor } from '~/utils/pathFor';
 import { AdminRoutes } from '~/routes';
 
 const UserMenu = () => {
-  const { auth, setIsLoading } = useAuthContext();
+  const { auth, logout } = useAuthContext();
   const { tenantId } = useTenantContext();
-  const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const { mutate: logout } = useLogoutMutation();
 
   const userInitials = auth ? auth.username?.split('')[0].toUpperCase() : 'U';
 
   const [anchorElSettingsMenu, setAnchorElSettingsMenu] = useState<null | HTMLElement>(null);
   const isOpenSettingsMenu = Boolean(anchorElSettingsMenu);
-
-  const handleLogout = () => {
-    setIsLoading(true);
-
-    logout(undefined, {
-      onSettled: () => {
-        sessionStorage.clear();
-        queryClient.setQueryData(['auth'], null);
-        queryClient.cancelQueries();
-        navigate('/login');
-        setIsLoading(false);
-      },
-    });
-  };
 
   return (
     <>
@@ -85,7 +67,7 @@ const UserMenu = () => {
           <Typography variant="body2">Help </Typography>
         </MenuItem>
         <Divider />
-        <MenuItem onClick={handleLogout}>
+        <MenuItem onClick={logout}>
           <Typography variant="body2">Logout</Typography>
         </MenuItem>
       </Menu>

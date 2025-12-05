@@ -4,21 +4,22 @@ import { isProduction } from '~/config/environment';
 import { Role, NotificationType, Prisma } from '~/db/prisma';
 import { ForbiddenError, NotFoundError } from '~/errors';
 import { AuthenticatedRequest } from '~/middlewares';
-import { getUserById as getUserService, getUserByUsername } from '~/modules/user/services/user.service';
 import { REFRESH_TOKEN_EXPIRY_IN_DAYS } from '~/shared/constants';
 import { createSchemaValidator } from '~/utils';
 
-import * as registerService from '../services/register.service';
+import * as authService from '~/modules/auth/services/auth.service';
+import * as loginService from '~/modules/auth/services/login.service';
+import * as logoutService from '~/modules/auth/services/logout.service';
+import * as registerService from '~/modules/auth/services/register.service';
+import * as notificationService from '~/modules/notification/services/notification.service';
+import * as userService from '~/modules/user/services/user.service';
+import { ForgotPasswordSchema } from '~/modules/notification/schema/forgotPasswordSchema';
+import { prisma } from '~/db/index';
+
 import { RegisterUserSchema } from '../schema/registerUserSchema';
 import { LoginUserSchema } from '../schema/loginUserSchema';
 import { UpdatePasswordSchema } from '../schema/updatePasswordSchema';
-import * as authService from '../services/auth.service';
-import { loginUser as loginUserService } from '../services/login.service';
-import { logoutSession } from '../services/logout.service';
 import { ForceUpdatePasswordSchema } from '../schema/forceUpdatePasswordSchema';
-import { ForgotPasswordSchema } from '~/modules/notification/schema/forgotPasswordSchema';
-import { createNotification } from '~/modules/notification/services/notification.service';
-import { prisma } from '~/db/index';
 
 const validateUserRegister = createSchemaValidator(RegisterUserSchema);
 const validateUserLogin = createSchemaValidator(LoginUserSchema);
@@ -34,7 +35,7 @@ const getMe = async (req: AuthenticatedRequest, res: Response, next: NextFunctio
       throw new NotFoundError('User not found');
     }
 
-    const user = await getUserService(userId);
+    const user = await userService.getUserById(userId);
 
     const authUserData = {
       id: user.id,
@@ -78,7 +79,7 @@ const loginUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const data = await validateUserLogin(req.body);
 
-    const { user, accessToken, refreshToken } = await loginUserService(data);
+    const { user, accessToken, refreshToken } = await loginService.loginUser(data);
 
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
@@ -103,7 +104,7 @@ const logoutUser = async (req: AuthenticatedRequest, res: Response, next: NextFu
   try {
     const refreshToken = req.cookies.refreshToken;
     if (refreshToken) {
-      await logoutSession(refreshToken);
+      await logoutService.logoutSession(refreshToken);
     }
 
     res.clearCookie('accessToken', {
@@ -178,7 +179,7 @@ const forceUpdatePassword = async (
 const forgotPassword = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { username } = await validateForgotPassword(req.body);
-    const user = await getUserByUsername(username);
+    const user = await userService.getUserByUsername(username);
 
     const userTenants = await prisma.tenantsOnUsers.findMany({
       where: { userId: user.id },
@@ -201,7 +202,7 @@ const forgotPassword = async (req: Request, res: Response, next: NextFunction) =
 
     const recipientIds = admins.map((admin) => admin.id);
 
-    await createNotification(
+    await notificationService.createNotification(
       NotificationType.PASSWORD_RESET_REQUEST,
       {
         userId: user.id,

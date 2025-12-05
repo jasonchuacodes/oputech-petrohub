@@ -1,32 +1,51 @@
-import { createContext, useState, type ReactNode } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { createContext, useCallback, type ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-import { useGetMe } from '~/services/auth/auth.queries';
+import { useGetMe, useLogoutMutation } from '~/services/auth/auth.queries';
 import type { User } from '~/services/user/user.types';
 
 type AuthContextType = {
   auth?: User | null;
   loading: boolean;
   refetch: () => void;
-  setIsLoading: (value: boolean) => void;
+  logout: () => void;
 };
 
 const initialState = {
   auth: null,
   loading: true,
   refetch: () => null,
-  setIsLoading: () => null,
+  logout: () => null,
 };
 
 const AuthContext = createContext<AuthContextType>(initialState);
 
 const AuthProvider = ({ children }: { children?: ReactNode }) => {
-  const { data: auth, isLoading: queryLoading, isFetching, refetch } = useGetMe();
-  const [manualLoading, setIsLoading] = useState(false);
+  const { data: auth, isLoading, isFetching, refetch } = useGetMe();
 
-  const loading = queryLoading || isFetching || manualLoading;
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+
+  const { mutate, isPending: isLoggingOut } = useLogoutMutation();
+
+  const logout = useCallback(() => {
+    mutate(undefined, {
+      onSuccess: () => {
+        sessionStorage.clear();
+        
+        queryClient.setQueryData(['auth'], null);
+        queryClient.cancelQueries();
+
+        navigate('/login');
+      },
+    });
+  }, [mutate, queryClient, navigate]);
+
+  const loading = isLoading || isFetching || isLoggingOut;
 
   return (
-    <AuthContext.Provider value={{ auth, loading, refetch, setIsLoading }}>
+    <AuthContext.Provider value={{ auth, loading, refetch, logout }}>
       {children}
     </AuthContext.Provider>
   );
