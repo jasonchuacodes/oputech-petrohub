@@ -1,25 +1,25 @@
 import { AddOutlined } from '@mui/icons-material';
 import { Stack, Typography } from '@mui/material';
-import type { UseFormRegister } from 'react-hook-form';
+import type { Control } from 'react-hook-form';
 
-import { FormRow, TextField } from '~/components/form';
+import { FormRow, Input } from '~/components/form';
 import { Button } from '~/components/ui';
 import type { CreateTenantInput } from '~/schema/createTenantSchema';
 
 type OtherInfoProps = {
-  register: UseFormRegister<CreateTenantInput>;
+  control: Control<CreateTenantInput>;
 };
 
-export const OtherInfo = ({ register }: OtherInfoProps) => {
+export const OtherInfo = ({ control }: OtherInfoProps) => {
   return (
     <Stack spacing={4}>
       <Stack spacing={2} justifyContent="start" alignItems="start">
         <FormRow alignLabel="flex-start" label="Description">
-          <TextField
+          <Input
             multiline
             rows={3}
             name="description"
-            register={register}
+            control={control}
             placeholder="Add a brief description"
             sx={{ textarea: { resize: 'vertical' } }}
           />

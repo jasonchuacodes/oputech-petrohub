@@ -22,7 +22,6 @@ export const DeleteConfirmModal = ({
       type="danger"
       title="Delete User Confirmation"
       submitText="Delete"
-      maxWidth={520}
       loading={loading}
     >
       <Typography variant="body2">Are you sure you want to delete this user?</Typography>

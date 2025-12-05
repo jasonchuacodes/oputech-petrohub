@@ -1,7 +1,5 @@
 import { SearchOutlined } from '@mui/icons-material';
-import { InputAdornment, Stack } from '@mui/material';
-
-import { TextField } from '~/components/form';
+import { InputAdornment, OutlinedInput, Stack } from '@mui/material';
 
 type SearchInputProps = {
   placeholder?: string;
@@ -12,23 +10,25 @@ type SearchInputProps = {
 export const SearchInput = ({ placeholder = 'Search', value, onChange }: SearchInputProps) => {
   return (
     <Stack alignItems="end" direction="row" spacing={1} width="100%" maxWidth={560}>
-      <TextField
-        name="search"
+      <OutlinedInput
         placeholder={placeholder}
         size="small"
-        fullWidth={true}
-        value={value}
+        fullWidth
+        value={value ?? ''}
         onChange={(e) => onChange && onChange(e.target.value)}
         sx={{ bgcolor: 'background.paper', height: 40 }}
         slotProps={{
           input: {
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchOutlined sx={{ color: 'text.secondary' }} />
-              </InputAdornment>
-            ),
+            sx: {
+              fontSize: 'body2.fontSize',
+            },
           },
         }}
+        startAdornment={
+          <InputAdornment position="start">
+            <SearchOutlined sx={{ color: 'text.secondary' }} />
+          </InputAdornment>
+        }
       />
     </Stack>
   );

@@ -1,10 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { VisibilityOffOutlined, VisibilityOutlined } from '@mui/icons-material';
-import { IconButton, List, OutlinedInput, Stack, Typography } from '@mui/material';
-import { useState } from 'react';
+import { List, Stack, Typography } from '@mui/material';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
+import { PasswordField } from '~/components/form';
 import { CustomModal, Form, InfoBox } from '~/components/ui';
 import { useForceUpdatePasswordMutation } from '~/services/auth/auth.queries';
 import {
@@ -19,11 +18,8 @@ type PasswordChangeModalProps = {
 };
 
 export const PasswordChangeModal = ({ open, onClose }: PasswordChangeModalProps) => {
-  const [isShowNewPassword, setIsShowNewPassword] = useState(false);
-  const [isShowConfirmPassword, setIsShowConfirmPassword] = useState(false);
-
   const {
-    register,
+    control,
     reset,
     handleSubmit,
     formState: { isValid },
@@ -69,30 +65,14 @@ export const PasswordChangeModal = ({ open, onClose }: PasswordChangeModalProps)
       <Form onSubmit={onSubmit}>
         <Stack justifyContent="center" alignItems="center" spacing={2} pb={2}>
           <Stack spacing={1} width="100%">
-            <Stack spacing={0.5}>
-              <Typography fontWeight="bold" color="text.secondary">
-                New Password
-                <Typography component="span" color="error">
-                  {' '}
-                  *
-                </Typography>
-              </Typography>
-              <OutlinedInput
-                {...register('newPassword')}
-                size="small"
-                type={isShowNewPassword ? 'text' : 'password'}
-                placeholder="Enter your new password"
-                endAdornment={
-                  <IconButton
-                    size="small"
-                    onClick={() => setIsShowNewPassword(!isShowNewPassword)}
-                    edge="end"
-                  >
-                    {isShowNewPassword ? <VisibilityOutlined /> : <VisibilityOffOutlined />}
-                  </IconButton>
-                }
-              />
-            </Stack>
+            <PasswordField
+              required
+              control={control}
+              name="newPassword"
+              label="New Password"
+              placeholder="Enter your new password"
+              randomizer={false}
+            />
             <InfoBox variant="info" title="Password requirements:">
               <List sx={{ listStyleType: 'disc', pl: 3, m: 0 }}>
                 {[
@@ -108,30 +88,14 @@ export const PasswordChangeModal = ({ open, onClose }: PasswordChangeModalProps)
                 ))}
               </List>
             </InfoBox>
-            <Stack spacing={0.5}>
-              <Typography fontWeight="bold" color="text.secondary">
-                Confirm Password
-                <Typography component="span" color="error">
-                  {' '}
-                  *
-                </Typography>
-              </Typography>
-              <OutlinedInput
-                {...register('confirmPassword')}
-                size="small"
-                type={isShowConfirmPassword ? 'text' : 'password'}
-                placeholder="Enter you confirm new password"
-                endAdornment={
-                  <IconButton
-                    size="small"
-                    onClick={() => setIsShowConfirmPassword(!isShowConfirmPassword)}
-                    edge="end"
-                  >
-                    {isShowConfirmPassword ? <VisibilityOutlined /> : <VisibilityOffOutlined />}
-                  </IconButton>
-                }
-              />
-            </Stack>
+            <PasswordField
+              required
+              control={control}
+              name="confirmPassword"
+              label="Confirm Password"
+              placeholder="Enter you confirm new password"
+              randomizer={false}
+            />
           </Stack>
         </Stack>
       </Form>

@@ -11,7 +11,6 @@ type Props<T extends object> = {
   placeholder?: string;
   label?: string;
   variant?: 'standard' | 'outlined' | 'filled';
-  mode?: 'view' | 'edit';
 };
 
 export const InputWithFormat = <T extends object>({
@@ -22,7 +21,6 @@ export const InputWithFormat = <T extends object>({
   pattern,
   required,
   variant = 'outlined',
-  mode = 'edit',
 }: Props<T>) => {
   return (
     <Controller
@@ -47,32 +45,26 @@ export const InputWithFormat = <T extends object>({
               )}
             </Typography>
 
-            {mode === 'edit' ? (
-              <TextField
-                {...field}
-                fullWidth
-                size="small"
-                variant={variant}
-                placeholder={placeholder}
-                value={formatted}
-                onChange={(e) => {
-                  const rawDigits = e.target.value.replace(/\D/g, '');
-                  const slicedRaw = rawDigits.slice(0, maxRawLength);
-                  onChange(slicedRaw === '' ? null : slicedRaw);
-                }}
-                slotProps={{
-                  htmlInput: {
-                    sx: {
-                      fontSize: 'body2.fontSize',
-                    },
+            <TextField
+              {...field}
+              fullWidth
+              size="small"
+              variant={variant}
+              placeholder={placeholder}
+              value={formatted}
+              onChange={(e) => {
+                const rawDigits = e.target.value.replace(/\D/g, '');
+                const slicedRaw = rawDigits.slice(0, maxRawLength);
+                onChange(slicedRaw === '' ? null : slicedRaw);
+              }}
+              slotProps={{
+                htmlInput: {
+                  sx: {
+                    fontSize: 'body2.fontSize',
                   },
-                }}
-              />
-            ) : (
-              <Typography variant="body2" height={40}>
-                {formatted === '' || formatted === null ? 'N/A' : formatted}
-              </Typography>
-            )}
+                },
+              }}
+            />
           </Stack>
         );
       }}

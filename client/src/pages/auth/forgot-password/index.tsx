@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
-import { TextField } from '~/components/form';
+import { Input } from '~/components/form';
 import { Button, Form, Link, PageLayout } from '~/components/ui';
 import { useAuthContext } from '~/context/auth/useAuthContext';
 import { ForgotPasswordSchema, type ForgotPasswordInput } from '~/schema/forgotPasswordSchema';
@@ -17,7 +17,7 @@ export const ForgotPassword = () => {
   const navigate = useNavigate();
 
   const {
-    register,
+    control,
     handleSubmit,
     reset,
     formState: { errors, isValid },
@@ -64,13 +64,12 @@ export const ForgotPassword = () => {
             Forgot Password
           </Typography>
           <Stack spacing={3} width="100%" maxWidth={{ xs: '100%', sm: 400 }} px={2}>
-            <TextField
-              register={register}
+            <Input
+              control={control}
               name="username"
               label="Username"
               placeholder="Enter your username"
               error={!!errors.username}
-              helperText={errors.username?.message}
               sx={{ fontSize: 'body2.fontSize' }}
             />
             <Button

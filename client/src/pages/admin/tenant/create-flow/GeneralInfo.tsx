@@ -1,33 +1,22 @@
 import { Stack } from '@mui/material';
-import type { Control, UseFormRegister } from 'react-hook-form';
+import type { Control } from 'react-hook-form';
 
-import { FormRow, InputWithFormat, TextField } from '~/components/form';
+import { FormRow, InputWithFormat, Input } from '~/components/form';
 import type { CreateTenantInput } from '~/schema/createTenantSchema';
 
 type GeneralInfoProps = {
   control: Control<CreateTenantInput>;
-  register: UseFormRegister<CreateTenantInput>;
 };
 
-export const GeneralInfo = ({ control, register }: GeneralInfoProps) => {
+export const GeneralInfo = ({ control }: GeneralInfoProps) => {
   return (
     <>
       <Stack spacing={2} justifyContent="start" alignItems="start">
         <FormRow label="Company Name" required>
-          <TextField
-            name="name"
-            register={register}
-            placeholder="ABC Corporation"
-            variant="standard"
-          />
+          <Input control={control} name="name" placeholder="ABC Corporation" />
         </FormRow>
         <FormRow label="Email Address" required>
-          <TextField
-            name="email"
-            register={register}
-            placeholder="hello@abc.com"
-            variant="standard"
-          />
+          <Input control={control} name="email" placeholder="hello@abc.com" />
         </FormRow>
         <FormRow label="Contact" required>
           <InputWithFormat
@@ -35,16 +24,10 @@ export const GeneralInfo = ({ control, register }: GeneralInfoProps) => {
             name="contact"
             pattern="9999-999-9999"
             placeholder="0925-123-1234"
-            variant="standard"
           />
         </FormRow>
         <FormRow label="Address">
-          <TextField
-            name="address"
-            register={register}
-            placeholder="123 Main Street..."
-            variant="standard"
-          />
+          <Input control={control} name="address" placeholder="123 Main Street..." />
         </FormRow>
       </Stack>
     </>

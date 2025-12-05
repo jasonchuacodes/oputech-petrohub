@@ -49,7 +49,7 @@ export const CustomModal = ({
         <Card
           sx={{
             position: 'absolute',
-            maxWidth: maxWidth ? maxWidth : 720,
+            maxWidth: maxWidth ? maxWidth : 400,
             maxHeight: 720,
             top: '50%',
             left: '50%',

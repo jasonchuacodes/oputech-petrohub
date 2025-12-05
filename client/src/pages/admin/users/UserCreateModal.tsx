@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
-import { TextField, Select, PasswordField } from '~/components/form';
+import { Input, Select, PasswordField } from '~/components/form';
 import { CustomModal } from '~/components/ui';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { UserRole, type UserRole as UserRoleType } from '~/services/user/user.types';
@@ -87,18 +87,18 @@ export const UserCreateModal = ({ open, setOpen }: Props) => {
       onSubmit={onSubmit}
     >
       <Stack spacing={2} justifyContent="start" alignItems="start">
-        <TextField
+        <Input
           required
           fullWidth
-          register={register}
+          control={control}
           name="name"
           label="Name"
           placeholder="John Doe"
         />
-        <TextField
+        <Input
           required
           fullWidth
-          register={register}
+          control={control}
           name="username"
           label="Username"
           placeholder="johndoe123"

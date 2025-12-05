@@ -17,28 +17,15 @@ interface TimePickerProps {
   control: Control<any>;
   name: string;
   label?: string;
-  mode: 'view' | 'edit';
   disabled?: boolean;
 }
 
-export const TimePicker = ({ control, name, label, mode, disabled }: TimePickerProps) => {
+export const TimePicker = ({ control, name, label,  disabled }: TimePickerProps) => {
   return (
     <Controller
       name={name}
       control={control}
       render={({ field: { onChange, value }, fieldState: { error } }) => {
-        if (mode === 'view') {
-          const displayValue = value ? dayjs(value).format('h:mm A') : '-';
-          return (
-            <div>
-              <Typography variant="body2" color="text.secondary" gutterBottom>
-                {label}
-              </Typography>
-              <Typography variant="body1">{displayValue}</Typography>
-            </div>
-          );
-        }
-
         const dayjsValue = value ? dayjs(value) : null;
 
         return (

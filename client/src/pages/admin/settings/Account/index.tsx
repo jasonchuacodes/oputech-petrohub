@@ -10,7 +10,7 @@ import { Controller, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
-import { InputWithFormat, TextField } from '~/components/form';
+import { InputWithFormat, Input } from '~/components/form';
 import { Button, Form } from '~/components/ui';
 import { useAuthContext } from '~/context/auth/useAuthContext';
 import { UpdateUserSchema, type UpdateUserPayload } from '~/schema/updateUserSchema';
@@ -35,7 +35,6 @@ export const AccountSettings = () => {
 
   const {
     control,
-    register,
     handleSubmit,
     reset,
     formState: { isValid },
@@ -104,16 +103,16 @@ export const AccountSettings = () => {
         </Avatar>
 
         <Stack width="100%" spacing={1}>
-          <TextField
+          <Input
             required
-            register={register}
+            control={control}
             name="name"
             label="Full name"
             placeholder="Enter first name"
           />
-          <TextField register={register} name="email" label="Email" placeholder="abc@gmail.com" />
-          <TextField
-            register={register}
+          <Input control={control} name="email" label="Email" placeholder="abc@gmail.com" />
+          <Input
+            control={control}
             name="address"
             label="Address"
             placeholder="123 Main Street, ABC City, ..."

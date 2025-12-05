@@ -1,12 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { VisibilityOutlined, VisibilityOffOutlined } from '@mui/icons-material';
-import { Card, IconButton, List, OutlinedInput, Stack, Typography } from '@mui/material';
-import { useEffect, useRef, useState } from 'react';
+import { Card, List, Stack, Typography } from '@mui/material';
+import { useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
-import { TextField } from '~/components/form';
+import { PasswordField, Input } from '~/components/form';
 import { Button, Form, InfoBox, Link, PageLayout } from '~/components/ui';
 import { PublicRoutes } from '~/routes';
 import { useRegisterUserMutation } from '~/services/auth/auth.queries';
@@ -24,11 +23,8 @@ export const Register = () => {
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const [isShowPassword, setIsShowPassword] = useState(false);
-  const [isShowConfirmPassword, setIsShowConfirmPassword] = useState(false);
-
   const {
-    register,
+    control,
     handleSubmit,
     reset,
     formState: { errors, isValid },
@@ -115,74 +111,36 @@ export const Register = () => {
         <Form onSubmit={handleSubmit(onSubmit)} sx={{ width: '100%' }}>
           <Stack spacing={3}>
             <Stack spacing={1.5}>
-              <TextField
-                register={register}
+              <Input
+                control={control}
                 required
                 name="name"
                 label="Name"
                 placeholder="Enter name"
               />
-              <TextField
-                register={register}
+              <Input
+                control={control}
                 required
                 name="username"
                 label="Username"
                 placeholder="Enter username"
               />
-              <Stack spacing={0.5}>
-                <Typography variant="body2" fontWeight="medium" color="text.secondary">
-                  Password
-                  <Typography component="span" color="error">
-                    {' '}
-                    *
-                  </Typography>
-                </Typography>
-                <OutlinedInput
-                  {...register('password')}
-                  endAdornment={
-                    <IconButton
-                      size="small"
-                      onClick={() => setIsShowPassword(!isShowPassword)}
-                      edge="end"
-                    >
-                      {isShowPassword ? <VisibilityOutlined /> : <VisibilityOffOutlined />}
-                    </IconButton>
-                  }
-                  size="small"
-                  type={isShowPassword ? 'text' : 'password'}
-                  placeholder="Password"
-                  sx={{
-                    fontSize: 'body2.fontSize',
-                  }}
-                />
-              </Stack>
-              <Stack spacing={0.5}>
-                <Typography variant="body2" fontWeight="medium" color="text.secondary">
-                  Confirm Password
-                  <Typography component="span" color="error">
-                    {' '}
-                    *
-                  </Typography>
-                </Typography>
-                <OutlinedInput
-                  {...register('confirmPassword')}
-                  endAdornment={
-                    <IconButton
-                      size="small"
-                      onClick={() => setIsShowConfirmPassword(!isShowConfirmPassword)}
-                      edge="end"
-                    >
-                      {isShowConfirmPassword ? <VisibilityOutlined /> : <VisibilityOffOutlined />}
-                    </IconButton>
-                  }
-                  size="small"
-                  type={isShowConfirmPassword ? 'text' : 'password'}
-                  placeholder="Confirm Password"
-                  sx={{
-                    fontSize: 'body2.fontSize',
-                  }}
-                />
-              </Stack>
+              <PasswordField
+                required
+                control={control}
+                name="password"
+                label="Password"
+                placeholder="Password"
+                randomizer={false}
+              />
+              <PasswordField
+                required
+                control={control}
+                name="confirmPassword"
+                label="Confirm Password"
+                placeholder="Confirm Password"
+                randomizer={false}
+              />
             </Stack>
 
             <InfoBox variant="info" title="Password requirements:">

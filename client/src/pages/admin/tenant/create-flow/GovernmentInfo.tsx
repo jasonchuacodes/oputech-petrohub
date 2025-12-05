@@ -18,7 +18,6 @@ export const GovernmentInfo = ({ control }: GovernmentInfoProps) => {
             pattern="999-999-999-999"
             placeholder="123-456-789-000"
             name="tin"
-            variant="standard"
           />
         </FormRow>
         <FormRow label="SSS">
@@ -27,7 +26,6 @@ export const GovernmentInfo = ({ control }: GovernmentInfoProps) => {
             pattern="99-9999999-9"
             placeholder="12-3456789-0"
             name="sss"
-            variant="standard"
           />
         </FormRow>
         <FormRow label="PAGIBIG">
@@ -36,7 +34,6 @@ export const GovernmentInfo = ({ control }: GovernmentInfoProps) => {
             name="pagibig"
             pattern="99-9999999999-9"
             placeholder="12-3456789012-3"
-            variant="standard"
           />
         </FormRow>
         <FormRow label="PHILHEALTH">
@@ -45,7 +42,6 @@ export const GovernmentInfo = ({ control }: GovernmentInfoProps) => {
             pattern="9999-9999-9999"
             placeholder="1234-5678-9012"
             name="philhealth"
-            variant="standard"
           />
         </FormRow>
       </Stack>

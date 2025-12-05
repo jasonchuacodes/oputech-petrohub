@@ -1,11 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { EditOutlined } from '@mui/icons-material';
-import { alpha, Box, Container, Divider, Stack, Typography } from '@mui/material';
-import { useForm, useWatch } from 'react-hook-form';
+import { Container, Divider, Stack, Typography } from '@mui/material';
+import { useForm } from 'react-hook-form';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import { useParams } from 'react-router-dom';
 
-import { FormRow, InputWithFormat, TextField, TimePicker } from '~/components/form';
+import { FormRow, Input, InputWithFormat, TimePicker } from '~/components/form';
 import { Button, BackButton, Form, PageLayout } from '~/components/ui';
 import { useAuthContext } from '~/context/auth/useAuthContext';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
@@ -13,19 +13,16 @@ import { AdminRoutes } from '~/routes';
 import { useGetUserQuery, useUpdateUserMutation } from '~/services/user/user.queries';
 import { UserRole } from '~/services/user/user.types';
 import { UpdateUserSchema, type UpdateUserPayload } from '~/schema/updateUserSchema';
-import theme from '~/theme';
 import { pathFor } from '~/utils/pathFor';
 import { parseBackendError } from '~/utils/parseBackendError';
 
 import { ResetPasswordModal } from '../ResetPasswordModal';
-import { useParams } from 'react-router-dom';
 
 export const UserDetailPage = () => {
   const { userId } = useParams();
   const { auth } = useAuthContext();
   const { tenantId } = useTenantContext();
 
-  const [mode, setMode] = useState<'view' | 'edit'>('view');
   const [isResetPasswordModalOpen, setIsResetPasswordModalOpen] = useState(false);
 
   const initialValues = {
@@ -43,17 +40,14 @@ export const UserDetailPage = () => {
 
   const {
     control,
-    register,
     handleSubmit,
     reset,
-    formState: { isValid, errors },
+    formState: { isValid, isDirty },
   } = useForm<UpdateUserPayload>({
     defaultValues: initialValues,
     resolver: zodResolver(UpdateUserSchema),
     mode: 'onBlur',
   });
-
-  const { name, address, position } = useWatch({ control });
 
   const { data: user, isLoading: isLoadingUser } = useGetUserQuery({
     tenantId,
@@ -79,8 +73,6 @@ export const UserDetailPage = () => {
     });
   }, [isLoadingUser, user, reset]);
 
-  const handleToggleMode = () => (mode === 'view' ? setMode('edit') : setMode('view'));
-
   const onSubmit = async (data: UpdateUserPayload) => {
     if (!tenantId || !userId) return;
     try {
@@ -92,7 +84,6 @@ export const UserDetailPage = () => {
 
       await updateUser({ data: payload as UpdateUserPayload, tenantId, userId });
 
-      setMode('view');
       toast.success('User updated successfully');
     } catch (err) {
       const parsedError = parseBackendError(err);
@@ -140,52 +131,30 @@ export const UserDetailPage = () => {
                       their profile up to date.
                     </Typography>
                   </Stack>
-                  {mode === 'view' && (
-                    <Button
-                      onClick={handleToggleMode}
-                      variant="contained"
-                      startIcon={<EditOutlined fontSize="small" />}
-                    >
-                      Edit
-                    </Button>
-                  )}
                 </Stack>
                 <Stack width="100%" spacing={1}>
                   <FormRow label="Full Name">
-                    <TextField
-                      register={register}
-                      mode={mode}
-                      value={name}
+                    <Input
+                      required
+                      fullWidth
+                      control={control}
                       name="name"
-                      placeholder="Juan Dela Cruz"
+                      placeholder="John Doe"
                     />
                   </FormRow>
                   <FormRow label="Contact Number">
                     <InputWithFormat
-                      mode={mode}
                       control={control}
                       name="contact"
                       pattern="9999-999-9999"
-                      placeholder="0912-345-6789"
+                      placeholder="0000-000-0000"
                     />
                   </FormRow>
                   <FormRow label="Address">
-                    <TextField
-                      register={register}
-                      mode={mode}
-                      value={address}
-                      name="address"
-                      placeholder="123 Main Street..."
-                    />
+                    <Input control={control} name="address" placeholder="Manila, Philippines" />
                   </FormRow>
                   <FormRow label="Position">
-                    <TextField
-                      register={register}
-                      mode={mode}
-                      value={position}
-                      name="position"
-                      placeholder="Manager"
-                    />
+                    <Input control={control} name="position" placeholder="Operations Manager" />
                   </FormRow>
                 </Stack>
               </Stack>
@@ -209,10 +178,10 @@ export const UserDetailPage = () => {
                     credited.
                   </Typography>
                 </Stack>
-                <Stack alignItems='center' direction='row' width="100%" spacing={2}>
-                    <TimePicker control={control} name="shiftStart" label="Shift Start" mode={mode} />
-                    <Divider sx={{ width: 120}} />
-                    <TimePicker control={control} name="shiftEnd" label="Shift End" mode={mode} />
+                <Stack alignItems="center" direction="row" width="100%" spacing={2}>
+                  <TimePicker control={control} name="shiftStart" label="Shift Start" />
+                  <Divider sx={{ width: 120 }} />
+                  <TimePicker control={control} name="shiftEnd" label="Shift End" />
                 </Stack>
               </Stack>
             )}
@@ -237,38 +206,34 @@ export const UserDetailPage = () => {
               <Stack width="100%" spacing={1}>
                 <FormRow label="TIN">
                   <InputWithFormat
-                    mode={mode}
                     control={control}
                     name="tin"
                     pattern="999-999-999-999"
-                    placeholder="123-456-789-101"
+                    placeholder="000-000-000-000"
                   />
                 </FormRow>
                 <FormRow label="SSS">
                   <InputWithFormat
-                    mode={mode}
                     control={control}
                     name="sss"
                     pattern="99-9999999-9"
-                    placeholder="12-3456789-0"
+                    placeholder="00-0000000-0"
                   />
                 </FormRow>
                 <FormRow label="PAG-IBIG">
                   <InputWithFormat
-                    mode={mode}
                     control={control}
                     name="pagibig"
                     pattern="99-9999999999-9"
-                    placeholder="12-3456789012-3"
+                    placeholder="00-0000000000-0"
                   />
                 </FormRow>
                 <FormRow label="PhilHealth">
                   <InputWithFormat
-                    mode={mode}
                     control={control}
                     name="philhealth"
                     pattern="9999-9999-9999"
-                    placeholder="1234-5678-9012"
+                    placeholder="0000-0000-0000"
                   />
                 </FormRow>
               </Stack>
@@ -305,59 +270,13 @@ export const UserDetailPage = () => {
                 </Stack>
               </Stack>
             )}
-
-            {(errors.name ||
-              errors.address ||
-              errors.position ||
-              errors.contact ||
-              errors.tin ||
-              errors.sss ||
-              errors.pagibig ||
-              errors.philhealth ||
-              errors.birthday ||
-              errors.shiftStart ||
-              errors.shiftEnd) && (
-              <Box
-                sx={{
-                  border: '1px solid',
-                  px: 1,
-                  py: 0.5,
-                  bgcolor: alpha(theme.palette.error.main, 0.2),
-                  borderColor: 'error.light',
-                }}
-              >
-                <Typography fontSize="small" color="error">
-                  {errors.name?.message ||
-                    errors.address?.message ||
-                    errors.position?.message ||
-                    errors.contact?.message ||
-                    errors.tin?.message ||
-                    errors.sss?.message ||
-                    errors.pagibig?.message ||
-                    errors.philhealth?.message ||
-                    errors.birthday?.message ||
-                    errors.shiftStart?.message ||
-                    errors.shiftEnd?.message}
-                </Typography>
-              </Box>
-            )}
           </Stack>
 
-          {mode === 'edit' && (
-            <Stack justifyContent="start" direction="row" spacing={1} my={5}>
-              <Button
-                disabled={!isValid}
-                loading={isUpdatePending}
-                variant="contained"
-                type="submit"
-              >
-                Update User
-              </Button>
-              <Button variant="outlined" onClick={handleToggleMode}>
-                Cancel
-              </Button>
-            </Stack>
-          )}
+          <Stack justifyContent="start" direction="row" spacing={1} my={5}>
+            <Button disabled={!isValid || !isDirty} loading={isUpdatePending} variant="contained" type="submit">
+              Update User
+            </Button>
+          </Stack>
         </Form>
       </Container>
 

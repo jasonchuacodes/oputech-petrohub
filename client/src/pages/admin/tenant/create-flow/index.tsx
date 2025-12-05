@@ -71,7 +71,7 @@ export const CreateTenantFlow = () => {
       case 1:
         return <GovernmentInfo control={control} />;
       case 2:
-        return <OtherInfo register={register} />;
+        return <OtherInfo control={control} />;
 
       default:
         return null;

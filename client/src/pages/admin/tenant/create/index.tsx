@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 
-import { FormRow, InputWithFormat, TextField } from '~/components/form';
+import { FormRow, InputWithFormat, Input } from '~/components/form';
 import { Button, Form, PageLayout } from '~/components/ui';
 import { CreateTenantSchema, type CreateTenantInput } from '~/schema/createTenantSchema';
 import { useCreateTenantMutation } from '~/services/tenant/tenant.queries';
@@ -22,7 +22,6 @@ export const CreateTenantPage = () => {
 
   const {
     control,
-    register,
     formState: { isValid, errors },
     handleSubmit,
     reset,
@@ -102,10 +101,10 @@ export const CreateTenantPage = () => {
                 </Typography>
               </Stack>
               <FormRow label="Name" required>
-                <TextField register={register} name="name" placeholder="ABC Corporation" />
+                <Input control={control} name="name" placeholder="ABC Corporation" />
               </FormRow>
               <FormRow label="Email Address" required>
-                <TextField register={register} name="email" placeholder="hello@abc.com" />
+                <Input control={control} name="email" placeholder="hello@abc.com" />
               </FormRow>
 
               <FormRow label="Contact number" required>
@@ -118,7 +117,7 @@ export const CreateTenantPage = () => {
                 />
               </FormRow>
               <FormRow label="Address">
-                <TextField register={register} name="address" placeholder="123 Main Street..." />
+                <Input control={control} name="address" placeholder="123 Main Street..." />
               </FormRow>
             </Stack>
 
@@ -181,11 +180,11 @@ export const CreateTenantPage = () => {
                   adipisicing elit. Dolore, vitae.
                 </Typography>
               </Stack>
-              <TextField
+              <Input
                 multiline
                 rows={3}
+                control={control}
                 name="description"
-                register={register}
                 placeholder="Add a brief description"
                 sx={{ textarea: { resize: 'vertical' } }}
               />

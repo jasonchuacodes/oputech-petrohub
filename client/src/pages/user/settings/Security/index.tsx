@@ -1,11 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { VisibilityOffOutlined, VisibilityOutlined } from '@mui/icons-material';
-import { Divider, IconButton, List, OutlinedInput, Stack, Typography } from '@mui/material';
-import { useState } from 'react';
+import { Divider, List, Stack, Typography } from '@mui/material';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
+import { PasswordField } from '~/components/form';
 import { Button, Form, InfoBox } from '~/components/ui';
 import { UpdatePasswordSchema, type UpdatePasswordInput } from '~/schema/updatePasswordSchema';
 import { useUpdatePasswordMutation } from '~/services/auth/auth.queries';
@@ -14,13 +13,8 @@ import { parseBackendError } from '~/utils/parseBackendError';
 export const SecuritySettings = () => {
   const navigate = useNavigate();
 
-  const [showPassword, setShowPassword] = useState({
-    oldPassword: false,
-    newPassword: false,
-    confirmPassword: false,
-  });
   const {
-    register,
+    control,
     reset,
     handleSubmit,
     formState: { isValid },
@@ -32,9 +26,6 @@ export const SecuritySettings = () => {
   const { mutate: updatePassword, isPending: isUpdatePasswordPending } =
     useUpdatePasswordMutation();
 
-  const togglePasswordVisibility = (field: keyof typeof showPassword) => {
-    setShowPassword((prev) => ({ ...prev, [field]: !prev[field] }));
-  };
   const handleCancel = () => {
     reset();
     navigate(-1);
@@ -63,55 +54,22 @@ export const SecuritySettings = () => {
       <Form onSubmit={onSubmit}>
         <Stack justifyContent="center" alignItems="center" spacing={2} pb={2}>
           <Stack spacing={1} width="100%">
-            <Stack spacing={0.5}>
-              <Typography fontWeight="bold" color="text.secondary">
-                Old Password
-                <Typography component="span" color="error">
-                  {' '}
-                  *
-                </Typography>
-              </Typography>
-              <OutlinedInput
-                {...register('oldPassword')}
-                size="small"
-                type={showPassword.oldPassword ? 'text' : 'password'}
-                placeholder="Enter your old password"
-                endAdornment={
-                  <IconButton
-                    size="small"
-                    onClick={() => togglePasswordVisibility('oldPassword')}
-                    edge="end"
-                  >
-                    {showPassword.oldPassword ? <VisibilityOutlined /> : <VisibilityOffOutlined />}
-                  </IconButton>
-                }
-              />
-            </Stack>
-
-            <Stack spacing={0.5}>
-              <Typography fontWeight="bold" color="text.secondary">
-                New Password
-                <Typography component="span" color="error">
-                  {' '}
-                  *
-                </Typography>
-              </Typography>
-              <OutlinedInput
-                {...register('newPassword')}
-                size="small"
-                type={showPassword.newPassword ? 'text' : 'password'}
-                placeholder="Enter your new password"
-                endAdornment={
-                  <IconButton
-                    size="small"
-                    onClick={() => togglePasswordVisibility('newPassword')}
-                    edge="end"
-                  >
-                    {showPassword.newPassword ? <VisibilityOutlined /> : <VisibilityOffOutlined />}
-                  </IconButton>
-                }
-              />
-            </Stack>
+            <PasswordField
+              required
+              control={control}
+              name="oldPassword"
+              label="Old Password"
+              placeholder="Enter your old password"
+              randomizer={false}
+            />
+            <PasswordField
+              required
+              control={control}
+              name="newPassword"
+              label="New Password"
+              placeholder="Enter your new password"
+              randomizer={false}
+            />
             <InfoBox variant="info" title="Password requirements:">
               <List sx={{ listStyleType: 'disc', pl: 3, m: 0 }}>
                 {[
@@ -127,34 +85,14 @@ export const SecuritySettings = () => {
                 ))}
               </List>
             </InfoBox>
-            <Stack spacing={0.5}>
-              <Typography fontWeight="bold" color="text.secondary">
-                Confirm Password
-                <Typography component="span" color="error">
-                  {' '}
-                  *
-                </Typography>
-              </Typography>
-              <OutlinedInput
-                {...register('confirmPassword')}
-                size="small"
-                type={showPassword.confirmPassword ? 'text' : 'password'}
-                placeholder="Enter you confirm new password"
-                endAdornment={
-                  <IconButton
-                    size="small"
-                    onClick={() => togglePasswordVisibility('confirmPassword')}
-                    edge="end"
-                  >
-                    {showPassword.confirmPassword ? (
-                      <VisibilityOutlined />
-                    ) : (
-                      <VisibilityOffOutlined />
-                    )}
-                  </IconButton>
-                }
-              />
-            </Stack>
+            <PasswordField
+              required
+              control={control}
+              name="confirmPassword"
+              label="Confirm Password"
+              placeholder="Enter you confirm new password"
+              randomizer={false}
+            />
           </Stack>
 
           <Divider sx={{ width: '100%' }} />

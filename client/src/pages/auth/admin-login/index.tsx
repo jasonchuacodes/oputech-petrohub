@@ -1,11 +1,10 @@
-import { alpha, Box, IconButton, OutlinedInput, Stack, Typography } from '@mui/material';
-import { VisibilityOffOutlined, VisibilityOutlined } from '@mui/icons-material';
+import { alpha, Box, Stack, Typography } from '@mui/material';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 
-import { TextField } from '~/components/form';
+import { PasswordField, Input } from '~/components/form';
 import { LoginLayout } from '~/components/layouts';
 import { Button, Form, Link } from '~/components/ui';
 import { useAuthContext } from '~/context/auth/useAuthContext';
@@ -18,11 +17,10 @@ export const LoginAdmin = () => {
   const { auth, loading, refetch: refetchAuth } = useAuthContext();
   const navigate = useNavigate();
 
-  const [isShowPassword, setIsShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const {
-    register,
+    control,
     handleSubmit,
     reset,
     formState: { errors, isValid },
@@ -103,34 +101,19 @@ export const LoginAdmin = () => {
                   </Typography>
                 </Box>
               )}
-              <TextField
-                register={register}
+              <Input
+                control={control}
                 name="username"
                 label="Username"
                 placeholder="Enter username"
-                sx={{ fontSize: 'body2.fontSize' }}
               />
-              <Stack spacing={0.5}>
-                <Typography variant="body2" fontWeight="medium" color="text.secondary">
-                  Password
-                </Typography>
-                <OutlinedInput
-                  {...register('password')}
-                  endAdornment={
-                    <IconButton
-                      size="small"
-                      onClick={() => setIsShowPassword(!isShowPassword)}
-                      edge="end"
-                    >
-                      {isShowPassword ? <VisibilityOutlined /> : <VisibilityOffOutlined />}
-                    </IconButton>
-                  }
-                  size="small"
-                  type={isShowPassword ? 'text' : 'password'}
-                  placeholder="Enter Password"
-                  sx={{ fontSize: 'body2.fontSize' }}
-                />
-              </Stack>
+              <PasswordField
+                control={control}
+                name="password"
+                label="Password"
+                placeholder="Enter Password"
+                randomizer={false}
+              />
               <Link
                 to="/forgot-password"
                 alignSelf="flex-end"

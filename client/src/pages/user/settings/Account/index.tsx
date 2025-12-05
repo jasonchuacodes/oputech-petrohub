@@ -10,7 +10,7 @@ import { Controller, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
-import { InputWithFormat, TextField } from '~/components/form';
+import { InputWithFormat, Input } from '~/components/form';
 import { Button, Form } from '~/components/ui';
 import { useAuthContext } from '~/context/auth/useAuthContext';
 import { UpdateUserSchema, type UpdateUserPayload } from '~/schema/updateUserSchema';
@@ -39,7 +39,6 @@ export const AccountSettings = () => {
 
   const {
     control,
-    register,
     handleSubmit,
     reset,
     formState: { isValid },
@@ -86,7 +85,7 @@ export const AccountSettings = () => {
       queryClient.invalidateQueries({
         queryKey: ['auth'],
       });
-      
+
       toast.success('User updated successfully');
     } catch (err) {
       const parsedError = parseBackendError(err);
@@ -101,7 +100,7 @@ export const AccountSettings = () => {
           <Typography fontWeight="bold" color="text.secondary">
             Personal Information:
           </Typography>
-          <Typography variant="subtitle2" color="text.secondary">
+          <Typography variant="body2" color="text.secondary">
             Manage your basic account information here.
           </Typography>
         </Stack>
@@ -112,16 +111,16 @@ export const AccountSettings = () => {
         </Avatar>
 
         <Stack width="100%" spacing={1}>
-          <TextField
+          <Input
             required
-            register={register}
+            control={control}
             name="name"
             label="Full name"
             placeholder="Enter first name"
           />
-          <TextField register={register} name="email" label="Email" placeholder="abc@gmail.com" />
-          <TextField
-            register={register}
+          <Input control={control} name="email" label="Email" placeholder="abc@gmail.com" />
+          <Input
+            control={control}
             name="address"
             label="Address"
             placeholder="123 Main Street, ABC City, ..."
@@ -139,7 +138,7 @@ export const AccountSettings = () => {
               name="birthday"
               render={({ field: { value, onChange } }) => (
                 <Stack spacing={0.5}>
-                  <Typography fontWeight="bold" color="text.secondary">
+                  <Typography variant="body2" fontWeight="medium" color="text.secondary">
                     Birthday
                   </Typography>
                   <DatePicker
@@ -168,7 +167,7 @@ export const AccountSettings = () => {
             <Typography fontWeight="bold" color="text.secondary">
               Government Information:
             </Typography>
-            <Typography variant="subtitle2" color="text.secondary">
+            <Typography variant="body2" color="text.secondary">
               Government-issued identification numbers linked to the user for verification and
               record-keeping.
             </Typography>
