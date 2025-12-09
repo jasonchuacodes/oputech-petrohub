@@ -1,11 +1,10 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { deleteNotification, getNotifications, markAsRead } from './notification.api';
-import type { NotificationStatus } from './notification.types';
 
-const useGetNotificationsQuery = (status?: NotificationStatus) => {
+const useGetNotificationsQuery = () => {
   return useQuery({
-    queryKey: ['notifications', status],
-    queryFn: () => getNotifications(status),
+    queryKey: ['notifications'],
+    queryFn: () => getNotifications(),
   });
 };
 
