@@ -8,6 +8,7 @@ import tenantRoutes from './modules/tenant/routes';
 import dashboardRoutes from './modules/dashboard/routes';
 import timesheetRoutes from './modules/timesheet/routes';
 import notificationRoutes from './modules/notification/routes';
+import pusherRoutes from './modules/pusher/routes';
 import { corsMiddleware } from './middlewares/corsMiddleware';
 
 const app = express();
@@ -22,6 +23,7 @@ app.use('/tenants', tenantRoutes);
 app.use('/timesheets', timesheetRoutes);
 app.use('/dashboard', dashboardRoutes);
 app.use('/notifications', notificationRoutes);
+app.use('/pusher', pusherRoutes);
 app.use(errorHandler);
 
 export { app };
