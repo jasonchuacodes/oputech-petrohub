@@ -24,7 +24,7 @@ export const NotificationMenu = () => {
 
   const isOpen = Boolean(anchorEl);
 
-  const { data: notificationsData, refetch } = useGetNotificationsQuery();
+  const { data: notificationsData } = useGetNotificationsQuery();
   const { mutate: markAsRead } = useMarkAsReadMutation();
   const { mutate: deleteNotif } = useDeleteNotificationMutation();
 
@@ -33,7 +33,6 @@ export const NotificationMenu = () => {
 
   const handleOpen = (e: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(e.currentTarget);
-    refetch();
   };
 
   const handleClose = () => setAnchorEl(null);
