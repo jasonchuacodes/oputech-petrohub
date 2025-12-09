@@ -6,19 +6,20 @@ import { Controller, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import { CustomModal } from '~/components/ui';
+import { useTimesheetLogContext } from '~/context/timesheetLog';
 import { UpdateTimesheetSchema, type UpdateTimesheetParams } from '~/schema/updateTimesheetSchema';
 import { useUpdateTimesheetMutation } from '~/services/timesheet/timesheet.queries';
-import { TimesheetEntryActionEnum, type Timesheet } from '~/services/timesheet/timesheet.types';
+import { TimesheetEntryActionEnum } from '~/services/timesheet/timesheet.types';
 import { parseBackendError } from '~/utils/parseBackendError';
 
 type EditTimesheetModalProps = {
   open: boolean;
   onClose: () => void;
-  timesheet: Timesheet;
 };
 
-export const EditTimesheetModal = ({ open, onClose, timesheet }: EditTimesheetModalProps) => {
-  const { id: timesheetId, createdAt, entries, totalHours } = timesheet;
+export const EditTimesheetModal = ({ open, onClose }: EditTimesheetModalProps) => {
+  const { timesheetLog } = useTimesheetLogContext();
+  const { id: timesheetId, createdAt, entries, totalHours } = timesheetLog;
 
   const firstCheckIn = entries.find((e) => e.action === TimesheetEntryActionEnum.CHECK_IN);
   const lastCheckOut = [...entries]

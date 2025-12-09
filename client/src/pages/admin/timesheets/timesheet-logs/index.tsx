@@ -1,7 +1,18 @@
-import { Typography, Container, Stack, Divider, Box } from '@mui/material';
-import { Dayjs } from 'dayjs';
-import { useEffect, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { FileDownloadOutlined } from '@mui/icons-material';
+import {
+  Box,
+  Container,
+  Divider,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+} from '@mui/material';
+import { useParams, useNavigate } from 'react-router-dom';
 
 import {
   BackButton,
@@ -9,30 +20,25 @@ import {
   DateRangePicker,
   LoadingSpinner,
   NoData,
-  PageLayout,
+  Paper,
   type DateRange,
 } from '~/components/ui';
-import { pathFor } from '~/utils/pathFor';
-import { AdminRoutes } from '~/routes';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
-import { FileDownloadOutlined } from '@mui/icons-material';
-import { useGetUserTimesheetsQuery } from '~/services/timesheet/timesheet.queries';
+import { useTimesheetContext } from '~/context/timesheet/useTimesheetContext';
+import { TimesheetLogProvider } from '~/context/timesheetLog';
+import { AdminRoutes } from '~/routes';
 import { useGetUserQuery } from '~/services/user/user.queries';
-import { getInitialDateRange } from '~/utils/date';
+import { useGetUserTimesheetsQuery } from '~/services/timesheet/timesheet.queries';
+import { pathFor } from '~/utils/pathFor';
 
-import { TimesheetLogsTable } from '../../timesheets/timesheet-logs/TimesheetLogsTable';
 import { UserHeader } from './UserHeader';
+import { TimesheetRow } from './TimesheetRow';
 
-const TIMESHEETS_KEY = 'timesheetRange';
-
-export const TimesheetLogsPage = () => {
+export const TimesheetLogs = () => {
   const { userId } = useParams();
+  const navigate = useNavigate();
   const { tenantId } = useTenantContext();
-
-  const initialRange = useMemo(() => getInitialDateRange(TIMESHEETS_KEY), []);
-
-  const [startDate, setStartDate] = useState<Dayjs | null>(initialRange.startDate);
-  const [endDate, setEndDate] = useState<Dayjs | null>(initialRange.endDate);
+  const { startDate, endDate, setStartDate, setEndDate } = useTimesheetContext();
 
   const { data: user, isLoading: isLoadingUser } = useGetUserQuery({
     userId,
@@ -58,67 +64,92 @@ export const TimesheetLogsPage = () => {
     }
   };
 
-  useEffect(() => {
-    if (startDate && endDate) {
-      sessionStorage.setItem(
-        TIMESHEETS_KEY,
-        JSON.stringify({
-          start: startDate.utc().toISOString(),
-          end: endDate.utc().toISOString(),
-        }),
-      );
-    }
-  }, [startDate, endDate]);
+  const handleGoBack = () => {
+    navigate(
+      pathFor({
+        pathname: AdminRoutes.TenantTimesheets,
+        params: { tenantId },
+      }),
+    );
+  };
+
+  if (!userId) {
+    return null;
+  }
 
   return (
-    <PageLayout p={3}>
-      <Container maxWidth="md" disableGutters>
-        <Stack spacing={3} justifyContent="start" alignItems="stretch">
-          <BackButton
-            text="Go back"
-            to={pathFor({
-              pathname: AdminRoutes.TenantTimesheets,
-              params: { tenantId },
-            })}
-          />
+    <Container maxWidth="md" disableGutters>
+      <Stack spacing={3} justifyContent="start" alignItems="stretch">
+        <BackButton
+          text="Go back"
+          onClick={handleGoBack}
+          to={pathFor({
+            pathname: AdminRoutes.TenantTimesheets,
+            params: { tenantId },
+          })}
+        />
 
-          <Typography variant="h6" fontWeight="bold">
-            Timesheet Logs
-          </Typography>
+        <Typography variant="h6" fontWeight="bold">
+          Timesheet Logs
+        </Typography>
 
-          <Stack direction="row" justifyContent="space-between" alignItems="center">
-            <UserHeader user={user} isLoading={isLoadingUser} />
-          </Stack>
-
-          <Divider />
-
-          <Stack direction="row" alignItems="end" justifyContent="space-between">
-            <DateRangePicker
-              onAccept={handleSelectDateRange}
-              selectedStart={startDate}
-              selectedEnd={endDate}
-            />
-            <Button
-              startIcon={<FileDownloadOutlined />}
-              onClick={() => null}
-              variant="contained"
-              sx={{ height: 40, flexShrink: 0 }}
-            >
-              Export
-            </Button>
-          </Stack>
-
-          {isLoading ? (
-            <Box display="flex" justifyContent="center" alignItems="center" pt={10}>
-              <LoadingSpinner />
-            </Box>
-          ) : timesheetLogs && timesheetLogs.length > 0 ? (
-            <TimesheetLogsTable timesheets={timesheetLogs} />
-          ) : (
-            <NoData text="No timesheets data available." />
-          )}
+        <Stack direction="row" justifyContent="space-between" alignItems="center">
+          <UserHeader user={user} isLoading={isLoadingUser} />
         </Stack>
-      </Container>
-    </PageLayout>
+
+        <Divider />
+
+        <Stack direction="row" alignItems="end" justifyContent="space-between">
+          <DateRangePicker
+            onAccept={handleSelectDateRange}
+            selectedStart={startDate}
+            selectedEnd={endDate}
+          />
+          <Button
+            startIcon={<FileDownloadOutlined />}
+            onClick={() => null}
+            variant="contained"
+            sx={{ height: 40, flexShrink: 0 }}
+          >
+            Export
+          </Button>
+        </Stack>
+
+        {isLoading ? (
+          <Box display="flex" justifyContent="center" alignItems="center" pt={10}>
+            <LoadingSpinner />
+          </Box>
+        ) : timesheetLogs && timesheetLogs.length > 0 ? (
+          <TableContainer component={Paper} sx={{ border: '1px solid', borderColor: 'divider' }}>
+            <Table sx={{ minWidth: 650 }}>
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={{ maxWidth: 240 }}>Date</TableCell>
+                  <TableCell align="left">Check In</TableCell>
+                  <TableCell align="left">Check Out</TableCell>
+                  <TableCell align="left" sx={{ width: 256 }}>
+                    Total Hours
+                  </TableCell>
+                  <TableCell align="left" sx={{ width: 120 }}>
+                    Actions
+                  </TableCell>
+                  <TableCell />
+                </TableRow>
+              </TableHead>
+
+              <TableBody>
+                {timesheetLogs.map((timesheet) => (
+                  <TimesheetLogProvider key={timesheet.id} timesheetLog={timesheet}>
+                    <TimesheetRow />
+                  </TimesheetLogProvider>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        ) : (
+          <NoData text="No timesheets data available." />
+        )}
+      </Stack>
+    </Container>
   );
 };

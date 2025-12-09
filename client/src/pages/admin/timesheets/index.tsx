@@ -20,7 +20,7 @@ import { useTimesheetContext } from '~/context/timesheet/useTimesheetContext';
 import { useGetAllTimesheetsQuery } from '~/services/timesheet/timesheet.queries';
 
 import { TimesheetTable } from './TimesheetTable';
-import { TimesheetLogsView } from './TimesheetLogsView';
+import { TimesheetLogs } from './timesheet-logs';
 
 dayjs.extend(weekday);
 dayjs.extend(utc);
@@ -70,7 +70,7 @@ const TimesheetsPageContent = () => {
   return (
     <PageLayout p={3}>
       {userId ? (
-        <TimesheetLogsView />
+        <TimesheetLogs />
       ) : (
         <Container maxWidth="lg" disableGutters>
           <Stack spacing={2}>
