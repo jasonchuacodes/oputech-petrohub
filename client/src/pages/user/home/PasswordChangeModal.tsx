@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { List, Stack, Typography } from '@mui/material';
+import { useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
@@ -18,6 +19,8 @@ type PasswordChangeModalProps = {
 };
 
 export const PasswordChangeModal = ({ open, onClose }: PasswordChangeModalProps) => {
+  const queryClient = useQueryClient();
+
   const {
     control,
     reset,
@@ -35,6 +38,7 @@ export const PasswordChangeModal = ({ open, onClose }: PasswordChangeModalProps)
     updatePassword(data, {
       onSuccess: () => {
         toast.success('Password updated successfully.');
+        queryClient.invalidateQueries({ queryKey: ['auth'] });
         onClose();
         reset();
 

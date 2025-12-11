@@ -87,6 +87,15 @@ export const UserDetailPage = () => {
       await updateUser({ data: payload as UpdateUserPayload, tenantId, userId });
 
       toast.success('User updated successfully');
+
+      navigate(
+        pathFor({
+          pathname: AdminRoutes.TenantUsers,
+          params: {
+            tenantId,
+          },
+        }),
+      );
     } catch (err) {
       const parsedError = parseBackendError(err);
       toast.error(`Failed to update user: ${parsedError}`);
