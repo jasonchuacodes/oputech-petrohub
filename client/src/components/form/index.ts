@@ -4,4 +4,5 @@ export * from './InputWithFormat';
 export * from './PasswordField';
 export * from './SearchInput';
 export * from './Select';
+export * from './ShiftSelect';
 export * from './TimePicker';

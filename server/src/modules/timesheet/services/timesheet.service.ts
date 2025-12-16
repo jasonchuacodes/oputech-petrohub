@@ -195,7 +195,9 @@ const getUserTimesheetStatus = async (userId: string, tenantId: string) => {
       },
     },
     select: {
-      shiftStart: true,
+      shift: {
+        select: { shiftStart: true },
+      },
       user: {
         select: { id: true, name: true, email: true, role: true },
       },
@@ -235,8 +237,8 @@ const getUserTimesheetStatus = async (userId: string, tenantId: string) => {
 
   let notes = null;
 
-  if (tenantUser.shiftStart) {
-    const expectedCheckIn = applyTimeToDate(tenantUser.shiftStart, now);
+  if (tenantUser.shift?.shiftStart) {
+    const expectedCheckIn = applyTimeToDate(tenantUser.shift.shiftStart, now);
     expectedCheckIn.setMinutes(expectedCheckIn.getMinutes() + 15);
 
     if (!checkIn && now > expectedCheckIn) {
@@ -250,7 +252,7 @@ const getUserTimesheetStatus = async (userId: string, tenantId: string) => {
     checkIn: checkIn?.toISOString() || null,
     checkOut: checkOut?.toISOString() || null,
     notes,
-    shiftStart: tenantUser.shiftStart?.toISOString() || null,
+    shiftStart: tenantUser.shift?.shiftStart?.toISOString() || null,
   };
 };
 
@@ -270,8 +272,9 @@ const getDailyTimesheets = async (tenantId: string) => {
         },
         select: {
           userId: true,
-          shiftStart: true,
-          shiftEnd: true,
+          shift: {
+            select: { shiftStart: true },
+          },
           user: {
             select: { id: true, name: true, email: true, role: true },
           },
@@ -301,7 +304,7 @@ const getDailyTimesheets = async (tenantId: string) => {
 
   const timesheetMap = new Map(todayTimesheets.map((ts) => [ts.userId, ts.entries]));
 
-  const usersWithTimesheet = tenantWithUsers.users.map(({ user, shiftStart }) => {
+  const usersWithTimesheet = tenantWithUsers.users.map(({ user, shift }) => {
     const entries = timesheetMap.get(user.id) || [];
 
     const checkInEntry = entries.find((e) => e.action === TimesheetEntryAction.CHECK_IN);
@@ -316,8 +319,8 @@ const getDailyTimesheets = async (tenantId: string) => {
 
     let notes = null;
 
-    if (shiftStart) {
-      const expectedCheckIn = applyTimeToDate(shiftStart, now);
+    if (shift?.shiftStart) {
+      const expectedCheckIn = applyTimeToDate(shift.shiftStart, now);
       expectedCheckIn.setMinutes(expectedCheckIn.getMinutes() + 15);
 
       if (!checkIn && now > expectedCheckIn) {
@@ -331,7 +334,7 @@ const getDailyTimesheets = async (tenantId: string) => {
       checkIn: checkIn?.toISOString() || null,
       checkOut: checkOut?.toISOString() || null,
       notes,
-      shiftStart: shiftStart?.toISOString() || null,
+      shiftStart: shift?.shiftStart?.toISOString() || null,
     };
   });
 
@@ -456,8 +459,12 @@ const checkOut = async (userId: string) => {
       tenants: {
         where: { tenantId: timesheet.tenantId },
         select: {
-          shiftStart: true,
-          shiftEnd: true,
+          shift: {
+            select: {
+              shiftStart: true,
+              shiftEnd: true,
+            },
+          },
         },
       },
     },
@@ -465,8 +472,8 @@ const checkOut = async (userId: string) => {
 
   const hasShiftSchedule =
     userWithShift?.role === 'USER' &&
-    userWithShift.tenants[0]?.shiftStart &&
-    userWithShift.tenants[0]?.shiftEnd;
+    userWithShift.tenants[0]?.shift?.shiftStart &&
+    userWithShift.tenants[0]?.shift?.shiftEnd;
 
   let sessionHours: number;
   let hoursCap: number;
@@ -474,8 +481,8 @@ const checkOut = async (userId: string) => {
   if (hasShiftSchedule) {
     const result = calculateShiftBasedHours(
       {
-        shiftStart: userWithShift.tenants[0].shiftStart!,
-        shiftEnd: userWithShift.tenants[0].shiftEnd!,
+        shiftStart: userWithShift.tenants[0].shift!.shiftStart,
+        shiftEnd: userWithShift.tenants[0].shift!.shiftEnd,
       },
       {
         checkIn: lastEntry.timestamp,

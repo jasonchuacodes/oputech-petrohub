@@ -75,15 +75,16 @@ const getUserById = async (id: string, tenantId?: string) => {
         },
       },
       select: {
-        shiftStart: true,
-        shiftEnd: true,
+        shift: true,
       },
     });
 
-    if (tenantUser?.shiftStart && tenantUser?.shiftEnd) {
+    if (tenantUser?.shift) {
       shiftSchedule = {
-        shiftStart: tenantUser.shiftStart,
-        shiftEnd: tenantUser.shiftEnd,
+        shiftId: tenantUser.shift.id,
+        shiftName: tenantUser.shift.name,
+        shiftStart: tenantUser.shift.shiftStart,
+        shiftEnd: tenantUser.shift.shiftEnd,
       };
     }
   }
@@ -100,9 +101,8 @@ const updateUser = async (id: string, data: UpdateUserPayload, tenantId?: string
     throw new NotFoundError('User not found');
   }
 
-  const { shiftStart, shiftEnd, ...userData } = data as UpdateUserPayload & {
-    shiftStart?: string;
-    shiftEnd?: string;
+  const { shiftId, ...userData } = data as UpdateUserPayload & {
+    shiftId?: string | null;
   };
 
   const updatedUser = await prisma.user.update({
@@ -110,7 +110,7 @@ const updateUser = async (id: string, data: UpdateUserPayload, tenantId?: string
     data: userData,
   });
 
-  if (tenantId && (shiftStart !== undefined || shiftEnd !== undefined)) {
+  if (tenantId && shiftId !== undefined) {
     await prisma.tenantsOnUsers.update({
       where: {
         userId_tenantId: {
@@ -119,10 +119,7 @@ const updateUser = async (id: string, data: UpdateUserPayload, tenantId?: string
         },
       },
       data: {
-        ...(shiftStart !== undefined && {
-          shiftStart: shiftStart ? new Date(shiftStart) : null,
-        }),
-        ...(shiftEnd !== undefined && { shiftEnd: shiftEnd ? new Date(shiftEnd) : null }),
+        shiftId: shiftId || null,
       },
     });
   }

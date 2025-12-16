@@ -5,13 +5,14 @@ import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import { Input, InputWithFormat, TimePicker } from '~/components/form';
+import { Input, InputWithFormat, ShiftSelect } from '~/components/form';
 import { Button, BackButton, Form, PageLayout } from '~/components/ui';
 import { useAuthContext } from '~/context/auth/useAuthContext';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { AdminRoutes } from '~/routes';
 import { useGetUserQuery, useUpdateUserMutation } from '~/services/user/user.queries';
 import { UserRole } from '~/services/user/user.types';
+import { useGetShiftsQuery } from '~/services/shift/shift.queries';
 import { UpdateUserSchema, type UpdateUserPayload } from '~/schema/updateUserSchema';
 import { pathFor } from '~/utils/pathFor';
 import { parseBackendError } from '~/utils/parseBackendError';
@@ -36,8 +37,7 @@ export const UserDetailPage = () => {
     philhealth: null,
     sss: null,
     tin: null,
-    shiftStart: null,
-    shiftEnd: null,
+    shiftId: null,
   };
 
   const {
@@ -56,6 +56,8 @@ export const UserDetailPage = () => {
     userId,
   });
 
+  const { data: shifts } = useGetShiftsQuery(tenantId);
+
   const { mutateAsync: updateUser, isPending: isUpdatePending } = useUpdateUserMutation();
 
   useEffect(() => {
@@ -70,8 +72,7 @@ export const UserDetailPage = () => {
       philhealth: user?.philhealth ?? null,
       sss: user?.sss ?? null,
       tin: user?.tin ?? null,
-      shiftStart: user?.shiftSchedule?.shiftStart ? new Date(user.shiftSchedule.shiftStart) : null,
-      shiftEnd: user?.shiftSchedule?.shiftEnd ? new Date(user.shiftSchedule.shiftEnd) : null,
+      shiftId: user?.shiftSchedule?.shiftId ?? null,
     });
   }, [isLoadingUser, user, reset]);
 
@@ -80,8 +81,7 @@ export const UserDetailPage = () => {
     try {
       const payload = {
         ...data,
-        shiftStart: data.shiftStart ? data.shiftStart.toISOString() : null,
-        shiftEnd: data.shiftEnd ? data.shiftEnd.toISOString() : null,
+        shiftId: data.shiftId || null,
       };
 
       await updateUser({ data: payload as UpdateUserPayload, tenantId, userId });
@@ -178,24 +178,16 @@ export const UserDetailPage = () => {
                         Shift Schedule
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        Define work shift hours for this user
+                        Assign work shift for this user
                       </Typography>
                     </Grid>
                     <Grid sx={{ xs: 12, md: 8 }}>
-                      <Stack spacing={1}>
-                        <Stack spacing={0.5}>
-                          <Typography variant="body2" fontWeight="medium">
-                            Shift Start
-                          </Typography>
-                          <TimePicker control={control} name="shiftStart" label="" />
-                        </Stack>
-                        <Stack spacing={0.5}>
-                          <Typography variant="body2" fontWeight="medium">
-                            Shift End
-                          </Typography>
-                          <TimePicker control={control} name="shiftEnd" label="" />
-                        </Stack>
-                      </Stack>
+                      <ShiftSelect
+                        control={control}
+                        name="shiftId"
+                        label="Shift"
+                        shifts={shifts || []}
+                      />
                     </Grid>
                   </Grid>
                   <Divider />

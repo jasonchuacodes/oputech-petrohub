@@ -4,6 +4,7 @@ import {
   GroupOutlined,
   HomeOutlined,
   KeyboardDoubleArrowRightOutlined,
+  ScheduleOutlined,
 } from '@mui/icons-material';
 import {
   alpha,
@@ -62,6 +63,15 @@ const Sidebar = () => {
       icon: CalendarTodayOutlined,
       to: pathFor({
         pathname: AdminRoutes.TenantTimesheets,
+        params: { tenantId },
+      }),
+    },
+    {
+      label: 'Shifts',
+      disabled: false,
+      icon: ScheduleOutlined,
+      to: pathFor({
+        pathname: AdminRoutes.TenantShifts,
         params: { tenantId },
       }),
     },

@@ -33,6 +33,8 @@ export type User = {
   pagibig?: string;
 
   shiftSchedule?: {
+    shiftId: string;
+    shiftName: string;
     shiftStart: Date;
     shiftEnd: Date;
   } | null;

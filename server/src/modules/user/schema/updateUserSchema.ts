@@ -41,23 +41,8 @@ export const UpdateUserSchema = z
       .regex(/^\d{12}$/, { message: 'PhilHealth number must be 12 digits' })
       .optional()
       .nullable(),
-    shiftStart: z.string().datetime().optional().nullable(),
-    shiftEnd: z.string().datetime().optional().nullable(),
-  })
-  .refine(
-    (data) => {
-      if (data.shiftStart && data.shiftEnd) {
-        const start = new Date(data.shiftStart);
-        const end = new Date(data.shiftEnd);
-        return end > start;
-      }
-      return true;
-    },
-    {
-      message: 'Shift end time must be after shift start time',
-      path: ['shiftEnd'],
-    },
-  );
+    shiftId: z.string().uuid().optional().nullable(),
+  });
 
 export type UpdateUserInput = z.infer<typeof UpdateUserSchema>;
 export type UpdateUserPayload = Omit<UpdateUserInput, 'role'>;
