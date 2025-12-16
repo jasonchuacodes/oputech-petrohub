@@ -1,4 +1,4 @@
-import { Palette, PaletteOptions } from '@mui/material/styles';
+import { Palette, PaletteOptions, PaletteColor, SimplePaletteColorOptions } from '@mui/material/styles';
 
 declare module '@mui/material/styles' {
   interface TypeBackground {
@@ -11,5 +11,13 @@ declare module '@mui/material/styles' {
 
   interface PaletteOptions {
     background?: Partial<TypeBackground>;
+  }
+
+  interface PaletteColor {
+    alpha?: string;
+  }
+
+  interface SimplePaletteColorOptions {
+    alpha?: string;
   }
 }

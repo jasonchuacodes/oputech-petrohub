@@ -1,20 +1,21 @@
 import {
   AssessmentOutlined,
   CalendarTodayOutlined,
+  DashboardOutlined,
   GroupOutlined,
-  HomeOutlined,
-  KeyboardDoubleArrowRightOutlined,
+  HelpOutlineOutlined,
+  PaymentsOutlined,
   ScheduleOutlined,
+  WarningAmberOutlined,
 } from '@mui/icons-material';
 import {
-  alpha,
   Icon,
-  IconButton,
   List,
   ListItem,
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  ListSubheader,
   Stack,
 } from '@mui/material';
 import { useState, type ComponentType } from 'react';
@@ -22,8 +23,9 @@ import { useNavigate } from 'react-router-dom';
 
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { AdminRoutes } from '~/routes';
-import theme from '~/theme';
 import { pathFor } from '~/utils/pathFor';
+
+import { Toggler } from './Toggler';
 
 export type NavItem = {
   disabled: boolean;
@@ -32,57 +34,95 @@ export type NavItem = {
   to: string;
 };
 
+type NavGroup = {
+  label: string;
+  items: NavItem[];
+};
+
 const Sidebar = () => {
   const navigate = useNavigate();
   const { tenantId } = useTenantContext();
 
   const [open, setOpen] = useState(true);
 
-  const navItems: NavItem[] = [
+  const navGroups: NavGroup[] = [
     {
-      label: 'Home',
-      disabled: false,
-      icon: HomeOutlined,
-      to: pathFor({
-        pathname: AdminRoutes.TenantHome,
-        params: { tenantId },
-      }),
+      label: 'Overview',
+      items: [
+        {
+          label: 'Dashboard',
+          disabled: false,
+          icon: DashboardOutlined,
+          to: pathFor({
+            pathname: AdminRoutes.TenantHome,
+            params: { tenantId },
+          }),
+        },
+        {
+          label: 'Reports',
+          disabled: true,
+          icon: AssessmentOutlined,
+          to: pathFor({
+            pathname: AdminRoutes.TenantReports,
+            params: { tenantId },
+          }),
+        },
+        {
+          label: 'Timesheets',
+          disabled: false,
+          icon: CalendarTodayOutlined,
+          to: pathFor({
+            pathname: AdminRoutes.TenantTimesheets,
+            params: { tenantId },
+          }),
+        },
+        {
+          label: 'Payroll',
+          disabled: true,
+          icon: PaymentsOutlined,
+          to: '#',
+        },
+      ],
     },
     {
-      label: 'Reports',
-      disabled: true,
-      icon: AssessmentOutlined,
-      to: pathFor({
-        pathname: AdminRoutes.TenantReports,
-        params: { tenantId },
-      }),
+      label: 'Management',
+      items: [
+        {
+          label: 'Users',
+          disabled: false,
+          icon: GroupOutlined,
+          to: pathFor({
+            pathname: AdminRoutes.TenantUsers,
+            params: { tenantId },
+          }),
+        },
+        {
+          label: 'Shift Schedules',
+          disabled: false,
+          icon: ScheduleOutlined,
+          to: pathFor({
+            pathname: AdminRoutes.TenantShifts,
+            params: { tenantId },
+          }),
+        },
+      ],
     },
     {
-      label: 'Timesheets',
-      disabled: false,
-      icon: CalendarTodayOutlined,
-      to: pathFor({
-        pathname: AdminRoutes.TenantTimesheets,
-        params: { tenantId },
-      }),
-    },
-    {
-      label: 'Shifts',
-      disabled: false,
-      icon: ScheduleOutlined,
-      to: pathFor({
-        pathname: AdminRoutes.TenantShifts,
-        params: { tenantId },
-      }),
-    },
-    {
-      label: 'Users',
-      disabled: false,
-      icon: GroupOutlined,
-      to: pathFor({
-        pathname: AdminRoutes.TenantUsers,
-        params: { tenantId },
-      }),
+      label: 'Other',
+      items: [
+        {
+          label: 'Issues',
+          disabled: true,
+          icon: WarningAmberOutlined,
+          to: '#',
+        },
+        {
+          label: 'Help & Support',
+          disabled: true,
+          icon: HelpOutlineOutlined,
+          to: '#',
+        },
+      ],
     },
   ];
 
@@ -92,83 +132,90 @@ const Sidebar = () => {
 
   return (
     <Stack
+      position="relative"
       justifyContent="space-between"
       role="presentation"
-      width={open ? 240 : 52}
-      bgcolor="primary.light"
+      width={open ? 256 : 56}
+      bgcolor="primary.main"
       color="primary.contrastText"
-      position="relative"
       sx={{
         transition: '0.3s ease',
       }}
     >
       <List>
-        {navItems.map(({ disabled, icon, label, to }, index) => {
-          const active = location.pathname === to;
-
-          return (
-            <ListItem key={index} disablePadding sx={{ height: 40 }}>
-              <ListItemButton
-                disabled={disabled}
-                onClick={() => handleNavigate(to)}
+        {navGroups.map((group, groupIndex) => (
+          <Stack key={groupIndex} spacing={0.5} sx={{ mb: 3 }}>
+            {open && (
+              <ListSubheader
                 sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  mx: 1,
-                  px: 1,
-                  gap: 1,
-                  height: '100%',
-                  borderRadius: 1,
-                  bgcolor: active ? alpha(theme.palette.primary.main, 0.5) : 'transparent',
+                  bgcolor: 'transparent',
+                  color: 'text.disabled',
+                  px: 2,
+                  pt: 2,
+                  pb: 1,
+                  typography: 'caption',
+                  textTransform: 'uppercase',
+                  fontWeight: 'medium',
                 }}
               >
-                <ListItemIcon
-                  sx={{
-                    color: 'inherit',
-                    minWidth: 0,
-                  }}
-                >
-                  <Icon component={icon} fontSize="small" />
-                </ListItemIcon>
-                {open && (
-                  <ListItemText
-                    primaryTypographyProps={{ variant: 'body2' }}
-                    sx={{
-                      '.MuiListItemText-primary': {
-                        fontWeight: active ? 'medium' : 'regular',
-                      },
-                    }}
-                  >
-                    {label}
-                  </ListItemText>
-                )}
-              </ListItemButton>
-            </ListItem>
-          );
-        })}
+                {group.label}
+              </ListSubheader>
+            )}
+
+            <Stack spacing={1}>
+              {group.items.map(({ disabled, icon, label, to }, itemIndex) => {
+                const active = location.pathname === to;
+
+                return (
+                  <ListItem key={itemIndex} disablePadding sx={{ height: 44, gap: 2 }}>
+                    <ListItemButton
+                      disabled={disabled}
+                      onClick={() => handleNavigate(to)}
+                      sx={{
+                        '&:hover': {
+                          bgcolor: 'primary.light',
+                        },
+                        display: 'flex',
+                        alignItems: 'center',
+                        mx: open ? 1 : 0.5,
+                        px: open ? 3 : 0,
+                        gap: 1,
+                        height: '100%',
+                        borderRadius: 1,
+                        bgcolor: active ? 'primary.light' : 'transparent',
+                        color: 'primary.alpha',
+                        justifyContent: open ? 'flex-start' : 'center',
+                      }}
+                    >
+                      <ListItemIcon
+                        sx={{
+                          color: 'inherit',
+                          minWidth: 0,
+                        }}
+                      >
+                        <Icon component={icon} fontSize="small" />
+                      </ListItemIcon>
+                      {open && (
+                        <ListItemText
+                          slotProps={{
+                            primary: {
+                              variant: 'body2',
+                            },
+                          }}
+                        >
+                          {label}
+                        </ListItemText>
+                      )}
+                    </ListItemButton>
+                  </ListItem>
+                );
+              })}
+            </Stack>
+          </Stack>
+        ))}
       </List>
-      <IconButton
-        size="small"
-        sx={{
-          position: 'absolute',
-          bottom: 4,
-          right: 0,
-          transform: 'translate(50%)',
-          bgcolor: 'background.default',
-          border: '1px solid',
-          borderColor: 'divider',
-          transition: 'all 0.3s ease',
-          '&:hover': {
-            bgcolor: 'background.paper',
-          },
-        }}
-        onClick={() => setOpen(!open)}
-      >
-        <KeyboardDoubleArrowRightOutlined
-          fontSize="small"
-          sx={{ transition: 'all 0.3s ease', transform: open ? 'rotate(180deg)' : '' }}
-        />
-      </IconButton>
+
+      <Toggler open={open} setOpen={setOpen} />
     </Stack>
   );
 };

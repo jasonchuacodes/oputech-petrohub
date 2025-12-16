@@ -13,7 +13,6 @@ export const Button = ({ children, sx, ...props }: PropsWithChildren<ButtonProps
         minWidth: ' fit-content',
         flexShrink: 0,
         overflow: 'hidden',
-
         ...sx,
       }}
       {...props}

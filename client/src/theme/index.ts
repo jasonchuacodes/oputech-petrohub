@@ -1,66 +1,117 @@
-import { createTheme } from '@mui/material/styles';
+import { createTheme } from "@mui/material";
 
 const theme = createTheme({
   palette: {
     mode: 'light',
 
     primary: {
-      main: '#213343',
-      light: '#3f4d5f',
-      dark: '#101e29',
-      contrastText: '#ffffff',
-    },
-
-    secondary: {
-      main: '#D88373',
-      light: '#e5a193',
-      dark: '#b15e50',
-      contrastText: '#ffffff',
+      main: '#0F3B34',
+      light: '#1A4F47',
+      dark: '#0A2823',
+      alpha: '#D6DDDC',
     },
 
     background: {
-      default: '#fafbfc',
-      paper: '#ffffff',
-      surface: '#f4f7f9ff',
+      default: '#F4F4F4',
+      paper: '#FFFFFF',
+      surface: '#FCFCFC',
     },
 
     text: {
-      primary: '#1a1a1a',
-      secondary: '#5f6b7a',
-      disabled: '#a0a0a0',
+      primary: '#272727',
+      secondary: '#6E6E6E',
+      disabled: '#BDBDBD',
     },
 
+    divider: '#E2E2E2',
+
     error: {
-      main: '#d32f2f',
-      light: '#e57373',
-      dark: '#c62828',
-      contrastText: '#fff',
+      main: '#C82121',
+      light: '#FBEAEA',
+      dark: '#A01313',
+      contrastText: '#FFFFFF',
     },
 
     warning: {
-      main: '#f57c00',
-      light: '#ffb74d',
-      dark: '#ef6c00',
-      contrastText: '#fff',
+      main: '#D98A00',
+      light: '#FFF4E0',
+      dark: '#996300',
+      contrastText: '#FFFFFF',
     },
 
     info: {
-      main: '#0288d1',
-      light: '#03a9f4',
-      dark: '#01579b',
-      contrastText: '#fff',
+      main: '#1E5CA8',
+      light: '#E7F0FB',
+      dark: '#153F75',
+      contrastText: '#FFFFFF',
     },
 
     success: {
-      main: '#2e7d32',
-      light: '#81c784',
-      dark: '#1b5e20',
-      contrastText: '#fff',
+      main: '#0F833C',
+      light: '#E3F4EA',
+      dark: '#0A5C2B',
+      contrastText: '#FFFFFF',
     },
   },
 
   typography: {
+    fontFamily: "'Inter', sans-serif",
     fontSize: 14,
+
+    h3: {
+      fontSize: '24px',
+      lineHeight: '120%',
+    },
+
+    h4: {
+      fontSize: '20px',
+      lineHeight: '120%',
+    },
+
+    h5: {
+      fontSize: '20px',
+      lineHeight: '120%',
+    },
+
+    h6: {
+      fontSize: '16px',
+      lineHeight: '140%',
+    },
+
+    body1: {
+      fontSize: '16px',
+      lineHeight: '140%',
+    },
+
+    subtitle1: {
+      fontSize: '16px',
+      lineHeight: '140%',
+    },
+
+    body2: {
+      fontSize: '14px',
+      lineHeight: '140%',
+    },
+
+    subtitle2: {
+      fontSize: '14px',
+      lineHeight: '140%',
+    },
+
+    button: {
+      fontSize: '14px',
+      lineHeight: '140%',
+    },
+
+    caption: {
+      fontSize: '12px',
+      lineHeight: '140%',
+    },
+
+    overline: {
+      fontSize: '12px',
+      lineHeight: '140%',
+    },
   },
 
   components: {
@@ -68,23 +119,6 @@ const theme = createTheme({
       styleOverrides: {
         body: {
           scrollbarColor: '#b1b9c2 transparent',
-        },
-      },
-    },
-    MuiTableCell: {
-      styleOverrides: {
-        head: ({ theme }) => ({
-          color: theme.palette.text.secondary,
-          paddingBottom: 6,
-          paddingTop: 6,
-          backgroundColor: theme.palette.background.surface,
-        }),
-      },
-    },
-    MuiTypography: {
-      styleOverrides: {
-        h6: {
-          fontWeight: 500,
         },
       },
     },

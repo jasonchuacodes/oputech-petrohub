@@ -88,7 +88,7 @@ const TenantSelector = () => {
     <>
       {activeTenant && (
         <Button onClick={handleOpenMenu} sx={{ height: 40, gap: 1, alignItems: 'center' }}>
-          <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main' }} variant="rounded">
+          <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.dark' }} variant="rounded">
             {activeTenant?.name?.charAt(0)}
           </Avatar>
           <Typography>{activeTenant?.name}</Typography>
