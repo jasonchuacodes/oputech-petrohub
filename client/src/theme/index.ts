@@ -1,4 +1,4 @@
-import { createTheme } from "@mui/material";
+import { createTheme } from '@mui/material';
 
 const theme = createTheme({
   palette: {
@@ -69,7 +69,7 @@ const theme = createTheme({
     },
 
     h5: {
-      fontSize: '20px',
+      fontSize: '18px',
       lineHeight: '120%',
     },
 

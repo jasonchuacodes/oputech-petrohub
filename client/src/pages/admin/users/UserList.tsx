@@ -1,58 +1,99 @@
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-} from '@mui/material';
+import { Avatar, Stack, Typography } from '@mui/material';
 
-import { Link, Paper } from '~/components/ui';
+import { Chip, DataTable, Link } from '~/components/ui';
+import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { UserProvider } from '~/context/user/UserContext';
-import type { User } from '~/services/user/user.types';
+import { useGetTenantUsersQuery } from '~/services/tenant/tenant.queries';
 import { toTitleCase } from '~/utils/textUtils';
 
 import { MoreDetailsMenu } from './MoreDetailsMenu';
 
-type UserListProps = { users: User[] };
+export const UserList = () => {
+  const { tenantId } = useTenantContext();
 
-export const UserList = ({ users }: UserListProps) => {
+  const { data: users, isLoading } = useGetTenantUsersQuery({ tenantId });
+
   return (
-    <TableContainer component={Paper} sx={{ border: '1px solid', borderColor: 'divider' }}>
-      <Table sx={{ minWidth: 650 }}>
-        <TableHead>
-          <TableRow>
-            <TableCell sx={{ maxWidth: 560 }}>Name</TableCell>
-            <TableCell align="left">Role</TableCell>
-            <TableCell align="left">Position</TableCell>
-            <TableCell align="left" />
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {users &&
-            users.map(({ id, name, role, position }) => (
-              <UserProvider key={id} userId={id}>
-                <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                  <TableCell component="th" scope="row" sx={{ maxWidth: 560 }}>
-                    <Link to={id}>
-                      <Typography variant="body2">{name}</Typography>
-                    </Link>
-                  </TableCell>
-                  <TableCell align="left">
-                    <Typography variant="body2">{toTitleCase(role)}</Typography>
-                  </TableCell>
-                  <TableCell align="left">
-                    <Typography variant="body2">{position || '—'}</Typography>
-                  </TableCell>
-                  <TableCell align="left">
-                    <MoreDetailsMenu />
-                  </TableCell>
-                </TableRow>
-              </UserProvider>
-            ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+    <DataTable
+      id="admin-users-table"
+      collection={DataTable.collection({
+        items: users || [],
+        itemToValue: (user) => user.id,
+        itemToString: (user) => user.name,
+      })}
+      columns={[
+        {
+          id: 'id',
+          heading: 'ID',
+          cell: (user) => (
+            <Typography variant="body2" color="text.secondary">
+              {user.id.slice(0, 8)}
+            </Typography>
+          ),
+          orderable: false,
+        },
+        {
+          id: 'name',
+          heading: 'Fullname',
+          cell: (user) => (
+            <Link to={user.id}>
+              <Stack direction="row" spacing={1} alignItems="center">
+                <Avatar sx={{ width: 32, height: 32 }}>
+                  <Typography fontSize="small"> {user.name.charAt(0).toUpperCase()}</Typography>
+                </Avatar>
+                <Stack alignItems="start" justifyContent="start">
+                  <Typography variant="body2" color="text.primary">
+                    {user.name}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    @{user.username || `user${user.id.slice(0, 4)}`}
+                  </Typography>
+                </Stack>
+              </Stack>
+            </Link>
+          ),
+          orderable: true,
+          width: 300,
+        },
+        {
+          id: 'role',
+          heading: 'Role',
+          cell: (user) => <Typography variant="body2">{toTitleCase(user.role)}</Typography>,
+          orderable: true,
+        },
+        {
+          id: 'shift',
+          heading: 'Shift',
+          cell: (user) =>
+            user.shiftSchedule ? (
+              <Chip label={user.shiftSchedule.shiftName} />
+            ) : (
+              <Typography variant="body2" color="text.secondary">
+                -
+              </Typography>
+            ),
+          orderable: true,
+        },
+        {
+          id: 'position',
+          heading: 'Position',
+          cell: (user) => <Typography variant="body2">{user.position || '-'}</Typography>,
+          orderable: true,
+        },
+        {
+          id: 'actions',
+          heading: '',
+          align: 'right',
+          cell: (user) => (
+            <UserProvider userId={user.id}>
+              <MoreDetailsMenu />
+            </UserProvider>
+          ),
+          orderable: false,
+        },
+      ]}
+      loading={isLoading}
+      emptyMessage="No users found"
+    />
   );
 };

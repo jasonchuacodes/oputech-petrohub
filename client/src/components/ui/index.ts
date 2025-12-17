@@ -2,8 +2,10 @@ export * from './AppToaster';
 export * from './BackButton';
 export * from './Button';
 export * from './CardContainer'
+export * from './Chip';
 export * from './ContentCard';
 export * from './CustomModal';
+export * from './DataTable';
 export * from './DateRangePicker';
 export * from './DateTimeDisplay';
 export * from './InfoBox';

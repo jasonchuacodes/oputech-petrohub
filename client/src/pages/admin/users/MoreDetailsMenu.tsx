@@ -74,10 +74,9 @@ export const MoreDetailsMenu = () => {
       <Button
         onClick={openMenu}
         size="small"
-        variant="outlined"
-        sx={{ borderColor: 'divider', height: 24, minWidth: 24 }}
+        variant="text"
       >
-        <MoreHorizOutlined fontSize="inherit" sx={{color: 'text.secondary'}}/>
+        <MoreHorizOutlined fontSize="inherit" sx={{ color: 'text.secondary' }} />
       </Button>
       <Menu
         anchorEl={anchorElSettingsMenu}
@@ -106,7 +105,7 @@ export const MoreDetailsMenu = () => {
           <Typography variant="body2">View Details</Typography>
         </MenuItem>
         <Divider />
-        <MenuItem onClick={() => null}>
+        <MenuItem disabled onClick={() => null}>
           <Typography variant="body2">Assign Roles</Typography>
         </MenuItem>
         <MenuItem disabled={isDeleteDisabled} onClick={handleDelete}>
