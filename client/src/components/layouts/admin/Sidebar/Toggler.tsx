@@ -15,10 +15,10 @@ export const Toggler = ({
       size="small"
       sx={{
         position: 'absolute',
-        bottom: 16,
-        right: 4,
+        bottom: 8,
+        right: open ? 8 : 4,
         width: 48,
-        borderRadius: 1,
+        borderRadius: 2,
         color: 'divider',
         bgcolor: alpha(theme.palette.background.paper, 0.05),
         transition: 'background-color 0.3s ease',

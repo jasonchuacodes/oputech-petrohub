@@ -135,39 +135,34 @@ const Sidebar = () => {
       position="relative"
       justifyContent="space-between"
       role="presentation"
-      width={open ? 256 : 56}
+      width={open ? 256 : 58}
       bgcolor="primary.main"
-      color="primary.contrastText"
       sx={{
         transition: '0.3s ease',
       }}
     >
       <List>
-        {navGroups.map((group, groupIndex) => (
-          <Stack key={groupIndex} spacing={0.5} sx={{ mb: 3 }}>
-            {open && (
-              <ListSubheader
-                sx={{
-                  bgcolor: 'transparent',
-                  color: 'text.disabled',
-                  px: 2,
-                  pt: 2,
-                  pb: 1,
-                  typography: 'caption',
-                  textTransform: 'uppercase',
-                  fontWeight: 'medium',
-                }}
-              >
-                {group.label}
-              </ListSubheader>
-            )}
-
-            <Stack spacing={1}>
+        <Stack spacing={2}>
+          {navGroups.map((group, groupIndex) => (
+            <Stack key={groupIndex} spacing={1} pt={2}>
+              {open && (
+                <ListSubheader
+                  sx={{
+                    bgcolor: 'transparent',
+                    color: 'text.disabled',
+                    typography: 'body2',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  {group.label}
+                </ListSubheader>
+              )}
+              
               {group.items.map(({ disabled, icon, label, to }, itemIndex) => {
                 const active = location.pathname === to;
 
                 return (
-                  <ListItem key={itemIndex} disablePadding sx={{ height: 44, gap: 2 }}>
+                  <ListItem key={itemIndex} disablePadding>
                     <ListItemButton
                       disabled={disabled}
                       onClick={() => handleNavigate(to)}
@@ -181,7 +176,7 @@ const Sidebar = () => {
                         px: open ? 3 : 0,
                         gap: 1,
                         height: '100%',
-                        borderRadius: 1,
+                        borderRadius: 2,
                         bgcolor: active ? 'primary.light' : 'transparent',
                         color: 'primary.alpha',
                         justifyContent: open ? 'flex-start' : 'center',
@@ -211,8 +206,8 @@ const Sidebar = () => {
                 );
               })}
             </Stack>
-          </Stack>
-        ))}
+          ))}
+        </Stack>
       </List>
 
       <Toggler open={open} setOpen={setOpen} />
