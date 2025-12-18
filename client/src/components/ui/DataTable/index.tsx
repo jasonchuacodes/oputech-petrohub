@@ -109,7 +109,7 @@ export const DataTable = <T,>({
           </TableRow>
         </TableHead>
         <TableBody>
-          {sortedItems.map((item) => {
+          {sortedItems.map((item, itemIndex) => {
             const key = collection.itemToValue(item);
             const ariaLabel = collection.itemToString(item);
 
@@ -130,6 +130,10 @@ export const DataTable = <T,>({
                     align={column.align || 'left'}
                     component={column.id === columns[0].id ? 'th' : undefined}
                     scope={column.id === columns[0].id ? 'row' : undefined}
+                    sx={{
+                      borderBottom: itemIndex === sortedItems.length - 1 ? undefined : '1px solid',
+                      borderColor: itemIndex === sortedItems.length - 1 ? undefined : 'divider',
+                    }}
                   >
                     {column.cell(item)}
                   </TableCell>

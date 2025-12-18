@@ -1,10 +1,9 @@
-import { MoreHorizOutlined } from '@mui/icons-material';
-import { Menu, MenuItem, Typography, Divider } from '@mui/material';
+import { MoreVertOutlined } from '@mui/icons-material';
+import { Menu, MenuItem, Typography, Divider, IconButton } from '@mui/material';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
-import { Button } from '~/components/ui';
 import { useAuthContext } from '~/context/auth/useAuthContext';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { useUserContext } from '~/context/user/useUserContext';
@@ -71,13 +70,12 @@ export const MoreDetailsMenu = () => {
 
   return (
     <>
-      <Button
+      <IconButton
         onClick={openMenu}
         size="small"
-        variant="text"
       >
-        <MoreHorizOutlined fontSize="inherit" sx={{ color: 'text.secondary' }} />
-      </Button>
+        <MoreVertOutlined fontSize="inherit" sx={{ color: 'text.secondary' }} />
+      </IconButton>
       <Menu
         anchorEl={anchorElSettingsMenu}
         id="settings-menu"
@@ -85,11 +83,11 @@ export const MoreDetailsMenu = () => {
         onClose={closeMenu}
         anchorOrigin={{
           vertical: 'bottom',
-          horizontal: 'left',
+          horizontal: 'right',
         }}
         transformOrigin={{
           vertical: 'top',
-          horizontal: 'left',
+          horizontal: 'right',
         }}
         slotProps={{
           paper: {

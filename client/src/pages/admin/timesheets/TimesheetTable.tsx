@@ -83,7 +83,7 @@ export const TimesheetTable = ({ timesheets }: { timesheets: Timesheet[] }) => {
                 }}
               >
                 <TableCell component="th" scope="row" sx={{ maxWidth: 240 }}>
-                  <Typography fontSize={14}>{userName}</Typography>
+                  <Typography variant='body2'>{userName}</Typography>
                 </TableCell>
                 <TableCell align="left">{totalHours}</TableCell>
                 <TableCell align="right">

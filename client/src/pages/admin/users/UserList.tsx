@@ -36,19 +36,23 @@ export const UserList = () => {
           id: 'name',
           heading: 'Fullname',
           cell: (user) => (
-            <Link to={user.id}>
-              <Stack direction="row" spacing={1} alignItems="center">
+            <Link to={user.id} >
+              <Stack
+                direction="row"
+                spacing={1}
+                alignItems="center"
+                sx={{ '&:hover .username': { fontWeight: 600, textDecoration: 'underline' } }}
+              >
                 <Avatar sx={{ width: 32, height: 32 }}>
                   <Typography fontSize="small"> {user.name.charAt(0).toUpperCase()}</Typography>
                 </Avatar>
-                <Stack alignItems="start" justifyContent="start">
-                  <Typography variant="body2" color="text.primary">
-                    {user.name}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    @{user.username || `user${user.id.slice(0, 4)}`}
-                  </Typography>
-                </Stack>
+                <Typography
+                  variant="body2"
+                  color="text.primary"
+                  className='username'
+                >
+                  {user.name}
+                </Typography>
               </Stack>
             </Link>
           ),
@@ -56,9 +60,23 @@ export const UserList = () => {
           width: 300,
         },
         {
+          id: 'username',
+          heading: 'Username',
+          cell: (user) => (
+            <Typography variant="body2" color="text.secondary">
+              {user.username}
+            </Typography>
+          ),
+          orderable: true,
+        },
+        {
           id: 'role',
           heading: 'Role',
-          cell: (user) => <Typography variant="body2">{toTitleCase(user.role)}</Typography>,
+          cell: (user) => (
+            <Typography variant="body2" color="text.secondary">
+              {toTitleCase(user.role)}
+            </Typography>
+          ),
           orderable: true,
         },
         {
@@ -77,7 +95,11 @@ export const UserList = () => {
         {
           id: 'position',
           heading: 'Position',
-          cell: (user) => <Typography variant="body2">{user.position || '-'}</Typography>,
+          cell: (user) => (
+            <Typography variant="body2" color="text.secondary">
+              {user.position || '-'}
+            </Typography>
+          ),
           orderable: true,
         },
         {
