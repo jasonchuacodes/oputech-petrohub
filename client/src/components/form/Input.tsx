@@ -97,7 +97,7 @@ export const Input = <T extends FieldValues>({
               '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
                 borderWidth: '1px',
               },
-              bgcolor: 'background.default',
+              bgcolor: 'background.paper',
               borderRadius: 2,
               ...sx,
             }}

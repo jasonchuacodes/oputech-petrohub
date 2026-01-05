@@ -28,13 +28,15 @@ export const HomePage = () => {
   };
 
   return (
-    <PageLayout p={2} spacing={4}>
-      <Stack spacing={1}>
-        <DateTimeDisplay />
-        <TimeLogger />
-      </Stack>
+    <PageLayout>
+      <Stack spacing={4} p={2} bgcolor="background.paper" flex={1}>
+        <Stack spacing={1}>
+          <DateTimeDisplay />
+          <TimeLogger />
+        </Stack>
 
-      <TimesheetsSection />
+        <TimesheetsSection />
+      </Stack>
 
       <PasswordChangeModal open={open} onClose={handleClose} />
     </PageLayout>

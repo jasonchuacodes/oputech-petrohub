@@ -34,7 +34,7 @@ export const Select = <T extends object>({
 }: SelectProps<T>) => {
   return (
     <Stack spacing={0.5} width="100%">
-      <Typography variant='body2' fontWeight="medium" color="text.secondary">
+      <Typography variant="body2" fontWeight="medium" color="text.secondary">
         {label}
         {required && (
           <Typography component="span" color="error">
@@ -55,9 +55,18 @@ export const Select = <T extends object>({
             },
           },
         }}
+        sx={{
+          '& .MuiOutlinedInput-notchedOutline': {
+            borderColor: 'divider',
+          },
+          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+            borderWidth: '1px',
+          },
+          borderRadius: 2,
+        }}
       >
         {options.map(({ label, value }: SelectOption) => (
-          <MenuItem key={`option-${value}`} value={value}>
+          <MenuItem key={`option-${value}`} value={value} sx={{ fontSize: 'body2.fontSize' }}>
             {label}
           </MenuItem>
         ))}

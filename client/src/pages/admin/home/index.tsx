@@ -1,17 +1,16 @@
-import { Container, Grid, Stack, Typography } from '@mui/material';
+import { Grid, Stack, Typography } from '@mui/material';
 
-import { DateTimeDisplay, PageLayout } from '~/components/ui';
+import { DateTimeDisplay, PageContainer, PageLayout } from '~/components/ui';
 
 import { TimesheetWidget } from './TimesheetWidget';
 import { UsersWidget } from './UserWidget';
 
 export const HomePage = () => {
   return (
-    <PageLayout p={3}>
-      <Container maxWidth="lg" disableGutters>
-        <Stack spacing={3}>
-          {/* Header */}
-          <Stack spacing={0.5}>
+    <PageLayout>
+      <PageContainer>
+        {/* Header */}
+        <Stack spacing={0.5}>
             <Typography variant="h6">
               Dashboard
             </Typography>
@@ -31,8 +30,7 @@ export const HomePage = () => {
               <UsersWidget/>
             </Grid>
           </Grid>
-        </Stack>
-      </Container>
+      </PageContainer>
     </PageLayout>
   );
 };

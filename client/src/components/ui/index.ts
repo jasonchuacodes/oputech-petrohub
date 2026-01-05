@@ -14,6 +14,7 @@ export * from './InactivityWarning';
 export * from './Link';
 export * from './LoadingSpinner';
 export * from './NoData';
+export * from './PageContainer';
 export * from './PageLayout';
 export * from './Paper';
 export * from './SkeletonList';

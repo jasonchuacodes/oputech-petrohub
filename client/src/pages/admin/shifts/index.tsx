@@ -1,5 +1,4 @@
 import {
-  Container,
   Stack,
   Typography,
   Button,
@@ -12,7 +11,7 @@ import { Add, Edit, Delete, Schedule } from '@mui/icons-material';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 
-import { PageLayout } from '~/components/ui';
+import { PageContainer, PageLayout } from '~/components/ui';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { useGetShiftsQuery, useDeleteShiftMutation } from '~/services/shift/shift.queries';
 import type { Shift } from '~/services/shift/shift.types';
@@ -42,10 +41,9 @@ export const ShiftsPage = () => {
   };
 
   return (
-    <PageLayout p={3}>
-      <Container maxWidth="lg" disableGutters>
-        <Stack spacing={3}>
-          <Stack direction="row" justifyContent="space-between" alignItems="center">
+    <PageLayout>
+      <PageContainer>
+        <Stack direction="row" justifyContent="space-between" alignItems="center">
             <Typography variant="h5">Shift Management</Typography>
             <Button
               startIcon={<Add />}
@@ -113,8 +111,7 @@ export const ShiftsPage = () => {
               ))}
             </Grid>
           )}
-        </Stack>
-      </Container>
+      </PageContainer>
 
       <CreateShiftModal open={createModalOpen} onClose={() => setCreateModalOpen(false)} />
       <EditShiftModal

@@ -1,7 +1,6 @@
 import { FileDownloadOutlined } from '@mui/icons-material';
 import {
   Box,
-  Container,
   Divider,
   Stack,
   Table,
@@ -20,6 +19,7 @@ import {
   DateRangePicker,
   LoadingSpinner,
   NoData,
+  PageContainer,
   Paper,
   type DateRange,
 } from '~/components/ui';
@@ -78,9 +78,8 @@ export const TimesheetLogs = () => {
   }
 
   return (
-    <Container maxWidth="md" disableGutters>
-      <Stack spacing={3} justifyContent="start" alignItems="stretch">
-        <BackButton
+    <PageContainer maxWidth="md" stackSx={{ justifyContent: 'start', alignItems: 'stretch' }}>
+      <BackButton
           text="Go back"
           onClick={handleGoBack}
           to={pathFor({
@@ -149,7 +148,6 @@ export const TimesheetLogs = () => {
         ) : (
           <NoData text="No timesheets data available." />
         )}
-      </Stack>
-    </Container>
+    </PageContainer>
   );
 };

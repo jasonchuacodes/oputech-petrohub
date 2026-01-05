@@ -1,12 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Container, Divider, Stack, Typography } from '@mui/material';
+import { Divider, Stack, Typography } from '@mui/material';
 import { AddOutlined } from '@mui/icons-material';
 import { useForm } from 'react-hook-form';
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
 
 import { FormRow, InputWithFormat, Input } from '~/components/form';
-import { Button, Form, PageLayout } from '~/components/ui';
+import { Button, Form, PageContainer, PageLayout } from '~/components/ui';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { UpdateTenantSchema, type UpdateTenantInput } from '~/schema/updateTenantSchema';
 import { useUpdateTenantMutation } from '~/services/tenant/tenant.queries';
@@ -81,8 +81,8 @@ export const TenantSettingsPage = () => {
   };
 
   return (
-    <PageLayout p={3}>
-      <Container maxWidth="lg" disableGutters>
+    <PageLayout>
+      <PageContainer>
         <Form onSubmit={handleSubmit(onSubmit)} sx={{ width: '100%' }}>
           {/* Header */}
           <Stack
@@ -124,7 +124,6 @@ export const TenantSettingsPage = () => {
                   name="contact"
                   pattern="9999-999-9999"
                   placeholder="0925-123-1234"
-                  variant="outlined"
                 />
               </FormRow>
               <FormRow label="Address">
@@ -223,7 +222,7 @@ export const TenantSettingsPage = () => {
             </Stack>
           </Stack>
         </Form>
-      </Container>
+      </PageContainer>
     </PageLayout>
   );
 };

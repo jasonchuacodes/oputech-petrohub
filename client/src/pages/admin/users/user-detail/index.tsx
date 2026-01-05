@@ -1,12 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Container, Divider, Grid, Stack, Typography } from '@mui/material';
+import { Divider, Grid, Stack, Typography } from '@mui/material';
 import { useForm } from 'react-hook-form';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { Input, InputWithFormat, ShiftSelect } from '~/components/form';
-import { Button, BackButton, Form, PageLayout } from '~/components/ui';
+import { Button, BackButton, Form, PageContainer, PageLayout } from '~/components/ui';
 import { useAuthContext } from '~/context/auth/useAuthContext';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { AdminRoutes } from '~/routes';
@@ -103,10 +103,9 @@ export const UserDetailPage = () => {
   };
 
   return (
-    <PageLayout p={3}>
-      <Container maxWidth="lg" disableGutters>
-        <Stack spacing={3}>
-          <BackButton
+    <PageLayout>
+      <PageContainer>
+        <BackButton
             text="Back to Users"
             to={pathFor({
               pathname: AdminRoutes.TenantUsers,
@@ -314,8 +313,7 @@ export const UserDetailPage = () => {
               </Button>
             </Stack>
           </Form>
-        </Stack>
-      </Container>
+      </PageContainer>
 
       <ResetPasswordModal
         open={isResetPasswordModalOpen}

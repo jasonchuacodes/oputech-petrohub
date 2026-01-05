@@ -91,8 +91,9 @@ export const TimesheetsPage = () => {
   };
 
   return (
-    <PageLayout p={2} spacing={2}>
-      <Stack direction="row" justifyContent="space-between">
+    <PageLayout>
+      <Stack spacing={2} p={2} bgcolor="background.paper" flex={1}>
+        <Stack direction="row" justifyContent="space-between">
         <DateRangePicker
           label="Select Time Period"
           selectedStart={startDate}
@@ -162,6 +163,7 @@ export const TimesheetsPage = () => {
           </Stack>
         )}
       </List>
+      </Stack>
     </PageLayout>
   );
 };

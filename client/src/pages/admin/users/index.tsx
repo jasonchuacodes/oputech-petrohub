@@ -1,23 +1,21 @@
-import { Container, Stack } from '@mui/material';
+import { Stack } from '@mui/material';
+import { FilterAltOutlined } from '@mui/icons-material';
 import { useState } from 'react';
 
 import { SearchInput } from '~/components/form';
 import { PageHeader } from '~/components/layouts';
-import { Button, PageLayout } from '~/components/ui';
+import { Button, PageContainer, PageLayout } from '~/components/ui';
 
 import { UserCreateModal } from './UserCreateModal';
 import { UserList } from './UserList';
-import { FilterAltOutlined } from '@mui/icons-material';
 
 export const UsersPage = () => {
   const [isCreateUserModalOpen, setIsCreateUserModalOpen] = useState(false);
 
   return (
-    <PageLayout p={3}>
-      <Container maxWidth="lg" disableGutters>
-        <Stack spacing={3}>
-          <PageHeader title="Users" description="View and manage users in your organization" />
-
+    <PageLayout>
+      <PageContainer>
+        <PageHeader title="Users" description="View and manage users in your organization" />
           <Stack spacing={1}>
             <Stack
               alignItems="start"
@@ -42,8 +40,7 @@ export const UsersPage = () => {
             </Stack>
             <UserList />
           </Stack>
-        </Stack>
-      </Container>
+      </PageContainer>
 
       <UserCreateModal open={isCreateUserModalOpen} setOpen={setIsCreateUserModalOpen} />
     </PageLayout>

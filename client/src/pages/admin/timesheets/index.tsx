@@ -1,5 +1,5 @@
 import { FileDownloadOutlined } from '@mui/icons-material';
-import { Box, Container, Stack, Typography } from '@mui/material';
+import { Box, Stack, Typography } from '@mui/material';
 import dayjs from 'dayjs';
 import weekday from 'dayjs/plugin/weekday';
 import utc from 'dayjs/plugin/utc';
@@ -12,6 +12,7 @@ import {
   DateRangePicker,
   LoadingSpinner,
   NoData,
+  PageContainer,
   PageLayout,
   type DateRange,
 } from '~/components/ui';
@@ -68,14 +69,13 @@ const TimesheetsPageContent = () => {
   const handleExport = () => alert('This feature is pending.');
 
   return (
-    <PageLayout p={3}>
+    <PageLayout>
       {userId ? (
         <TimesheetLogs />
       ) : (
-        <Container maxWidth="lg" disableGutters>
-          <Stack spacing={2}>
-            {/* Header */}
-            <Stack spacing={3} alignItems="start">
+        <PageContainer spacing={2}>
+          {/* Header */}
+          <Stack spacing={3} alignItems="start">
               <Stack spacing={0.5}>
                 <Typography variant="h6">
                   Timesheets
@@ -115,8 +115,7 @@ const TimesheetsPageContent = () => {
             ) : (
               <NoData text="No timesheets data available." />
             )}
-          </Stack>
-        </Container>
+        </PageContainer>
       )}
     </PageLayout>
   );

@@ -15,8 +15,9 @@ export const AdminSettingsPage = () => {
   };
 
   return (
-    <PageLayout spacing={2} p={3}>
-      <Stack spacing={0.5}>
+    <PageLayout>
+      <Stack spacing={2} p={3} bgcolor="background.paper" flex={1}>
+        <Stack spacing={0.5}>
         <Typography variant="h6">
           Account Settings
         </Typography>
@@ -47,6 +48,7 @@ export const AdminSettingsPage = () => {
           <SecuritySettings />
         </SettingsTabPanel>
       </Container>
+      </Stack>
     </PageLayout>
   );
 };

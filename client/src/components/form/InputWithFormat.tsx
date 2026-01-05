@@ -64,7 +64,7 @@ export const InputWithFormat = <T extends object>({
                 '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
                   borderWidth: '1px',
                 },
-                bgcolor: 'background.default',
+                bgcolor: 'background.paper',
                 borderRadius: 2,
               }}
               slotProps={{
