@@ -1,20 +1,40 @@
 import { Stack } from '@mui/material';
-import { AddOutlined, FilterAltOutlined } from '@mui/icons-material';
+import { AddOutlined, FilterAltOutlined, HomeOutlined } from '@mui/icons-material';
 
 import { SearchInput } from '~/components/form';
 import { PageHeader } from '~/components/layouts';
-import { Button, PageContainer, PageLayout } from '~/components/ui';
+import { Breadcrumb, Button, PageContainer, PageLayout } from '~/components/ui';
+import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { useDisclosure } from '~/hooks/useDisclosure';
+import { AdminRoutes } from '~/routes';
+import { pathFor } from '~/utils/pathFor';
 
 import { UserCreateModal } from './UserCreateModal';
 import { UserList } from './UserList';
 
 export const UsersPage = () => {
+  const { tenantId } = useTenantContext();
   const disclosure = useDisclosure();
 
   return (
     <PageLayout>
       <PageContainer>
+        <Breadcrumb
+          items={[
+            {
+              icon: HomeOutlined,
+              label: 'Home',
+              to: pathFor({
+                pathname: AdminRoutes.TenantHome,
+                params: { tenantId },
+              }),
+            },
+            {
+              label: 'Users',
+            },
+          ]}
+        />
+        
         <PageHeader
           title="Users"
           description="View and manage users in your organization"

@@ -1,131 +1,96 @@
-import {
-  Stack,
-  Typography,
-  Button,
-  Card,
-  CardContent,
-  Grid,
-  IconButton,
-} from '@mui/material';
-import { Add, Edit, Delete, Schedule } from '@mui/icons-material';
-import { useState } from 'react';
-import toast from 'react-hot-toast';
+import { Stack, Typography } from '@mui/material';
+import { Schedule, HomeOutlined, AddOutlined } from '@mui/icons-material';
 
-import { PageContainer, PageLayout } from '~/components/ui';
+import { PageHeader } from '~/components/layouts';
+import { Breadcrumb, Button, CardContainer, PageContainer, PageLayout } from '~/components/ui';
+import { ShiftProvider } from '~/context/shift';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
-import { useGetShiftsQuery, useDeleteShiftMutation } from '~/services/shift/shift.queries';
-import type { Shift } from '~/services/shift/shift.types';
+import { useDisclosure } from '~/hooks/useDisclosure';
+import { AdminRoutes } from '~/routes';
+import { useGetShiftsQuery } from '~/services/shift/shift.queries';
+import { pathFor } from '~/utils/pathFor';
+
 import { CreateShiftModal } from './CreateShiftModal';
-import { EditShiftModal } from './EditShiftModal';
-import { DeleteConfirmModal } from './DeleteConfirmModal';
+import { MoreDetailsMenu } from './MoreDetailsMenu';
 
 export const ShiftsPage = () => {
   const { tenantId } = useTenantContext();
+  const disclosure = useDisclosure();
+
   const { data: shifts, isLoading } = useGetShiftsQuery(tenantId);
-  const { mutateAsync: deleteShift } = useDeleteShiftMutation();
-
-  const [createModalOpen, setCreateModalOpen] = useState(false);
-  const [editModalOpen, setEditModalOpen] = useState(false);
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [selectedShift, setSelectedShift] = useState<Shift | null>(null);
-
-  const handleDelete = async () => {
-    if (!selectedShift || !tenantId) return;
-    try {
-      await deleteShift({ shiftId: selectedShift.id, tenantId });
-      toast.success('Shift deleted successfully');
-      setDeleteModalOpen(false);
-    } catch {
-      toast.error('Failed to delete shift');
-    }
-  };
 
   return (
     <PageLayout>
       <PageContainer>
-        <Stack direction="row" justifyContent="space-between" alignItems="center">
-            <Typography variant="h5">Shift Management</Typography>
+        <Breadcrumb
+          items={[
+            {
+              icon: HomeOutlined,
+              label: 'Home',
+              to: pathFor({
+                pathname: AdminRoutes.TenantHome,
+                params: { tenantId },
+              }),
+            },
+            {
+              label: 'Shifts',
+            },
+          ]}
+        />
+        <PageHeader
+          title="Shift Management"
+          description="Manage your employee shift schedules here. Assign start and end times."
+          action={
             <Button
-              startIcon={<Add />}
+              onClick={disclosure.onOpen}
               variant="contained"
-              onClick={() => setCreateModalOpen(true)}
+              size="large"
+              startIcon={<AddOutlined fontSize="small" />}
             >
               Create Shift
             </Button>
-          </Stack>
+          }
+        />
 
-          {isLoading ? (
-            <Typography>Loading...</Typography>
-          ) : (
-            <Grid container spacing={2}>
-              {shifts?.map((shift) => (
-                <Grid size={{ xs: 12, md: 6 }} key={shift.id}>
-                  <Card>
-                    <CardContent>
-                      <Stack direction="row" justifyContent="space-between" alignItems="start">
-                        <Stack spacing={1}>
-                          <Typography variant="h6">{shift.name}</Typography>
-                          <Stack direction="row" spacing={1} alignItems="center">
-                            <Schedule fontSize="small" color="action" />
-                            <Typography variant="body2" color="text.secondary">
-                              {new Date(shift.shiftStart).toLocaleTimeString('en-US', {
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })}{' '}
-                              -{' '}
-                              {new Date(shift.shiftEnd).toLocaleTimeString('en-US', {
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })}
-                            </Typography>
-                          </Stack>
-                          <Typography variant="caption" color="text.secondary">
-                            {shift._count?.users || 0} users assigned
-                          </Typography>
-                        </Stack>
-                        <Stack direction="row">
-                          <IconButton
-                            size="small"
-                            onClick={() => {
-                              setSelectedShift(shift);
-                              setEditModalOpen(true);
-                            }}
-                          >
-                            <Edit fontSize="small" />
-                          </IconButton>
-                          <IconButton
-                            size="small"
-                            color="error"
-                            onClick={() => {
-                              setSelectedShift(shift);
-                              setDeleteModalOpen(true);
-                            }}
-                          >
-                            <Delete fontSize="small" />
-                          </IconButton>
-                        </Stack>
+        {isLoading ? (
+          <Typography>Loading...</Typography>
+        ) : (
+          <Stack spacing={2}>
+            {shifts?.map((shift) => (
+              <ShiftProvider shift={shift}>
+                <CardContainer maxWidth={560}>
+                  <Stack direction="row" justifyContent="space-between" alignItems="start">
+                    <Stack spacing={1}>
+                      <Typography variant="h6">{shift.name}</Typography>
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        <Schedule fontSize="small" color="action" />
+                        <Typography variant="body2" color="text.primary">
+                          {new Date(shift.shiftStart).toLocaleTimeString('en-US', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}{' '}
+                          -{' '}
+                          {new Date(shift.shiftEnd).toLocaleTimeString('en-US', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </Typography>
                       </Stack>
-                    </CardContent>
-                  </Card>
-                </Grid>
-              ))}
-            </Grid>
-          )}
+                      <Typography variant="caption" color="text.secondary">
+                        {`(${shift._count?.users || 0} users assigned)`}
+                      </Typography>
+                    </Stack>
+
+                    <MoreDetailsMenu />
+                  </Stack>
+                </CardContainer>
+              </ShiftProvider>
+            ))}
+          </Stack>
+        )}
       </PageContainer>
 
-      <CreateShiftModal open={createModalOpen} onClose={() => setCreateModalOpen(false)} />
-      <EditShiftModal
-        open={editModalOpen}
-        onClose={() => setEditModalOpen(false)}
-        shift={selectedShift}
-      />
-      <DeleteConfirmModal
-        open={deleteModalOpen}
-        onClose={() => setDeleteModalOpen(false)}
-        onConfirm={handleDelete}
-        shiftName={selectedShift?.name || ''}
-        userCount={selectedShift?._count?.users || 0}
-      />
+      <CreateShiftModal open={disclosure.open} onClose={disclosure.onClose} />
     </PageLayout>
   );
 };

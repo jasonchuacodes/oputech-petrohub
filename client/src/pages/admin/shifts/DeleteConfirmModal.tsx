@@ -1,42 +1,65 @@
-import { Dialog, DialogTitle, DialogContent, DialogActions, Typography } from '@mui/material';
-import { Button } from '~/components/ui';
+import { DeleteOutlined } from '@mui/icons-material';
+import { Stack, Typography } from '@mui/material';
+import toast from 'react-hot-toast';
+
+import { CustomModal } from '~/components/ui';
+import { useShiftContext } from '~/context/shift';
+import { useTenantContext } from '~/context/tenant/useTenantContext';
+import { useDeleteShiftMutation } from '~/services/shift/shift.queries';
 
 type DeleteConfirmModalProps = {
   open: boolean;
   onClose: () => void;
-  onConfirm: () => void;
-  shiftName: string;
-  userCount: number;
 };
 
-export const DeleteConfirmModal = ({
-  open,
-  onClose,
-  onConfirm,
-  shiftName,
-  userCount,
-}: DeleteConfirmModalProps) => {
+export const DeleteConfirmModal = ({ open, onClose }: DeleteConfirmModalProps) => {
+  const { shift } = useShiftContext();
+  const { tenantId } = useTenantContext();
+
+  const { mutateAsync: deleteShift } = useDeleteShiftMutation();
+
+  const handleConfirmDelete = async () => {
+    if (!tenantId) return;
+
+    try {
+      await deleteShift({ shiftId: shift.id, tenantId });
+      toast.success('Shift deleted successfully');
+      onClose();
+    } catch {
+      toast.error('Failed to delete shift');
+    }
+  };
+
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Delete Shift</DialogTitle>
-      <DialogContent>
-        <Typography>
-          Are you sure you want to delete <strong>{shiftName}</strong>?
-        </Typography>
-        {userCount > 0 && (
-          <Typography color="warning.main" sx={{ mt: 2 }}>
-            This will unassign {userCount} user{userCount !== 1 ? 's' : ''} from this shift.
+    <CustomModal
+      onSubmit={handleConfirmDelete}
+      onClose={onClose}
+      open={open}
+      type="danger"
+      title="Delete Shift Confirmation"
+      subheader={
+        <Stack spacing={1}>
+          <Typography variant="body2">
+            Are you sure you want to delete{' '}
+            <Typography variant="inherit" component="span" color="warning.main">
+              {shift.name}
+            </Typography>
+            ?
           </Typography>
-        )}
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose} variant="text">
-          Cancel
-        </Button>
-        <Button onClick={onConfirm} variant="contained" color="error">
-          Delete
-        </Button>
-      </DialogActions>
-    </Dialog>
+          {(shift._count?.users || 0) > 0 && (
+            <Typography variant="body2">
+              This will unassign{' '}
+              <Typography variant="inherit" component="span" color="warning.main">
+                {shift._count?.users} user{shift._count?.users !== 1 ? 's' : ''}
+              </Typography>{' '}
+              from this shift.
+            </Typography>
+          )}
+        </Stack>
+      }
+      submitText="Delete"
+      maxWidth={560}
+      icon={DeleteOutlined}
+    />
   );
 };

@@ -4,20 +4,22 @@ import {
   Card,
   CardActions,
   CardContent,
-  CardHeader,
+  Icon,
   IconButton,
   Modal,
+  Stack,
+  Typography,
   type ModalProps,
 } from '@mui/material';
-import type { ReactNode } from 'react';
+import type { ComponentType, ReactNode } from 'react';
 
 import { Button } from '~/components/ui/Button';
 
-type Props = ModalProps & {
+type Props = Omit<ModalProps, 'children'> & {
   title: string;
   onClose: () => void;
   type?: 'default' | 'danger';
-  subheader?: string;
+  subheader?: string | ReactNode;
   children?: ReactNode;
   disabled?: boolean;
   maxWidth?: number;
@@ -26,6 +28,7 @@ type Props = ModalProps & {
   cancelText?: string;
   onCancel?: () => void;
   onSubmit?: () => void;
+  icon?: ComponentType;
 };
 
 export const CustomModal = ({
@@ -41,6 +44,7 @@ export const CustomModal = ({
   onClose,
   onSubmit,
   type = 'default',
+  icon,
   ...modalProps
 }: Props) => {
   return (
@@ -57,33 +61,100 @@ export const CustomModal = ({
             transform: 'translate(-50%, -50%)',
           }}
         >
-          <CardHeader
-            onClose={onClose}
-            subheader={subheader}
-            title={title}
-            slotProps={{
-              title: {
-                fontSize: 'h6.fontSize',
-                color: 'text.primary',
-                fontWeight: 'medium',
-              },
+          <Box
+            sx={{
+              px: 2,
+              py: 1.5,
             }}
-            action={
+          >
+            <Stack direction="row" alignItems="center" spacing={3}>
+              {icon && (
+                <Box
+                  sx={{
+                    position: 'relative',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: 40,
+                    height: 40,
+                    borderRadius: 2,
+                    bgcolor: type === 'danger' ? 'error.main' : 'primary.main',
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      top: 2,
+                      left: 2,
+                      width: '100%',
+                      height: '100%',
+                      bgcolor: type === 'danger' ? 'error.main' : 'primary.main',
+                      borderRadius: 2,
+                      opacity: 0.2,
+                      transform: 'rotate(15deg)',
+                      transformOrigin: 'bottom right',
+                      zIndex: -1,
+                    },
+                  }}
+                >
+                  <Icon
+                    component={icon}
+                    sx={{
+                      color: 'common.white',
+                      fontSize: 24,
+                      position: 'relative',
+                      zIndex: 1,
+                    }}
+                  />
+                </Box>
+              )}
+              <Box sx={{ flex: 1 }}>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontSize: 'h5.fontSize',
+                    color: 'text.primary',
+                    fontWeight: 'bold',
+                    mb: subheader ? 0.5 : 0,
+                  }}
+                >
+                  {title}
+                </Typography>
+                {subheader && (
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontSize: 'body2.fontSize',
+                      color: 'text.secondary',
+                    }}
+                  >
+                    {subheader}
+                  </Typography>
+                )}
+              </Box>
               <IconButton aria-label="close" onClick={onClose}>
                 <Close />
               </IconButton>
-            }
-            sx={{ borderBottom: '1px solid', borderColor: 'divider' }}
-          />
-          <CardContent
+            </Stack>
+          </Box>
+          {children && (
+            <CardContent
+              sx={{
+                flexGrow: 1,
+                overflow: 'auto',
+                pt: 2,
+              }}
+            >
+              {children}
+            </CardContent>
+          )}
+          <CardActions
             sx={{
-              flexGrow: 1,
-              overflow: 'auto',
+              width: '100%',
+              borderTop: '1px solid',
+              borderColor: 'divider',
+              justifyContent: 'flex-end',
+              p: 2,
             }}
           >
-            {children}
-          </CardContent>
-          <CardActions sx={{ justifySelf: 'flex-end', p: 2 }}>
             <Button
               disableElevation={true}
               onClick={onCancel ?? onClose}

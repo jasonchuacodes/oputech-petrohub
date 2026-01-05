@@ -1,5 +1,6 @@
 export * from './AppToaster';
 export * from './BackButton';
+export * from './Breadcrumb';
 export * from './Button';
 export * from './CardContainer'
 export * from './Chip';

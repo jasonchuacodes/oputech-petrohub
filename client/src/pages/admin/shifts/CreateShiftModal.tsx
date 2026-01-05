@@ -1,16 +1,9 @@
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Stack,
-  Typography,
-} from '@mui/material';
+import { Stack, Typography } from '@mui/material';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import toast from 'react-hot-toast';
 
-import { Button, Form } from '~/components/ui';
+import { CustomModal } from '~/components/ui';
 import { Input, TimePicker } from '~/components/form';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { useCreateShiftMutation } from '~/services/shift/shift.queries';
@@ -52,40 +45,29 @@ export const CreateShiftModal = ({ open, onClose }: CreateShiftModalProps) => {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Create New Shift</DialogTitle>
-      <Form onSubmit={handleSubmit(onSubmit)}>
-        <DialogContent>
-          <Stack spacing={2}>
-            <Stack spacing={0.5}>
-              <Typography variant="body2" fontWeight="medium">
-                Shift Name
-              </Typography>
-              <Input control={control} name="name" placeholder="Morning Shift" />
-            </Stack>
-            <Stack spacing={0.5}>
-              <Typography variant="body2" fontWeight="medium">
-                Shift Start
-              </Typography>
-              <TimePicker control={control} name="shiftStart" label="" />
-            </Stack>
-            <Stack spacing={0.5}>
-              <Typography variant="body2" fontWeight="medium">
-                Shift End
-              </Typography>
-              <TimePicker control={control} name="shiftEnd" label="" />
-            </Stack>
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={onClose} variant="text">
-            Cancel
-          </Button>
-          <Button type="submit" variant="contained" loading={isPending}>
-            Create
-          </Button>
-        </DialogActions>
-      </Form>
-    </Dialog>
+    <CustomModal
+      open={open}
+      onClose={onClose}
+      onSubmit={handleSubmit(onSubmit)}
+      title="Create Shift Schedule"
+      subheader="Create a new shift schedule for employees."
+      submitText="Create Shift"
+      loading={isPending}
+      maxWidth={560}
+    >
+      <Stack spacing={2}>
+        <Stack spacing={0.5}>
+          <Typography variant="body2" fontWeight="medium">
+            Shift Name
+          </Typography>
+          <Input control={control} name="name" placeholder="Morning Shift" />
+        </Stack>
+        <Stack alignItems="center" direction="row" spacing={2}>
+          <TimePicker control={control} name="shiftStart" label="Shift Start" />
+          <Typography variant="body2">—</Typography>
+          <TimePicker control={control} name="shiftEnd" label="Shift End" />
+        </Stack>
+      </Stack>
+    </CustomModal>
   );
 };

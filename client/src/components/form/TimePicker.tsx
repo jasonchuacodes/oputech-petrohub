@@ -34,7 +34,8 @@ export const TimePicker = ({ control, name, label,  disabled }: TimePickerProps)
               <Typography
                 gutterBottom
                 variant="body2"
-                color="text.secondary"
+                color="text.primary"
+                fontWeight='medium'
                 sx={{ whiteSpace: 'nowrap' }}
               >
                 {label}

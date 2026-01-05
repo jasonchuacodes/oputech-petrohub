@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { Input, InputWithFormat, ShiftSelect } from '~/components/form';
-import { Button, BackButton, Form, PageContainer, PageLayout } from '~/components/ui';
+import { Button, Breadcrumb, Form, PageContainer, PageLayout } from '~/components/ui';
 import { useAuthContext } from '~/context/auth/useAuthContext';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { AdminRoutes } from '~/routes';
@@ -19,6 +19,7 @@ import { parseBackendError } from '~/utils/parseBackendError';
 
 import { ResetPasswordModal } from '../ResetPasswordModal';
 import { AvatarPicker } from './AvatarPicker';
+import { HomeOutlined } from '@mui/icons-material';
 
 export const UserDetailPage = () => {
   const navigate = useNavigate();
@@ -105,15 +106,28 @@ export const UserDetailPage = () => {
   return (
     <PageLayout>
       <PageContainer>
-        <BackButton
-            text="Back to Users"
-            to={pathFor({
-              pathname: AdminRoutes.TenantUsers,
-              params: {
-                tenantId,
-              },
-            })}
-          />
+        <Breadcrumb
+          items={[
+            {
+              icon: HomeOutlined,
+              label: 'Home',
+              to: pathFor({
+                pathname: AdminRoutes.TenantHome,
+                params: { tenantId },
+              }),
+            },
+            {
+              label: 'Users',
+              to: pathFor({
+                pathname: AdminRoutes.TenantUsers,
+                params: { tenantId },
+              }),
+            },
+            {
+              label: user?.name ?? 'Loading...',
+            },
+          ]}
+        />
 
           <Form onSubmit={handleSubmit(onSubmit)}>
             <Stack spacing={4}>
