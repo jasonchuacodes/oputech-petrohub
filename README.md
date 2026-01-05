@@ -53,6 +53,7 @@ Runs on: http://localhost:5173
 ```
 cd ../server
 pnpm install
+npx prisma generate // generate ~/db/prisma files
 pnpm dev
 ```
 Runs on: http://localhost:8000

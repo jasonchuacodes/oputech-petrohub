@@ -58,23 +58,28 @@ const theme = createTheme({
     fontFamily: "'Inter', sans-serif",
     fontSize: 14,
 
+    h2: {
+      fontSize: '32px',
+      lineHeight: '120%',
+    },
+
     h3: {
-      fontSize: '24px',
+      fontSize: '28px',
       lineHeight: '120%',
     },
 
     h4: {
-      fontSize: '20px',
+      fontSize: '24px',
       lineHeight: '120%',
     },
 
     h5: {
-      fontSize: '18px',
+      fontSize: '20px',
       lineHeight: '120%',
     },
 
     h6: {
-      fontSize: '16px',
+      fontSize: '18px',
       lineHeight: '140%',
     },
 

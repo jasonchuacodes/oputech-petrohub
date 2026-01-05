@@ -1,4 +1,4 @@
-import { Stack, TextField, Typography } from '@mui/material';
+import { OutlinedInput, Stack, Typography } from '@mui/material';
 import { Controller, type Control, type Path } from 'react-hook-form';
 
 import { formatDigitsWithPattern } from '~/utils/textUtils';
@@ -10,7 +10,7 @@ type Props<T extends object> = {
   required?: boolean;
   placeholder?: string;
   label?: string;
-  variant?: 'standard' | 'outlined' | 'filled';
+  error?: boolean;
 };
 
 export const InputWithFormat = <T extends object>({
@@ -20,13 +20,13 @@ export const InputWithFormat = <T extends object>({
   placeholder,
   pattern,
   required,
-  variant = 'outlined',
+  error: errorProp,
 }: Props<T>) => {
   return (
     <Controller
       name={name}
       control={control}
-      render={({ field: { onChange, value, ...field }, fieldState: { error }  }) => {
+      render={({ field: { onChange, value, ...field }, fieldState: { error } }) => {
         const safeValue = value ?? '';
         const maxRawLength = (pattern.match(/9/g) || []).length;
         const rawDigits = safeValue.replace(/\D/g, '').slice(0, maxRawLength);
@@ -35,7 +35,7 @@ export const InputWithFormat = <T extends object>({
 
         return (
           <Stack spacing={0.5} width="100%">
-            <Typography variant="body2" fontWeight="medium" color="text.secondary">
+            <Typography variant="body2" fontWeight="medium" color="text.primary">
               {label}
               {required && (
                 <Typography component="span" color="error">
@@ -45,11 +45,10 @@ export const InputWithFormat = <T extends object>({
               )}
             </Typography>
 
-            <TextField
+            <OutlinedInput
               {...field}
               fullWidth
               size="small"
-              variant={variant}
               placeholder={placeholder}
               value={formatted}
               onChange={(e) => {
@@ -57,8 +56,19 @@ export const InputWithFormat = <T extends object>({
                 const slicedRaw = rawDigits.slice(0, maxRawLength);
                 onChange(slicedRaw === '' ? null : slicedRaw);
               }}
+              error={error?.message ? true : false}
+              sx={{
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'divider',
+                },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderWidth: '1px',
+                },
+                bgcolor: 'background.default',
+                borderRadius: 2,
+              }}
               slotProps={{
-                htmlInput: {
+                input: {
                   sx: {
                     fontSize: 'body2.fontSize',
                   },
@@ -66,7 +76,7 @@ export const InputWithFormat = <T extends object>({
               }}
             />
 
-            {error?.message && (
+            {errorProp && error?.message && (
               <Typography fontSize="small" color="error">
                 {error.message}
               </Typography>

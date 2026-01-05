@@ -1,4 +1,10 @@
-import { OutlinedInput, Stack, Typography, type OutlinedInputProps, type SxProps } from '@mui/material';
+import {
+  OutlinedInput,
+  Stack,
+  Typography,
+  type OutlinedInputProps,
+  type SxProps,
+} from '@mui/material';
 import type { HTMLInputTypeAttribute, ReactNode } from 'react';
 import { Controller, type Control, type FieldValues, type Path } from 'react-hook-form';
 
@@ -59,7 +65,7 @@ export const Input = <T extends FieldValues>({
       render={({ field, fieldState: { error } }) => (
         <Stack spacing={0.5} width={fullWidth ? '100%' : 'auto'}>
           {label && (
-            <Typography variant="body2" fontWeight="medium" color="text.secondary">
+            <Typography variant="body2" fontWeight="medium" color="text.primary">
               {label}
               {required && (
                 <Typography component="span" color="error">
@@ -84,10 +90,20 @@ export const Input = <T extends FieldValues>({
             slotProps={mergedSlotProps}
             endAdornment={endAdornment}
             startAdornment={startAdornment}
-            sx={sx}
+            sx={{
+              '& .MuiOutlinedInput-notchedOutline': {
+                borderColor: 'divider',
+              },
+              '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                borderWidth: '1px',
+              },
+              bgcolor: 'background.default',
+              borderRadius: 2,
+              ...sx,
+            }}
           />
 
-          {error?.message && (
+          {errorProp && error?.message && (
             <Typography fontSize="small" color="error">
               {error.message}
             </Typography>

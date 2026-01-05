@@ -61,21 +61,21 @@ export const Login = () => {
         onSubmit={handleSubmit(onSubmit)}
         sx={{
           flex: 1,
-          justifyContent: 'center',
           alignItems: 'center',
+          mt: 16,
           gap: 4,
         }}
       >
-        <Stack alignItems="center" spacing={1}>
-          <Typography fontWeight="bold" variant="h4">
-            Sign in to{' '}
-            <Box component="span" color="secondary.main">
-              Buzhub
-            </Box>
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Welcome back! Please enter your details.
-          </Typography>
+        <Stack alignItems="center" justifyContent="center" spacing={2}>
+          <Box bgcolor="divider" borderRadius={99} height={120} width={120}></Box>
+          <Stack alignItems="center" spacing={0.5}>
+            <Typography fontWeight="bold" variant="h2">
+              Welcome back
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Please enter your details
+            </Typography>
+          </Stack>
         </Stack>
         <Stack spacing={3} width="100%" maxWidth={{ xs: '100%', sm: 400 }} px={2}>
           <Stack spacing={1.5}>
@@ -110,7 +110,7 @@ export const Login = () => {
             <Link
               to="/forgot-password"
               alignSelf="flex-end"
-              sx={{ fontSize: 'small', color: 'text.main' }}
+              sx={{ fontSize: 'small', fontWeight: 'medium', color: 'text.primary' }}
             >
               Forgot password?
             </Link>

@@ -55,8 +55,8 @@ export const ForgotPassword = () => {
           onSubmit={handleSubmit(onSubmit)}
           sx={{
             flex: 1,
-            justifyContent: 'center',
             alignItems: 'center',
+            mt: 16,
             gap: 4,
           }}
         >

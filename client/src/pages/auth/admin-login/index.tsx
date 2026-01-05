@@ -1,4 +1,4 @@
-import { alpha, Box, Stack, Typography } from '@mui/material';
+import { alpha, Box, Checkbox, FormControlLabel, Stack, Typography } from '@mui/material';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -68,21 +68,21 @@ export const LoginAdmin = () => {
           onSubmit={handleSubmit(onSubmit)}
           sx={{
             flex: 1,
-            justifyContent: 'center',
             alignItems: 'center',
+            mt: 16,
             gap: 4,
           }}
         >
-          <Stack alignItems="center" spacing={1}>
-            <Typography fontWeight="bold" variant="h4">
-              Sign in to{' '}
-              <Box component="span" color="secondary.main">
-                Buzhub
-              </Box>
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Welcome back! Please enter your details.
-            </Typography>
+          <Stack alignItems="center" justifyContent="center" spacing={2}>
+            <Box bgcolor="divider" borderRadius={99} height={120} width={120}></Box>
+            <Stack alignItems="center" spacing={0.5}>
+              <Typography fontWeight="bold" variant="h2">
+                Welcome back
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Please enter your details
+              </Typography>
+            </Stack>
           </Stack>
           <Stack spacing={3} width="100%" maxWidth={{ xs: '100%', sm: 400 }} px={2}>
             <Stack spacing={1.5}>
@@ -114,13 +114,22 @@ export const LoginAdmin = () => {
                 placeholder="Enter Password"
                 randomizer={false}
               />
-              <Link
-                to="/forgot-password"
-                alignSelf="flex-end"
-                sx={{ fontSize: 'small', color: 'text.main' }}
-              >
-                Forgot password?
-              </Link>
+              <Stack direction="row" justifyContent="space-between" alignItems="center">
+                <FormControlLabel
+                  control={<Checkbox size="small" />}
+                  label="Remember me"
+                  sx={{
+                    '& .MuiTypography-root': { fontSize: '0.875rem' },
+                  }}
+                />
+                <Link
+                  to="/forgot-password"
+                  alignSelf="flex-center"
+                  sx={{ fontSize: 'small', color: 'text.main', fontWeight: 'medium' }}
+                >
+                  Forgot password?
+                </Link>
+              </Stack>
             </Stack>
             <Button
               disabled={!isValid}
