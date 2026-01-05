@@ -3,10 +3,12 @@ import { Stack, Typography } from '@mui/material';
 interface Props {
   title: string;
   description?: string;
+  action?: React.ReactNode;
 }
 
-export const PageHeader = ({ title, description }: Props) => {
+export const PageHeader = ({ title, description, action }: Props) => {
   return (
+    <Stack direction='row' justifyContent="space-between" alignItems="center" mb={3}>
     <Stack spacing={0.5}>
       <Typography variant="h5" sx={{ fontWeight: 600 }}>
         {title}
@@ -14,6 +16,9 @@ export const PageHeader = ({ title, description }: Props) => {
       <Typography variant="body2" color="text.secondary">
         {description}
       </Typography>
+
+    </Stack>
+      {action}
     </Stack>
   );
 };
