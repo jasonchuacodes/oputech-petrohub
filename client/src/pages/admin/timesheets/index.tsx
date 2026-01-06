@@ -1,5 +1,5 @@
 import { FileDownloadOutlined, HomeOutlined } from '@mui/icons-material';
-import { Box, Stack, Typography } from '@mui/material';
+import { Box, Stack } from '@mui/material';
 import dayjs from 'dayjs';
 import weekday from 'dayjs/plugin/weekday';
 import utc from 'dayjs/plugin/utc';
@@ -7,6 +7,7 @@ import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { SearchInput } from '~/components/form';
+import { PageHeader } from '~/components/layouts';
 import {
   Breadcrumb,
   Button,
@@ -70,7 +71,7 @@ const TimesheetsPageContent = () => {
       {userId ? (
         <TimesheetLogs />
       ) : (
-        <PageContainer spacing={2}>
+        <PageContainer>
           <Breadcrumb
             items={[
               {
@@ -86,44 +87,44 @@ const TimesheetsPageContent = () => {
               },
             ]}
           />
-          <Stack spacing={3} alignItems="start">
-            <Stack spacing={0.5}>
-              <Typography variant="h6">Timesheets</Typography>
-              <Typography variant="body2" color="text.secondary">
-                View and manage timesheet records for your team
-              </Typography>
-            </Stack>
+          <PageHeader
+            title="Timesheets"
+            description="View and manage timesheet records for your team"
+          />
+          <Stack spacing={1}>
             <DateRangePicker
               selectedStart={startDate}
               selectedEnd={endDate}
               label="Select Time Period"
               onAccept={handleSelectDateRange}
             />
+            <Stack direction="row" alignItems="end" justifyContent="space-between">
+              <SearchInput
+                placeholder="Search employee"
+                value={searchTerm}
+                onChange={setSearchTerm}
+              />
+              <Button
+                startIcon={<FileDownloadOutlined />}
+                onClick={handleExport}
+                variant="contained"
+                sx={{ height: 40, flexShrink: 0 }}
+              >
+                Export
+              </Button>
+            </Stack>
+            {isLoading ? (
+              <Box display="flex" justifyContent="center" alignItems="center" pt={10}>
+                <LoadingSpinner />
+              </Box>
+            ) : filteredTimesheets && filteredTimesheets.length > 0 ? (
+              <TimesheetTable timesheets={filteredTimesheets} />
+            ) : (
+              <Box pt={10}>
+                <NoData text="No timesheets data available." />
+              </Box>
+            )}
           </Stack>
-          <Stack direction="row" alignItems="end" justifyContent="space-between">
-            <SearchInput
-              placeholder="Search employee"
-              value={searchTerm}
-              onChange={setSearchTerm}
-            />
-            <Button
-              startIcon={<FileDownloadOutlined />}
-              onClick={handleExport}
-              variant="contained"
-              sx={{ height: 40, flexShrink: 0 }}
-            >
-              Export
-            </Button>
-          </Stack>
-          {isLoading ? (
-            <Box display="flex" justifyContent="center" alignItems="center" pt={10}>
-              <LoadingSpinner />
-            </Box>
-          ) : filteredTimesheets && filteredTimesheets.length > 0 ? (
-            <TimesheetTable timesheets={filteredTimesheets} />
-          ) : (
-            <NoData text="No timesheets data available." />
-          )}
         </PageContainer>
       )}
     </PageLayout>

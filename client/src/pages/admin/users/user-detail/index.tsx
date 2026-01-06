@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { HomeOutlined } from '@mui/icons-material';
 import { Divider, Grid, Stack, Typography } from '@mui/material';
 import { useForm } from 'react-hook-form';
 import { useEffect, useState } from 'react';
@@ -19,7 +20,6 @@ import { parseBackendError } from '~/utils/parseBackendError';
 
 import { ResetPasswordModal } from '../ResetPasswordModal';
 import { AvatarPicker } from './AvatarPicker';
-import { HomeOutlined } from '@mui/icons-material';
 
 export const UserDetailPage = () => {
   const navigate = useNavigate();
@@ -88,15 +88,6 @@ export const UserDetailPage = () => {
       await updateUser({ data: payload as UpdateUserPayload, tenantId, userId });
 
       toast.success('User updated successfully');
-
-      navigate(
-        pathFor({
-          pathname: AdminRoutes.TenantUsers,
-          params: {
-            tenantId,
-          },
-        }),
-      );
     } catch (err) {
       const parsedError = parseBackendError(err);
       toast.error(`Failed to update user: ${parsedError}`);
@@ -129,204 +120,204 @@ export const UserDetailPage = () => {
           ]}
         />
 
-          <Form onSubmit={handleSubmit(onSubmit)}>
-            <Stack spacing={4}>
-              <Grid container spacing={6}>
-                <Grid size={{ xs: 12, md: 4 }}>
-                  <Typography variant="body2" fontWeight="medium">
-                    Personal Information
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Basic information about the user
-                  </Typography>
-                </Grid>
-                <Grid size={{ xs: 12, md: 8 }}>
-                  <Stack spacing={2}>
-                    <AvatarPicker name={user?.name} />
-                    <Stack spacing={0.5}>
-                      <Typography variant="body2" fontWeight="medium">
-                        Full Name
-                      </Typography>
-                      <Input
-                        required
-                        fullWidth
-                        control={control}
-                        name="name"
-                        placeholder="John Doe"
-                      />
-                    </Stack>
-                    <Stack spacing={0.5}>
-                      <Typography variant="body2" fontWeight="medium">
-                        Contact Number
-                      </Typography>
-                      <InputWithFormat
-                        control={control}
-                        name="contact"
-                        pattern="9999-999-9999"
-                        placeholder="0000-000-0000"
-                      />
-                    </Stack>
-                    <Stack spacing={0.5}>
-                      <Typography variant="body2" fontWeight="medium">
-                        Address
-                      </Typography>
-                      <Input control={control} name="address" placeholder="Manila, Philippines" />
-                    </Stack>
-                    <Stack spacing={0.5}>
-                      <Typography variant="body2" fontWeight="medium">
-                        Position
-                      </Typography>
-                      <Input control={control} name="position" placeholder="Operations Manager" />
-                    </Stack>
-                  </Stack>
-                </Grid>
+        <Form onSubmit={handleSubmit(onSubmit)}>
+          <Stack spacing={4}>
+            <Grid container spacing={6}>
+              <Grid size={{ xs: 12, md: 4 }}>
+                <Typography variant="body2" fontWeight="medium">
+                  Personal Information
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Basic information about the user
+                </Typography>
               </Grid>
-              <Divider />
-
-              {user?.role === UserRole.USER && (
-                <>
-                  <Grid container spacing={6}>
-                    <Grid size={{ xs: 12, md: 4 }}>
-                      <Typography variant="body2" fontWeight="medium">
-                        Shift Schedule
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Assign work shift for this user
-                      </Typography>
-                    </Grid>
-                    <Grid sx={{ xs: 12, md: 8 }}>
-                      <ShiftSelect
-                        control={control}
-                        name="shiftId"
-                        label="Shift"
-                        shifts={shifts || []}
-                      />
-                    </Grid>
-                  </Grid>
-                  <Divider />
-                </>
-              )}
-
-              <Grid container spacing={6}>
-                <Grid size={{ xs: 12, md: 4 }}>
-                  <Typography variant="body2" fontWeight="medium">
-                    Government IDs
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Government-issued information for reference
-                  </Typography>
-                </Grid>
-                <Grid size={{ xs: 12, md: 8 }}>
-                  <Stack spacing={2}>
-                    <Stack spacing={0.5}>
-                      <Typography variant="body2" fontWeight="medium">
-                        TIN
-                      </Typography>
-                      <InputWithFormat
-                        control={control}
-                        name="tin"
-                        pattern="999-999-999-999"
-                        placeholder="000-000-000-000"
-                      />
-                    </Stack>
-                    <Stack spacing={0.5}>
-                      <Typography variant="body2" fontWeight="medium">
-                        SSS
-                      </Typography>
-                      <InputWithFormat
-                        control={control}
-                        name="sss"
-                        pattern="99-9999999-9"
-                        placeholder="00-0000000-0"
-                      />
-                    </Stack>
-                    <Stack spacing={0.5}>
-                      <Typography variant="body2" fontWeight="medium">
-                        PAG-IBIG
-                      </Typography>
-                      <InputWithFormat
-                        control={control}
-                        name="pagibig"
-                        pattern="99-9999999999-9"
-                        placeholder="00-0000000000-0"
-                      />
-                    </Stack>
-                    <Stack spacing={0.5}>
-                      <Typography variant="body2" fontWeight="medium">
-                        PhilHealth
-                      </Typography>
-                      <InputWithFormat
-                        control={control}
-                        name="philhealth"
-                        pattern="9999-9999-9999"
-                        placeholder="0000-0000-0000"
-                      />
-                    </Stack>
-                  </Stack>
-                </Grid>
-              </Grid>
-              <Divider />
-
-              <Grid container spacing={6}>
-                <Grid size={{ xs: 12, md: 4 }}>
-                  <Typography variant="body2" fontWeight="medium" color="error">
-                    Danger Zone
-                  </Typography>
-                </Grid>
-                <Grid size={{ xs: 12, md: 8 }}>
-                  <Stack spacing={1}>
-                    <Typography variant="body2" color="text.secondary">
-                      Manage account security settings and password controls
+              <Grid size={{ xs: 12, md: 8 }}>
+                <Stack spacing={2}>
+                  <AvatarPicker name={user?.name} />
+                  <Stack spacing={0.5}>
+                    <Typography variant="body2" fontWeight="medium">
+                      Full Name
                     </Typography>
-                    <Button
-                      onClick={() => setIsResetPasswordModalOpen(true)}
-                      disabled={auth?.id === userId}
-                      color="error"
-                      variant="outlined"
-                      sx={{ width: 'fit-content' }}
-                    >
-                      Reset Password
-                    </Button>
-
-                    {auth?.id === userId && (
-                      <Typography variant="caption" color="text.secondary">
-                        You cannot reset your own password here. Please go to the{' '}
-                        <Typography
-                          variant="caption"
-                          color="info"
-                          sx={{ cursor: 'pointer' }}
-                          onClick={() =>
-                            navigate(
-                              pathFor({
-                                pathname: AdminRoutes.TenantAccountSettings,
-                                params: { tenantId },
-                              }),
-                            )
-                          }
-                        >
-                          account settings
-                        </Typography>{' '}
-                        section.
-                      </Typography>
-                    )}
+                    <Input
+                      required
+                      fullWidth
+                      control={control}
+                      name="name"
+                      placeholder="John Doe"
+                    />
                   </Stack>
-                </Grid>
+                  <Stack spacing={0.5}>
+                    <Typography variant="body2" fontWeight="medium">
+                      Contact Number
+                    </Typography>
+                    <InputWithFormat
+                      control={control}
+                      name="contact"
+                      pattern="9999-999-9999"
+                      placeholder="0000-000-0000"
+                    />
+                  </Stack>
+                  <Stack spacing={0.5}>
+                    <Typography variant="body2" fontWeight="medium">
+                      Address
+                    </Typography>
+                    <Input control={control} name="address" placeholder="Manila, Philippines" />
+                  </Stack>
+                  <Stack spacing={0.5}>
+                    <Typography variant="body2" fontWeight="medium">
+                      Position
+                    </Typography>
+                    <Input control={control} name="position" placeholder="Operations Manager" />
+                  </Stack>
+                </Stack>
               </Grid>
-              <Divider />
-            </Stack>
+            </Grid>
+            <Divider />
 
-            <Stack py={2} width="100%">
-              <Button
-                disabled={!isValid || !isDirty}
-                loading={isUpdatePending}
-                variant="contained"
-                type="submit"
-                sx={{ alignSelf: 'end' }}
-              >
-                Save Changes
-              </Button>
-            </Stack>
-          </Form>
+            {user?.role === UserRole.USER && (
+              <>
+                <Grid container spacing={6}>
+                  <Grid size={{ xs: 12, md: 4 }}>
+                    <Typography variant="body2" fontWeight="medium">
+                      Shift Schedule
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Assign work shift for this user
+                    </Typography>
+                  </Grid>
+                  <Grid sx={{ xs: 12, md: 8 }}>
+                    <ShiftSelect
+                      control={control}
+                      name="shiftId"
+                      label="Shift"
+                      shifts={shifts || []}
+                    />
+                  </Grid>
+                </Grid>
+                <Divider />
+              </>
+            )}
+
+            <Grid container spacing={6}>
+              <Grid size={{ xs: 12, md: 4 }}>
+                <Typography variant="body2" fontWeight="medium">
+                  Government IDs
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Government-issued information for reference
+                </Typography>
+              </Grid>
+              <Grid size={{ xs: 12, md: 8 }}>
+                <Stack spacing={2}>
+                  <Stack spacing={0.5}>
+                    <Typography variant="body2" fontWeight="medium">
+                      TIN
+                    </Typography>
+                    <InputWithFormat
+                      control={control}
+                      name="tin"
+                      pattern="999-999-999-999"
+                      placeholder="000-000-000-000"
+                    />
+                  </Stack>
+                  <Stack spacing={0.5}>
+                    <Typography variant="body2" fontWeight="medium">
+                      SSS
+                    </Typography>
+                    <InputWithFormat
+                      control={control}
+                      name="sss"
+                      pattern="99-9999999-9"
+                      placeholder="00-0000000-0"
+                    />
+                  </Stack>
+                  <Stack spacing={0.5}>
+                    <Typography variant="body2" fontWeight="medium">
+                      PAG-IBIG
+                    </Typography>
+                    <InputWithFormat
+                      control={control}
+                      name="pagibig"
+                      pattern="99-9999999999-9"
+                      placeholder="00-0000000000-0"
+                    />
+                  </Stack>
+                  <Stack spacing={0.5}>
+                    <Typography variant="body2" fontWeight="medium">
+                      PhilHealth
+                    </Typography>
+                    <InputWithFormat
+                      control={control}
+                      name="philhealth"
+                      pattern="9999-9999-9999"
+                      placeholder="0000-0000-0000"
+                    />
+                  </Stack>
+                </Stack>
+              </Grid>
+            </Grid>
+            <Divider />
+
+            <Grid container spacing={6}>
+              <Grid size={{ xs: 12, md: 4 }}>
+                <Typography variant="body2" fontWeight="medium" color="error">
+                  Danger Zone
+                </Typography>
+              </Grid>
+              <Grid size={{ xs: 12, md: 8 }}>
+                <Stack spacing={1}>
+                  <Typography variant="body2" color="text.secondary">
+                    Manage account security settings and password controls
+                  </Typography>
+                  <Button
+                    onClick={() => setIsResetPasswordModalOpen(true)}
+                    disabled={auth?.id === userId}
+                    color="error"
+                    variant="outlined"
+                    sx={{ width: 'fit-content' }}
+                  >
+                    Reset Password
+                  </Button>
+
+                  {auth?.id === userId && (
+                    <Typography variant="caption" color="text.secondary">
+                      You cannot reset your own password here. Please go to the{' '}
+                      <Typography
+                        variant="caption"
+                        color="info"
+                        sx={{ cursor: 'pointer' }}
+                        onClick={() =>
+                          navigate(
+                            pathFor({
+                              pathname: AdminRoutes.TenantAccountSettings,
+                              params: { tenantId },
+                            }),
+                          )
+                        }
+                      >
+                        account settings
+                      </Typography>{' '}
+                      section.
+                    </Typography>
+                  )}
+                </Stack>
+              </Grid>
+            </Grid>
+            <Divider />
+          </Stack>
+
+          <Stack py={2} width="100%">
+            <Button
+              disabled={!isValid || !isDirty}
+              loading={isUpdatePending}
+              variant="contained"
+              type="submit"
+              sx={{ alignSelf: 'end' }}
+            >
+              Save Changes
+            </Button>
+          </Stack>
+        </Form>
       </PageContainer>
 
       <ResetPasswordModal

@@ -54,14 +54,14 @@ export const DateRangePicker = ({
     <Stack spacing={1}>
       <Button
         onClick={handleOpen}
-        fullWidth
         variant="outlined"
         sx={{
+          width: 'fit-content',
           height: 40,
           justifyContent: 'flex-start',
-          bgcolor: isOpen ? alpha(theme.palette.primary.light, 0.1) : '',
+          bgcolor: isOpen ? alpha(theme.palette.primary.light, 0.1) : 'background.paper',
         }}
-        startIcon={<CalendarOutlined fontSize="small" />}
+        startIcon={<CalendarOutlined fontSize="small" sx={{ color: 'text.secondary' }} />}
       >
         <Stack direction="row" spacing={1}>
           <Typography component="span" variant="body2" color="text.secondary">

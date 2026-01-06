@@ -80,14 +80,15 @@ const getTenantUsers = async (tenantId: string) => {
       users: {
         include: {
           user: {
-            select :{
+            select: {
               id: true,
               name: true,
               username: true,
               role: true,
               position: true,
-            }
+            },
           },
+          shift: true,
         },
       },
     },
@@ -97,7 +98,21 @@ const getTenantUsers = async (tenantId: string) => {
     throw new NotFoundError('Tenant not found');
   }
 
-  return tenantWithUsers.users.map((u) => u.user);
+  return tenantWithUsers.users
+    .map((u) => {
+      let shiftSchedule = null;
+      if (u.shift) {
+        shiftSchedule = {
+          shiftId: u.shift.id,
+          shiftName: u.shift.name,
+          shiftStart: u.shift.shiftStart,
+          shiftEnd: u.shift.shiftEnd,
+          color: u.shift.color,
+        };
+      }
+      return { ...u.user, shiftSchedule };
+    })
+    .sort((a, b) => a.name.localeCompare(b.name));
 };
 
 export { createTenant, updateTenant, getTenantById, getTenants, getTenantUsers };

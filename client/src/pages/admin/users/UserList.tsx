@@ -26,7 +26,7 @@ export const UserList = () => {
           id: 'name',
           heading: 'Fullname',
           cell: (user) => (
-            <Link to={user.id} >
+            <Link to={user.id}>
               <Stack
                 direction="row"
                 spacing={1}
@@ -36,11 +36,7 @@ export const UserList = () => {
                 <Avatar sx={{ width: 32, height: 32 }}>
                   <Typography fontSize="small"> {user.name.charAt(0).toUpperCase()}</Typography>
                 </Avatar>
-                <Typography
-                  variant="body2"
-                  color="text.primary"
-                  className='username'
-                >
+                <Typography variant="body2" color="text.primary" className="username">
                   {user.name}
                 </Typography>
               </Stack>
@@ -74,7 +70,7 @@ export const UserList = () => {
           heading: 'Shift',
           cell: (user) =>
             user.shiftSchedule ? (
-              <Chip label={user.shiftSchedule.shiftName} />
+              <Chip label={user.shiftSchedule.shiftName} color={user.shiftSchedule.color} />
             ) : (
               <Typography variant="body2" color="text.secondary">
                 -

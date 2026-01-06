@@ -2,6 +2,7 @@ import { prisma } from '~/db';
 import { ConflictError, NotFoundError } from '~/errors';
 import type { CreateShiftPayload } from '../schema/createShiftSchema';
 import type { UpdateShiftPayload } from '../schema/updateShiftSchema';
+import { getNextShiftColor } from '../utils/shiftColors';
 
 const createShift = async (data: CreateShiftPayload) => {
   const existing = await prisma.shift.findFirst({
@@ -12,12 +13,15 @@ const createShift = async (data: CreateShiftPayload) => {
     throw new ConflictError('Shift with this name already exists');
   }
 
+  const count = await prisma.shift.count({ where: { tenantId: data.tenantId } });
+
   return await prisma.shift.create({
     data: {
       tenantId: data.tenantId,
       name: data.name,
       shiftStart: new Date(data.shiftStart),
       shiftEnd: new Date(data.shiftEnd),
+      color: getNextShiftColor(count),
     },
   });
 };

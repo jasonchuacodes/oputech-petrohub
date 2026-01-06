@@ -1,24 +1,25 @@
-import { Controller, type Control } from 'react-hook-form';
-import {
-  FormControl,
-  MenuItem,
-  Select,
-  Typography,
-  Stack,
-  FormHelperText,
-} from '@mui/material';
+import { Controller, type Control, type FieldValues, type FieldPath } from 'react-hook-form';
+import { FormControl, MenuItem, Typography, Stack, FormHelperText, Divider } from '@mui/material';
 
+import { Select } from '~/components/ui/Select';
 import type { Shift } from '~/services/shift/shift.types';
+import { formatTime } from '~/utils/date';
 
-type ShiftSelectProps = {
-  control: Control<any>;
-  name: string;
+type ShiftSelectProps<TFieldValues extends FieldValues = FieldValues> = {
+  control: Control<TFieldValues>;
+  name: FieldPath<TFieldValues>;
   label?: string;
   shifts: Shift[];
   disabled?: boolean;
 };
 
-export const ShiftSelect = ({ control, name, label, shifts, disabled }: ShiftSelectProps) => {
+export const ShiftSelect = <TFieldValues extends FieldValues = FieldValues>({
+  control,
+  name,
+  label,
+  shifts,
+  disabled,
+}: ShiftSelectProps<TFieldValues>) => {
   return (
     <Controller
       name={name}
@@ -31,23 +32,41 @@ export const ShiftSelect = ({ control, name, label, shifts, disabled }: ShiftSel
             </Typography>
           )}
           <FormControl fullWidth error={!!error} disabled={disabled}>
-            <Select value={value || ''} onChange={(e) => onChange(e.target.value || null)} displayEmpty size="small">
+            <Select
+              value={value || ''}
+              onChange={(e) => onChange(e.target.value || null)}
+              displayEmpty
+              size="small"
+              renderValue={(selected) => {
+                if (!selected) return <Typography variant="body2">No shift assigned</Typography>;
+
+                const shift = shifts.find((s) => s.id === selected);
+                if (!shift) return null;
+
+                return (
+                  <Stack direction="row" spacing={2} width="100%">
+                    <Typography variant="body2">{shift.name}</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {`(${formatTime(String(shift.shiftStart))} — ${formatTime(String(shift.shiftEnd))})`}
+                    </Typography>
+                  </Stack>
+                );
+              }}
+            >
               <MenuItem value="">
-                <em>No shift assigned</em>
+                <Typography variant="body2">No shift assigned</Typography>
               </MenuItem>
+              <Divider />
               {shifts.map((shift) => (
-                <MenuItem key={shift.id} value={shift.id}>
-                  {shift.name} (
-                  {new Date(shift.shiftStart).toLocaleTimeString('en-US', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}{' '}
-                  -{' '}
-                  {new Date(shift.shiftEnd).toLocaleTimeString('en-US', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
-                  )
+                <MenuItem
+                  key={shift.id}
+                  value={shift.id}
+                  sx={{ display: 'flex', justifyContent: 'space-between' }}
+                >
+                  <Typography variant="body2">{shift.name}</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {formatTime(String(shift.shiftStart))} — {formatTime(String(shift.shiftEnd))}
+                  </Typography>
                 </MenuItem>
               ))}
             </Select>

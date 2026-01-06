@@ -107,6 +107,7 @@ model Shift {
   name       String
   shiftStart DateTime
   shiftEnd   DateTime
+  color      String
 
   users TenantsOnUsers[]
 

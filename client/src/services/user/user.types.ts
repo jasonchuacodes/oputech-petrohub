@@ -37,5 +37,6 @@ export type User = {
     shiftName: string;
     shiftStart: Date;
     shiftEnd: Date;
+    color: string;
   } | null;
 };

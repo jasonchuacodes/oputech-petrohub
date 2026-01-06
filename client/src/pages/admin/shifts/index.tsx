@@ -1,8 +1,16 @@
-import { Stack, Typography } from '@mui/material';
+import { Box, Stack, Typography } from '@mui/material';
 import { Schedule, HomeOutlined, AddOutlined } from '@mui/icons-material';
 
 import { PageHeader } from '~/components/layouts';
-import { Breadcrumb, Button, CardContainer, PageContainer, PageLayout } from '~/components/ui';
+import {
+  Breadcrumb,
+  Button,
+  CardContainer,
+  LoadingSpinner,
+  NoData,
+  PageContainer,
+  PageLayout,
+} from '~/components/ui';
 import { ShiftProvider } from '~/context/shift';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { useDisclosure } from '~/hooks/useDisclosure';
@@ -53,10 +61,12 @@ export const ShiftsPage = () => {
         />
 
         {isLoading ? (
-          <Typography>Loading...</Typography>
-        ) : (
+          <Box display="flex" justifyContent="center" alignItems="center" pt={10}>
+            <LoadingSpinner />
+          </Box>
+        ) : shifts && shifts.length > 0 ? (
           <Stack spacing={2}>
-            {shifts?.map((shift) => (
+            {shifts.map((shift) => (
               <ShiftProvider shift={shift}>
                 <CardContainer maxWidth={560}>
                   <Stack direction="row" justifyContent="space-between" alignItems="start">
@@ -87,6 +97,10 @@ export const ShiftsPage = () => {
               </ShiftProvider>
             ))}
           </Stack>
+        ) : (
+          <Box pt={10}>
+            <NoData text="No Shift schedule found." />
+          </Box>
         )}
       </PageContainer>
 
