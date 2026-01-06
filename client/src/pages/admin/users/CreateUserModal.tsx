@@ -12,6 +12,7 @@ import { CreateUserSchema, type CreateUserInput } from '~/schema/createUserSchem
 import { useCreateUserMutation } from '~/services/user/user.queries';
 import { parseBackendError } from '~/utils/parseBackendError';
 import { toTitleCase } from '~/utils/textUtils';
+import { PeopleOutlined } from '@mui/icons-material';
 
 const roleOptions = Object.values(UserRole).map((value) => {
   return {
@@ -25,7 +26,7 @@ type Props = {
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-export const UserCreateModal = ({ open, setOpen }: Props) => {
+export const CreateUserModal = ({ open, setOpen }: Props) => {
   const { tenantId } = useTenantContext();
 
   const [selectedRole, setSelectedRole] = useState<UserRoleType>(UserRole.USER);
@@ -80,11 +81,13 @@ export const UserCreateModal = ({ open, setOpen }: Props) => {
     <CustomModal
       disabled={!isValid}
       title="Create User"
+      subheader="Add a new user to your company."
       open={open}
       onClose={handleCancel}
       onCancel={handleCancel}
       maxWidth={520}
       onSubmit={onSubmit}
+      icon={PeopleOutlined}
     >
       <Stack spacing={2} justifyContent="start" alignItems="start">
         <Input

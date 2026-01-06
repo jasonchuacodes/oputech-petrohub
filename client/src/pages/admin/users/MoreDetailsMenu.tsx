@@ -12,7 +12,7 @@ import { useDeleteUserMutation } from '~/services/user/user.queries';
 import { parseBackendError } from '~/utils/parseBackendError';
 import { pathFor } from '~/utils/pathFor';
 
-import { DeleteConfirmModal } from './DeleteConfirmModal';
+import { DeleteConfirmationModal } from './DeleteConfirmationModal';
 
 export const MoreDetailsMenu = () => {
   const navigate = useNavigate();
@@ -111,7 +111,7 @@ export const MoreDetailsMenu = () => {
         </MenuItem>
       </Menu>
 
-      <DeleteConfirmModal
+      <DeleteConfirmationModal
         open={isDeleteModalOpen}
         loading={isDeletePending}
         onClose={() => setIsDeleteModalOpen(false)}

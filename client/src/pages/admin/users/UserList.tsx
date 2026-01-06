@@ -23,16 +23,6 @@ export const UserList = () => {
       })}
       columns={[
         {
-          id: 'id',
-          heading: 'ID',
-          cell: (user) => (
-            <Typography variant="body2" color="text.secondary">
-              {user.id.slice(0, 8)}
-            </Typography>
-          ),
-          orderable: false,
-        },
-        {
           id: 'name',
           heading: 'Fullname',
           cell: (user) => (
@@ -107,7 +97,7 @@ export const UserList = () => {
           heading: '',
           align: 'right',
           cell: (user) => (
-            <UserProvider userId={user.id}>
+            <UserProvider userId={user.id} user={user}>
               <MoreDetailsMenu />
             </UserProvider>
           ),

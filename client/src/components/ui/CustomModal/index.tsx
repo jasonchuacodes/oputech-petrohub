@@ -53,7 +53,7 @@ export const CustomModal = ({
         <Card
           sx={{
             position: 'absolute',
-            maxWidth: maxWidth ? maxWidth : 400,
+            maxWidth: maxWidth ? maxWidth : 560,
             maxHeight: 720,
             top: '50%',
             left: '50%',
@@ -113,7 +113,6 @@ export const CustomModal = ({
                     fontSize: 'h5.fontSize',
                     color: 'text.primary',
                     fontWeight: 'bold',
-                    mb: subheader ? 0.5 : 0,
                   }}
                 >
                   {title}

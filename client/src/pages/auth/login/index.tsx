@@ -62,7 +62,7 @@ export const Login = () => {
         sx={{
           flex: 1,
           alignItems: 'center',
-          mt: 16,
+          justifyContent: 'center',
           gap: 4,
         }}
       >

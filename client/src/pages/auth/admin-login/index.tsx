@@ -69,7 +69,7 @@ export const LoginAdmin = () => {
           sx={{
             flex: 1,
             alignItems: 'center',
-            mt: 16,
+            justifyContent: 'center',
             gap: 4,
           }}
         >
@@ -111,7 +111,7 @@ export const LoginAdmin = () => {
                 control={control}
                 name="password"
                 label="Password"
-                placeholder="Enter Password"
+                placeholder="Enter password"
                 randomizer={false}
               />
               <Stack direction="row" justifyContent="space-between" alignItems="center">

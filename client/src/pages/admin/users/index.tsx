@@ -9,7 +9,7 @@ import { useDisclosure } from '~/hooks/useDisclosure';
 import { AdminRoutes } from '~/routes';
 import { pathFor } from '~/utils/pathFor';
 
-import { UserCreateModal } from './UserCreateModal';
+import { CreateUserModal } from './CreateUserModal';
 import { UserList } from './UserList';
 
 export const UsersPage = () => {
@@ -68,7 +68,7 @@ export const UsersPage = () => {
         </Stack>
       </PageContainer>
 
-      <UserCreateModal open={disclosure.open} setOpen={disclosure.setOpen} />
+      <CreateUserModal open={disclosure.open} setOpen={disclosure.setOpen} />
     </PageLayout>
   );
 };
