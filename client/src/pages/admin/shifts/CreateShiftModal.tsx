@@ -8,6 +8,7 @@ import { Input, TimePicker } from '~/components/form';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { useCreateShiftMutation } from '~/services/shift/shift.queries';
 import { CreateShiftSchema, type CreateShiftInput } from '~/schema/createShiftSchema';
+import { CalendarMonthOutlined } from '@mui/icons-material';
 
 type CreateShiftModalProps = {
   open: boolean;
@@ -54,6 +55,7 @@ export const CreateShiftModal = ({ open, onClose }: CreateShiftModalProps) => {
       submitText="Create Shift"
       loading={isPending}
       maxWidth={560}
+      icon={CalendarMonthOutlined}
     >
       <Stack spacing={2}>
         <Stack spacing={0.5}>

@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { LockOutlined } from '@mui/icons-material';
 import { Stack } from '@mui/material';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
@@ -63,12 +64,14 @@ export const ResetPasswordModal = ({ open, onClose, userId }: Props) => {
       disabled={!isValid}
       loading={isPending}
       title="Reset User Password"
+      subheader="Set a new password for the selected user."
       open={open}
       onClose={handleCancel}
       onCancel={handleCancel}
       maxWidth={520}
       onSubmit={onSubmit}
       submitText="Reset Password"
+      icon={LockOutlined}
     >
       <Stack spacing={2} justifyContent="start" alignItems="start">
         <PasswordField
