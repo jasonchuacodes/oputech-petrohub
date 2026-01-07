@@ -64,7 +64,7 @@ export const DataTable = <T,>({
   }
 
   if (collection.items.length === 0) {
-    return <NoData text={emptyMessage} />;
+    return <NoData text={emptyMessage} sx={{ minHeight: 120 }} />;
   }
 
   return (

@@ -1,19 +1,7 @@
-import {
-  Box,
-  Chip,
-  Paper,
-  Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-} from '@mui/material';
+import { Box, Chip, Stack, Typography } from '@mui/material';
 import dayjs from 'dayjs';
 
-import { NoData, Widget } from '~/components/ui';
+import { DataTable, Widget } from '~/components/ui';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { useTimesheetPusher } from '~/hooks/useTimesheetPusher';
 import { useGetDailyTimesheetsQuery } from '~/services/timesheet/timesheet.queries';
@@ -38,22 +26,6 @@ export const TimesheetWidget = () => {
     params: { tenantId },
   });
 
-  const renderStatus = (status: string) => {
-    const isIn = status === UserStatusEnum.IN;
-    const color = isIn ? 'success.main' : 'text.disabled';
-
-    return (
-      <Box
-        sx={{
-          width: 8,
-          height: 8,
-          borderRadius: '50%',
-          bgcolor: color,
-        }}
-      />
-    );
-  };
-
   const getStatusChip = (user: { checkIn: string | null; shiftStart: string | null }) => {
     if (!user.checkIn || !user.shiftStart) return '-';
 
@@ -70,64 +42,96 @@ export const TimesheetWidget = () => {
     );
   };
 
+  const renderStatus = (status: string) => {
+    const isIn = status === UserStatusEnum.IN;
+    const color = isIn ? 'success.main' : 'text.disabled';
+
+    return (
+      <Box
+        sx={{
+          width: 8,
+          height: 8,
+          borderRadius: '50%',
+          bgcolor: color,
+        }}
+      />
+    );
+  };
+
   return (
     <Widget title="Daily Timesheet" to={navigateTo}>
-      {users.length > 0 ? (
-        <TableContainer
-          component={Paper}
-          elevation={0}
-          sx={{
-            border: '1px solid',
-            borderColor: 'divider',
-            maxHeight: 450,
-            overflowY: 'auto',
-          }}
-        >
-          <Table stickyHeader>
-            <TableHead>
-              <TableRow>
-                <TableCell sx={{ whiteSpace: 'nowrap' }}>Full Name</TableCell>
-                <TableCell sx={{ whiteSpace: 'nowrap' }}>Check In</TableCell>
-                <TableCell sx={{ whiteSpace: 'nowrap' }}>Check Out</TableCell>
-                <TableCell sx={{ whiteSpace: 'nowrap' }}>Status</TableCell>
-                <TableCell sx={{ minWidth: 240, whiteSpace: 'nowrap' }}>Notes</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {users.map((user) => (
-                <TableRow key={user.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                  <TableCell sx={{ whiteSpace: 'nowrap' }}>
-                    <Stack direction="row" alignItems="center" spacing={1}>
-                      <Box component="span">{renderStatus(user.status)}</Box>
-                      <Typography variant="body2" sx={{ whiteSpace: 'nowrap' }}>
-                        {user.name}
-                      </Typography>
-                    </Stack>
-                  </TableCell>
-                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatTime(user.checkIn)}</TableCell>
-                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatTime(user.checkOut)}</TableCell>
-                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{getStatusChip(user)}</TableCell>
-                  <TableCell sx={{ whiteSpace: 'nowrap' }}>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: 'error',
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                      }}
-                    >
-                      {user.notes}
-                    </Typography>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      ) : (
-        <NoData text="No users found" />
-      )}
+      <DataTable
+      id="admin-users-table"
+      collection={DataTable.collection({
+        items: users || [],
+        itemToValue: (user) => user.id,
+        itemToString: (user) => user.name,
+      })}
+      columns={[
+        {
+          id: 'name',
+          heading: 'Full Name',
+          cell: (user) => (
+            <Stack direction="row" alignItems="center" spacing={1}>
+              <Box component="span">{renderStatus(user.status)}</Box>
+              <Typography variant="body2" sx={{ whiteSpace: 'nowrap' }}>
+                {user.name}
+              </Typography>
+            </Stack>
+          ),
+          orderable: true,
+        },
+        {
+          id: 'checkIn',
+          heading: 'Check In',
+          cell: (user) => (
+            <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
+              {formatTime(user.checkIn)}
+            </Typography>
+          ),
+          orderable: true,
+        },
+        {
+          id: 'checkOut',
+          heading: 'Check Out',
+          cell: (user) => (
+            <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
+              {formatTime(user.checkOut)}
+            </Typography>
+          ),
+          orderable: true,
+        },
+        {
+          id: 'status',
+          heading: 'Status',
+          cell: (user) => (
+            <Box sx={{ whiteSpace: 'nowrap' }}>
+              {getStatusChip(user)}
+            </Box>
+          ),
+          orderable: false,
+        },
+        {
+          id: 'notes',
+          heading: 'Notes',
+          cell: (user) => (
+            <Typography
+              variant="body2"
+              sx={{
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
+            >
+              {user.notes}
+            </Typography>
+          ),
+          orderable: false,
+          width: 240,
+        },
+      ]}
+      emptyMessage="No users found"
+    />
     </Widget>
   );
 };

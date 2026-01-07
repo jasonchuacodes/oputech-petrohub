@@ -1,7 +1,7 @@
 import { Controller, type Control, type FieldValues, type FieldPath } from 'react-hook-form';
 import { FormControl, MenuItem, Typography, Stack, FormHelperText, Divider } from '@mui/material';
 
-import { Select } from '~/components/ui/Select';
+import { Select, Show } from '~/components/ui';
 import type { Shift } from '~/services/shift/shift.types';
 import { formatTime } from '~/utils/date';
 
@@ -56,7 +56,10 @@ export const ShiftSelect = <TFieldValues extends FieldValues = FieldValues>({
               <MenuItem value="">
                 <Typography variant="body2">No shift assigned</Typography>
               </MenuItem>
-              <Divider />
+              <Show when={shifts.length > 0}>
+                <Divider />
+              </Show>
+
               {shifts.map((shift) => (
                 <MenuItem
                   key={shift.id}
