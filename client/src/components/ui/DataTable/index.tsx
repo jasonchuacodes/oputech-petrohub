@@ -64,15 +64,11 @@ export const DataTable = <T,>({
   }
 
   if (collection.items.length === 0) {
-<<<<<<< Updated upstream
-    return <NoData text={emptyMessage} sx={{ minHeight: 120 }} />;
-=======
     return (
       <Box pt={10}>
         <NoData text={emptyMessage} />
       </Box>
     );
->>>>>>> Stashed changes
   }
 
   return (
