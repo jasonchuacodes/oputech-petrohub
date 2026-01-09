@@ -96,31 +96,31 @@ export const UserDetailPage = () => {
 
   return (
     <PageLayout>
-      <PageContainer>
-        <Breadcrumb
-          items={[
-            {
-              icon: HomeOutlined,
-              label: 'Home',
-              to: pathFor({
-                pathname: AdminRoutes.TenantHome,
-                params: { tenantId },
-              }),
-            },
-            {
-              label: 'Users',
-              to: pathFor({
-                pathname: AdminRoutes.TenantUsers,
-                params: { tenantId },
-              }),
-            },
-            {
-              label: user?.name ?? 'Loading...',
-            },
-          ]}
-        />
+      <Form onSubmit={handleSubmit(onSubmit)}>
+        <PageContainer>
+          <Breadcrumb
+            items={[
+              {
+                icon: HomeOutlined,
+                label: 'Home',
+                to: pathFor({
+                  pathname: AdminRoutes.TenantHome,
+                  params: { tenantId },
+                }),
+              },
+              {
+                label: 'Users',
+                to: pathFor({
+                  pathname: AdminRoutes.TenantUsers,
+                  params: { tenantId },
+                }),
+              },
+              {
+                label: user?.name ?? 'Loading...',
+              },
+            ]}
+          />
 
-        <Form onSubmit={handleSubmit(onSubmit)}>
           <Stack spacing={4}>
             <Grid container spacing={6}>
               <Grid size={{ xs: 12, md: 4 }}>
@@ -303,22 +303,33 @@ export const UserDetailPage = () => {
                 </Stack>
               </Grid>
             </Grid>
-            <Divider />
           </Stack>
+        </PageContainer>
 
-          <Stack py={2} width="100%">
-            <Button
-              disabled={!isValid || !isDirty}
-              loading={isUpdatePending}
-              variant="contained"
-              type="submit"
-              sx={{ alignSelf: 'end' }}
-            >
-              Save Changes
-            </Button>
-          </Stack>
-        </Form>
-      </PageContainer>
+        <Stack
+          py={2}
+          px={3}
+          width="100%"
+          bgcolor="background.paper"
+          sx={{
+            position: 'sticky',
+            bottom: 0,
+            zIndex: 10,
+            borderTop: '1px solid',
+            borderColor: 'divider',
+          }}
+        >
+          <Button
+            disabled={!isValid || !isDirty}
+            loading={isUpdatePending}
+            variant="contained"
+            type="submit"
+            sx={{ alignSelf: 'end' }}
+          >
+            Save Changes
+          </Button>
+        </Stack>
+      </Form>
 
       <ResetPasswordModal
         open={isResetPasswordModalOpen}

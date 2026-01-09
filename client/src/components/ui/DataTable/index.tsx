@@ -125,6 +125,9 @@ export const DataTable = <T,>({
                 sx={{
                   ...(onRowClick && {
                     cursor: 'pointer',
+                    ":hover": {
+                      backgroundColor: 'background.surface'
+                    }
                   }),
                 }}
                 aria-label={ariaLabel}

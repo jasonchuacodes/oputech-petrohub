@@ -121,7 +121,7 @@ const getReports = async ({
         select: { entries: true, expenses: true },
       },
     },
-    orderBy: { shiftDate: 'desc' },
+    orderBy: { submittedAt: 'desc' },
   });
 
   return reports.map((report) => ({

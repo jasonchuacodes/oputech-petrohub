@@ -28,6 +28,7 @@ export const AppToaster = () => {
             secondary: theme.palette.error.contrastText,
           },
         },
+        duration: 4000,
       }}
     />
   );

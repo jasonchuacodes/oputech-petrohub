@@ -48,7 +48,7 @@ export const getInitialDateRange = (key: string) => {
 };
 
 export const formatDate = (date: string | Date, format?: string): string => {
-  return dayjs(date).tz(APP_TZ).format(format ?? 'MMM D, YYYY');
+  return dayjs(date).tz(APP_TZ).format(format ?? 'MMMM D, YYYY');
 };
 
 export const formatTime = (timestamp: string | null, format?: string) => {

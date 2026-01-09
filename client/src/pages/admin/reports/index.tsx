@@ -1,10 +1,9 @@
-import { AddOutlined, ChevronRightOutlined, HomeOutlined } from '@mui/icons-material';
+import { ChevronRightOutlined, HomeOutlined } from '@mui/icons-material';
 import { Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
 import {
   Breadcrumb,
-  Button,
   Chip,
   DataTable,
   DateRangePicker,
@@ -13,7 +12,6 @@ import {
 } from '~/components/ui';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { PageHeader } from '~/components/layouts';
-import { useDisclosure } from '~/hooks/useDisclosure';
 import { AdminRoutes } from '~/routes';
 import { pathFor } from '~/utils/pathFor';
 import { formatDate } from '~/utils/date';
@@ -22,7 +20,6 @@ import { useGetReportsQuery } from '~/services/report/report.queries';
 
 export const ReportsPage = () => {
   const { tenantId } = useTenantContext();
-  const disclosure = useDisclosure();
   const navigate = useNavigate();
 
   const { data: reports, isLoading } = useGetReportsQuery({ tenantId });
@@ -54,20 +51,7 @@ export const ReportsPage = () => {
             },
           ]}
         />
-        <PageHeader
-          title="Reports"
-          description="View the list of reports here."
-          action={
-            <Button
-              onClick={disclosure.onOpen}
-              variant="contained"
-              size="large"
-              startIcon={<AddOutlined fontSize="small" />}
-            >
-              Create Report
-            </Button>
-          }
-        />
+        <PageHeader title="Reports" description="View the list of reports here." />
 
         <DateRangePicker
           selectedStart={null}
