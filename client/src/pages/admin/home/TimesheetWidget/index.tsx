@@ -61,77 +61,76 @@ export const TimesheetWidget = () => {
   return (
     <Widget title="Daily Timesheet" to={navigateTo}>
       <DataTable
-      id="admin-users-table"
-      collection={DataTable.collection({
-        items: users || [],
-        itemToValue: (user) => user.id,
-        itemToString: (user) => user.name,
-      })}
-      columns={[
-        {
-          id: 'name',
-          heading: 'Full Name',
-          cell: (user) => (
-            <Stack direction="row" alignItems="center" spacing={1}>
-              <Box component="span">{renderStatus(user.status)}</Box>
-              <Typography variant="body2" sx={{ whiteSpace: 'nowrap' }}>
-                {user.name}
+        id="admin-users-table"
+        collection={DataTable.collection({
+          items: users || [],
+          itemToValue: (user) => user.id,
+          itemToString: (user) => user.name,
+        })}
+        columns={[
+          {
+            id: 'name',
+            heading: 'Full Name',
+            cell: (user) => (
+              <Stack direction="row" alignItems="center" spacing={1}>
+                <Box component="span">{renderStatus(user.status)}</Box>
+                <Typography variant="body2" sx={{ whiteSpace: 'nowrap' }}>
+                  {user.name}
+                </Typography>
+              </Stack>
+            ),
+            orderable: true,
+          },
+          {
+            id: 'checkIn',
+            heading: 'Check In',
+            cell: (user) => (
+              <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
+                {formatTime(user.checkIn)}
               </Typography>
-            </Stack>
-          ),
-          orderable: true,
-        },
-        {
-          id: 'checkIn',
-          heading: 'Check In',
-          cell: (user) => (
-            <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
-              {formatTime(user.checkIn)}
-            </Typography>
-          ),
-          orderable: true,
-        },
-        {
-          id: 'checkOut',
-          heading: 'Check Out',
-          cell: (user) => (
-            <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
-              {formatTime(user.checkOut)}
-            </Typography>
-          ),
-          orderable: true,
-        },
-        {
-          id: 'status',
-          heading: 'Status',
-          cell: (user) => (
-            <Box sx={{ whiteSpace: 'nowrap' }}>
-              {getStatusChip(user)}
-            </Box>
-          ),
-          orderable: false,
-        },
-        {
-          id: 'notes',
-          heading: 'Notes',
-          cell: (user) => (
-            <Typography
-              variant="body2"
-              sx={{
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-              }}
-            >
-              {user.notes}
-            </Typography>
-          ),
-          orderable: false,
-          width: 240,
-        },
-      ]}
-      emptyMessage="No users found"
-    />
+            ),
+            orderable: true,
+            width: 160,
+          },
+          {
+            id: 'checkOut',
+            heading: 'Check Out',
+            cell: (user) => (
+              <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
+                {formatTime(user.checkOut)}
+              </Typography>
+            ),
+            orderable: true,
+            width: 160,
+          },
+          {
+            id: 'status',
+            heading: 'Status',
+            cell: (user) => <Box sx={{ whiteSpace: 'nowrap' }}>{getStatusChip(user)}</Box>,
+            orderable: false,
+            width: 160,
+          },
+          {
+            id: 'notes',
+            heading: 'Notes',
+            cell: (user) => (
+              <Typography
+                variant="body2"
+                sx={{
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
+              >
+                {user.notes}
+              </Typography>
+            ),
+            orderable: false,
+            width: 240,
+          },
+        ]}
+        emptyMessage="No users found"
+      />
     </Widget>
   );
 };
