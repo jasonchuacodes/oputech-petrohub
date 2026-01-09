@@ -1,11 +1,8 @@
+import { prisma } from '~/db';
 import { Prisma, ReportStatus, Role } from '~/db/prisma';
-import {
-  ConflictError,
-  ForbiddenError,
-  NotFoundError,
-} from '~/errors';
+import { ConflictError, ForbiddenError, NotFoundError } from '~/errors';
 
-import { prisma } from '../../../db';
+import { computeReportTotals } from '../utils/compute';
 
 interface CreateReportPayload {
   tenantId: string;
@@ -25,12 +22,7 @@ interface GetReportsFilters {
   creatorId?: string;
 }
 
-const createReport = async ({
-  tenantId,
-  creatorId,
-  shiftId,
-  shiftDate,
-}: CreateReportPayload) => {
+const createReport = async ({ tenantId, creatorId, shiftId, shiftDate }: CreateReportPayload) => {
   const existing = await prisma.report.findUnique({
     where: {
       tenantId_shiftDate_shiftId: { tenantId, shiftDate, shiftId },
@@ -49,7 +41,7 @@ const createReport = async ({
     throw new NotFoundError('Shift not found');
   }
 
-  return await prisma.report.create({
+  const report = await prisma.report.create({
     data: {
       tenantId,
       creatorId,
@@ -61,6 +53,7 @@ const createReport = async ({
       shift: true,
       creator: { select: { id: true, name: true } },
       entries: { include: { product: true } },
+      income: true,
       expenses: true,
       employees: {
         include: {
@@ -71,6 +64,11 @@ const createReport = async ({
       },
     },
   });
+
+  return {
+    ...report,
+    ...computeReportTotals(report),
+  };
 };
 
 const getReports = async ({
@@ -99,19 +97,19 @@ const getReports = async ({
   };
 
   if (userRole === Role.USER) {
-    where.OR = [
-      { creatorId: userId },
-      { status: ReportStatus.SUBMITTED },
-    ];
+    where.OR = [{ creatorId: userId }, { status: ReportStatus.SUBMITTED }];
   } else if (userRole === Role.ADMIN) {
     where.status = ReportStatus.SUBMITTED;
   }
 
-  return await prisma.report.findMany({
+  const reports = await prisma.report.findMany({
     where,
     include: {
       creator: { select: { id: true, name: true } },
       shift: true,
+      entries: { select: { totalPrice: true } },
+      income: { select: { amount: true } },
+      expenses: { select: { amount: true } },
       employees: {
         include: {
           user: {
@@ -125,6 +123,11 @@ const getReports = async ({
     },
     orderBy: { shiftDate: 'desc' },
   });
+
+  return reports.map((report) => ({
+    ...report,
+    ...computeReportTotals(report),
+  }));
 };
 
 const getReportById = async (reportId: string) => {
@@ -134,6 +137,7 @@ const getReportById = async (reportId: string) => {
       creator: { select: { id: true, name: true } },
       shift: true,
       entries: { include: { product: true } },
+      income: true,
       expenses: true,
       employees: {
         include: {
@@ -149,7 +153,10 @@ const getReportById = async (reportId: string) => {
     throw new NotFoundError('Report not found');
   }
 
-  return report;
+  return {
+    ...report,
+    ...computeReportTotals(report),
+  };
 };
 
 const validateReport = async (reportId: string, userId: string) => {
@@ -163,13 +170,14 @@ const validateReport = async (reportId: string, userId: string) => {
     throw new ConflictError('Only draft reports can be validated');
   }
 
-  return await prisma.report.update({
+  const updatedReport = await prisma.report.update({
     where: { id: reportId },
     data: { status: ReportStatus.VALIDATED },
     include: {
       creator: { select: { id: true, name: true } },
       shift: true,
       entries: { include: { product: true } },
+      income: true,
       expenses: true,
       employees: {
         include: {
@@ -180,6 +188,11 @@ const validateReport = async (reportId: string, userId: string) => {
       },
     },
   });
+
+  return {
+    ...updatedReport,
+    ...computeReportTotals(updatedReport),
+  };
 };
 
 const submitReport = async (reportId: string, userId: string) => {
@@ -193,7 +206,7 @@ const submitReport = async (reportId: string, userId: string) => {
     throw new ConflictError('Only validated reports can be submitted');
   }
 
-  return await prisma.report.update({
+  const updatedReport = await prisma.report.update({
     where: { id: reportId },
     data: {
       status: ReportStatus.SUBMITTED,
@@ -203,6 +216,7 @@ const submitReport = async (reportId: string, userId: string) => {
       creator: { select: { id: true, name: true } },
       shift: true,
       entries: { include: { product: true } },
+      income: true,
       expenses: true,
       employees: {
         include: {
@@ -213,6 +227,11 @@ const submitReport = async (reportId: string, userId: string) => {
       },
     },
   });
+
+  return {
+    ...updatedReport,
+    ...computeReportTotals(updatedReport),
+  };
 };
 
 export { createReport, getReports, getReportById, validateReport, submitReport };

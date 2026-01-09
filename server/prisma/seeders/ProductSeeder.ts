@@ -4,7 +4,7 @@ export class ProductSeeder {
   constructor(private prisma: PrismaClient) {}
 
   async seed(tenantId: string): Promise<void> {
-    console.log('🌱 Seeding products...');
+    console.log('Seeding products...');
 
     const products = [
       { code: 'A', name: 'Regular Gasoline', unit: 'L' },

@@ -65,14 +65,14 @@ export const DataTable = <T,>({
 
   if (collection.items.length === 0) {
     return (
-      <Box pt={10}>
+      <Box p={5}>
         <NoData text={emptyMessage} />
       </Box>
     );
   }
 
   return (
-    <TableContainer component={Paper} sx={{ borderRadius: 2 }}>
+    <TableContainer component={Paper} sx={{ borderRadius: 2, overflowX: 'auto', maxWidth: '100%' }}>
       <Table sx={{ minWidth: 650 }} id={id}>
         <TableHead>
           <TableRow>
@@ -88,6 +88,7 @@ export const DataTable = <T,>({
                   bgcolor: 'background.surface',
                   borderBottom: '1px solid',
                   borderColor: 'divider',
+                  whiteSpace: 'nowrap',
                 }}
               >
                 {column.orderable ? (
@@ -137,6 +138,7 @@ export const DataTable = <T,>({
                     sx={{
                       borderBottom: itemIndex === sortedItems.length - 1 ? undefined : '1px solid',
                       borderColor: itemIndex === sortedItems.length - 1 ? undefined : 'divider',
+                      whiteSpace: 'nowrap',
                     }}
                   >
                     {column.cell(item)}

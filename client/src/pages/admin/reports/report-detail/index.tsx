@@ -26,6 +26,7 @@ export const ReportDetailPage = () => {
               label: 'Reports',
               to: pathFor({
                 pathname: AdminRoutes.TenantReports,
+                params: { tenantId },
               })
             },
             {

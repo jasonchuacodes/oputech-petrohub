@@ -2,7 +2,6 @@ import { Decimal } from '@prisma/client/runtime/library';
 import { prisma } from '~/db';
 import { ReportStatus } from '~/db/prisma';
 import { ConflictError, NotFoundError } from '~/errors';
-import { recalculateReportTotals } from '../utils/totals-calculator';
 
 interface CreateReportEntryPayload {
   reportId: string;
@@ -54,8 +53,6 @@ const createOrUpdateEntry = async ({ reportId, productId, quantity }: CreateRepo
     include: { product: true },
   });
 
-  await recalculateReportTotals(reportId);
-
   return entry;
 };
 
@@ -87,8 +84,6 @@ const deleteEntry = async (entryId: string, reportId: string) => {
   await prisma.reportEntry.delete({
     where: { id: entryId },
   });
-
-  await recalculateReportTotals(reportId);
 };
 
 export { createOrUpdateEntry, deleteEntry };

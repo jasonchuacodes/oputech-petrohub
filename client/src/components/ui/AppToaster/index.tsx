@@ -9,6 +9,7 @@ export const AppToaster = () => {
       toastOptions={{
         style: {
           fontFamily: 'inherit',
+          fontSize: '14px',
           background: theme.palette.background.paper,
           color: theme.palette.text.primary,
           border: '1px solid',

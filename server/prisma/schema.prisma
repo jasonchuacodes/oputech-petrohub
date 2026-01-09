@@ -238,11 +238,8 @@ model Report {
   shiftDate   DateTime
   status      ReportStatus  @default(DRAFT)
 
-  totalIncome   Decimal     @default(0) @db.Decimal(10, 2)
-  totalExpenses Decimal     @default(0) @db.Decimal(10, 2)
-  netTotal      Decimal     @default(0) @db.Decimal(10, 2)
-
   entries     ReportEntry[]
+  income      ReportIncome[]
   expenses    ReportExpense[]
   employees   EmployeesOnReports[]
 
@@ -278,6 +275,19 @@ model ReportEntry {
 }
 
 model ReportExpense {
+  id          String   @id @default(uuid())
+  reportId    String
+  report      Report   @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  description String
+  amount      Decimal  @db.Decimal(10, 2)
+
+  createdAt   DateTime @default(now())
+
+  @@index([reportId])
+}
+
+model ReportIncome {
   id          String   @id @default(uuid())
   reportId    String
   report      Report   @relation(fields: [reportId], references: [id], onDelete: Cascade)

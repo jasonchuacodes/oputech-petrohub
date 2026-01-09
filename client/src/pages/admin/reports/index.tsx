@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Breadcrumb,
   Button,
+  Chip,
   DataTable,
   DateRangePicker,
   PageContainer,
@@ -16,6 +17,7 @@ import { useDisclosure } from '~/hooks/useDisclosure';
 import { AdminRoutes } from '~/routes';
 import { pathFor } from '~/utils/pathFor';
 import { formatDate } from '~/utils/date';
+import { formatNumber } from '~/utils/number';
 import { useGetReportsQuery } from '~/services/report/report.queries';
 
 export const ReportsPage = () => {
@@ -90,44 +92,52 @@ export const ReportsPage = () => {
                 </Typography>
               ),
               orderable: true,
-              width: 200,
+              width: 100,
             },
             {
               id: 'shift',
               heading: 'Shift',
+              cell: (report) => <Chip label={report.shift.name} color={report.shift.color} />,
+              orderable: true,
+              width: 100,
+            },
+            {
+              id: 'netTotal',
+              heading: 'Net Total',
               cell: (report) => (
                 <Typography variant="body2" color="text.secondary">
-                  {report.shift.name}
+                  {formatNumber(report.totalIncome - report.totalExpenses)}
                 </Typography>
               ),
               orderable: true,
-              width: 150,
+              width: 120,
             },
             {
               id: 'totalSales',
               heading: 'Total Sales',
               cell: (report) => (
                 <Typography variant="body2" color="text.secondary">
-                  ${report.totalIncome.toFixed(2)}
+                  {formatNumber(Number(report.totalIncome))}
                 </Typography>
               ),
               orderable: true,
-              width: 150,
+              width: 120,
             },
             {
               id: 'expenses',
               heading: 'Expenses',
               cell: (report) => (
                 <Typography variant="body2" color="text.secondary">
-                  ${report.totalExpenses.toFixed(2)}
+                  {formatNumber(Number(report.totalExpenses))}
                 </Typography>
               ),
               orderable: true,
-              width: 150,
+              width: 120,
             },
             {
               id: 'actions',
               heading: '',
+              align: 'right',
               cell: () => (
                 <ChevronRightOutlined
                   fontSize="small"

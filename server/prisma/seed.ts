@@ -19,7 +19,7 @@ const main = async () => {
   const productSeeder = new ProductSeeder(prisma);
   await productSeeder.seed(tenant.id);
 
-  console.log('🎉 Database seeding completed!');
+  console.log('Database seeding completed!');
 };
 
 main()

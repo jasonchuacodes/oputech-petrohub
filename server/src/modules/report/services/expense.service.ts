@@ -4,8 +4,6 @@ import { prisma } from '~/db';
 import { ReportStatus } from '~/db/prisma';
 import { ConflictError, NotFoundError } from '~/errors';
 
-import { recalculateReportTotals } from '../utils/totals-calculator';
-
 interface CreateExpensePayload {
   reportId: string;
   description: string;
@@ -36,8 +34,6 @@ const createExpense = async ({
       amount,
     },
   });
-
-  await recalculateReportTotals(reportId);
 
   return expense;
 };
@@ -70,8 +66,6 @@ const deleteExpense = async (expenseId: string, reportId: string) => {
   await prisma.reportExpense.delete({
     where: { id: expenseId },
   });
-
-  await recalculateReportTotals(reportId);
 };
 
 export { createExpense, deleteExpense };
