@@ -1,0 +1,9 @@
+import axios from '~/lib/axiosInstance';
+import type { Report } from './report.types';
+
+const getReports = async (tenantId: string): Promise<Report[]> => {
+  const res = await axios.get('/reports', { params: { tenantId } });
+  return res.data.data.reports;
+};
+
+export { getReports };

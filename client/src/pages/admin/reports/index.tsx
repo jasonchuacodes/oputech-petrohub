@@ -1,9 +1,151 @@
-import { Stack, Typography } from '@mui/material';
+import { AddOutlined, ChevronRightOutlined, HomeOutlined } from '@mui/icons-material';
+import { Typography } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+
+import {
+  Breadcrumb,
+  Button,
+  DataTable,
+  DateRangePicker,
+  PageContainer,
+  PageLayout,
+} from '~/components/ui';
+import { useTenantContext } from '~/context/tenant/useTenantContext';
+import { PageHeader } from '~/components/layouts';
+import { useDisclosure } from '~/hooks/useDisclosure';
+import { AdminRoutes } from '~/routes';
+import { pathFor } from '~/utils/pathFor';
+import { formatDate } from '~/utils/date';
+import { useGetReportsQuery } from '~/services/report/report.queries';
 
 export const ReportsPage = () => {
+  const { tenantId } = useTenantContext();
+  const disclosure = useDisclosure();
+  const navigate = useNavigate();
+
+  const { data: reports, isLoading } = useGetReportsQuery({ tenantId });
+
+  const handleRowClick = (reportId: string) => {
+    navigate(
+      pathFor({
+        pathname: AdminRoutes.TenantReportDetails,
+        params: { tenantId, reportId },
+      }),
+    );
+  };
+
   return (
-    <Stack width="100%">
-      <Typography>Reports Page</Typography>
-    </Stack>
+    <PageLayout>
+      <PageContainer>
+        <Breadcrumb
+          items={[
+            {
+              icon: HomeOutlined,
+              label: 'Home',
+              to: pathFor({
+                pathname: AdminRoutes.TenantHome,
+                params: { tenantId },
+              }),
+            },
+            {
+              label: 'Reports',
+            },
+          ]}
+        />
+        <PageHeader
+          title="Reports"
+          description="View the list of reports here."
+          action={
+            <Button
+              onClick={disclosure.onOpen}
+              variant="contained"
+              size="large"
+              startIcon={<AddOutlined fontSize="small" />}
+            >
+              Create Report
+            </Button>
+          }
+        />
+
+        <DateRangePicker
+          selectedStart={null}
+          selectedEnd={null}
+          label="MM/DD/YYYY — MM/DD/YYYY"
+          onAccept={() => null}
+        />
+        <DataTable
+          id="reports-table"
+          collection={DataTable.collection({
+            items: reports || [],
+            itemToValue: (report) => report.id,
+            itemToString: (report) => report.shiftDate,
+          })}
+          columns={[
+            {
+              id: 'date',
+              heading: 'Date',
+              cell: (report) => (
+                <Typography variant="body2" color="text.primary">
+                  {formatDate(report.shiftDate)}
+                </Typography>
+              ),
+              orderable: true,
+              width: 200,
+            },
+            {
+              id: 'shift',
+              heading: 'Shift',
+              cell: (report) => (
+                <Typography variant="body2" color="text.secondary">
+                  {report.shift.name}
+                </Typography>
+              ),
+              orderable: true,
+              width: 150,
+            },
+            {
+              id: 'totalSales',
+              heading: 'Total Sales',
+              cell: (report) => (
+                <Typography variant="body2" color="text.secondary">
+                  ${report.totalIncome.toFixed(2)}
+                </Typography>
+              ),
+              orderable: true,
+              width: 150,
+            },
+            {
+              id: 'expenses',
+              heading: 'Expenses',
+              cell: (report) => (
+                <Typography variant="body2" color="text.secondary">
+                  ${report.totalExpenses.toFixed(2)}
+                </Typography>
+              ),
+              orderable: true,
+              width: 150,
+            },
+            {
+              id: 'actions',
+              heading: '',
+              cell: () => (
+                <ChevronRightOutlined
+                  fontSize="small"
+                  sx={{
+                    color: 'text.secondary',
+                    opacity: 0.6,
+                  }}
+                />
+              ),
+              orderable: false,
+              width: 50,
+            },
+          ]}
+          loading={isLoading}
+          onRowClick={(report) => handleRowClick(report.id)}
+          emptyMessage="No reports data available."
+        />
+      </PageContainer>
+    </PageLayout>
   );
 };

@@ -10,6 +10,7 @@ import timesheetRoutes from './modules/timesheet/routes';
 import notificationRoutes from './modules/notification/routes';
 import pusherRoutes from './modules/pusher/routes';
 import shiftRoutes from './modules/shift/routes';
+import reportRoutes from './modules/report/routes';
 import { corsMiddleware } from './middlewares/corsMiddleware';
 
 const app = express();
@@ -26,6 +27,7 @@ app.use('/dashboard', dashboardRoutes);
 app.use('/notifications', notificationRoutes);
 app.use('/pusher', pusherRoutes);
 app.use('/shifts', shiftRoutes);
+app.use('/reports', reportRoutes);
 app.use(errorHandler);
 
 export { app };

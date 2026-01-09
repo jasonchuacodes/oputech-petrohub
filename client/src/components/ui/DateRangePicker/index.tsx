@@ -52,6 +52,9 @@ export const DateRangePicker = ({
 
   return (
     <Stack spacing={1}>
+      <Typography variant="body1" color="text.primary">
+        Time period:
+      </Typography>
       <Button
         onClick={handleOpen}
         variant="outlined"
@@ -64,22 +67,17 @@ export const DateRangePicker = ({
         startIcon={<CalendarOutlined fontSize="small" sx={{ color: 'text.secondary' }} />}
       >
         <Stack direction="row" spacing={1}>
-          <Typography component="span" variant="body2" color="text.secondary">
-            Time period:
-          </Typography>
-
           {selectedStart || selectedEnd ? (
             <Typography component="span" variant="body2">
               {formatRange(selectedStart, selectedEnd)}
             </Typography>
           ) : (
-            <Typography component="span" variant="body2">
+            <Typography component="span" variant="body2" color="text.secondary">
               {label}
             </Typography>
           )}
         </Stack>
       </Button>
-
       <Menu
         anchorEl={anchorEl}
         open={isOpen}

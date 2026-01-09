@@ -14,6 +14,7 @@ import { UsersPage } from '~/pages/admin/users';
 import { BootstrapPage } from '~/pages/admin/bootstrap';
 import { HomePage } from '~/pages/admin/home';
 import { ReportsPage } from '~/pages/admin/reports';
+import { ReportDetailPage } from '~/pages/admin/reports/report-detail';
 import { ShiftsPage } from '~/pages/admin/shifts';
 import { UserDetailPage } from '~/pages/admin/users/user-detail';
 import { ForgotPassword } from '~/pages/auth/forgot-password';
@@ -43,6 +44,7 @@ export const AdminRoutes = {
   TenantSettings: '/tenants/:tenantId/settings',
   TenantCreate: '/tenants/:tenantId/create-tenant',
   TenantReports: '/tenants/:tenantId/reports',
+  TenantReportDetails: '/tenants/:tenantId/reports/:reportId',
   TenantTimesheets: '/tenants/:tenantId/timesheets/:userId?',
   TenantShifts: '/tenants/:tenantId/shifts',
   TenantUsers: '/tenants/:tenantId/users',
@@ -98,6 +100,7 @@ export const router = createBrowserRouter(
           <Route element={<AdminMainLayout />}>
             <Route index element={<HomePage />} />
             <Route path="reports" element={<ReportsPage />} />
+            <Route path="reports/:reportId" element={<ReportDetailPage />} />
             <Route path="timesheets/:userId?" element={<TimesheetsPage />} />
             <Route path="shifts" element={<ShiftsPage />} />
             <Route path="users" element={<UsersPage />} />

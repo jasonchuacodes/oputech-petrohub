@@ -33,6 +33,12 @@ enum NotificationStatus {
   READ
 }
 
+enum ReportStatus {
+  DRAFT
+  VALIDATED
+  SUBMITTED
+}
+
 model User {
   id       String  @id @default(uuid())
   username String  @unique
@@ -53,6 +59,8 @@ model User {
   sessions      Session[]
   timesheets    Timesheet[]
   notifications Notification[]
+  createdReports  Report[]             @relation("ReportCreator")
+  assignedReports EmployeesOnReports[]
 
   tenants TenantsOnUsers[]
 
@@ -80,6 +88,8 @@ model Tenant {
   users      TenantsOnUsers[]
   timesheets Timesheet[]
   shifts     Shift[]
+  products   Product[]
+  reports    Report[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -109,7 +119,8 @@ model Shift {
   shiftEnd   DateTime
   color      String
 
-  users TenantsOnUsers[]
+  users    TenantsOnUsers[]
+  reports  Report[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -178,4 +189,115 @@ model Notification {
 
   @@index([recipientId, status])
   @@index([recipientId, createdAt])
+}
+
+model Product {
+  id          String      @id @default(uuid())
+  tenantId    String
+  tenant      Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  name        String
+  code        String
+  description String?
+  unit        String      @default("L")
+
+  productPrices ProductPrice[]
+  reportEntries ReportEntry[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, code])
+  @@index([tenantId])
+}
+
+model ProductPrice {
+  id            String   @id @default(uuid())
+  productId     String
+  product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  price         Decimal  @db.Decimal(10, 2)
+  effectiveFrom DateTime
+
+  createdAt DateTime @default(now())
+
+  @@index([productId, effectiveFrom])
+}
+
+model Report {
+  id          String        @id @default(uuid())
+  tenantId    String
+  tenant      Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  creatorId   String
+  creator     User          @relation("ReportCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+
+  shiftId     String
+  shift       Shift         @relation(fields: [shiftId], references: [id], onDelete: Restrict)
+
+  shiftDate   DateTime
+  status      ReportStatus  @default(DRAFT)
+
+  totalIncome   Decimal     @default(0) @db.Decimal(10, 2)
+  totalExpenses Decimal     @default(0) @db.Decimal(10, 2)
+  netTotal      Decimal     @default(0) @db.Decimal(10, 2)
+
+  entries     ReportEntry[]
+  expenses    ReportExpense[]
+  employees   EmployeesOnReports[]
+
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  submittedAt DateTime?
+
+  @@unique([tenantId, shiftDate, shiftId])
+  @@index([tenantId, status])
+  @@index([tenantId, shiftDate])
+  @@index([creatorId])
+  @@index([shiftId])
+}
+
+model ReportEntry {
+  id                String   @id @default(uuid())
+  reportId          String
+  report            Report   @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  productId         String
+  product           Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  quantity          Decimal  @db.Decimal(10, 3)
+  unitPriceSnapshot Decimal  @db.Decimal(10, 2)
+  totalPrice        Decimal  @db.Decimal(10, 2)
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([reportId, productId])
+  @@index([reportId])
+  @@index([productId])
+}
+
+model ReportExpense {
+  id          String   @id @default(uuid())
+  reportId    String
+  report      Report   @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  description String
+  amount      Decimal  @db.Decimal(10, 2)
+
+  createdAt   DateTime @default(now())
+
+  @@index([reportId])
+}
+
+model EmployeesOnReports {
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   String
+
+  report   Report @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  reportId String
+
+  @@id([userId, reportId])
+  @@index([reportId])
+  @@index([userId])
 }

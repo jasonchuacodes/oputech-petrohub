@@ -28,7 +28,7 @@ import { pathFor } from '~/utils/pathFor';
 import { Toggler } from './Toggler';
 
 export type NavItem = {
-  disabled: boolean;
+  disabled?: boolean;
   label: string;
   icon: ComponentType;
   to: string;
@@ -51,7 +51,6 @@ const Sidebar = () => {
       items: [
         {
           label: 'Dashboard',
-          disabled: false,
           icon: DashboardOutlined,
           to: pathFor({
             pathname: AdminRoutes.TenantHome,
@@ -60,7 +59,6 @@ const Sidebar = () => {
         },
         {
           label: 'Reports',
-          disabled: true,
           icon: AssessmentOutlined,
           to: pathFor({
             pathname: AdminRoutes.TenantReports,
@@ -69,7 +67,6 @@ const Sidebar = () => {
         },
         {
           label: 'Timesheets',
-          disabled: false,
           icon: CalendarTodayOutlined,
           to: pathFor({
             pathname: AdminRoutes.TenantTimesheets,
@@ -89,7 +86,6 @@ const Sidebar = () => {
       items: [
         {
           label: 'Users',
-          disabled: false,
           icon: GroupOutlined,
           to: pathFor({
             pathname: AdminRoutes.TenantUsers,
@@ -98,7 +94,6 @@ const Sidebar = () => {
         },
         {
           label: 'Shift Schedules',
-          disabled: false,
           icon: ScheduleOutlined,
           to: pathFor({
             pathname: AdminRoutes.TenantShifts,
