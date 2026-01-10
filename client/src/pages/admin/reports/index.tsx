@@ -72,7 +72,7 @@ export const ReportsPage = () => {
               heading: 'Date',
               cell: (report) => (
                 <Typography variant="body2" color="text.primary">
-                  {formatDate(report.shiftDate)}
+                  {formatDate(report.shiftDate, 'MM/DD/YYYY')}
                 </Typography>
               ),
               orderable: true,

@@ -6,4 +6,9 @@ const getReports = async (tenantId: string): Promise<Report[]> => {
   return res.data.data.reports;
 };
 
-export { getReports };
+const getReportById = async (tenantId: string, reportId: string): Promise<Report> => {
+  const res = await axios.get(`/reports/${reportId}`, { params: { tenantId } });
+  return res.data.data.report;
+};
+
+export { getReports, getReportById };

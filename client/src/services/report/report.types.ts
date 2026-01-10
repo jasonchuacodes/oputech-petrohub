@@ -8,6 +8,26 @@ export const ReportStatusEnum = {
 
 export type ReportStatus = ValueOf<typeof ReportStatusEnum>;
 
+export type ReportIncome = {
+  id: string;
+  description: string;
+  amount: number;
+  createdAt: string;
+};
+
+export type ReportExpense = {
+  id: string;
+  description: string;
+  amount: number;
+  createdAt: string;
+};
+
+export type Employee = {
+  id: string;
+  name: string;
+  username: string;
+};
+
 export type Report = {
   id: string;
   tenantId: string;
@@ -29,6 +49,15 @@ export type Report = {
     id: string;
     name: string;
   };
+  income: ReportIncome[];
+  expenses: ReportExpense[];
+  employees: {
+    user: {
+      id: string;
+      username: string;
+      name: string;
+    };
+  }[];
   createdAt: string;
   updatedAt: string;
 };

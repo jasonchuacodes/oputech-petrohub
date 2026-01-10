@@ -10,6 +10,7 @@ import { useState } from 'react';
 import theme from '~/theme';
 import { Button } from '~/components/ui';
 import { formatRange } from '~/utils/date';
+import { useDisclosure } from '../../../hooks/useDisclosure';
 
 export type DateRange = { start: Dayjs | null; end: Dayjs | null };
 
@@ -31,8 +32,9 @@ export const DateRangePicker = ({
 
   const [start, setStart] = useState<Dayjs | null>(selectedStart);
   const [end, setEnd] = useState<Dayjs | null>(selectedEnd);
-  const [isStartOpen, setIsStartOpen] = useState(false);
-  const [isEndOpen, setIsEndOpen] = useState(false);
+
+  const startDisclosure = useDisclosure(false)
+  const endDisclosure = useDisclosure(false)
 
   const handleOpen = (e: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(e.currentTarget);
   const handleClose = () => setAnchorEl(null);
@@ -108,13 +110,13 @@ export const DateRangePicker = ({
               </Typography>
               <DatePicker
                 value={start}
-                onOpen={() => setIsStartOpen(true)}
-                onClose={() => setIsStartOpen(false)}
+                onOpen={() => startDisclosure.setOpen(true)}
+                onClose={() => startDisclosure.setOpen(false)}
                 onChange={(newValue) => {
                   setStart(newValue);
-                  setIsStartOpen(false);
+                  startDisclosure.setOpen(false)
                 }}
-                open={isStartOpen}
+                open={startDisclosure.open}
                 slotProps={{
                   textField: {
                     size: 'small',
@@ -143,13 +145,13 @@ export const DateRangePicker = ({
               </Typography>
               <DatePicker
                 value={end}
-                onOpen={() => setIsEndOpen(true)}
-                onClose={() => setIsEndOpen(false)}
+                onOpen={() => endDisclosure.setOpen(true)}
+                onClose={() => endDisclosure.setOpen(false)}
                 onChange={(newValue) => {
                   setEnd(newValue);
-                  setIsEndOpen(false);
+                  endDisclosure.setOpen(false);
                 }}
-                open={isEndOpen}
+                open={endDisclosure.open}
                 minDate={start || undefined}
                 slotProps={{
                   textField: {

@@ -5,9 +5,7 @@ export const CardContainer = (props: StackProps) => {
     <Stack
       bgcolor="background.paper"
       p={2}
-      borderRadius={1}
-      border="1px solid"
-      borderColor="divider"
+      borderRadius={2}
       height='100%'
       {...props}
     />
