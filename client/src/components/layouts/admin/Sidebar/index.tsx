@@ -19,7 +19,7 @@ import {
   Stack,
 } from '@mui/material';
 import { useState, type ComponentType } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { matchPath, useLocation, useNavigate } from 'react-router-dom';
 
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { AdminRoutes } from '~/routes';
@@ -41,6 +41,7 @@ type NavGroup = {
 
 const Sidebar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { tenantId } = useTenantContext();
 
   const [open, setOpen] = useState(true);
@@ -152,9 +153,23 @@ const Sidebar = () => {
                   {group.label}
                 </ListSubheader>
               )}
-              
+
               {group.items.map(({ disabled, icon, label, to }, itemIndex) => {
-                const active = location.pathname === to;
+                const active =
+                  disabled || to === '#'
+                    ? false
+                    : !!matchPath(
+                        {
+                          path: to,
+                          end:
+                            to ===
+                            pathFor({
+                              pathname: AdminRoutes.TenantHome,
+                              params: { tenantId },
+                            }),
+                        },
+                        location.pathname,
+                      );
 
                 return (
                   <ListItem key={itemIndex} disablePadding>

@@ -8,6 +8,7 @@ export * from './ContentCard';
 export * from './CustomModal';
 export * from './DataTable';
 export * from './DateRangePicker';
+export * from './DatePicker';
 export * from './DateTimeDisplay';
 export * from './InfoBox';
 export * from './Form';

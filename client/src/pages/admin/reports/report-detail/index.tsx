@@ -44,7 +44,7 @@ export const ReportDetailPage = () => {
               }),
             },
             {
-              label: 'Report Details',
+              label: 'Report',
             },
           ]}
         />
@@ -58,138 +58,142 @@ export const ReportDetailPage = () => {
             <LoadingSpinner />
           </Box>
         ) : (
-          <Stack direction="row" spacing={2}>
-            <Stack flex={1} spacing={2}>
+          <Stack spacing={2}>
+            {report && (
               <CardContainer height="fit-content">
-                {report && (
-                  <Typography variant="h5" pb={2} sx={{ fontWeight: 600 }}>
-                    {formatDate(report?.shiftDate, 'MMMM DD, YYYY')} — {report?.shift.name}
-                  </Typography>
-                )}
-                <Stack spacing={2}>
+                <Typography variant="h5" sx={{ fontWeight: 600 }}>
+                  {formatDate(report.shiftDate, 'MMMM DD, YYYY')} — {report.shift.name}
+                </Typography>
+              </CardContainer>
+            )}
+            <Stack direction="row" spacing={2}>
+              <Stack flex={1} spacing={2}>
+                <CardContainer height="fit-content">
+                  <Stack spacing={2}>
+                    <Stack direction="row" alignItems="center" justifyContent="space-between">
+                      <Typography variant="h6" color="text.primary">
+                        Net Sales
+                      </Typography>
+                      <Typography variant="h4" fontWeight="medium" color="text.primary">
+                        ₱{formatNumber(Number(report?.netTotal))}
+                      </Typography>
+                    </Stack>
+                    <Divider />
+                    <Stack pl={3} spacing={1}>
+                      <Stack direction="row" justifyContent="space-between">
+                        <Typography variant="body2" color="text.secondary">
+                          Sales
+                        </Typography>
+                        <Typography variant="body2" color="text.primary">
+                          {formatNumber(Number(report?.totalIncome))}
+                        </Typography>
+                      </Stack>
+                      <Stack direction="row" justifyContent="space-between">
+                        <Typography variant="body2" color="text.secondary">
+                          Expenses
+                        </Typography>
+                        <Typography variant="body2" color="text.primary">
+                          {formatNumber(Number(report?.totalExpenses))}
+                        </Typography>
+                      </Stack>
+                    </Stack>
+                  </Stack>
+                </CardContainer>
+
+                {/* Income */}
+                <CardContainer height="fit-content" spacing={2}>
                   <Stack direction="row" alignItems="center" justifyContent="space-between">
-                    <Typography variant="body2" color="text.secondary">
-                      Net Sales
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      Income
                     </Typography>
-                    <Typography variant="h4" fontWeight="medium" color="text.primary">
-                      ₱{formatNumber(Number(report?.netTotal))}
-                    </Typography>
+                    <IconButton onClick={() => null} size="small">
+                      <MoreHorizOutlined fontSize="inherit" />
+                    </IconButton>
+                  </Stack>
+                  <Stack spacing={1}>
+                    {report?.income.map((income) => (
+                      <Stack direction="row" justifyContent="space-between">
+                        <Typography variant="body2" color="text.secondary">
+                          {income.description ?? 'Cash'}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {income.amount && formatNumber(Number(income.amount))}
+                        </Typography>
+                      </Stack>
+                    ))}
                   </Stack>
                   <Divider />
-                  <Stack pl={3} spacing={1}>
+                  <Stack spacing={1}>
                     <Stack direction="row" justifyContent="space-between">
                       <Typography variant="body2" color="text.secondary">
-                        Sales
+                        Total
                       </Typography>
-                      <Typography variant="body2" color="text.primary">
+                      <Typography variant="body2" color="text.secondary">
                         {formatNumber(Number(report?.totalIncome))}
                       </Typography>
                     </Stack>
+                  </Stack>
+                </CardContainer>
+
+                {/* Expenses */}
+                <CardContainer height="fit-content" spacing={2}>
+                  <Stack direction="row" alignItems="center" justifyContent="space-between">
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      Expenses
+                    </Typography>
+                    <IconButton onClick={() => null} size="small">
+                      <MoreHorizOutlined fontSize="inherit" />
+                    </IconButton>
+                  </Stack>
+                  <Stack spacing={1}>
+                    {report?.expenses.map((expense) => (
+                      <Stack direction="row" justifyContent="space-between">
+                        <Typography variant="body2" color="text.secondary">
+                          {expense.description ?? 'Cash'}
+                        </Typography>
+                        <Typography variant="body2" color="text.primary">
+                          {expense.amount && formatNumber(Number(expense.amount))}
+                        </Typography>
+                      </Stack>
+                    ))}
+                  </Stack>
+                  <Divider />
+                  <Stack spacing={1}>
                     <Stack direction="row" justifyContent="space-between">
                       <Typography variant="body2" color="text.secondary">
-                        Expenses
+                        Total
                       </Typography>
                       <Typography variant="body2" color="text.primary">
                         {formatNumber(Number(report?.totalExpenses))}
                       </Typography>
                     </Stack>
                   </Stack>
-                </Stack>
-              </CardContainer>
+                </CardContainer>
+              </Stack>
 
-              {/* Income */}
-              <CardContainer height="fit-content" spacing={2}>
-                <Stack direction="row" alignItems="center" justifyContent="space-between">
-                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                    Income
-                  </Typography>
-                  <IconButton onClick={() => null} size="small">
-                    <MoreHorizOutlined fontSize="inherit" />
-                  </IconButton>
-                </Stack>
-                <Stack spacing={1}>
-                  {report?.income.map((income) => (
-                    <Stack direction="row" justifyContent="space-between">
-                      <Typography variant="body2" color="text.secondary">
-                        {income.description ?? 'Cash'}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {income.amount && formatNumber(Number(income.amount))}
-                      </Typography>
-                    </Stack>
-                  ))}
-                </Stack>
-                <Divider />
-                <Stack spacing={1}>
-                  <Stack direction="row" justifyContent="space-between">
-                    <Typography variant="body2" color="text.secondary">
-                      Total
+              {/* Right Section */}
+              <Stack minWidth="30%" spacing={2}>
+                <CardContainer height="fit-content" spacing={2}>
+                  <Stack direction="row" alignItems="center" justifyContent="space-between">
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      On Duty
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {formatNumber(Number(report?.totalIncome))}
-                    </Typography>
+                    <IconButton onClick={() => null} size="small">
+                      <MoreHorizOutlined fontSize="inherit" />
+                    </IconButton>
                   </Stack>
-                </Stack>
-              </CardContainer>
-
-              {/* Expenses */}
-              <CardContainer height="fit-content" spacing={2}>
-                <Stack direction="row" alignItems="center" justifyContent="space-between">
-                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                    Expenses
-                  </Typography>
-                  <IconButton onClick={() => null} size="small">
-                    <MoreHorizOutlined fontSize="inherit" />
-                  </IconButton>
-                </Stack>
-                <Stack spacing={1}>
-                  {report?.expenses.map((expense) => (
-                    <Stack direction="row" justifyContent="space-between">
-                      <Typography variant="body2" color="text.secondary">
-                        {expense.description ?? 'Cash'}
-                      </Typography>
-                      <Typography variant="body2" color="text.primary">
-                        {expense.amount && formatNumber(Number(expense.amount))}
-                      </Typography>
-                    </Stack>
-                  ))}
-                </Stack>
-                <Divider />
-                <Stack spacing={1}>
-                  <Stack direction="row" justifyContent="space-between">
-                    <Typography variant="body2" color="text.secondary">
-                      Total
-                    </Typography>
-                    <Typography variant="body2" color="text.primary">
-                      {formatNumber(Number(report?.totalExpenses))}
-                    </Typography>
+                  <Stack direction="row" spacing={3} px={2}>
+                    {report?.employees.map(({ user }) => (
+                      <Stack alignItems="center">
+                        <Avatar sx={{ height: 40, width: 40 }}></Avatar>
+                        <Typography variant="body2" color="text.primary">
+                          {user?.name.split(' ')[0]}
+                        </Typography>
+                      </Stack>
+                    ))}
                   </Stack>
-                </Stack>
-              </CardContainer>
-            </Stack>
-
-            {/* Right Section */}
-            <Stack minWidth="30%" spacing={2}>
-              <CardContainer height="fit-content" spacing={2}>
-                <Stack direction="row" alignItems="center" justifyContent="space-between">
-                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                    On Duty
-                  </Typography>
-                  <IconButton onClick={() => null} size="small">
-                    <MoreHorizOutlined fontSize="inherit" />
-                  </IconButton>
-                </Stack>
-                <Stack direction="row" spacing={3} px={2}>
-                  {report?.employees.map(({ user }) => (
-                    <Stack alignItems="center">
-                      <Avatar sx={{ height: 40, width: 40 }}></Avatar>
-                      <Typography variant="body2" color="text.primary">
-                        {user?.name.split(' ')[0]}
-                      </Typography>
-                    </Stack>
-                  ))}
-                </Stack>
-              </CardContainer>
+                </CardContainer>
+              </Stack>
             </Stack>
           </Stack>
         )}
