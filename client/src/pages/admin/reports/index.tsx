@@ -68,7 +68,7 @@ export const ReportsPage = () => {
           })}
           columns={[
             {
-              id: 'date',
+              id: 'shiftDate',
               heading: 'Date',
               cell: (report) => (
                 <Typography variant="body2" color="text.primary">
@@ -82,7 +82,6 @@ export const ReportsPage = () => {
               id: 'shift',
               heading: 'Shift',
               cell: (report) => <Chip label={report.shift.name} color={report.shift.color} />,
-              orderable: true,
               width: 100,
             },
             {
@@ -93,7 +92,6 @@ export const ReportsPage = () => {
                   {formatNumber(report.totalIncome - report.totalExpenses)}
                 </Typography>
               ),
-              orderable: true,
               width: 120,
             },
             {
@@ -104,7 +102,6 @@ export const ReportsPage = () => {
                   {formatNumber(Number(report.totalIncome))}
                 </Typography>
               ),
-              orderable: true,
               width: 120,
             },
             {
@@ -115,7 +112,6 @@ export const ReportsPage = () => {
                   {formatNumber(Number(report.totalExpenses))}
                 </Typography>
               ),
-              orderable: true,
               width: 120,
             },
             {
@@ -131,7 +127,6 @@ export const ReportsPage = () => {
                   }}
                 />
               ),
-              orderable: false,
               width: 50,
             },
           ]}
