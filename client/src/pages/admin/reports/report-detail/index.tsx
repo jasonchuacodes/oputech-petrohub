@@ -14,7 +14,7 @@ import { PageHeader } from '~/components/layouts';
 import { AdminRoutes } from '~/routes';
 import { useGetReportByIdQuery } from '~/services/report/report.queries';
 import { formatDate } from '~/utils/date';
-import { formatNumber } from '~/utils/number';
+import { formatCurrency, formatNumber } from '~/utils/number';
 import { pathFor } from '~/utils/pathFor';
 
 export const ReportDetailPage = () => {
@@ -75,7 +75,7 @@ export const ReportDetailPage = () => {
                         Net Sales
                       </Typography>
                       <Typography variant="h4" fontWeight="medium" color="text.primary">
-                        ₱{formatNumber(Number(report?.netTotal))}
+                        {formatCurrency(Number(report?.netTotal))}
                       </Typography>
                     </Stack>
                     <Divider />
@@ -188,6 +188,164 @@ export const ReportDetailPage = () => {
                       </Stack>
                     ))}
                   </Stack>
+                </CardContainer>
+
+                {/* Disposals */}
+                <CardContainer height="fit-content" spacing={2}>
+                  <Stack direction="row" alignItems="center" justifyContent="space-between">
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      Disposals
+                    </Typography>
+                    <IconButton onClick={() => null} size="small">
+                      <MoreHorizOutlined fontSize="inherit" />
+                    </IconButton>
+                  </Stack>
+                  <Stack direction="row" justifyContent="space-between">
+                    <Typography variant="body2" color="text.secondary">
+                      Calculated Sales
+                    </Typography>
+                    <Typography variant="body1" color="text.primary">
+                      {formatCurrency(243456)}
+                    </Typography>
+                  </Stack>
+                  <Divider />
+
+                  {/* Summary */}
+                  {[
+                    { name: 'XCS', calculatedSales: 160595.25 },
+                    { name: 'XTRA 1', calculatedSales: 80546.2 },
+                    { name: 'XTRA 2', calculatedSales: 24240.8 },
+                    { name: 'ADO', calculatedSales: 14240.0 },
+                  ].map((disposal) => (
+                    <Stack direction="row" justifyContent="space-between" pl={2}>
+                      <Typography variant="body2" color="text.secondary">
+                        {disposal.name}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {disposal.calculatedSales && formatNumber(Number(disposal.calculatedSales))}
+                      </Typography>
+                    </Stack>
+                  ))}
+
+                  {/* Disposal Card */}
+
+                  {[
+                    {
+                      beforeReading: 1230904,
+                      afterReading: 1203981,
+                      netDisposal: 1200,
+                      calculatedSales: 80546.2,
+                      product: {
+                        name: 'XCS',
+                        price: 59.94,
+                      },
+                    },
+                    {
+                      beforeReading: 1230904,
+                      afterReading: 1203981,
+                      netDisposal: 1200,
+                      calculatedSales: 80546.2,
+                      product: {
+                        name: 'XTRA 1',
+                        price: 59.94,
+                      },
+                    },
+                    {
+                      beforeReading: 1230904,
+                      afterReading: 1203981,
+                      netDisposal: 1200,
+                      calculatedSales: 80546.2,
+                      product: {
+                        name: 'XTRA 2',
+                        price: 59.94,
+                      },
+                    },
+                    {
+                      beforeReading: 1230904,
+                      afterReading: 1203981,
+                      netDisposal: 1200,
+                      calculatedSales: 80546.2,
+                      product: {
+                        name: 'ADO',
+                        price: 59.94,
+                      },
+                    },
+                  ].map((disposal) => (
+                    <CardContainer bgcolor="background.default">
+                      <Stack direction="row" justifyContent="space-between" alignItems="start">
+                        <Stack spacing={1} width="100%">
+                          <Typography variant="h6">{disposal.product.name}</Typography>
+                          <Stack
+                            direction="row"
+                            spacing={1}
+                            justifyContent="space-between"
+                            alignItems="center"
+                          >
+                            <Typography variant="body2" color="text.secondary">
+                              Before Reading
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              {disposal.beforeReading}
+                            </Typography>
+                          </Stack>
+                          <Stack
+                            direction="row"
+                            spacing={1}
+                            justifyContent="space-between"
+                            alignItems="center"
+                          >
+                            <Typography variant="body2" color="text.secondary">
+                              Before Reading
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              {disposal.afterReading}
+                            </Typography>
+                          </Stack>
+                          <Divider />
+                          <Stack
+                            direction="row"
+                            spacing={1}
+                            justifyContent="space-between"
+                            alignItems="center"
+                          >
+                            <Typography variant="body2" color="text.secondary">
+                              Net Disposal
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              {disposal.netDisposal}
+                            </Typography>
+                          </Stack>
+                          <Stack
+                            direction="row"
+                            spacing={1}
+                            justifyContent="space-between"
+                            alignItems="center"
+                          >
+                            <Typography variant="body2" color="text.secondary">
+                              Price
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              {formatCurrency(disposal.product.price)}
+                            </Typography>
+                          </Stack>
+                          <Divider />
+                          <Stack
+                            direction="row"
+                            spacing={1}
+                            justifyContent="space-between"
+                            alignItems="center"
+                          >
+                            <Typography variant="body2" color="text.secondary">
+                              Sales
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              {formatCurrency(disposal.calculatedSales)}
+                            </Typography>
+                          </Stack>
+                        </Stack>
+                      </Stack>
+                    </CardContainer>
+                  ))}
                 </CardContainer>
               </Stack>
             </Stack>
