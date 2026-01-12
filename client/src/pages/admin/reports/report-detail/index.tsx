@@ -69,7 +69,7 @@ export const ReportDetailPage = () => {
             <Stack direction="row" spacing={2}>
               <Stack flex={1} spacing={2}>
                 <CardContainer height="fit-content">
-                  <Stack spacing={2}>
+                  <Stack spacing={1}>
                     <Stack direction="row" alignItems="center" justifyContent="space-between">
                       <Typography variant="h6" color="text.primary">
                         Net Sales
@@ -79,7 +79,7 @@ export const ReportDetailPage = () => {
                       </Typography>
                     </Stack>
                     <Divider />
-                    <Stack pl={3} spacing={1}>
+                    <Stack pl={2} spacing={1}>
                       <Stack direction="row" justifyContent="space-between">
                         <Typography variant="body2" color="text.secondary">
                           Sales
@@ -101,7 +101,7 @@ export const ReportDetailPage = () => {
                 </CardContainer>
 
                 {/* Income */}
-                <CardContainer height="fit-content" spacing={2}>
+                <CardContainer height="fit-content" spacing={1}>
                   <Stack direction="row" alignItems="center" justifyContent="space-between">
                     <Typography variant="body2" sx={{ fontWeight: 600 }}>
                       Income
@@ -110,25 +110,25 @@ export const ReportDetailPage = () => {
                       <MoreHorizOutlined fontSize="inherit" />
                     </IconButton>
                   </Stack>
-                  <Stack spacing={1}>
-                    {report?.income.map((income) => (
-                      <Stack direction="row" justifyContent="space-between">
-                        <Typography variant="body2" color="text.secondary">
-                          {income.description ?? 'Cash'}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {income.amount && formatNumber(Number(income.amount))}
-                        </Typography>
-                      </Stack>
-                    ))}
-                  </Stack>
+
+                  {report?.income.map((income) => (
+                    <Stack direction="row" justifyContent="space-between">
+                      <Typography variant="body2" color="text.secondary">
+                        {income.description ?? 'Cash'}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {income.amount && formatNumber(Number(income.amount))}
+                      </Typography>
+                    </Stack>
+                  ))}
+
                   <Divider />
                   <Stack spacing={1}>
                     <Stack direction="row" justifyContent="space-between">
                       <Typography variant="body2" color="text.secondary">
                         Total
                       </Typography>
-                      <Typography variant="body2" color="text.secondary">
+                      <Typography variant="body2" color="text.primary">
                         {formatNumber(Number(report?.totalIncome))}
                       </Typography>
                     </Stack>
@@ -145,34 +145,30 @@ export const ReportDetailPage = () => {
                       <MoreHorizOutlined fontSize="inherit" />
                     </IconButton>
                   </Stack>
-                  <Stack spacing={1}>
-                    {report?.expenses.map((expense) => (
-                      <Stack direction="row" justifyContent="space-between">
-                        <Typography variant="body2" color="text.secondary">
-                          {expense.description ?? 'Cash'}
-                        </Typography>
-                        <Typography variant="body2" color="text.primary">
-                          {expense.amount && formatNumber(Number(expense.amount))}
-                        </Typography>
-                      </Stack>
-                    ))}
-                  </Stack>
-                  <Divider />
-                  <Stack spacing={1}>
+                  {report?.expenses.map((expense) => (
                     <Stack direction="row" justifyContent="space-between">
                       <Typography variant="body2" color="text.secondary">
-                        Total
+                        {expense.description ?? 'Cash'}
                       </Typography>
-                      <Typography variant="body2" color="text.primary">
-                        {formatNumber(Number(report?.totalExpenses))}
+                      <Typography variant="body2" color="text.secondary">
+                        {expense.amount && formatNumber(Number(expense.amount))}
                       </Typography>
                     </Stack>
+                  ))}
+                  <Divider />
+                  <Stack direction="row" justifyContent="space-between">
+                    <Typography variant="body2" color="text.secondary">
+                      Total
+                    </Typography>
+                    <Typography variant="body2" color="text.primary">
+                      {formatNumber(Number(report?.totalExpenses))}
+                    </Typography>
                   </Stack>
                 </CardContainer>
               </Stack>
 
               {/* Right Section */}
-              <Stack minWidth="30%" spacing={2}>
+              <Stack minWidth="40%" spacing={2}>
                 <CardContainer height="fit-content" spacing={2}>
                   <Stack direction="row" alignItems="center" justifyContent="space-between">
                     <Typography variant="body2" sx={{ fontWeight: 600 }}>

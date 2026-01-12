@@ -19,8 +19,18 @@ export const PageContainer = ({
   stackSx,
 }: PageContainerProps) => {
   return (
-    <Container maxWidth={maxWidth} disableGutters sx={{ display: 'flex', flex: 1, ...containerSx }}>
-      <Stack spacing={spacing} p={p} bgcolor="default" flex={1} sx={{ minWidth: 0, ...stackSx }}>
+    <Container
+      maxWidth={maxWidth}
+      disableGutters
+      sx={{ display: 'flex', flex: 1, ...containerSx }}
+    >
+      <Stack
+        spacing={spacing}
+        p={p}
+        bgcolor="default"
+        flex={1}
+        sx={{ height: '100%', minWidth: 0, ...stackSx }}
+      >
         {children}
       </Stack>
     </Container>

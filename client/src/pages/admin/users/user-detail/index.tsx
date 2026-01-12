@@ -96,7 +96,7 @@ export const UserDetailPage = () => {
 
   return (
     <PageLayout>
-      <Form onSubmit={handleSubmit(onSubmit)}>
+      <Form onSubmit={handleSubmit(onSubmit)} sx={{ height: '100%' }}>
         <PageContainer>
           <Breadcrumb
             items={[
