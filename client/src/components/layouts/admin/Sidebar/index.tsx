@@ -4,6 +4,8 @@ import {
   DashboardOutlined,
   GroupOutlined,
   HelpOutlineOutlined,
+  InventoryOutlined,
+  LocalGasStationOutlined,
   PaymentsOutlined,
   ScheduleOutlined,
   WarningAmberOutlined,
@@ -94,6 +96,28 @@ const Sidebar = () => {
           }),
         },
         {
+          label: 'Products',
+          icon: LocalGasStationOutlined,
+          to: pathFor({
+            pathname: AdminRoutes.TenantProducts,
+            params: { tenantId },
+          }),
+        },
+        {
+          label: 'Inventory',
+          icon: InventoryOutlined,
+          to: pathFor({
+            pathname: AdminRoutes.TenantInventory,
+            params: { tenantId },
+          }),
+          disabled: true,
+        },
+      ],
+    },
+    {
+      label: 'Configuration',
+      items: [
+         {
           label: 'Shift Schedules',
           icon: ScheduleOutlined,
           to: pathFor({

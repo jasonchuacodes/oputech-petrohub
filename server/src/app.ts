@@ -11,6 +11,7 @@ import notificationRoutes from './modules/notification/routes';
 import pusherRoutes from './modules/pusher/routes';
 import shiftRoutes from './modules/shift/routes';
 import reportRoutes from './modules/report/routes';
+import productRoutes from './modules/product/routes';
 import { corsMiddleware } from './middlewares/corsMiddleware';
 
 const app = express();
@@ -28,6 +29,7 @@ app.use('/notifications', notificationRoutes);
 app.use('/pusher', pusherRoutes);
 app.use('/shifts', shiftRoutes);
 app.use('/reports', reportRoutes);
+app.use('/products', productRoutes);
 app.use(errorHandler);
 
 export { app };

@@ -13,6 +13,7 @@ import { TimesheetsPage } from '~/pages/admin/timesheets';
 import { UsersPage } from '~/pages/admin/users';
 import { BootstrapPage } from '~/pages/admin/bootstrap';
 import { HomePage } from '~/pages/admin/home';
+import { ProductsPage } from '~/pages/admin/products';
 import { ReportsPage } from '~/pages/admin/reports';
 import { ReportDetailPage } from '~/pages/admin/reports/report-detail';
 import { ShiftsPage } from '~/pages/admin/shifts';
@@ -47,6 +48,8 @@ export const AdminRoutes = {
   TenantReportDetails: '/tenants/:tenantId/reports/:reportId',
   TenantTimesheets: '/tenants/:tenantId/timesheets/:userId?',
   TenantShifts: '/tenants/:tenantId/shifts',
+  TenantProducts: '/tenants/:tenantId/products',
+  TenantInventory: '/tenants/:tenantId/inventory',
   TenantUsers: '/tenants/:tenantId/users',
   TenantUserDetail: '/tenants/:tenantId/users/:userId',
   TenantUserTimesheetLogs: '/tenants/:tenantId/users/:userId/timesheets',
@@ -100,6 +103,8 @@ export const router = createBrowserRouter(
           <Route element={<AdminMainLayout />}>
             <Route index element={<HomePage />} />
             <Route path="reports" element={<ReportsPage />} />
+            <Route path="products" element={<ProductsPage />} />
+            {/* <Route path="inventory" element={<InventoryPage />} /> */}
             <Route path="reports/:reportId" element={<ReportDetailPage />} />
             <Route path="timesheets/:userId?" element={<TimesheetsPage />} />
             <Route path="shifts" element={<ShiftsPage />} />

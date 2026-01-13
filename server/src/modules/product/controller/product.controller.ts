@@ -1,0 +1,97 @@
+import type { Request, Response, NextFunction } from 'express';
+import { createSchemaValidator } from '~/utils';
+import * as productService from '../services/product.service';
+import { CreateProductSchema } from '../schema/createProductSchema';
+import { UpdateProductSchema } from '../schema/updateProductSchema';
+
+const validateCreateProduct = createSchemaValidator(CreateProductSchema);
+const validateUpdateProduct = createSchemaValidator(UpdateProductSchema);
+
+const createProduct = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const data = await validateCreateProduct(req.body);
+    const product = await productService.createProduct(data);
+    res.status(201).json({ message: 'Product created successfully', data: product });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const getProductsByTenantId = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { tenantId } = req.query;
+    const products = await productService.getProductsByTenantId(tenantId as string);
+    res.status(200).json({ data: products });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const getProductById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { productId } = req.params;
+    const { tenantId } = req.query;
+    const product = await productService.getProductById(
+      productId,
+      tenantId as string,
+    );
+    res.status(200).json({ data: product });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const updateProduct = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { productId } = req.params;
+    const { tenantId } = req.query;
+    const data = await validateUpdateProduct(req.body);
+    const product = await productService.updateProduct(
+      productId,
+      tenantId as string,
+      data,
+    );
+    res.status(200).json({ message: 'Product updated successfully', data: product });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const deleteProduct = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { productId } = req.params;
+    const { tenantId } = req.query;
+    await productService.deleteProduct(productId, tenantId as string);
+    res.status(204).send();
+  } catch (err) {
+    next(err);
+  }
+};
+
+export {
+  createProduct,
+  getProductsByTenantId,
+  getProductById,
+  updateProduct,
+  deleteProduct,
+};
