@@ -1,4 +1,5 @@
 import { PrismaClient } from '../src/db/prisma';
+import { TenantSeeder } from './seeders/TenantSeeder';
 import { ProductSeeder } from './seeders/ProductSeeder';
 import { UserSeeder } from './seeders/UserSeeder';
 import { ShiftSeeder } from './seeders/ShiftSeeder';
@@ -9,12 +10,9 @@ const prisma = new PrismaClient();
 const main = async () => {
   console.log('Starting database seeding...\n');
 
-  const tenant = await prisma.tenant.findFirst();
-
-  if (!tenant) {
-    console.log('No tenant found. Skip seeding.');
-    return;
-  }
+  // Create tenant first
+  const tenantSeeder = new TenantSeeder(prisma);
+  const tenant = await tenantSeeder.seed();
 
   console.log(`Using tenant: ${tenant.name} (${tenant.id})\n`);
 

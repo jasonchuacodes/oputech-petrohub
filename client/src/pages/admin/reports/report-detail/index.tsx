@@ -72,17 +72,17 @@ export const ReportDetailPage = () => {
                   <Stack spacing={1}>
                     <Stack direction="row" alignItems="center" justifyContent="space-between">
                       <Typography variant="h6" color="text.primary">
-                        Net Sales
+                        Total Sales
                       </Typography>
                       <Typography variant="h4" fontWeight="medium" color="text.primary">
                         {formatCurrency(Number(report?.netTotal))}
                       </Typography>
                     </Stack>
-                    <Divider />
-                    <Stack pl={2} spacing={1}>
+
+                    <Stack spacing={1}>
                       <Stack direction="row" justifyContent="space-between">
                         <Typography variant="body2" color="text.secondary">
-                          Sales
+                          Income
                         </Typography>
                         <Typography variant="body2" color="text.primary">
                           {formatNumber(Number(report?.totalIncome))}
@@ -96,6 +96,22 @@ export const ReportDetailPage = () => {
                           {formatNumber(Number(report?.totalExpenses))}
                         </Typography>
                       </Stack>
+                    </Stack>
+
+                    <Divider />
+                    
+                    <Stack direction="row" justifyContent="space-between">
+                      <Typography variant="body2" color="text.secondary">
+                        Shortages
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        color={(report?.shortages ?? 0) >= 0 ? 'error.main' : 'success.main'}
+                      >
+                        {(report?.shortages ?? 0) >= 0
+                          ? `(${formatCurrency(Math.abs(report?.shortages ?? 0))})`
+                          : `${formatCurrency(Math.abs(report?.shortages ?? 0))} over`}
+                      </Typography>
                     </Stack>
                   </Stack>
                 </CardContainer>
@@ -129,14 +145,14 @@ export const ReportDetailPage = () => {
                         Total
                       </Typography>
                       <Typography variant="body2" color="text.primary">
-                        {formatNumber(Number(report?.totalIncome))}
+                        {formatCurrency(Number(report?.totalIncome))}
                       </Typography>
                     </Stack>
                   </Stack>
                 </CardContainer>
 
                 {/* Expenses */}
-                <CardContainer height="fit-content" spacing={2}>
+                <CardContainer height="fit-content" spacing={1}>
                   <Stack direction="row" alignItems="center" justifyContent="space-between">
                     <Typography variant="body2" sx={{ fontWeight: 600 }}>
                       Expenses
@@ -161,7 +177,7 @@ export const ReportDetailPage = () => {
                       Total
                     </Typography>
                     <Typography variant="body2" color="text.primary">
-                      {formatNumber(Number(report?.totalExpenses))}
+                      {formatCurrency(Number(report?.totalExpenses))}
                     </Typography>
                   </Stack>
                 </CardContainer>
@@ -205,73 +221,27 @@ export const ReportDetailPage = () => {
                       Calculated Sales
                     </Typography>
                     <Typography variant="body1" color="text.primary">
-                      {formatCurrency(243456)}
+                      {formatCurrency(report?.totalDisposalSales || 0)}
                     </Typography>
                   </Stack>
                   <Divider />
 
                   {/* Summary */}
-                  {[
-                    { name: 'XCS', calculatedSales: 160595.25 },
-                    { name: 'XTRA 1', calculatedSales: 80546.2 },
-                    { name: 'XTRA 2', calculatedSales: 24240.8 },
-                    { name: 'ADO', calculatedSales: 14240.0 },
-                  ].map((disposal) => (
-                    <Stack direction="row" justifyContent="space-between" pl={2}>
+                  {report?.disposals.map((disposal) => (
+                    <Stack key={disposal.id} direction="row" justifyContent="space-between" pl={2}>
                       <Typography variant="body2" color="text.secondary">
-                        {disposal.name}
+                        {disposal.product.name}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        {disposal.calculatedSales && formatNumber(Number(disposal.calculatedSales))}
+                        {formatCurrency(Number(disposal.totalSales))}
                       </Typography>
                     </Stack>
                   ))}
 
                   {/* Disposal Card */}
 
-                  {[
-                    {
-                      beforeReading: 1230904,
-                      afterReading: 1203981,
-                      netDisposal: 1200,
-                      calculatedSales: 80546.2,
-                      product: {
-                        name: 'XCS',
-                        price: 59.94,
-                      },
-                    },
-                    {
-                      beforeReading: 1230904,
-                      afterReading: 1203981,
-                      netDisposal: 1200,
-                      calculatedSales: 80546.2,
-                      product: {
-                        name: 'XTRA 1',
-                        price: 59.94,
-                      },
-                    },
-                    {
-                      beforeReading: 1230904,
-                      afterReading: 1203981,
-                      netDisposal: 1200,
-                      calculatedSales: 80546.2,
-                      product: {
-                        name: 'XTRA 2',
-                        price: 59.94,
-                      },
-                    },
-                    {
-                      beforeReading: 1230904,
-                      afterReading: 1203981,
-                      netDisposal: 1200,
-                      calculatedSales: 80546.2,
-                      product: {
-                        name: 'ADO',
-                        price: 59.94,
-                      },
-                    },
-                  ].map((disposal) => (
-                    <CardContainer bgcolor="background.default">
+                  {report?.disposals.map((disposal) => (
+                    <CardContainer key={disposal.id} bgcolor="background.default">
                       <Stack direction="row" justifyContent="space-between" alignItems="start">
                         <Stack spacing={1} width="100%">
                           <Typography variant="h6">{disposal.product.name}</Typography>
@@ -295,7 +265,7 @@ export const ReportDetailPage = () => {
                             alignItems="center"
                           >
                             <Typography variant="body2" color="text.secondary">
-                              Before Reading
+                              After Reading
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
                               {disposal.afterReading}
@@ -325,7 +295,7 @@ export const ReportDetailPage = () => {
                               Price
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                              {formatCurrency(disposal.product.price)}
+                              {formatCurrency(Number(disposal.priceSnapshot))}
                             </Typography>
                           </Stack>
                           <Divider />
@@ -339,7 +309,7 @@ export const ReportDetailPage = () => {
                               Sales
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                              {formatCurrency(disposal.calculatedSales)}
+                              {formatCurrency(Number(disposal.totalSales))}
                             </Typography>
                           </Stack>
                         </Stack>

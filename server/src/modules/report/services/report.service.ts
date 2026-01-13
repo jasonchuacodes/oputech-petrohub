@@ -55,6 +55,7 @@ const createReport = async ({ tenantId, creatorId, shiftId, shiftDate }: CreateR
       entries: { include: { product: true } },
       income: true,
       expenses: true,
+      disposals: { include: { product: true } },
       employees: {
         include: {
           user: {
@@ -139,6 +140,7 @@ const getReportById = async (reportId: string) => {
       entries: { include: { product: true } },
       income: true,
       expenses: true,
+      disposals: { include: { product: true } },
       employees: {
         include: {
           user: {

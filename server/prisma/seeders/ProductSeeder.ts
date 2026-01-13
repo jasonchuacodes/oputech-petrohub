@@ -7,10 +7,10 @@ export class ProductSeeder {
     console.log('Seeding products...');
 
     const products = [
-      { code: 'A', name: 'Regular Gasoline', unit: 'L' },
-      { code: 'B', name: 'Premium Gasoline', unit: 'L' },
-      { code: 'C', name: 'Diesel', unit: 'L' },
-      { code: 'D', name: 'Kerosene', unit: 'L' },
+      { code: 'A', name: 'XCS', unit: 'L' },
+      { code: 'B', name: 'XTRA 1', unit: 'L' },
+      { code: 'C', name: 'XTRA 2', unit: 'L' },
+      { code: 'D', name: 'ADO', unit: 'L' },
     ];
 
     const basePrices = {

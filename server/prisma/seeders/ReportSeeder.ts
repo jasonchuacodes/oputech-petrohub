@@ -28,11 +28,32 @@ export class ReportSeeder {
   }
 
   private formatDate(date: Date): string {
-    return date.toLocaleDateString('en-CA'); // YYYY-MM-DD format
+    return date.toLocaleDateString('en-CA'); 
+  }
+
+  private async getPriceSnapshot(productId: string, shiftDate: Date): Promise<Decimal> {
+    const productPrice = await this.prisma.productPrice.findFirst({
+      where: {
+        productId,
+        effectiveFrom: { lte: shiftDate },
+      },
+      orderBy: { effectiveFrom: 'desc' },
+    });
+
+    if (!productPrice) {
+      throw new Error(`No price found for product ${productId} at date ${shiftDate}`);
+    }
+
+    return new Decimal(productPrice.price);
   }
 
   async seed(tenantId: string, adminUserId: string, shifts: Shifts, usersByShift: UsersByShift) {
     console.log('Seeding reports...');
+
+    const products = await this.prisma.product.findMany({
+      where: { tenantId },
+      orderBy: { code: 'asc' },
+    });
 
     const reportDates = [this.getShiftDate(2), this.getShiftDate(1), this.getShiftDate(0)];
 
@@ -48,20 +69,74 @@ export class ReportSeeder {
       { description: 'Transportation', baseAmount: 800 },
     ];
 
-    // Variations for each report to add realism
+    // Disposal templates (meter start readings)
+    const disposalStartingReadings = [
+      1230904,
+      890450, 
+      1050230,
+      670200,
+    ];
+
+    // Track current readings across shifts
+    let currentReadings = [...disposalStartingReadings];
+
+    // Disposal amounts (L) per shift
+    const morningDisposalAmounts = [1200, 950, 1500, 800];
+    const afternoonDisposalAmounts = [1350, 1100, 1650, 900];
+
     const variations = [
-      [-5, -3, 2], // Report 1 variations for income items
-      [3, -2, 5], // Report 2
-      [-2, 4, -1], // Report 3
-      [4, -1, 3], // Report 4
-      [-3, 2, 4], // Report 5
-      [2, -4, 1], // Report 6
+      [-5, -3, 2],
+      [3, -2, 5],
+      [-2, 4, -1],
+      [4, -1, 3],
+      [-3, 2, 4],
+      [2, -4, 1],
     ];
 
     let reportIndex = 0;
 
     for (const shiftDate of reportDates) {
-      // Create morning shift report
+      const morningDisposalsData = await Promise.all(
+        products.map(async (product, idx) => {
+          const priceSnapshot = await this.getPriceSnapshot(product.id, shiftDate);
+          const beforeReading = new Decimal(currentReadings[idx]);
+          const netDisposal = new Decimal(morningDisposalAmounts[idx]);
+          const afterReading = beforeReading.add(netDisposal);
+          const totalSales = netDisposal.mul(priceSnapshot);
+
+          // Update current readings for next shift
+          currentReadings[idx] = afterReading.toNumber();
+
+          return {
+            productId: product.id,
+            beforeReading,
+            afterReading,
+            netDisposal,
+            priceSnapshot,
+            totalSales,
+          };
+        }),
+      );
+
+      const morningTotalDisposalSales = morningDisposalsData.reduce(
+        (sum, d) => sum.add(d.totalSales),
+        new Decimal(0),
+      );
+
+      // Generate income based on disposal sales ±10
+      const morningVariation = Math.random() * 20 - 10;
+      const morningTargetIncome = morningTotalDisposalSales.toNumber() + morningVariation;
+
+      // Distribute target income across categories using ratios
+      const incomeRatios = [0.58, 0.33, 0.09]; // 58% cash, 33% online, 9% gift cards
+      const morningIncomeData = incomeTemplates.map((template, idx) => ({
+        description: template.description,
+        amount: new Decimal((morningTargetIncome * incomeRatios[idx]).toFixed(2)),
+      }));
+
+       /**
+       * AFTERNOON SHIFT REPORT
+       */
       const morningReport = await this.prisma.report.upsert({
         where: {
           tenantId_shiftDate_shiftId: {
@@ -81,16 +156,16 @@ export class ReportSeeder {
             shiftDate.getTime() + shifts.morningShift.shiftEnd.getUTCHours() * 3600000 + 2 * 3600000,
           ),
           income: {
-            create: incomeTemplates.map((template, idx) => ({
-              description: template.description,
-              amount: this.getAmount(template.baseAmount, variations[reportIndex][idx]),
-            })),
+            create: morningIncomeData,
           },
           expenses: {
             create: expenseTemplates.map((template, idx) => ({
               description: template.description,
               amount: this.getAmount(template.baseAmount, variations[reportIndex][idx]),
             })),
+          },
+          disposals: {
+            create: morningDisposalsData,
           },
         },
       });
@@ -113,14 +188,19 @@ export class ReportSeeder {
       }
 
       // Calculate totals for logging
-      const morningIncome = incomeTemplates.reduce(
+      const morningIncome = morningIncomeData.reduce(
+        (sum, income) => sum.add(income.amount),
+        new Decimal(0),
+      );
+
+      const morningExpenses = expenseTemplates.reduce(
         (sum, template, idx) =>
           sum.add(this.getAmount(template.baseAmount, variations[reportIndex][idx])),
         new Decimal(0),
       );
-      const morningExpenses = expenseTemplates.reduce(
-        (sum, template, idx) =>
-          sum.add(this.getAmount(template.baseAmount, variations[reportIndex][idx])),
+
+      const morningDisposalTotal = morningDisposalAmounts.reduce(
+        (sum, amount) => sum.add(new Decimal(amount)),
         new Decimal(0),
       );
 
@@ -131,11 +211,53 @@ export class ReportSeeder {
       );
       console.log(`  Income: ₱${morningIncome.toFixed(2)}`);
       console.log(`  Expenses: ₱${morningExpenses.toFixed(2)}`);
+      console.log(`  Disposals: ${morningDisposalTotal.toFixed(3)}L`);
       console.log(`  Employees: ${usersByShift.morningShiftUsers.length}`);
 
       reportIndex++;
 
-      // Create afternoon shift report
+      // Calculate disposal sales first for afternoon shift
+      const afternoonDisposalsData = await Promise.all(
+        products.map(async (product, idx) => {
+          const priceSnapshot = await this.getPriceSnapshot(product.id, shiftDate);
+          const beforeReading = new Decimal(currentReadings[idx]);
+          const netDisposal = new Decimal(afternoonDisposalAmounts[idx]);
+          const afterReading = beforeReading.add(netDisposal);
+          const totalSales = netDisposal.mul(priceSnapshot);
+
+          // Update current readings for next shift
+          currentReadings[idx] = afterReading.toNumber();
+
+          return {
+            productId: product.id,
+            beforeReading,
+            afterReading,
+            netDisposal,
+            priceSnapshot,
+            totalSales,
+          };
+        }),
+      );
+
+      // Calculate total disposal sales
+      const afternoonTotalDisposalSales = afternoonDisposalsData.reduce(
+        (sum, d) => sum.add(d.totalSales),
+        new Decimal(0),
+      );
+
+      // Generate income based on disposal sales ±10
+      const afternoonVariation = Math.random() * 20 - 10; // Random between -10 and +10
+      const afternoonTargetIncome = afternoonTotalDisposalSales.toNumber() + afternoonVariation;
+
+      // Distribute target income across categories using ratios
+      const afternoonIncomeData = incomeTemplates.map((template, idx) => ({
+        description: template.description,
+        amount: new Decimal((afternoonTargetIncome * incomeRatios[idx]).toFixed(2)),
+      }));
+
+      /**
+       * AFTERNOON SHIFT REPORT
+       */
       const afternoonReport = await this.prisma.report.upsert({
         where: {
           tenantId_shiftDate_shiftId: {
@@ -155,16 +277,16 @@ export class ReportSeeder {
             shiftDate.getTime() + shifts.afternoonShift.shiftEnd.getUTCHours() * 3600000 + 2 * 3600000,
           ),
           income: {
-            create: incomeTemplates.map((template, idx) => ({
-              description: template.description,
-              amount: this.getAmount(template.baseAmount, variations[reportIndex][idx]),
-            })),
+            create: afternoonIncomeData,
           },
           expenses: {
             create: expenseTemplates.map((template, idx) => ({
               description: template.description,
               amount: this.getAmount(template.baseAmount, variations[reportIndex][idx]),
             })),
+          },
+          disposals: {
+            create: afternoonDisposalsData,
           },
         },
       });
@@ -187,14 +309,19 @@ export class ReportSeeder {
       }
 
       // Calculate totals for logging
-      const afternoonIncome = incomeTemplates.reduce(
-        (sum, template, idx) =>
-          sum.add(this.getAmount(template.baseAmount, variations[reportIndex][idx])),
+      const afternoonIncome = afternoonIncomeData.reduce(
+        (sum, income) => sum.add(income.amount),
         new Decimal(0),
       );
       const afternoonExpenses = expenseTemplates.reduce(
         (sum, template, idx) =>
           sum.add(this.getAmount(template.baseAmount, variations[reportIndex][idx])),
+        new Decimal(0),
+      );
+
+      // Calculate disposal totals
+      const afternoonDisposalTotal = afternoonDisposalAmounts.reduce(
+        (sum, amount) => sum.add(new Decimal(amount)),
         new Decimal(0),
       );
 
@@ -205,6 +332,7 @@ export class ReportSeeder {
       );
       console.log(`  Income: ₱${afternoonIncome.toFixed(2)}`);
       console.log(`  Expenses: ₱${afternoonExpenses.toFixed(2)}`);
+      console.log(`  Disposals: ${afternoonDisposalTotal.toFixed(3)}L`);
       console.log(`  Employees: ${usersByShift.afternoonShiftUsers.length}`);
 
       reportIndex++;

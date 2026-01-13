@@ -22,6 +22,25 @@ export type ReportExpense = {
   createdAt: string;
 };
 
+export type ReportDisposal = {
+  id: string;
+  reportId: string;
+  productId: string;
+  product: {
+    id: string;
+    name: string;
+    code: string;
+    unit: string;
+  };
+  beforeReading: number;
+  afterReading: number;
+  netDisposal: number;
+  priceSnapshot: number;
+  totalSales: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type Employee = {
   id: string;
   name: string;
@@ -37,6 +56,8 @@ export type Report = {
   status: ReportStatus;
   totalIncome: number;
   totalExpenses: number;
+  totalDisposalSales: number;
+  shortages: number;
   netTotal: number;
   shift: {
     id: string;
@@ -51,6 +72,7 @@ export type Report = {
   };
   income: ReportIncome[];
   expenses: ReportExpense[];
+  disposals: ReportDisposal[];
   employees: {
     user: {
       id: string;
