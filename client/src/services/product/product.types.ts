@@ -9,7 +9,7 @@ export type Product = {
   tenantId: string;
   name: string;
   description: string | null;
-  productPrice: ProductPrice | null;
+  productPrice: ProductPrice;
   createdAt: Date;
   updatedAt: Date;
 };
