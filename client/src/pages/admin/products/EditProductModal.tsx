@@ -2,11 +2,11 @@ import { EditOutlined } from '@mui/icons-material';
 import { Checkbox, FormControlLabel, Stack } from '@mui/material';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import dayjs from 'dayjs';
+import { dayjsLocal } from '~/utils/date';
 import toast from 'react-hot-toast';
 import { useEffect, useState } from 'react';
 
-import { CustomModal, DatePicker, Show } from '~/components/ui';
+import { CustomModal, DateTimePicker, Show } from '~/components/ui';
 import { Input } from '~/components/form';
 import { useProductContext } from '~/context/product';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
@@ -23,14 +23,14 @@ export const EditProductModal = ({ open, onClose }: EditProductModalProps) => {
   const { tenantId } = useTenantContext();
   const { mutateAsync: updateProduct, isPending } = useUpdateProductMutation();
 
-  const [future, setFuture] = useState(false);
+  const [future, setFuture] = useState(!!product.scheduledPrice);
 
   const { control, handleSubmit, reset } = useForm<CreateProductInput>({
     defaultValues: {
       name: '',
       description: '',
       price: 0,
-      effectiveFrom: '',
+      effectiveFrom: dayjsLocal(product.scheduledPrice?.effectiveFrom).toISOString(),
     },
     resolver: zodResolver(CreateProductSchema),
   });
@@ -42,9 +42,7 @@ export const EditProductModal = ({ open, onClose }: EditProductModalProps) => {
         description: product.description || '',
         price: product.productPrice?.price || 0,
         reading: product.productReading?.reading || 0,
-        effectiveFrom: product.productPrice?.effectiveFrom
-          ? new Date(product.productPrice.effectiveFrom).toISOString().slice(0, 16)
-          : new Date().toISOString().slice(0, 16),
+        effectiveFrom: dayjsLocal(product.scheduledPrice?.effectiveFrom).toISOString(),
       });
     }
   }, [product, reset]);
@@ -65,18 +63,21 @@ export const EditProductModal = ({ open, onClose }: EditProductModalProps) => {
         },
       });
       toast.success('Product updated successfully');
-      reset();
-      setFuture(false);
       onClose();
     } catch {
       toast.error('Failed to update product');
     }
   };
 
+  const handleClose = () => {
+    onClose()
+    reset()
+  }
+
   return (
     <CustomModal
       onSubmit={handleSubmit(onSubmit)}
-      onClose={onClose}
+      onClose={handleClose}
       open={open}
       title="Update Product"
       subheader="Edit an existing product details"
@@ -129,8 +130,9 @@ export const EditProductModal = ({ open, onClose }: EditProductModalProps) => {
             name="effectiveFrom"
             control={control}
             render={({ field }) => (
-              <DatePicker
-                value={field.value ? dayjs(field.value) : dayjs()}
+              <DateTimePicker
+                disablePast
+                value={dayjsLocal(field.value)}
                 onChange={(date) => field.onChange(date?.toISOString() ?? '')}
               />
             )}

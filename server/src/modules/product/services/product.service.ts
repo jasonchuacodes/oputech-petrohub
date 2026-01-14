@@ -31,50 +31,56 @@ const createProduct = async (data: CreateProductPayload) => {
 };
 
 const getProductsByTenantId = async (tenantId: string) => {
+  const now = new Date();
+
   const products = await prisma.product.findMany({
     where: { tenantId },
     include: {
       productPrices: {
-        where: {
-          effectiveFrom: { lte: new Date()}
-        },
+        where: { effectiveFrom: { lte: now } },
         orderBy: { effectiveFrom: 'desc' },
         take: 1,
       },
       productReadings: {
-        orderBy: {
-          createdAt: 'desc',
-        },
+        orderBy: { createdAt: 'desc' },
         take: 1,
       },
     },
     orderBy: { createdAt: 'desc' },
   });
 
+  const scheduledPrices = await prisma.productPrice.findMany({
+    where: {
+      productId: { in: products.map((p) => p.id) },
+      effectiveFrom: { gt: now },
+    },
+    orderBy: { effectiveFrom: 'asc' },
+    distinct: ['productId'],
+  });
+
   return products.map((product) => ({
     ...product,
     productReading: product.productReadings[0] || null,
     productPrice: product.productPrices[0] || null,
+    scheduledPrice: scheduledPrices.find((sp) => sp.productId === product.id) || null,
     productPrices: undefined,
     productReadings: undefined,
   }));
 };
 
 const getProductById = async (productId: string, tenantId: string) => {
+  const now = new Date();
+
   const product = await prisma.product.findFirst({
     where: { id: productId, tenantId },
     include: {
       productPrices: {
-        where: {
-          effectiveFrom: { lte: new Date()}
-        },
+        where: { effectiveFrom: { lte: now } },
         orderBy: { effectiveFrom: 'desc' },
         take: 1,
       },
       productReadings: {
-        orderBy: {
-          createdAt: 'desc',
-        },
+        orderBy: { createdAt: 'desc' },
         take: 1,
       },
     },
@@ -84,10 +90,19 @@ const getProductById = async (productId: string, tenantId: string) => {
     throw new NotFoundError('Product not found');
   }
 
+  const scheduledPrice = await prisma.productPrice.findFirst({
+    where: {
+      productId,
+      effectiveFrom: { gt: now },
+    },
+    orderBy: { effectiveFrom: 'asc' },
+  });
+
   return {
     ...product,
     productPrice: product.productPrices[0] || null,
     productReading: product.productReadings[0] || null,
+    scheduledPrice: scheduledPrice || null,
     productPrices: undefined,
     productReadings: undefined,
   };

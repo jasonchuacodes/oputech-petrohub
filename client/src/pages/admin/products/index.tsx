@@ -9,7 +9,7 @@ import { useDisclosure } from '~/hooks/useDisclosure';
 import { AdminRoutes } from '~/routes';
 import { useGetProductsQuery } from '~/services/product/product.queries';
 import { formatDate } from '~/utils/date';
-import { formatCurrency, formatNumber } from '~/utils/number';
+import { formatCurrency } from '~/utils/number';
 import { pathFor } from '~/utils/pathFor';
 
 import { CreateProductModal } from './CreateProductModal';
@@ -69,17 +69,17 @@ export const ProductsPage = () => {
                 </Typography>
               ),
               orderable: true,
-              width: 240,
+              width: 200,
             },
             {
               id: 'reading',
               heading: 'Current Reading',
               cell: (product) => (
                 <Typography variant="body2" color="text.secondary">
-                  {formatNumber(product.productReading.reading, 3)}
+                  {product.productReading.reading}
                 </Typography>
               ),
-              width: 200,
+              width: 160,
             },
             {
               id: 'price',
@@ -87,6 +87,30 @@ export const ProductsPage = () => {
               cell: (product) => (
                 <Typography variant="body2" color="text.secondary">
                   {formatCurrency(product.productPrice.price, undefined, 2)}
+                </Typography>
+              ),
+              width: 160,
+            },
+            {
+              id: 'priceChange',
+              heading: 'Price Change',
+              cell: (product) => (
+                <Typography variant="body2" color="text.secondary">
+                  {product.scheduledPrice
+                    ? formatCurrency(product.scheduledPrice.price, undefined, 2)
+                    : '-'}
+                </Typography>
+              ),
+              width: 160,
+            },
+            {
+              id: 'effectiveFrom',
+              heading: 'Effective From',
+              cell: (product) => (
+                <Typography variant="body2" color="text.secondary">
+                  {product.scheduledPrice
+                    ? formatDate(product.scheduledPrice.effectiveFrom, 'YYYY-MM-DD hh:mm')
+                    : '-'}
                 </Typography>
               ),
               width: 160,

@@ -17,6 +17,7 @@ export type Product = {
   description: string | null;
   productReading: ProductReading;
   productPrice: ProductPrice;
+  scheduledPrice: ProductPrice | null;
   createdAt: Date;
   updatedAt: Date;
 };

@@ -9,6 +9,7 @@ export * from './CustomModal';
 export * from './DataTable';
 export * from './DateRangePicker';
 export * from './DatePicker';
+export * from './DateTimePicker';
 export * from './DateTimeDisplay';
 export * from './InfoBox';
 export * from './Form';

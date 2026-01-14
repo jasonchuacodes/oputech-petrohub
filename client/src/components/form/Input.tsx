@@ -1,10 +1,4 @@
-import {
-  Box,
-  OutlinedInput,
-  Stack,
-  Typography,
-  type OutlinedInputProps,
-} from '@mui/material';
+import { Box, OutlinedInput, Stack, Typography, type OutlinedInputProps } from '@mui/material';
 import type { HTMLInputTypeAttribute, ReactNode } from 'react';
 import { Controller, type Control, type FieldValues, type Path } from 'react-hook-form';
 
@@ -105,7 +99,6 @@ export const Input = <T extends FieldValues>({
               startAdornment ? (
                 <Box
                   sx={{
-                    bgcolor: 'background.default',
                     display: 'flex',
                     borderRight: '1px solid',
                     borderColor: 'divider',
