@@ -81,7 +81,9 @@ const getProductById = async (productId: string, tenantId: string) => {
   return {
     ...product,
     productPrice: product.productPrices[0] || null,
+    productReading: product.productReadings[0] || null,
     productPrices: undefined,
+    productReadings: undefined,
   };
 };
 
@@ -107,7 +109,7 @@ const updateProduct = async (productId: string, tenantId: string, data: UpdatePr
       data: {
         productId,
         price: data.productPrice,
-        effectiveFrom: data.effectiveFrom ? new Date(data.effectiveFrom) : new Date(),
+        ...(data.effectiveFrom && { effectiveFrom: new Date(data.effectiveFrom) }),
       },
     });
   }

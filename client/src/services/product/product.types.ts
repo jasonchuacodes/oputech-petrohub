@@ -32,7 +32,7 @@ export type CreateProductPayload = {
 export type UpdateProductPayload = {
   name?: string;
   description?: string;
-  price?: number;
-  reading?: number;
+  productPrice?: number;
+  productReading?: number;
   effectiveFrom?: string;
 };

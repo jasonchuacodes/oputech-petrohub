@@ -3,7 +3,6 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker as MuiDatePicker } from '@mui/x-date-pickers/DatePicker';
 import { Dayjs } from 'dayjs';
-import { useState } from 'react';
 
 import { useDisclosure } from '~/hooks/useDisclosure';
 
@@ -12,10 +11,10 @@ import { Show } from '../Show';
 export type DatePickerProps = {
   label?: string;
   value: Dayjs | null;
+  onChange: (value: Dayjs | null) => void;
 };
 
-export const DatePicker = ({ label, value }: DatePickerProps) => {
-  const [internalDate, setInternalDate] = useState<Dayjs | null>(value);
+export const DatePicker = ({ label, value, onChange }: DatePickerProps) => {
   const dateDisclosure = useDisclosure(false);
 
   return (
@@ -27,11 +26,11 @@ export const DatePicker = ({ label, value }: DatePickerProps) => {
       </Show>
       <LocalizationProvider dateAdapter={AdapterDayjs}>
         <MuiDatePicker
-          value={internalDate}
+          value={value}
           onOpen={() => dateDisclosure.setOpen(true)}
           onClose={() => dateDisclosure.setOpen(false)}
           onChange={(newValue) => {
-            setInternalDate(newValue);
+            onChange?.(newValue);
             dateDisclosure.setOpen(false);
           }}
           open={dateDisclosure.open}

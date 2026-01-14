@@ -56,7 +56,6 @@ const useUpdateProductMutation = () => {
     }) => updateProduct(productId, data, tenantId),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['products', variables.tenantId] });
-      queryClient.invalidateQueries({ queryKey: ['product', variables.productId] });
     },
   });
 };

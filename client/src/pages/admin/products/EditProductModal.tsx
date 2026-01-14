@@ -52,19 +52,16 @@ export const EditProductModal = ({ open, onClose }: EditProductModalProps) => {
   const onSubmit = async (data: CreateProductInput) => {
     if (!tenantId || !product) return;
     try {
-      const effectiveFrom = data.effectiveFrom
-        ? new Date(data.effectiveFrom).toISOString()
-        : new Date().toISOString();
-
       await updateProduct({
         productId: product.id,
         tenantId,
         data: {
           name: data.name,
           description: data.description,
-          price: data.price,
-          reading: data.reading,
-          effectiveFrom,
+          productPrice: data.price,
+          productReading: data.reading,
+          ...(future &&
+            data.effectiveFrom && { effectiveFrom: new Date(data.effectiveFrom).toISOString() }),
         },
       });
       toast.success('Product updated successfully');
@@ -129,7 +126,12 @@ export const EditProductModal = ({ open, onClose }: EditProductModalProps) => {
           <Controller
             name="effectiveFrom"
             control={control}
-            render={() => <DatePicker value={dayjs(new Date())} />}
+            render={({ field }) => (
+              <DatePicker
+                value={field.value ? dayjs(field.value) : dayjs()}
+                onChange={(date) => field.onChange(date?.toISOString() ?? '')}
+              />
+            )}
           />
         </Show>
         <Input
