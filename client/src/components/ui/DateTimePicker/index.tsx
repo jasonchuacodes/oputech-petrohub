@@ -51,7 +51,7 @@ export const DateTimePicker = ({
                 sx: { fontSize: 'body2.fontSize' },
               },
             },
-            actionBar: { actions: ['clear'] },
+            actionBar: { actions: ['accept', 'clear'] },
           }}
           slots={{
             toolbar: undefined,

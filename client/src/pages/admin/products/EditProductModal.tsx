@@ -1,17 +1,18 @@
 import { EditOutlined } from '@mui/icons-material';
-import { Checkbox, FormControlLabel, Stack } from '@mui/material';
+import { Checkbox, FormControlLabel, Stack, Typography } from '@mui/material';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { dayjsLocal } from '~/utils/date';
+import { dayjsLocal, formatDate } from '~/utils/date';
+import { useEffect } from 'react';
 import toast from 'react-hot-toast';
-import { useEffect, useState } from 'react';
 
-import { CustomModal, DateTimePicker, Show } from '~/components/ui';
+import { CustomModal, DateTimePicker, InfoBox, Show } from '~/components/ui';
 import { Input } from '~/components/form';
 import { useProductContext } from '~/context/product';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { useUpdateProductMutation } from '~/services/product/product.queries';
 import { CreateProductSchema, type CreateProductInput } from '~/schema/createProductSchema';
+import { formatCurrency } from '~/utils/number';
 
 type EditProductModalProps = {
   open: boolean;
@@ -23,9 +24,7 @@ export const EditProductModal = ({ open, onClose }: EditProductModalProps) => {
   const { tenantId } = useTenantContext();
   const { mutateAsync: updateProduct, isPending } = useUpdateProductMutation();
 
-  const [future, setFuture] = useState(!!product.scheduledPrice);
-
-  const { control, handleSubmit, reset } = useForm<CreateProductInput>({
+  const { control, handleSubmit, reset, formState, watch, setValue } = useForm<CreateProductInput>({
     defaultValues: {
       name: '',
       description: '',
@@ -34,6 +33,8 @@ export const EditProductModal = ({ open, onClose }: EditProductModalProps) => {
     },
     resolver: zodResolver(CreateProductSchema),
   });
+
+  const future = watch('future');
 
   useEffect(() => {
     if (product) {
@@ -49,6 +50,7 @@ export const EditProductModal = ({ open, onClose }: EditProductModalProps) => {
 
   const onSubmit = async (data: CreateProductInput) => {
     if (!tenantId || !product) return;
+
     try {
       await updateProduct({
         productId: product.id,
@@ -58,21 +60,22 @@ export const EditProductModal = ({ open, onClose }: EditProductModalProps) => {
           description: data.description,
           productPrice: data.price,
           productReading: data.reading,
-          ...(future &&
-            data.effectiveFrom && { effectiveFrom: new Date(data.effectiveFrom).toISOString() }),
+          ...(data.future && {
+            effectiveFrom: new Date(data.effectiveFrom!).toISOString(),
+          }),
         },
       });
+
       toast.success('Product updated successfully');
       onClose();
     } catch {
       toast.error('Failed to update product');
     }
   };
-
   const handleClose = () => {
-    onClose()
-    reset()
-  }
+    onClose();
+    reset();
+  };
 
   return (
     <CustomModal
@@ -85,8 +88,31 @@ export const EditProductModal = ({ open, onClose }: EditProductModalProps) => {
       maxWidth={560}
       loading={isPending}
       icon={EditOutlined}
+      disabled={!formState.isValid}
     >
       <Stack spacing={2}>
+        {product.scheduledPrice && (
+          <InfoBox variant="info">
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+              pl={1}
+              spacing={2}
+            >
+              <Typography variant="body2">
+                Price set to change to{' '}
+                <Typography variant="inherit" component="span" color="warning.main">
+                  {formatCurrency(product.scheduledPrice.price)}
+                </Typography>{' '}
+                on{' '}
+                <Typography variant="inherit" component="span" color="warning.main">
+                  {formatDate(product.scheduledPrice.effectiveFrom, 'MMMM DD, YYYY hh:mm A')}
+                </Typography>
+              </Typography>
+            </Stack>
+          </InfoBox>
+        )}
         <Input
           label="Product Name"
           control={control}
@@ -122,10 +148,16 @@ export const EditProductModal = ({ open, onClose }: EditProductModalProps) => {
               ml: 0.5,
             },
           }}
-          control={<Checkbox checked={future} onChange={() => setFuture(!future)} sx={{ p: 0 }} />}
+          control={
+            <Checkbox
+              checked={future}
+              onChange={(e) => setValue('future', e.target.checked, { shouldValidate: true })}
+              sx={{ p: 0 }}
+            />
+          }
           label="Schedule price change?"
         />
-        <Show when={future} fallback={null}>
+        <Show when={!!future} fallback={null}>
           <Controller
             name="effectiveFrom"
             control={control}

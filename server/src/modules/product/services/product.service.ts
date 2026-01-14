@@ -117,34 +117,80 @@ const updateProduct = async (productId: string, tenantId: string, data: UpdatePr
     throw new NotFoundError('Product not found');
   }
 
-  await prisma.product.update({
-    where: { id: productId },
-    data: {
-      name: data.name,
-      description: data.description,
-    },
+  return await prisma.$transaction(async (tx) => {
+    // 1. Update product base fields
+    await tx.product.update({
+      where: { id: productId },
+      data: {
+        name: data.name,
+        description: data.description,
+      },
+    });
+
+    // 2. Handle product price
+    if (data.productPrice !== undefined) {
+      const now = new Date();
+
+      const futurePrices = await tx.productPrice.findMany({
+        where: {
+          productId,
+          effectiveFrom: {
+            gt: now,
+          },
+        },
+        orderBy: {
+          effectiveFrom: 'asc',
+        },
+      });
+
+      if (futurePrices.length > 0) {
+        const [priceToUpdate, ...pricesToDelete] = futurePrices;
+
+        // Update the nearest future price
+        await tx.productPrice.update({
+          where: { id: priceToUpdate.id },
+          data: {
+            price: data.productPrice,
+            ...(data.effectiveFrom && {
+              effectiveFrom: new Date(data.effectiveFrom),
+            }),
+          },
+        });
+
+        // Remove other future prices
+        if (pricesToDelete.length > 0) {
+          await tx.productPrice.deleteMany({
+            where: {
+              id: {
+                in: pricesToDelete.map((p) => p.id),
+              },
+            },
+          });
+        }
+      } else {
+        // Optional: create a future price if none exists
+        await tx.productPrice.create({
+          data: {
+            productId,
+            price: data.productPrice,
+            effectiveFrom: data.effectiveFrom ? new Date(data.effectiveFrom) : now,
+          },
+        });
+      }
+    }
+
+    // 3. Handle product reading
+    if (data.productReading !== undefined) {
+      await tx.productReading.create({
+        data: {
+          productId,
+          reading: data.productReading,
+        },
+      });
+    }
+
+    return getProductById(productId, tenantId);
   });
-
-  if (data.productPrice !== undefined) {
-    await prisma.productPrice.create({
-      data: {
-        productId,
-        price: data.productPrice,
-        ...(data.effectiveFrom && { effectiveFrom: new Date(data.effectiveFrom) }),
-      },
-    });
-  }
-
-  if (data.productReading !== undefined) {
-    await prisma.productReading.create({
-      data: {
-        productId,
-        reading: data.productReading,
-      },
-    });
-  }
-
-  return await getProductById(productId, tenantId);
 };
 
 const deleteProduct = async (productId: string, tenantId: string) => {
