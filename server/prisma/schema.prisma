@@ -200,12 +200,14 @@ model Product {
   description String?
 
   productPrices   ProductPrice[]
+  productReadings ProductReading[]  
   reportEntries   ReportEntry[]
   reportDisposals ReportDisposal[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@unique([tenantId, name])
   @@index([tenantId])
 }
 
@@ -220,6 +222,18 @@ model ProductPrice {
   createdAt DateTime @default(now())
 
   @@index([productId, effectiveFrom])
+}
+
+model ProductReading {
+  id            String   @id @default(uuid())
+  productId     String
+  product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  reading       Decimal  @db.Decimal(12, 3)
+
+  createdAt     DateTime  @default(now())
+
+  @@index([productId])
 }
 
 model Report {

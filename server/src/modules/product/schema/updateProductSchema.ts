@@ -12,6 +12,10 @@ export const UpdateProductSchema = z.object({
     .positive('Product price must be positive')
     .min(0.01, 'Product price must be at least 0.01')
     .optional(),
+  productReading: z
+    .number()
+    .min(1, 'Product price must be at least 1')
+    .optional(),
   effectiveFrom: z
     .string()
     .datetime()

@@ -9,7 +9,7 @@ import { useDisclosure } from '~/hooks/useDisclosure';
 import { AdminRoutes } from '~/routes';
 import { useGetProductsQuery } from '~/services/product/product.queries';
 import { formatDate } from '~/utils/date';
-import { formatCurrency } from '~/utils/number';
+import { formatCurrency, formatNumber } from '~/utils/number';
 import { pathFor } from '~/utils/pathFor';
 
 import { CreateProductModal } from './CreateProductModal';
@@ -71,16 +71,15 @@ export const ProductsPage = () => {
               orderable: true,
               width: 240,
             },
-            // TODO: implement product reading.
-            // {
-            //   id: 'reading',
-            //   heading: 'Current Reading',
-            //   cell: (product) => (
-            //     <Typography variant="body2" color="text.secondary">
-            //       {product.reading}
-            //     </Typography>
-            //   ),
-            // },
+            {
+              id: 'reading',
+              heading: 'Current Reading',
+              cell: (product) => (
+                <Typography variant="body2" color="text.secondary">
+                  {formatNumber(product.productReading.reading, 3)}
+                </Typography>
+              ),
+            },
             {
               id: 'price',
               heading: 'Current Price',

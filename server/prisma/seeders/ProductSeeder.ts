@@ -6,47 +6,49 @@ export class ProductSeeder {
   async seed(tenantId: string): Promise<void> {
     console.log('Seeding products...');
 
-    const products = [
-      { code: 'A', name: 'XCS', unit: 'L' },
-      { code: 'B', name: 'XTRA 1', unit: 'L' },
-      { code: 'C', name: 'XTRA 2', unit: 'L' },
-      { code: 'D', name: 'ADO', unit: 'L' },
-    ];
+    const products = [{ name: 'XCS' }, { name: 'XTRA 1' }, { name: 'XTRA 2' }, { name: 'ADO' }];
 
     const basePrices = {
-      A: '55.50',
-      B: '58.75',
-      C: '52.30',
-      D: '49.80',
+      XCS: '55.50',
+      'XTRA 1': '58.75',
+      'XTRA 2': '52.30',
+      ADO: '49.80',
     };
 
     for (const productData of products) {
       const product = await this.prisma.product.upsert({
         where: {
-          tenantId_code: {
+          tenantId_name: {
             tenantId,
-            code: productData.code,
+            name: productData.name,
           },
         },
         update: {},
         create: {
           tenantId,
-          code: productData.code,
           name: productData.name,
-          unit: productData.unit,
         },
       });
 
       await this.prisma.productPrice.create({
         data: {
           productId: product.id,
-          price: basePrices[productData.code as keyof typeof basePrices],
+          price: basePrices[productData.name as keyof typeof basePrices],
           effectiveFrom: new Date('2026-01-01T00:00:00Z'),
         },
       });
 
+      await this.prisma.productReading.create({
+        data: {
+          productId: product.id,
+          reading: 100.000,
+        },
+      });
+
       console.log(
-        `Product ${productData.code} (${productData.name}) - ₱${basePrices[productData.code as keyof typeof basePrices]}/L`
+        `Product (${productData.name}) - ₱${
+          basePrices[productData.name as keyof typeof basePrices]
+        }/L`,
       );
     }
 

@@ -16,8 +16,15 @@ const createProduct = async (data: CreateProductPayload) => {
   await prisma.productPrice.create({
     data: {
       productId: product.id,
-      price: data.productPrice,
+      price: data.price,
       effectiveFrom: new Date(data.effectiveFrom),
+    },
+  });
+
+  await prisma.productReading.create({
+    data: {
+      productId: product.id,
+      reading: data.reading,
     },
   });
 
@@ -32,14 +39,22 @@ const getProductsByTenantId = async (tenantId: string) => {
         orderBy: { effectiveFrom: 'desc' },
         take: 1,
       },
+      productReadings: {
+        orderBy: {
+          createdAt: 'desc',
+        },
+        take: 1,
+      },
     },
     orderBy: { createdAt: 'desc' },
   });
 
   return products.map((product) => ({
     ...product,
+    productReading: product.productReadings[0] || null,
     productPrice: product.productPrices[0] || null,
     productPrices: undefined,
+    productReadings: undefined,
   }));
 };
 
@@ -49,6 +64,12 @@ const getProductById = async (productId: string, tenantId: string) => {
     include: {
       productPrices: {
         orderBy: { effectiveFrom: 'desc' },
+        take: 1,
+      },
+      productReadings: {
+        orderBy: {
+          createdAt: 'desc',
+        },
         take: 1,
       },
     },
@@ -88,6 +109,15 @@ const updateProduct = async (productId: string, tenantId: string, data: UpdatePr
         productId,
         price: data.productPrice,
         effectiveFrom: data.effectiveFrom ? new Date(data.effectiveFrom) : new Date(),
+      },
+    });
+  }
+
+  if (data.productReading !== undefined) {
+    await prisma.productReading.create({
+      data: {
+        productId,
+        reading: data.productReading,
       },
     });
   }

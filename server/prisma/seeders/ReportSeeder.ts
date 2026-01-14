@@ -52,7 +52,7 @@ export class ReportSeeder {
 
     const products = await this.prisma.product.findMany({
       where: { tenantId },
-      orderBy: { code: 'asc' },
+      orderBy: { name: 'asc' },
     });
 
     const reportDates = [this.getShiftDate(2), this.getShiftDate(1), this.getShiftDate(0)];
