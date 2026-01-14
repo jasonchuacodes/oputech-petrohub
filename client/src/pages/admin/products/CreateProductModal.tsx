@@ -28,7 +28,6 @@ export const CreateProductModal = ({ open, onClose }: CreateProductModalProps) =
     defaultValues: {
       name: '',
       description: '',
-      price: 0,
     },
     resolver: zodResolver(CreateProductSchema),
   });
@@ -51,10 +50,15 @@ export const CreateProductModal = ({ open, onClose }: CreateProductModalProps) =
     }
   };
 
+  const handleClose = () => {
+    reset();
+    onClose();
+  };
+
   return (
     <CustomModal
       open={open}
-      onClose={onClose}
+      onClose={handleClose}
       onSubmit={handleSubmit(onSubmit)}
       title="Create Product"
       subheader="Add a new product to your inventory."
@@ -76,13 +80,14 @@ export const CreateProductModal = ({ open, onClose }: CreateProductModalProps) =
           control={control}
           name="price"
           type="number"
+          startAdornment="₱"
           placeholder="0.00"
           slotProps={{
             input: { step: '0.01', min: '0.01' },
           }}
         />
         <Input
-          label="Meter Reading"
+          label="Current Reading"
           control={control}
           name="reading"
           type="number"
@@ -97,7 +102,7 @@ export const CreateProductModal = ({ open, onClose }: CreateProductModalProps) =
           name="description"
           placeholder="Optional description"
           multiline
-          rows={2}
+          rows={3}
         />
       </Stack>
     </CustomModal>

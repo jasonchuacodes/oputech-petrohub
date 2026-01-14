@@ -1,5 +1,5 @@
 import { EditOutlined } from '@mui/icons-material';
-import { Checkbox, FormControlLabel, Stack, Typography } from '@mui/material';
+import { Checkbox, FormControlLabel, Stack } from '@mui/material';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import dayjs from 'dayjs';
@@ -80,48 +80,43 @@ export const EditProductModal = ({ open, onClose }: EditProductModalProps) => {
       onClose={onClose}
       open={open}
       title="Update Product"
-      subheader="Edit an existing product."
+      subheader="Edit an existing product details"
       submitText="Update"
       maxWidth={560}
       loading={isPending}
       icon={EditOutlined}
     >
       <Stack spacing={2}>
-        <Stack spacing={0.5}>
-          <Typography variant="body2" fontWeight="medium">
-            Product Name
-          </Typography>
-          <Input control={control} name="name" placeholder="e.g., Premium Diesel" />
-        </Stack>
-
-        <Stack spacing={0.5}>
-          <Typography variant="body2" fontWeight="medium">
-            Description
-          </Typography>
-          <Input
-            control={control}
-            name="description"
-            placeholder="Optional description"
-            multiline
-            rows={2}
-          />
-        </Stack>
-
-        <Stack spacing={0.5}>
-          <Typography variant="body2" fontWeight="medium">
-            Current Reading
-          </Typography>
-          <Input control={control} name="reading" type="number" placeholder="0.00" />
-        </Stack>
-
-        <Stack spacing={0.5}>
-          <Typography variant="body2" fontWeight="medium">
-            Product Price
-          </Typography>
-          <Input control={control} name="price" type="number" placeholder="0.00" />
-        </Stack>
+        <Input
+          label="Product Name"
+          control={control}
+          name="name"
+          placeholder="e.g., Premium Diesel"
+        />
+        <Input
+          label="Current Reading"
+          control={control}
+          name="reading"
+          type="number"
+          placeholder="0.00"
+          slotProps={{
+            input: { step: '0.01', min: '0.01' },
+          }}
+        />
+        <Input
+          label="Product Price"
+          control={control}
+          name="price"
+          startAdornment="₱"
+          type="number"
+          placeholder="0.00"
+          slotProps={{
+            input: { step: '0.01', min: '0.01' },
+          }}
+        />
         <FormControlLabel
           sx={{
+            width: 'fit-content',
             '& .MuiFormControlLabel-label': {
               fontSize: 'body2.fontSize',
               ml: 0.5,
@@ -137,6 +132,14 @@ export const EditProductModal = ({ open, onClose }: EditProductModalProps) => {
             render={() => <DatePicker value={dayjs(new Date())} />}
           />
         </Show>
+        <Input
+          label="Description (optional)"
+          control={control}
+          name="description"
+          placeholder="Optional description"
+          multiline
+          rows={3}
+        />
       </Stack>
     </CustomModal>
   );

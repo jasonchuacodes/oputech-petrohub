@@ -1,9 +1,9 @@
 import {
+  Box,
   OutlinedInput,
   Stack,
   Typography,
   type OutlinedInputProps,
-  type SxProps,
 } from '@mui/material';
 import type { HTMLInputTypeAttribute, ReactNode } from 'react';
 import { Controller, type Control, type FieldValues, type Path } from 'react-hook-form';
@@ -21,7 +21,6 @@ type InputProps<T extends FieldValues> = {
 
   size?: 'small' | 'medium';
   fullWidth?: boolean;
-  sx?: SxProps;
 
   endAdornment?: ReactNode;
   startAdornment?: ReactNode;
@@ -41,7 +40,6 @@ export const Input = <T extends FieldValues>({
   disabled = false,
   size = 'small',
   fullWidth = true,
-  sx,
   endAdornment,
   startAdornment,
   slotProps,
@@ -53,7 +51,21 @@ export const Input = <T extends FieldValues>({
     input: {
       sx: {
         fontSize: 'body2.fontSize',
+        ...(startAdornment && { pl: 1 }),
         ...slotProps?.input?.sx,
+      },
+    },
+    root: {
+      sx: {
+        ...(startAdornment && { padding: 0 }),
+        '& .MuiOutlinedInput-notchedOutline': {
+          borderColor: 'divider',
+        },
+        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+          borderWidth: '1px',
+        },
+        bgcolor: 'background.paper',
+        borderRadius: 2,
       },
     },
   };
@@ -89,18 +101,24 @@ export const Input = <T extends FieldValues>({
             error={error?.message ? true : errorProp}
             slotProps={mergedSlotProps}
             endAdornment={endAdornment}
-            startAdornment={startAdornment}
-            sx={{
-              '& .MuiOutlinedInput-notchedOutline': {
-                borderColor: 'divider',
-              },
-              '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                borderWidth: '1px',
-              },
-              bgcolor: 'background.paper',
-              borderRadius: 2,
-              ...sx,
-            }}
+            startAdornment={
+              startAdornment ? (
+                <Box
+                  sx={{
+                    bgcolor: 'background.default',
+                    display: 'flex',
+                    borderRight: '1px solid',
+                    borderColor: 'divider',
+                    alignItems: 'center',
+                    alignSelf: 'stretch',
+                    px: 2,
+                    m: 0,
+                  }}
+                >
+                  {startAdornment}
+                </Box>
+              ) : undefined
+            }
           />
 
           {errorProp && error?.message && (

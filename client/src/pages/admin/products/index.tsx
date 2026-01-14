@@ -79,6 +79,7 @@ export const ProductsPage = () => {
                   {formatNumber(product.productReading.reading, 3)}
                 </Typography>
               ),
+              width: 200,
             },
             {
               id: 'price',
