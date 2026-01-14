@@ -25,15 +25,14 @@ export type CreateProductPayload = {
   tenantId: string;
   name: string;
   description?: string;
+  price: number;
   reading: number;
-  productPrice: number;
-  effectiveFrom?: string;
 };
 
 export type UpdateProductPayload = {
   name?: string;
   description?: string;
-  productPrice?: number;
+  price?: number;
   reading?: number;
   effectiveFrom?: string;
 };

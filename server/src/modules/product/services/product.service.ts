@@ -17,7 +17,6 @@ const createProduct = async (data: CreateProductPayload) => {
     data: {
       productId: product.id,
       price: data.price,
-      effectiveFrom: new Date(data.effectiveFrom),
     },
   });
 

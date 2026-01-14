@@ -1,11 +1,12 @@
 import { EditOutlined } from '@mui/icons-material';
-import { Stack, Typography } from '@mui/material';
+import { Checkbox, FormControlLabel, Stack, Typography } from '@mui/material';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import dayjs from 'dayjs';
 import toast from 'react-hot-toast';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
-import { CustomModal } from '~/components/ui';
+import { CustomModal, DatePicker, Show } from '~/components/ui';
 import { Input } from '~/components/form';
 import { useProductContext } from '~/context/product';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
@@ -22,11 +23,13 @@ export const EditProductModal = ({ open, onClose }: EditProductModalProps) => {
   const { tenantId } = useTenantContext();
   const { mutateAsync: updateProduct, isPending } = useUpdateProductMutation();
 
+  const [future, setFuture] = useState(false);
+
   const { control, handleSubmit, reset } = useForm<CreateProductInput>({
     defaultValues: {
       name: '',
       description: '',
-      productPrice: 0,
+      price: 0,
       effectiveFrom: '',
     },
     resolver: zodResolver(CreateProductSchema),
@@ -37,7 +40,8 @@ export const EditProductModal = ({ open, onClose }: EditProductModalProps) => {
       reset({
         name: product.name,
         description: product.description || '',
-        productPrice: product.productPrice?.price || 0,
+        price: product.productPrice?.price || 0,
+        reading: product.productReading?.reading || 0,
         effectiveFrom: product.productPrice?.effectiveFrom
           ? new Date(product.productPrice.effectiveFrom).toISOString().slice(0, 16)
           : new Date().toISOString().slice(0, 16),
@@ -51,13 +55,15 @@ export const EditProductModal = ({ open, onClose }: EditProductModalProps) => {
       const effectiveFrom = data.effectiveFrom
         ? new Date(data.effectiveFrom).toISOString()
         : new Date().toISOString();
+
       await updateProduct({
         productId: product.id,
         tenantId,
         data: {
           name: data.name,
           description: data.description,
-          productPrice: data.productPrice,
+          price: data.price,
+          reading: data.reading,
           effectiveFrom,
         },
       });
@@ -103,38 +109,34 @@ export const EditProductModal = ({ open, onClose }: EditProductModalProps) => {
 
         <Stack spacing={0.5}>
           <Typography variant="body2" fontWeight="medium">
-            Product Price
+            Current Reading
           </Typography>
-          <Input
-            control={control}
-            name="productPrice"
-            type="number"
-            placeholder="0.00"
-          />
+          <Input control={control} name="reading" type="number" placeholder="0.00" />
         </Stack>
 
         <Stack spacing={0.5}>
           <Typography variant="body2" fontWeight="medium">
-            Effective From
+            Product Price
           </Typography>
+          <Input control={control} name="price" type="number" placeholder="0.00" />
+        </Stack>
+        <FormControlLabel
+          sx={{
+            '& .MuiFormControlLabel-label': {
+              fontSize: 'body2.fontSize',
+              ml: 0.5,
+            },
+          }}
+          control={<Checkbox checked={future} onChange={() => setFuture(!future)} sx={{ p: 0 }} />}
+          label="Schedule price change?"
+        />
+        <Show when={future} fallback={null}>
           <Controller
             name="effectiveFrom"
             control={control}
-            render={({ field }) => (
-              <input
-                {...field}
-                type="datetime-local"
-                style={{
-                  padding: '12px',
-                  borderRadius: '4px',
-                  border: '1px solid #ccc',
-                  fontSize: '14px',
-                  fontFamily: 'inherit',
-                }}
-              />
-            )}
+            render={() => <DatePicker value={dayjs(new Date())} />}
           />
-        </Stack>
+        </Show>
       </Stack>
     </CustomModal>
   );

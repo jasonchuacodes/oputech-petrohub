@@ -6,7 +6,6 @@ export const CreateProductSchema = z.object({
   description: z.string().max(255, 'Description must be at most 255 characters').optional(),
   price: z.coerce.number().min(0.01),
   reading: z.coerce.number().min(1),
-  effectiveFrom: z.string().datetime().optional().default(() => new Date().toISOString()),
 });
 
 export type CreateProductPayload = z.infer<typeof CreateProductSchema>;
