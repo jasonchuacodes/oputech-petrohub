@@ -65,6 +65,8 @@ export const EditProductModal = ({ open, onClose }: EditProductModalProps) => {
         },
       });
       toast.success('Product updated successfully');
+      reset();
+      setFuture(false);
       onClose();
     } catch {
       toast.error('Failed to update product');

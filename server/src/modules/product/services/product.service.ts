@@ -35,6 +35,9 @@ const getProductsByTenantId = async (tenantId: string) => {
     where: { tenantId },
     include: {
       productPrices: {
+        where: {
+          effectiveFrom: { lte: new Date()}
+        },
         orderBy: { effectiveFrom: 'desc' },
         take: 1,
       },
@@ -62,6 +65,9 @@ const getProductById = async (productId: string, tenantId: string) => {
     where: { id: productId, tenantId },
     include: {
       productPrices: {
+        where: {
+          effectiveFrom: { lte: new Date()}
+        },
         orderBy: { effectiveFrom: 'desc' },
         take: 1,
       },
