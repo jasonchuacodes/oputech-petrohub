@@ -68,35 +68,13 @@ const Sidebar = () => {
             params: { tenantId },
           }),
         },
-        {
-          label: 'Timesheets',
-          icon: CalendarTodayOutlined,
-          to: pathFor({
-            pathname: AdminRoutes.TenantTimesheets,
-            params: { tenantId },
-          }),
-        },
-        {
-          label: 'Payroll',
-          disabled: true,
-          icon: PaymentsOutlined,
-          to: '#',
-        },
       ],
     },
     {
-      label: 'Management',
+      label: 'Products',
       items: [
         {
-          label: 'Users',
-          icon: GroupOutlined,
-          to: pathFor({
-            pathname: AdminRoutes.TenantUsers,
-            params: { tenantId },
-          }),
-        },
-        {
-          label: 'Products',
+          label: 'Fuel',
           icon: LocalGasStationOutlined,
           to: pathFor({
             pathname: AdminRoutes.TenantProducts,
@@ -115,9 +93,17 @@ const Sidebar = () => {
       ],
     },
     {
-      label: 'Configuration',
+      label: 'Management',
       items: [
-         {
+        {
+          label: 'Users',
+          icon: GroupOutlined,
+          to: pathFor({
+            pathname: AdminRoutes.TenantUsers,
+            params: { tenantId },
+          }),
+        },
+        {
           label: 'Shift Schedules',
           icon: ScheduleOutlined,
           to: pathFor({
@@ -125,8 +111,23 @@ const Sidebar = () => {
             params: { tenantId },
           }),
         },
+        {
+          label: 'Timesheets',
+          icon: CalendarTodayOutlined,
+          to: pathFor({
+            pathname: AdminRoutes.TenantTimesheets,
+            params: { tenantId },
+          }),
+        },
+        {
+          label: 'Payroll',
+          disabled: true,
+          icon: PaymentsOutlined,
+          to: '#',
+        },
       ],
     },
+
     {
       label: 'Other',
       items: [
