@@ -106,6 +106,8 @@ const theme = createTheme({
     button: {
       fontSize: '14px',
       lineHeight: '140%',
+      textTransform: 'none',
+      minWidth: '64px',
     },
 
     caption: {

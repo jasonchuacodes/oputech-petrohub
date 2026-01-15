@@ -19,7 +19,7 @@ export const formatRange = (start: Dayjs | null, end: Dayjs | null) => {
     return start.format('MMMM D, YYYY');
   }
 
-  return `${start ? start.format('MM/DD/YY') : 'MM/DD/YY'} - ${end ? end.format('MM/DD/YY') : 'MM/DD/YY'}`;
+  return `${start ? start.format('MMM DD, YYYY') : 'MMM DD, YYYY'} - ${end ? end.format('MMM DD, YYYY') : 'MMM DD, YYYY'}`;
 };
 
 /**

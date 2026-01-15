@@ -16,7 +16,7 @@ import {
   DateRangePicker,
   PageLayout,
   SkeletonList,
-  type DateRange,
+  type DateRange
 } from '~/components/ui';
 import { useAuthContext } from '~/context/auth/useAuthContext';
 import { useGetUserTimesheetsQuery } from '~/services/timesheet/timesheet.queries';

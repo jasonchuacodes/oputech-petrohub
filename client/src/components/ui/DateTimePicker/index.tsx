@@ -46,12 +46,32 @@ export const DateTimePicker = ({
           slotProps={{
             textField: {
               size: 'small',
-              sx: { width: '100%' },
+              sx: {
+                width: '100%',
+                borderRadius: 2,
+                borderColor: 'divider',
+                bgcolor: 'background.paper',
+              },
               InputProps: {
-                sx: { fontSize: 'body2.fontSize' },
+                sx: {
+                  fontSize: 'body2.fontSize',
+                  borderRadius: 2,
+
+                  '& .MuiOutlinedInput-notchedOutline': {
+                    borderColor: 'divider',
+                  },
+
+                  '&:hover .MuiOutlinedInput-notchedOutline': {
+                    borderColor: 'text.primary',
+                  },
+
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                    borderColor: 'text.primary',
+                    borderWidth: 1,
+                  },
+                },
               },
             },
-            actionBar: { actions: ['accept', 'clear'] },
           }}
           slots={{
             toolbar: undefined,

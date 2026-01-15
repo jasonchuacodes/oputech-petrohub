@@ -31,7 +31,7 @@ export const SearchInput = ({
             borderColor: 'divider',
           },
           '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-            borderWidth: 1,
+            borderWidth: 2,
             borderColor: 'text.primary',
           },
         }}

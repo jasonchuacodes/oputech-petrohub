@@ -56,7 +56,7 @@ export const Input = <T extends FieldValues>({
           borderColor: 'divider',
         },
         '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-          borderWidth: '1px',
+          borderWidth: '2px',
         },
         bgcolor: 'background.paper',
         borderRadius: 2,

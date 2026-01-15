@@ -62,7 +62,7 @@ export const InputWithFormat = <T extends object>({
                   borderColor: 'divider',
                 },
                 '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                  borderWidth: '1px',
+                  borderWidth: 2,
                 },
                 bgcolor: 'background.paper',
                 borderRadius: 2,

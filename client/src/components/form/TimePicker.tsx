@@ -67,6 +67,7 @@ export const TimePicker = ({ control, name, label,  disabled }: TimePickerProps)
                     InputProps: {
                       sx: {
                         fontSize: 'body2.fontSize',
+                        borderRadius: 2,
                       },
                     },
                   },

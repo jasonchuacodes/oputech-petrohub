@@ -1,10 +1,11 @@
-import { Stack, Typography } from '@mui/material';
+import { Stack, ThemeProvider, Typography } from '@mui/material';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker as MuiDatePicker } from '@mui/x-date-pickers/DatePicker';
 import { Dayjs } from 'dayjs';
 
 import { useDisclosure } from '~/hooks/useDisclosure';
+import theme from '~/theme';
 
 import { Show } from '../Show';
 
@@ -25,29 +26,33 @@ export const DatePicker = ({ label, value, onChange }: DatePickerProps) => {
         </Typography>
       </Show>
       <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <MuiDatePicker
-          value={value}
-          onOpen={() => dateDisclosure.setOpen(true)}
-          onClose={() => dateDisclosure.setOpen(false)}
-          onChange={(newValue) => {
-            onChange?.(newValue);
-            dateDisclosure.setOpen(false);
-          }}
-          open={dateDisclosure.open}
-          slotProps={{
-            textField: {
-              size: 'small',
-              sx: { width: '100%' },
-              InputProps: {
-                sx: { fontSize: 'body2.fontSize' },
+        <ThemeProvider theme={theme}>
+          <MuiDatePicker
+            value={value}
+            onOpen={() => dateDisclosure.setOpen(true)}
+            onClose={() => dateDisclosure.setOpen(false)}
+            onChange={(newValue) => onChange?.(newValue)}
+            open={dateDisclosure.open}
+            slotProps={{
+              textField: {
+                size: 'small',
+                InputProps: {
+                  sx: {
+                    fontSize: 'body2.fontSize',
+                    borderRadius: 2,
+                    backgroundColor: 'background.paper',
+                  },
+                },
               },
-            },
-            actionBar: { actions: ['clear'] },
-          }}
-          slots={{
-            toolbar: undefined,
-          }}
-        />
+              actionBar: {
+                actions: ['cancel', 'accept'],
+              },
+            }}
+            slots={{
+              toolbar: undefined,
+            }}
+          />
+        </ThemeProvider>
       </LocalizationProvider>
     </Stack>
   );

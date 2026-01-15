@@ -9,7 +9,6 @@ export const Button = ({ children, sx, ...props }: PropsWithChildren<ButtonProps
       textOverflow: 'ellipsis',
       whiteSpace: 'nowrap',
       borderRadius: 2,
-      minWidth: 'fit-content',
       flexShrink: 0,
       overflow: 'hidden',
       fontWeight: 'normal',
@@ -22,8 +21,8 @@ export const Button = ({ children, sx, ...props }: PropsWithChildren<ButtonProps
         bgcolor: 'background.paper'
       }),
 
-      ...(props.size === 'small' && { height: 36 }),
-      ...(props.size === 'large' && { height: 40 }),
+      ...(props.size === 'small' && { fontSize: 'body2.fontSize', height: 36 }),
+      ...(props.size === 'large' && { fontSize: 'body1.fontSize', height: 40 }),
 
       ...sx,
     }}

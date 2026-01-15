@@ -1,5 +1,7 @@
 import { ChevronRightOutlined, HomeOutlined } from '@mui/icons-material';
 import { Typography } from '@mui/material';
+import type { Dayjs } from 'dayjs';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import {
@@ -9,20 +11,41 @@ import {
   DateRangePicker,
   PageContainer,
   PageLayout,
+  type DateRange,
 } from '~/components/ui';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { PageHeader } from '~/components/layouts';
 import { AdminRoutes } from '~/routes';
 import { pathFor } from '~/utils/pathFor';
-import { formatDate } from '~/utils/date';
+import { formatDate, getInitialDateRange } from '~/utils/date';
 import { formatNumber } from '~/utils/number';
 import { useGetReportsQuery } from '~/services/report/report.queries';
+
+const REPORTS_KEY = 'reports';
 
 export const ReportsPage = () => {
   const { tenantId } = useTenantContext();
   const navigate = useNavigate();
 
+  const initialRange = getInitialDateRange(REPORTS_KEY);
+
+  const [startDate, setStartDate] = useState<Dayjs | null>(initialRange.startDate);
+  const [endDate, setEndDate] = useState<Dayjs | null>(initialRange.endDate);
+
   const { data: reports, isLoading } = useGetReportsQuery({ tenantId });
+
+  const handleSelectDateRange = ({ start, end }: DateRange) => {
+    const newStart = start?.startOf('day') ?? null;
+    const newEnd = end?.endOf('day') ?? null;
+
+    const hasChanged =
+      (newStart && !newStart.isSame(startDate)) || (newEnd && !newEnd.isSame(endDate));
+
+    if (hasChanged) {
+      setStartDate(newStart);
+      setEndDate(newEnd);
+    }
+  };
 
   const handleRowClick = (reportId: string) => {
     navigate(
@@ -54,10 +77,10 @@ export const ReportsPage = () => {
         <PageHeader title="Reports" description="View the list of reports here." />
 
         <DateRangePicker
-          selectedStart={null}
-          selectedEnd={null}
-          label="MM/DD/YYYY — MM/DD/YYYY"
-          onAccept={() => null}
+          selectedStart={startDate}
+          selectedEnd={endDate}
+          label="Select Time Period"
+          onAccept={handleSelectDateRange}
         />
         <DataTable
           id="reports-table"
