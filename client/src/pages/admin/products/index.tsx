@@ -106,13 +106,17 @@ export const ProductsPage = () => {
             {
               id: 'effectiveFrom',
               heading: 'Effective From',
-              cell: (product) => (
-                <Typography variant="body2" color="text.secondary">
-                  {product.scheduledPrice
-                    ? formatDate(product.scheduledPrice.effectiveFrom, 'YYYY-MM-DD hh:mm')
-                    : '-'}
-                </Typography>
-              ),
+              cell: (product) => {
+                const effectiveFrom = product.scheduledPrice?.effectiveFrom;
+
+                const shouldDisplay = effectiveFrom && new Date(effectiveFrom) > new Date();
+
+                return (
+                  <Typography variant="body2" color="text.secondary">
+                    {shouldDisplay ? formatDate(effectiveFrom, 'YYYY-MM-DD hh:mm') : '-'}
+                  </Typography>
+                );
+              },
               width: 160,
             },
             {

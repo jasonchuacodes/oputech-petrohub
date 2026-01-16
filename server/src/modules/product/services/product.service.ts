@@ -111,24 +111,74 @@ const getProductById = async (productId: string, tenantId: string) => {
 const updateProduct = async (productId: string, tenantId: string, data: UpdateProductPayload) => {
   const product = await prisma.product.findFirst({
     where: { id: productId, tenantId },
+    include: {
+      productPrices: {
+        where: { effectiveFrom: { lte: new Date() } },
+        orderBy: { effectiveFrom: 'desc' },
+        take: 1,
+      },
+      productReadings: {
+        orderBy: { createdAt: 'desc' },
+        take: 1,
+      },
+    },
   });
 
   if (!product) {
     throw new NotFoundError('Product not found');
   }
 
-  return await prisma.$transaction(async (tx) => {
-    // 1. Update product base fields
-    await tx.product.update({
-      where: { id: productId },
-      data: {
-        name: data.name,
-        description: data.description,
-      },
-    });
+  const currentPrice = product.productPrices[0]?.price;
+  const currentReading = product.productReadings[0]?.reading;
 
-    // 2. Handle product price
-    if (data.productPrice !== undefined) {
+  const updates: Partial<UpdateProductPayload> = {};
+
+  // Base fields
+  if (data.name !== undefined && data.name !== product.name) {
+    updates.name = data.name;
+  }
+  if (data.description !== undefined && data.description !== product.description) {
+    updates.description = data.description;
+  }
+
+  // Price - convert Decimal to number for comparison
+  if (data.productPrice !== undefined) {
+    const priceChanged = !currentPrice || Number(currentPrice) !== data.productPrice;
+    if (priceChanged) {
+      updates.productPrice = data.productPrice;
+      if (data.effectiveFrom) {
+        updates.effectiveFrom = data.effectiveFrom;
+      }
+    }
+  }
+
+  // Reading - convert Decimal to number
+  if (data.productReading !== undefined) {
+    const readingChanged = !currentReading || Number(currentReading) !== data.productReading;
+    if (readingChanged) {
+      updates.productReading = data.productReading;
+    }
+  }
+
+  // Early return if nothing changed
+  if (Object.keys(updates).length === 0) {
+    return getProductById(productId, tenantId);
+  }
+
+  return await prisma.$transaction(async (tx) => {
+    // 1. Update product base fields only if changed
+    if (updates.name !== undefined || updates.description !== undefined) {
+      await tx.product.update({
+        where: { id: productId },
+        data: {
+          ...(updates.name !== undefined && { name: updates.name }),
+          ...(updates.description !== undefined && { description: updates.description }),
+        },
+      });
+    }
+
+    // 2. Handle product price only if changed
+    if (updates.productPrice !== undefined) {
       const now = new Date();
 
       const futurePrices = await tx.productPrice.findMany({
@@ -150,9 +200,9 @@ const updateProduct = async (productId: string, tenantId: string, data: UpdatePr
         await tx.productPrice.update({
           where: { id: priceToUpdate.id },
           data: {
-            price: data.productPrice,
-            ...(data.effectiveFrom && {
-              effectiveFrom: new Date(data.effectiveFrom),
+            price: updates.productPrice,
+            ...(updates.effectiveFrom && {
+              effectiveFrom: new Date(updates.effectiveFrom),
             }),
           },
         });
@@ -168,23 +218,23 @@ const updateProduct = async (productId: string, tenantId: string, data: UpdatePr
           });
         }
       } else {
-        // Optional: create a future price if none exists
+        // Create a future price if none exists
         await tx.productPrice.create({
           data: {
             productId,
-            price: data.productPrice,
-            effectiveFrom: data.effectiveFrom ? new Date(data.effectiveFrom) : now,
+            price: updates.productPrice,
+            effectiveFrom: updates.effectiveFrom ? new Date(updates.effectiveFrom) : now,
           },
         });
       }
     }
 
-    // 3. Handle product reading
-    if (data.productReading !== undefined) {
+    // 3. Handle product reading only if changed
+    if (updates.productReading !== undefined) {
       await tx.productReading.create({
         data: {
           productId,
-          reading: data.productReading,
+          reading: updates.productReading,
         },
       });
     }
