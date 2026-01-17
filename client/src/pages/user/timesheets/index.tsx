@@ -34,7 +34,7 @@ export const TimesheetsPage = () => {
   const [endDate, setEndDate] = useState<Dayjs | null>(initialRange.endDate);
 
   const userId = auth?.id;
-  const tenantId = auth?.tenants[0].id;
+  const tenantId = auth?.tenantId;
 
   const { data: timesheets, isLoading: isLoadingTimesheets } = useGetUserTimesheetsQuery({
     tenantId,

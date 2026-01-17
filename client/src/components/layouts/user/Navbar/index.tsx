@@ -2,6 +2,7 @@ import {
   CalendarTodayOutlined,
   CloseOutlined,
   DashboardOutlined,
+  DescriptionOutlined,
   MenuOutlined,
 } from '@mui/icons-material';
 import {
@@ -50,6 +51,13 @@ const Navbar = () => {
       }),
     },
     {
+      label: 'Report',
+      icon: DescriptionOutlined,
+      to: pathFor({
+        pathname: UserRoutes.Report,
+      }),
+    },
+    {
       label: 'Timesheets',
       icon: CalendarTodayOutlined,
       to: pathFor({
@@ -60,6 +68,7 @@ const Navbar = () => {
 
   const routeTitles: Record<string, string> = {
     [UserRoutes.Home]: 'Dashboard',
+    [UserRoutes.Report]: 'Report',
     [UserRoutes.Timesheets]: 'Timesheets',
     [UserRoutes.Settings]: 'Settings',
   };

@@ -87,7 +87,7 @@ export const UsersPage = () => {
             columns={[
               {
                 id: 'name',
-                heading: 'Fullname',
+                heading: 'Name',
                 cell: (user) => (
                   <Link to={user.id}>
                     <Stack

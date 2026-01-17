@@ -1,5 +1,7 @@
 import type { ValueOf } from '~/utils/valueOf';
 
+import type { Shift } from '../shift/shift.types';
+
 export const ReportStatusEnum = {
   DRAFT: 'DRAFT',
   VALIDATED: 'VALIDATED',
@@ -59,13 +61,7 @@ export type Report = {
   totalDisposalSales: number;
   shortages: number;
   netTotal: number;
-  shift: {
-    id: string;
-    name: string;
-    shiftStart: string;
-    shiftEnd: string;
-    color?: string;
-  };
+  shift: Shift;
   creator: {
     id: string;
     name: string;
@@ -82,4 +78,10 @@ export type Report = {
   }[];
   createdAt: string;
   updatedAt: string;
+};
+
+export type CreateReportPayload = {
+  tenantId: string;
+  shiftId: string;
+  shiftDate: string;
 };

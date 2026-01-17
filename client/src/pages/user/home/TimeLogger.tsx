@@ -1,4 +1,4 @@
-import { alpha, Typography } from '@mui/material';
+import { Stack, Typography } from '@mui/material';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 import { useEffect, useMemo, useState } from 'react';
@@ -18,10 +18,14 @@ dayjs.extend(duration);
 
 export const TimeLogger = () => {
   const [elapsed, setElapsed] = useState('00:00:00');
+  const [dateTime, setDateTime] = useState(dayjs());
 
   const { data: timesheet, isLoading: isLoadingTimesheet } = useGetTodayTimesheetQuery();
   const { mutate: checkIn, isPending: isPendingCheckIn } = useCheckInMutation();
   const { mutate: checkOut, isPending: isPendingCheckOut } = useCheckOutMutation();
+
+  const formattedDate = dateTime.format('MMMM DD, YYYY');
+  const formattedTime = dateTime.format('dddd');
 
   const latestEntry = useMemo(() => {
     if (!timesheet?.entries?.length) return undefined;
@@ -34,11 +38,17 @@ export const TimeLogger = () => {
   const isCheckedIn = latestEntry?.action === TimesheetEntryActionEnum.CHECK_IN;
 
   const styles = {
-    borderColor: isCheckedIn ? theme.palette.success.light : theme.palette.grey[400],
-    bgcolor: isCheckedIn
-      ? alpha(theme.palette.success.dark, 0.1)
-      : alpha(theme.palette.grey[600], 0.2),
+    borderColor: isCheckedIn ? theme.palette.primary.main : theme.palette.primary.alpha,
+    bgcolor: isCheckedIn ? theme.palette.primary.main : theme.palette.primary.alpha,
   };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setDateTime(dayjs());
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const getElapsedTime = (timesheet: Timesheet | null): number => {
@@ -111,17 +121,28 @@ export const TimeLogger = () => {
   };
 
   return (
-    <CardContainer direction="row" justifyContent="space-between" alignItems="center" sx={styles}>
-      <Typography fontWeight="bold" color={isCheckedIn ? 'success.dark' : 'text.primary'}>
-        {isCheckedIn ? `In ${elapsed} hrs` : 'Check In'}
-      </Typography>
+    <CardContainer sx={styles}>
+      <Stack spacing={0.5}>
+        <Typography variant="body2" sx={{ color: isCheckedIn ? 'divider' : 'text.secondary' }}>
+          {formattedDate} - {formattedTime}
+        </Typography>
+        <Stack direction="row" justifyContent="space-between" alignItems="center">
+          <Typography
+            variant="h4"
+            fontWeight="bold"
+            color={isCheckedIn ? 'common.white' : 'text.primary'}
+          >
+            {isCheckedIn ? `In ${elapsed} hrs` : 'Check In'}
+          </Typography>
 
-      <Switch
-        disabled={isLoadingTimesheet || isPendingCheckIn || isPendingCheckOut}
-        checked={isCheckedIn}
-        onChange={handleToggle}
-        value={isCheckedIn}
-      />
+          <Switch
+            disabled={isLoadingTimesheet || isPendingCheckIn || isPendingCheckOut}
+            checked={isCheckedIn}
+            onChange={handleToggle}
+            value={isCheckedIn}
+          />
+        </Stack>
+      </Stack>
     </CardContainer>
   );
 };

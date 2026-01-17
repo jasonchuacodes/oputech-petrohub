@@ -24,6 +24,8 @@ import { LoginAdmin } from '~/pages/auth/admin-login';
 import { Register } from '~/pages/auth/register';
 import { HomePage as UserHomePage } from '~/pages/user/home';
 import { TimesheetsPage as UserTimesheetsPage } from '~/pages/user/timesheets';
+import { ReportPage as UserReportPage } from '~/pages/user/report';
+import { ReportDetailPage as UserReportDetailPage } from '~/pages/user/report/ReportDetailPage';
 import { SettingsPage as UserSettingsPage } from '~/pages/user/settings';
 import { AdminSettingsPage } from '~/pages/admin/settings';
 import { NotFoundPage } from '~/pages/NotFound';
@@ -60,6 +62,8 @@ export const UserRoutes = {
   Home: '/',
   Timesheets: '/timesheets',
   Settings: '/settings',
+  Report: '/report',
+  ReportDetail: '/report/:reportId',
 };
 
 export const router = createBrowserRouter(
@@ -77,6 +81,8 @@ export const router = createBrowserRouter(
           <Route index element={<UserHomePage />} />
           <Route path={UserRoutes.Timesheets} element={<UserTimesheetsPage />} />
           <Route path={UserRoutes.Settings} element={<UserSettingsPage />} />
+          <Route path={UserRoutes.Report} element={<UserReportPage />} />
+          <Route path={UserRoutes.ReportDetail} element={<UserReportDetailPage />} />
         </Route>
       </Route>
 

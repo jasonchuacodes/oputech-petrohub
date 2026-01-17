@@ -35,7 +35,7 @@ export const AccountSettings = () => {
   const queryClient = useQueryClient();
 
   const userId = auth?.id;
-  const tenantId = auth?.tenants[0].id;
+  const tenantId = auth?.tenantId;
 
   const {
     control,

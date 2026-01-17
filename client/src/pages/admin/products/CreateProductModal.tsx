@@ -76,21 +76,21 @@ export const CreateProductModal = ({ open, onClose }: CreateProductModalProps) =
           placeholder="e.g., Premium Diesel"
         />
         <Input
-          label="Product Price"
+          label="Current Reading"
           control={control}
-          name="price"
+          name="reading"
           type="number"
-          startAdornment="₱"
           placeholder="0.00"
           slotProps={{
             input: { step: '0.01', min: '0.01' },
           }}
         />
         <Input
-          label="Current Reading"
+          label="Product Price"
           control={control}
-          name="reading"
+          name="price"
           type="number"
+          startAdornment="₱"
           placeholder="0.00"
           slotProps={{
             input: { step: '0.01', min: '0.01' },

@@ -30,7 +30,34 @@ const createReport = async ({ tenantId, creatorId, shiftId, shiftDate }: CreateR
   });
 
   if (existing) {
-    throw new ConflictError('Report for this shift and date already exists');
+    // Return existing report with all relations
+    const fullReport = await prisma.report.findUnique({
+      where: { id: existing.id },
+      include: {
+        shift: true,
+        creator: { select: { id: true, name: true } },
+        entries: { include: { product: true } },
+        income: true,
+        expenses: true,
+        disposals: { include: { product: true } },
+        employees: {
+          include: {
+            user: {
+              select: { id: true, name: true, username: true },
+            },
+          },
+        },
+      },
+    });
+
+    if (!fullReport) {
+      throw new NotFoundError('Report not found');
+    }
+
+    return {
+      ...fullReport,
+      ...computeReportTotals(fullReport),
+    };
   }
 
   const shift = await prisma.shift.findFirst({

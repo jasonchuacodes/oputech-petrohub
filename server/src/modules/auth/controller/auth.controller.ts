@@ -45,6 +45,7 @@ const getMe = async (req: AuthenticatedRequest, res: Response, next: NextFunctio
       hasTenant: user.tenants.length > 0,
       role: user.role,
       shouldChangePassword: user.shouldChangePassword,
+      ...(user.role === Role.USER && { tenantId: user.tenants[0]?.tenant?.id }),
 
       tenants: user.tenants.map(({ tenant }) => ({
         id: tenant.id,

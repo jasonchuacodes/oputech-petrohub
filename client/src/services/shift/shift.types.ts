@@ -4,6 +4,7 @@ export type Shift = {
   name: string;
   shiftStart: Date;
   shiftEnd: Date;
+  color?: string;
   createdAt: Date;
   updatedAt: Date;
   _count?: {

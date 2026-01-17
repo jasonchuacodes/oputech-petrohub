@@ -1,6 +1,6 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { getReportById, getReports } from './report.api';
+import { createReport, getReportById, getReports } from './report.api';
 
 const useGetReportsQuery = ({ tenantId }: { tenantId?: string }) => {
   return useQuery({
@@ -18,4 +18,15 @@ const useGetReportByIdQuery = ({ tenantId, reportId }: { tenantId?: string; repo
   });
 };
 
-export { useGetReportsQuery, useGetReportByIdQuery };
+const useCreateReportMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: createReport,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['reports', data.tenantId] });
+    },
+  });
+};
+
+export { useGetReportsQuery, useGetReportByIdQuery, useCreateReportMutation };

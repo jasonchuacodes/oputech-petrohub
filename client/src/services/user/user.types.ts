@@ -21,6 +21,7 @@ export type User = {
   shouldChangePassword: boolean;
 
   hasTenant: boolean;
+  tenantId?: string;
   tenants: Tenant[];
 
   birthday?: Date;

@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { CardContainer } from '~/components/ui';
 import theme from '~/theme';
 
-export const DateTimeDisplay = () => {
+export const DateTimeDisplay__legacy = () => {
   const [dateTime, setDateTime] = useState(dayjs());
 
   useEffect(() => {
@@ -18,9 +18,9 @@ export const DateTimeDisplay = () => {
 
   const formattedDate = dateTime.format('dddd, MMMM D');
   const formattedTime = dateTime.format('hh:mm:ss A');
-  
+
   return (
-    <CardContainer sx={{ bgcolor: alpha(theme.palette.info.main, 0.10)}}>
+    <CardContainer height="fit-content" bgcolor={alpha(theme.palette.info.main, 0.1)}>
       <Typography>{formattedDate}</Typography>
       <Typography variant="h5" fontWeight="bold">
         {formattedTime}
