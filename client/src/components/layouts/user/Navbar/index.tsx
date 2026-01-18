@@ -169,7 +169,7 @@ const Navbar = () => {
         alignItems="center"
         justifyContent="center"
         height={56}
-        border="1px solid"
+        borderBottom="1px solid"
         borderColor="divider"
       >
         <IconButton

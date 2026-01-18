@@ -12,11 +12,13 @@ import { GetReportsSchema } from '../schema/getReportsSchema';
 import { CreateReportEntrySchema } from '../schema/createReportEntrySchema';
 import { CreateExpenseSchema } from '../schema/createExpenseSchema';
 import { AssignEmployeeSchema } from '../schema/assignEmployeeSchema';
+import { GetReportByShiftSchema } from '../schema/getReportByShiftSchema';
 
 const validateCreateReport = createSchemaValidator(CreateReportSchema);
 const validateGetReports = createSchemaValidator(GetReportsSchema);
 const validateCreateReportEntry = createSchemaValidator(CreateReportEntrySchema);
 const validateCreateExpense = createSchemaValidator(CreateExpenseSchema);
+const validateGetReportByShift = createSchemaValidator(GetReportByShiftSchema);
 const validateAssignEmployee = createSchemaValidator(AssignEmployeeSchema);
 
 const createReport = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
@@ -61,6 +63,25 @@ const getReportById = async (req: Request, res: Response, next: NextFunction) =>
   try {
     const { reportId } = req.params;
     const report = await reportService.getReportById(reportId);
+
+    res.status(200).json({
+      message: 'Report retrieved successfully',
+      data: { report },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const getReportByShift = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const filters = await validateGetReportByShift({
+      tenantId: req.query.tenantId as string,
+      shiftId: req.query.shiftId as string,
+      shiftDate: req.query.shiftDate as string,
+    });
+
+    const report = await reportService.getReportByShift(filters);
 
     res.status(200).json({
       message: 'Report retrieved successfully',
@@ -192,6 +213,7 @@ export {
   createReport,
   getReports,
   getReportById,
+  getReportByShift,
   validateReport,
   submitReport,
   createOrUpdateEntry,

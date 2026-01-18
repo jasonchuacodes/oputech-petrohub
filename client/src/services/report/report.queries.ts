@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { createReport, getReportById, getReports } from './report.api';
+import { createReport, getReportById, getReportByShift, getReports } from './report.api';
 
 const useGetReportsQuery = ({ tenantId }: { tenantId?: string }) => {
   return useQuery({
@@ -18,6 +18,24 @@ const useGetReportByIdQuery = ({ tenantId, reportId }: { tenantId?: string; repo
   });
 };
 
+const useGetReportByShiftQuery = ({
+  tenantId,
+  shiftId,
+  shiftDate,
+}: {
+  tenantId?: string;
+  shiftId?: string;
+  shiftDate?: string;
+}) => {
+  return useQuery({
+    queryKey: ['report', 'by-shift', tenantId, shiftId, shiftDate],
+    queryFn: () => getReportByShift(tenantId!, shiftId!, shiftDate!),
+    enabled: !!tenantId && !!shiftId && !!shiftDate,
+    retry: false
+  });
+};
+
+
 const useCreateReportMutation = () => {
   const queryClient = useQueryClient();
 
@@ -29,4 +47,4 @@ const useCreateReportMutation = () => {
   });
 };
 
-export { useGetReportsQuery, useGetReportByIdQuery, useCreateReportMutation };
+export { useGetReportsQuery, useGetReportByIdQuery,useGetReportByShiftQuery,  useCreateReportMutation };

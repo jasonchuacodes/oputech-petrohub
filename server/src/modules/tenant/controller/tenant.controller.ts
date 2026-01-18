@@ -18,7 +18,7 @@ const validateGetTenantById = createSchemaValidator(GetTenantByIdSchema);
 
 const createTenant = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
-    const userId = req.user?.id;
+    const userId = req.user?.id as string;
 
     const data = await validateCreateTenant(req.body);
 
@@ -41,7 +41,6 @@ const createTenant = async (req: AuthenticatedRequest, res: Response, next: Next
 const updateTenant = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const { role } = req.user!;
-    const { tenantId } = req.params;
 
     const data = await validateUpdateTenant(req.body);
 
@@ -51,10 +50,7 @@ const updateTenant = async (req: AuthenticatedRequest, res: Response, next: Next
       );
     }
 
-    const tenant = await tenantService.updateTenant({
-      id: tenantId,
-      ...data,
-    });
+    const tenant = await tenantService.updateTenant(data);
 
     res.status(200).json({
       message: 'Tenant updated successfully',

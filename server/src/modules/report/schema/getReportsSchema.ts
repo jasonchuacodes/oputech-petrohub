@@ -1,12 +1,27 @@
 import z from 'zod';
 
+import { ReportStatus } from '~/db/prisma';
+import { getStartOfDay } from '~/utils';
+
 export const GetReportsSchema = z
   .object({
     tenantId: z.string().uuid(),
-    status: z.enum(['DRAFT', 'VALIDATED', 'SUBMITTED']).optional(),
-    shiftDate: z.string().datetime().optional().transform((val) => val ? new Date(val) : undefined),
-    startDate: z.string().datetime().optional().transform((val) => val ? new Date(val) : undefined),
-    endDate: z.string().datetime().optional().transform((val) => val ? new Date(val) : undefined),
+    status: z.enum([ReportStatus.DRAFT, ReportStatus.VALIDATED, ReportStatus.SUBMITTED]).optional(),
+    shiftDate: z
+      .string()
+      .datetime()
+      .optional()
+      .transform((val) => (val ? getStartOfDay(new Date(val)) : undefined)),
+    startDate: z
+      .string()
+      .datetime()
+      .optional()
+      .transform((val) => (val ? getStartOfDay(new Date(val)) : undefined)),
+    endDate: z
+      .string()
+      .datetime()
+      .optional()
+      .transform((val) => (val ? getStartOfDay(new Date(val)) : undefined)),
     creatorId: z.string().uuid().optional(),
   })
   .refine((data) => !(data.shiftDate && (data.startDate || data.endDate)), {

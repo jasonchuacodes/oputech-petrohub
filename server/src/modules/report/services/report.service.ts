@@ -188,6 +188,48 @@ const getReportById = async (reportId: string) => {
   };
 };
 
+const getReportByShift = async ({
+  tenantId,
+  shiftId,
+  shiftDate,
+}: {
+  tenantId: string;
+  shiftId: string;
+  shiftDate: Date;
+}) => {
+  const report = await prisma.report.findUnique({
+    where: {
+      tenantId_shiftDate_shiftId: {
+        tenantId,
+        shiftDate,
+        shiftId,
+      },
+    },
+    include: {
+      creator: { select: { id: true, name: true } },
+      shift: true,
+      entries: { include: { product: true } },
+      income: true,
+      expenses: true,
+      disposals: { include: { product: true } },
+      employees: {
+        include: {
+          user: {
+            select: { id: true, name: true, username: true },
+          },
+        },
+      },
+    },
+  });
+
+  if (!report) throw new NotFoundError('Report not found');
+
+  return {
+    ...report,
+    ...computeReportTotals(report),
+  };
+};
+
 const validateReport = async (reportId: string, userId: string) => {
   const report = await getReportById(reportId);
 
@@ -263,4 +305,4 @@ const submitReport = async (reportId: string, userId: string) => {
   };
 };
 
-export { createReport, getReports, getReportById, validateReport, submitReport };
+export { createReport, getReports, getReportById, getReportByShift, validateReport, submitReport };

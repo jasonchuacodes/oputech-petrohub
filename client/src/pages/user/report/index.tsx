@@ -19,8 +19,9 @@ export const ReportPage = () => {
   const tenantId = auth?.tenantId || null;
 
   const { data: shifts, isLoading: shiftsLoading } = useGetShiftsQuery(tenantId!);
-  const { mutateAsync: createReport, isPending: isCreating } = useCreateReportMutation();
+  const { mutateAsync: createReport } = useCreateReportMutation();
 
+  // TODO: transfer this shiftselect handler to the shiftcardselect cmpt
   const handleShiftSelect = useCallback(
     async (shift: Shift) => {
       if (!tenantId) return;
@@ -51,12 +52,10 @@ export const ReportPage = () => {
       <Stack spacing={2} p={2} bgcolor="background.paper" flex={1}>
         {!!shifts && shifts.length > 0 ? (
           <Stack spacing={1}>
-            <Typography variant="body1" color="text.primary">Select a Shift:</Typography>
-            <ShiftCardSelect
-              shifts={shifts}
-              onSelectShift={handleShiftSelect}
-              isLoading={isCreating}
-            />
+            <Typography variant="body1" color="text.primary">
+              Please select a shift schedule:
+            </Typography>
+            <ShiftCardSelect shifts={shifts} onSelectShift={handleShiftSelect} />
           </Stack>
         ) : (
           <NoData text="You have not been assigned to a shift." />

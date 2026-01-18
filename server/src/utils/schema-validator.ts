@@ -1,9 +1,9 @@
-import { ZodError, ZodSchema } from 'zod';
+import { ZodError, ZodSchema, z } from 'zod';
 
 import { BadInputError } from '../errors/bad-input.error';
 
-export const createSchemaValidator = (schema: ZodSchema) => {
-    return async <T extends Record<string, any>>(data: T): Promise<T> => {
+export const createSchemaValidator = <T extends ZodSchema>(schema: T) => {
+    return async (data: unknown): Promise<z.infer<T>> => {
         try {
             return schema.parse(data);
         } catch (err) {

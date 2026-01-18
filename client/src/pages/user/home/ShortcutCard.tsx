@@ -22,6 +22,7 @@ export const ShortcutCard = ({ title, icon, to }: ShortcutCardProps) => {
         flexDirection: 'column',
         flex: 1,
         gap: 0.5,
+        p:2,
         bgcolor: 'background.paper',
         border: '1px solid', 
         borderColor: 'divider',

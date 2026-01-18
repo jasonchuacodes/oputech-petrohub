@@ -13,6 +13,7 @@ import {
   deleteExpense,
   assignEmployee,
   removeEmployee,
+  getReportByShift,
 } from '../controller/report.controller';
 
 const router = express.Router();
@@ -20,7 +21,9 @@ const router = express.Router();
 // Report routes
 router.post('/', requireAuth, asyncHandler(createReport));
 router.get('/', requireAuth, asyncHandler(getReports));
+router.get('/by-shift', requireAuth, asyncHandler(getReportByShift));
 router.get('/:reportId', requireAuth, asyncHandler(getReportById));
+
 router.patch('/:reportId/validate', requireAuth, asyncHandler(validateReport));
 router.post('/:reportId/submit', requireAuth, asyncHandler(submitReport));
 

@@ -8,7 +8,9 @@ const APP_TZ = process.env.TZ || 'Asia/Manila';
 export const getStartOfDay = (date: Date = new Date()): Date => {
   const local = toZonedTime(date, APP_TZ);
   local.setHours(0, 0, 0, 0);
-  return fromZonedTime(local, APP_TZ);
+  const result = fromZonedTime(local, APP_TZ);
+  
+  return result;
 };
 
 /**
@@ -28,12 +30,7 @@ export const applyTimeToDate = (sourceTime: Date, targetDate: Date = new Date())
   const sourceLocal = toZonedTime(sourceTime, APP_TZ);
   const targetLocal = toZonedTime(targetDate, APP_TZ);
 
-  targetLocal.setHours(
-    sourceLocal.getHours(),
-    sourceLocal.getMinutes(),
-    0,
-    0
-  );
+  targetLocal.setHours(sourceLocal.getHours(), sourceLocal.getMinutes(), 0, 0);
 
   return fromZonedTime(targetLocal, APP_TZ);
 };
