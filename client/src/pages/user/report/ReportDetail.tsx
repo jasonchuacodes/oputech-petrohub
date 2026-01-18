@@ -3,6 +3,7 @@ import { Stack, Typography, CircularProgress, Box } from '@mui/material';
 import { CardContainer } from '~/components/ui';
 import { formatCurrency } from '~/utils/number';
 import { useGetReportByIdQuery } from '~/services/report/report.queries';
+import { ReportStatus } from '~/services/report/report.types';
 import type { Shift } from '~/services/shift/shift.types';
 import { formatDate } from '~/utils/date';
 
@@ -27,8 +28,9 @@ export const ReportDetail = ({ reportId, tenantId, shift }: ReportDetailProps) =
     return <Typography color="error">Report not found</Typography>;
   }
 
-  const isEditable = report.status === 'DRAFT' || report.status === 'VALIDATED';
-  const isReadOnly = report.status === 'SUBMITTED';
+  const isEditable =
+    report.status === ReportStatus.DRAFT || report.status === ReportStatus.VALIDATED;
+  const isReadOnly = report.status === ReportStatus.SUBMITTED;
 
   return (
     <Stack spacing={1}>

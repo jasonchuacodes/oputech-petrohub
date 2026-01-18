@@ -2,13 +2,13 @@ import type { ValueOf } from '~/utils/valueOf';
 
 import type { Shift } from '../shift/shift.types';
 
-export const ReportStatusEnum = {
+export const ReportStatus = {
   DRAFT: 'DRAFT',
   VALIDATED: 'VALIDATED',
   SUBMITTED: 'SUBMITTED',
 } as const;
 
-export type ReportStatus = ValueOf<typeof ReportStatusEnum>;
+export type ReportStatus = ValueOf<typeof ReportStatus>;
 
 export type ReportIncome = {
   id: string;

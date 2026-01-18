@@ -29,6 +29,7 @@ const theme = createTheme({
       main: '#C82121',
       light: '#FBEAEA',
       dark: '#A01313',
+      alpha: '#FBEAEA',
       contrastText: '#FFFFFF',
     },
 
@@ -36,6 +37,7 @@ const theme = createTheme({
       main: '#D98A00',
       light: '#FFF4E0',
       dark: '#996300',
+      alpha: '#FFF4E0',
       contrastText: '#FFFFFF',
     },
 
@@ -50,6 +52,7 @@ const theme = createTheme({
       main: '#0F833C',
       light: '#E3F4EA',
       dark: '#0A5C2B',
+      alpha: '#E3F4EA',
       contrastText: '#FFFFFF',
     },
   },

@@ -1,16 +1,19 @@
-import { Stack, Box, CircularProgress, Typography } from '@mui/material';
-import { useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Stack, Box, CircularProgress, Typography } from '@mui/material';
 
-import { ShiftCardSelect } from './ShiftCardSelect';
-
-import { NoData, PageLayout } from '~/components/ui';
+import { NoData, PageLayout, Button, Show } from '~/components/ui';
 import { useAuthContext } from '~/context/auth/useAuthContext';
-import { useCreateReportMutation } from '~/services/report/report.queries';
-import { dayjsLocal } from '~/utils/date';
-import { UserRoutes } from '~/routes';
+import {
+  useCreateReportMutation,
+  useGetReportByShiftQuery,
+} from '~/services/report/report.queries';
 import { useGetShiftsQuery } from '~/services/shift/shift.queries';
 import type { Shift } from '~/services/shift/shift.types';
+import { dayjsLocal } from '~/utils/date';
+import { UserRoutes } from '~/routes';
+
+import { ShiftCard } from './ShiftCard';
 
 export const ReportPage = () => {
   const { auth } = useAuthContext();
@@ -19,9 +22,11 @@ export const ReportPage = () => {
   const tenantId = auth?.tenantId || null;
 
   const { data: shifts, isLoading: shiftsLoading } = useGetShiftsQuery(tenantId!);
-  const { mutateAsync: createReport } = useCreateReportMutation();
+  const { mutateAsync: createReport, isPending: isCreatingReport } = useCreateReportMutation();
 
-  // TODO: transfer this shiftselect handler to the shiftcardselect cmpt
+  const [selectedShift, setSelectedShift] = useState<Shift | null>(null);
+  const shiftDate = dayjsLocal().startOf('day').toISOString();
+
   const handleShiftSelect = useCallback(
     async (shift: Shift) => {
       if (!tenantId) return;
@@ -36,6 +41,18 @@ export const ReportPage = () => {
     },
     [createReport, navigate, tenantId],
   );
+
+  useEffect(() => {
+    if (shifts && shifts.length > 0 && !selectedShift) {
+      setSelectedShift(shifts[0]);
+    }
+  }, [shifts, selectedShift]);
+
+  const { data: report, isFetching } = useGetReportByShiftQuery({
+    tenantId: tenantId!,
+    shiftId: selectedShift?.id,
+    shiftDate,
+  });
 
   if (shiftsLoading) {
     return (
@@ -55,7 +72,45 @@ export const ReportPage = () => {
             <Typography variant="body1" color="text.primary">
               Please select a shift schedule:
             </Typography>
-            <ShiftCardSelect shifts={shifts} onSelectShift={handleShiftSelect} />
+
+            <Stack spacing={2}>
+              <Stack spacing={1}>
+                {shifts.map((shift) => (
+                  <ShiftCard
+                    key={shift.id}
+                    shift={shift}
+                    tenantId={tenantId!}
+                    shiftDate={shiftDate}
+                    isSelected={selectedShift?.id === shift.id}
+                    onClick={setSelectedShift}
+                  />
+                ))}
+              </Stack>
+
+              <Show
+                when={!!report}
+                fallback={
+                  <Button
+                    loading={isCreatingReport}
+                    disabled={!selectedShift || isFetching}
+                    size="large"
+                    onClick={() => handleShiftSelect(selectedShift!)}
+                    variant="contained"
+                  >
+                    Create Report
+                  </Button>
+                }
+              >
+                <Button
+                  disabled={!selectedShift || isFetching}
+                  size="large"
+                  onClick={() => navigate(`${UserRoutes.Report}/${report!.id}`)}
+                  variant="contained"
+                >
+                  View Report
+                </Button>
+              </Show>
+            </Stack>
           </Stack>
         ) : (
           <NoData text="You have not been assigned to a shift." />

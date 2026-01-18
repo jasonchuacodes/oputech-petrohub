@@ -1,4 +1,4 @@
-import { Stack, Typography } from '@mui/material';
+import { Stack } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -7,19 +7,23 @@ import { useAuthContext } from '~/context/auth/useAuthContext';
 import { UserRoutes } from '~/routes';
 import { useGetReportByShiftQuery } from '~/services/report/report.queries';
 import type { Shift } from '~/services/shift/shift.types';
-import { dayjsLocal, formatTime } from '~/utils/date';
+import { dayjsLocal } from '~/utils/date';
+
+import { ShiftCard } from './ShiftCard';
 
 type ShiftCardSelectProps = {
   shifts: Shift[];
   onSelectShift: (shift: Shift) => void;
+  isLoading?: boolean;
 };
 
-export const ShiftCardSelect = ({ shifts, onSelectShift }: ShiftCardSelectProps) => {
+export const ShiftCardSelect = ({ shifts, onSelectShift, isLoading }: ShiftCardSelectProps) => {
   const { auth } = useAuthContext();
   const tenantId = auth?.tenantId || null;
 
   const navigate = useNavigate();
   const [selectedShift, setSelectedShift] = useState<Shift | null>(null);
+  const shiftDate = dayjsLocal().startOf('day').toISOString();
 
   useEffect(() => {
     if (shifts.length > 0 && !selectedShift) {
@@ -30,32 +34,21 @@ export const ShiftCardSelect = ({ shifts, onSelectShift }: ShiftCardSelectProps)
   const { data: report, isFetching } = useGetReportByShiftQuery({
     tenantId: tenantId!,
     shiftId: selectedShift?.id,
-    shiftDate: dayjsLocal().startOf('day').toISOString(),
+    shiftDate,
   });
 
   return (
     <Stack spacing={2}>
       <Stack spacing={1}>
         {shifts.map((shift) => (
-          <Stack
+          <ShiftCard
             key={shift.id}
-            onClick={() => setSelectedShift(shift)}
-            gap={1}
-            p={2}
-            bgcolor={selectedShift?.id === shift.id ? 'primary.alpha' : undefined}
-            borderRadius={2}
-            border="1px solid"
-            borderColor={selectedShift?.id === shift.id ? 'primary.main' : 'divider'}
-            sx={{ transition: 'all 0.2s' }}
-          >
-            <Typography variant="body1" fontWeight={600}>
-              {shift.name} Shift
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              {formatTime(shift.shiftStart as unknown as string)} —{' '}
-              {formatTime(shift.shiftEnd as unknown as string)}
-            </Typography>
-          </Stack>
+            shift={shift}
+            tenantId={tenantId!}
+            shiftDate={shiftDate}
+            isSelected={selectedShift?.id === shift.id}
+            onClick={setSelectedShift}
+          />
         ))}
       </Stack>
 
@@ -63,6 +56,7 @@ export const ShiftCardSelect = ({ shifts, onSelectShift }: ShiftCardSelectProps)
         when={!!report}
         fallback={
           <Button
+            loading={isLoading}
             disabled={!selectedShift || isFetching}
             size="large"
             onClick={() => onSelectShift(selectedShift!)}
