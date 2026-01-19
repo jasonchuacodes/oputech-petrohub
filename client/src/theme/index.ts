@@ -84,6 +84,7 @@ const theme = createTheme({
     h6: {
       fontSize: '18px',
       lineHeight: '140%',
+      fontWeight: 400,
     },
 
     body1: {

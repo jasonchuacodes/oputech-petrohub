@@ -24,8 +24,9 @@ import { LoginAdmin } from '~/pages/auth/admin-login';
 import { Register } from '~/pages/auth/register';
 import { HomePage as UserHomePage } from '~/pages/user/home';
 import { TimesheetsPage as UserTimesheetsPage } from '~/pages/user/timesheets';
+
 import { ReportPage as UserReportPage } from '~/pages/user/report';
-import { ReportDetailPage as UserReportDetailPage } from '~/pages/user/report/ReportDetailPage';
+import { ReportDetailPage as UserReportDetailPage } from '~/pages/user/report-detail';
 import { SettingsPage as UserSettingsPage } from '~/pages/user/settings';
 import { AdminSettingsPage } from '~/pages/admin/settings';
 import { NotFoundPage } from '~/pages/NotFound';

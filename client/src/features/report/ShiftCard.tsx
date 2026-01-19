@@ -8,7 +8,7 @@ import { ReportStatus } from '~/services/report/report.types';
 import { formatTime } from '~/utils/date';
 import { toTitleCase } from '~/utils/textUtils';
 
-import { ReportStatusChip } from './ReportStatusChip';
+import { ReportStatusChip } from './StatusChip';
 
 type ShiftCardProps = {
   shift: Shift;
