@@ -8,9 +8,9 @@ import { UserRoutes } from '~/routes';
 import { pathFor } from '~/utils/pathFor';
 
 import { PasswordChangeModal } from './PasswordChangeModal';
-import { TimeLogger } from './TimeLogger';
-import { TimesheetsSection } from './TimesheetsSection';
+import { RecentLogs } from './RecentLogs';
 import { ShortcutCard } from './ShortcutCard';
+import { TimeLogger } from './TimeLogger';
 
 export const HomePage = () => {
   const { auth } = useAuthContext();
@@ -33,7 +33,7 @@ export const HomePage = () => {
 
   return (
     <PageLayout>
-      <Stack spacing={1} p={2} bgcolor="background.paper" flex={1}>
+      <Stack spacing={2} p={2} flex={1}>
         <Stack spacing={1}>
           <Typography variant="body1" color="text.secondary">
             Welcome back, {auth?.name?.split(' ')[0] || 'User'}!
@@ -58,7 +58,7 @@ export const HomePage = () => {
             })}
           />
         </Stack>
-        <TimesheetsSection />
+        <RecentLogs />
       </Stack>
 
       <PasswordChangeModal open={open} onClose={handleClose} />

@@ -4,8 +4,8 @@ import type { ComponentType } from 'react';
 
 import { useGetReportByShiftQuery } from '~/services/report/report.queries';
 import type { Shift } from '~/services/shift/shift.types';
-import { formatTime } from '~/utils/date';
 import { ReportStatus } from '~/services/report/report.types';
+import { formatTime } from '~/utils/date';
 import { toTitleCase } from '~/utils/textUtils';
 
 import { ReportStatusChip } from './ReportStatusChip';
@@ -41,9 +41,10 @@ export const ShiftCard = ({ shift, tenantId, shiftDate, isSelected, onClick }: S
       onClick={() => onClick(shift)}
       gap={1}
       p={2}
+      bgcolor={isSelected ? 'background.paper': 'background.surface'}
       borderRadius={2}
       border="1px solid"
-      borderColor={isSelected ? 'primary.main' : 'divider'}
+      borderColor={isSelected ? 'primary.alpha' : 'transparent'}
       sx={{ transition: 'all 0.2s' }}
     >
       <Stack direction="row" justifyContent="space-between" alignItems="center">

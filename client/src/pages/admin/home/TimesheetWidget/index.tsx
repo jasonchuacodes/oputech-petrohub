@@ -129,7 +129,7 @@ export const TimesheetWidget = () => {
             width: 240,
           },
         ]}
-        emptyMessage="No users found"
+        emptyMessage="No timesheets found"
       />
     </Widget>
   );

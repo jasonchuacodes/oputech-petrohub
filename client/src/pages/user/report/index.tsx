@@ -66,7 +66,7 @@ export const ReportPage = () => {
 
   return (
     <PageLayout>
-      <Stack spacing={2} p={2} bgcolor="background.paper" flex={1}>
+      <Stack spacing={2} p={2} flex={1}>
         {!!shifts && shifts.length > 0 ? (
           <Stack spacing={1}>
             <Typography variant="body1" color="text.primary">
@@ -113,7 +113,10 @@ export const ReportPage = () => {
             </Stack>
           </Stack>
         ) : (
-          <NoData text="You have not been assigned to a shift." />
+          <NoData
+            text="No shifts found"
+            description="There are no shifts configured. Please contact your administrator or refresh the page and try again."
+          />
         )}
       </Stack>
     </PageLayout>

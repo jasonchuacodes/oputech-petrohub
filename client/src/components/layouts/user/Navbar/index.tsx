@@ -171,6 +171,7 @@ const Navbar = () => {
         height={56}
         borderBottom="1px solid"
         borderColor="divider"
+        bgcolor="background.paper"
       >
         <IconButton
           size="small"

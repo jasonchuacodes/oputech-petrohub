@@ -24,8 +24,6 @@ export const ShortcutCard = ({ title, icon, to }: ShortcutCardProps) => {
         gap: 0.5,
         p:2,
         bgcolor: 'background.paper',
-        border: '1px solid', 
-        borderColor: 'divider',
         borderRadius: 2,
       }}
     >
