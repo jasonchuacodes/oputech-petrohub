@@ -123,7 +123,7 @@ export const TimeLogger = () => {
   return (
     <CardContainer sx={styles}>
       <Stack spacing={0.5}>
-        <Typography variant="body2" sx={{ color: isCheckedIn ? 'divider' : 'text.secondary' }}>
+        <Typography variant="body1" sx={{ color: isCheckedIn ? 'divider' : 'text.secondary' }}>
           {formattedDate} - {formattedTime}
         </Typography>
         <Stack direction="row" justifyContent="space-between" alignItems="center">

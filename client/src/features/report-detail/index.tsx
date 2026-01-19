@@ -64,7 +64,7 @@ export const ReportDetail = () => {
           height="fit-content"
         >
           <Stack>
-            <Typography variant="h6" fontWeight={500} color="primary.alpha">
+            <Typography variant="body1" fontWeight={500} color="primary.alpha">
               Total Sales
             </Typography>
             <Typography variant="h2" fontWeight={600} color="common.white">

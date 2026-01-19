@@ -20,7 +20,7 @@ export const RecentLogs = () => {
   return (
     <Stack spacing={1}>
       <Stack direction="row" alignItems="center" justifyContent="space-between">
-        <Typography variant="body1" fontWeight="bold">
+        <Typography variant="body1" fontWeight={600}>
           Recent Logs
         </Typography>
         <Link
@@ -63,7 +63,7 @@ export const RecentLogs = () => {
                                   label={TimesheetEntryActionMap[entry.action]}
                                   variant="outlined"
                                 />
-                                <Typography variant="caption" color="text.secondary">
+                                <Typography variant="body2" color="text.secondary">
                                   {formatTime(entry.timestamp)}
                                 </Typography>
                               </Stack>

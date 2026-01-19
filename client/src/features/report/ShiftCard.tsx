@@ -39,7 +39,6 @@ export const ShiftCard = ({ shift, tenantId, shiftDate, isSelected, onClick }: S
   return (
     <Stack
       onClick={() => onClick(shift)}
-      gap={1}
       p={2}
       bgcolor={isSelected ? 'background.paper': 'background.surface'}
       borderRadius={2}
@@ -59,7 +58,7 @@ export const ShiftCard = ({ shift, tenantId, shiftDate, isSelected, onClick }: S
         />
       </Stack>
 
-      <Typography variant="caption" color="text.secondary">
+      <Typography variant="body2" color="text.secondary">
         {formatTime(shift.shiftStart as unknown as string)} —{' '}
         {formatTime(shift.shiftEnd as unknown as string)}
       </Typography>

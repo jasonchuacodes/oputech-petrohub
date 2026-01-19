@@ -51,13 +51,13 @@ export const Lubricants = () => {
           {/* Data Rows */}
           {mockLubricantSales.map((sale) => (
             <Stack key={sale.id} direction="row" alignItems="center" spacing={1}>
-              <Typography variant="body1" sx={{ flex: 1 }}>
+              <Typography variant="body2" sx={{ flex: 1 }}>
                 {sale.name}
               </Typography>
-              <Typography variant="body1" sx={{ width: 80, textAlign: 'right' }}>
+              <Typography variant="body2" sx={{ width: 80, textAlign: 'right' }}>
                 {formatNumber(sale.quantity, 0)}
               </Typography>
-              <Typography variant="body1" sx={{ width: 100, textAlign: 'right' }}>
+              <Typography variant="body2" sx={{ width: 100, textAlign: 'right' }}>
                 {formatNumber(sale.amount, 2)}
               </Typography>
             </Stack>
@@ -67,11 +67,11 @@ export const Lubricants = () => {
 
         {/* Total Row */}
         <Stack direction="row" alignItems="center">
-          <Typography variant="body1" fontWeight={600} sx={{ flex: 1 }}>
+          <Typography variant="body2" sx={{ flex: 1 }}>
             Total
           </Typography>
-          <Typography variant="body1" fontWeight={600} sx={{ width: 80 }} />
-          <Typography variant="body1" fontWeight={600} sx={{ width: 100, textAlign: 'right' }}>
+          <Typography variant="body2" sx={{ width: 80 }} />
+          <Typography variant="body2" sx={{ width: 100, textAlign: 'right' }}>
             {formatCurrency(totalLubricanSales)}
           </Typography>
         </Stack>

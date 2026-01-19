@@ -38,7 +38,7 @@ const ShortcutCard = ({
       borderRadius={2}
     >
       <Icon component={icon} fontSize="medium" />
-      <Typography variant="body1" color="text.primary">
+      <Typography variant="body2" color="text.primary">
         {name}
       </Typography>
     </Stack>

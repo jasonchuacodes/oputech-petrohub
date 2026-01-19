@@ -68,7 +68,7 @@ export const Report = () => {
       <Stack spacing={2} p={2} flex={1}>
         {!!shifts && shifts.length > 0 ? (
           <Stack spacing={1}>
-            <Typography variant="body1" color="text.primary">
+            <Typography variant="body2" color="text.primary">
               Please select a shift schedule:
             </Typography>
 

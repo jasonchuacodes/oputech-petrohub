@@ -26,7 +26,7 @@ export const EmployeesOnDuty = () => {
           {mockEmployees.map((employee) => (
             <Stack key={employee.id} alignItems="center" spacing={0.5}>
               <Avatar src={employee.avatar} alt={employee.name} />
-              <Typography variant="body1" align="center">
+              <Typography variant="body2" align="center">
                 {employee.name.split(' ')[0]}
               </Typography>
             </Stack>

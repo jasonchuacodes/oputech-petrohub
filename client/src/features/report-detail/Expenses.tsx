@@ -35,15 +35,15 @@ export const Expenses = () => {
               alignItems="center"
               spacing={1}
             >
-              <Typography variant="body1">{income.name}</Typography>
-              <Typography variant="body1">{formatNumber(income.amount, 2)}</Typography>
+              <Typography variant="body2">{income.name}</Typography>
+              <Typography variant="body2">{formatNumber(income.amount, 2)}</Typography>
             </Stack>
           ))}
         </Stack>
         <Divider />
         <Stack direction="row" justifyContent="space-between" alignItems="center">
-          <Typography variant="body1">Total</Typography>
-          <Typography variant="body1">{formatCurrency(totalIncome)}</Typography>
+          <Typography variant="body2">Total</Typography>
+          <Typography variant="body2">{formatCurrency(totalIncome)}</Typography>
         </Stack>
       </CardContainer>
     </Stack>
