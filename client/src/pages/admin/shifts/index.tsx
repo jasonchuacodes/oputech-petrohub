@@ -67,7 +67,7 @@ export const ShiftsPage = () => {
         ) : shifts && shifts.length > 0 ? (
           <Stack spacing={2}>
             {shifts.map((shift) => (
-              <ShiftProvider shift={shift}>
+              <ShiftProvider key={shift.id} shift={shift}>
                 <CardContainer maxWidth={560}>
                   <Stack direction="row" justifyContent="space-between" alignItems="start">
                     <Stack spacing={1}>

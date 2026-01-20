@@ -65,7 +65,10 @@ export const ReportDisposal = () => {
       </Typography>
 
       {disposals.length === 0 ? (
-        <NoData text="No disposals recorded" />
+        <NoData
+          text="No products found"
+          description="There were no products found. Please contact your administrator and setup the products."
+        />
       ) : (
         disposals.map((disposal) => (
           <CardContainer height="fit-content" spacing={2} key={disposal.id}>

@@ -70,11 +70,22 @@ const createReport = async ({ tenantId, creatorId, shiftId, shiftDate }: CreateR
   }
 
   // Fetch products with latest readings and prices
+  const shiftStartDateTime = new Date(
+    shiftDate.getFullYear(),
+    shiftDate.getMonth(),
+    shiftDate.getDate(),
+    shift.shiftStart.getHours(),
+    shift.shiftStart.getMinutes(),
+    shift.shiftStart.getSeconds(),
+  );
+
   const products = await prisma.product.findMany({
     where: { tenantId },
     include: {
       productPrices: {
-        where: { effectiveFrom: { lte: shiftDate } },
+        where: {
+          effectiveFrom: { lte: shiftStartDateTime },
+        },
         orderBy: { effectiveFrom: 'desc' },
         take: 1,
       },
@@ -86,22 +97,35 @@ const createReport = async ({ tenantId, creatorId, shiftId, shiftDate }: CreateR
     orderBy: { name: 'asc' },
   });
 
-  const disposalsData = products.map((product) => {
-    const beforeReading = product.productReadings[0]?.reading ?? new Decimal(0);
-    const priceSnapshot = product.productPrices[0]?.price ?? new Decimal(0);
-    const afterReading = beforeReading;
-    const netDisposal = new Decimal(0);
-    const totalSales = new Decimal(0);
+  const disposalsData = await Promise.all(
+    products.map(async (product) => {
+      const beforeReading = product.productReadings[0]?.reading ?? new Decimal(0);
 
-    return {
-      productId: product.id,
-      beforeReading,
-      afterReading,
-      netDisposal,
-      priceSnapshot,
-      totalSales,
-    };
-  });
+      // Get price effective at shift start, fallback to earliest price
+      let priceSnapshot = product.productPrices[0]?.price ?? new Decimal(0);
+
+      if (!product.productPrices[0]) {
+        const earliestPrice = await prisma.productPrice.findFirst({
+          where: { productId: product.id },
+          orderBy: { effectiveFrom: 'asc' },
+        });
+        priceSnapshot = earliestPrice?.price ?? new Decimal(0);
+      }
+
+      const afterReading = beforeReading;
+      const netDisposal = new Decimal(0);
+      const totalSales = new Decimal(0);
+
+      return {
+        productId: product.id,
+        beforeReading,
+        afterReading,
+        netDisposal,
+        priceSnapshot,
+        totalSales,
+      };
+    }),
+  );
 
   const report = await prisma.report.create({
     data: {

@@ -1,5 +1,6 @@
 import {
   CalendarTodayOutlined,
+  ChevronLeftOutlined,
   CloseOutlined,
   DashboardOutlined,
   DescriptionOutlined,
@@ -19,11 +20,12 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
-import { useState, type ComponentType } from 'react';
+import { type ComponentType } from 'react';
 import { matchPath, useLocation, useNavigate } from 'react-router-dom';
 
 import { Button } from '~/components/ui';
 import { useAuthContext } from '~/context/auth/useAuthContext';
+import { useDisclosure } from '~/hooks/useDisclosure';
 import { UserRoutes } from '~/routes';
 import { pathFor } from '~/utils/pathFor';
 
@@ -40,7 +42,7 @@ const Navbar = () => {
   const navigate = useNavigate();
   const { auth } = useAuthContext();
 
-  const [open, setOpen] = useState(false);
+  const disclosure = useDisclosure();
 
   const navItems: NavItem[] = [
     {
@@ -82,8 +84,17 @@ const Navbar = () => {
   const pageTitle = matchedRoute ? routeTitles[matchedRoute] : '';
 
   const handleNavigate = (to: string) => {
-    setOpen(false);
+    disclosure.onClose();
     navigate(to);
+  };
+
+  const isHomePage = !!matchPath(
+    { path: pathFor({ pathname: UserRoutes.Home }), end: true },
+    location.pathname,
+  );
+
+  const handleBack = () => {
+    navigate(-1);
   };
 
   const DrawerList = (
@@ -102,7 +113,7 @@ const Navbar = () => {
             <Typography>{currentTenant?.name.charAt(0).toUpperCase()}</Typography>
           </Avatar>
         </Button>
-        <IconButton onClick={() => setOpen(false)}>
+        <IconButton onClick={disclosure.onClose}>
           <CloseOutlined />
         </IconButton>
       </Stack>
@@ -181,17 +192,17 @@ const Navbar = () => {
       >
         <IconButton
           size="small"
-          onClick={() => setOpen(!open)}
+          onClick={isHomePage ? disclosure.onOpen : handleBack}
           sx={{ position: 'absolute', top: '50%', left: 8, transform: 'translateY(-50%)' }}
         >
-          <MenuOutlined />
+          {isHomePage ? <MenuOutlined /> : <ChevronLeftOutlined />}
         </IconButton>
         <Typography fontWeight="bold" variant="h5">
           {pageTitle}
         </Typography>
       </Stack>
 
-      <Drawer open={open} onClose={() => setOpen(false)}>
+      <Drawer open={disclosure.open} onClose={disclosure.onClose}>
         {DrawerList}
       </Drawer>
     </>

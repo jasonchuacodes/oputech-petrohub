@@ -43,7 +43,7 @@ export const Income = ({ reportId, income, totalIncome, isReadOnly }: IncomeProp
             </Stack>
           ))}
           
-          <Show when={income.length > 0}>
+          <Show when={income.length > 1}>
             <Divider />
             <Stack direction="row" justifyContent="space-between" alignItems="center">
               <Typography variant="body2">Total</Typography>

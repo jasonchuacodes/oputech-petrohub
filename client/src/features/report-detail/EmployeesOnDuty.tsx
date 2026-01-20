@@ -93,12 +93,12 @@ export const EmployeesOnDuty = ({ reportId, employees, isReadOnly }: EmployeesOn
                   <Typography variant="body2">{emp.user.name.split(' ')[0]}</Typography>
                   <RemoveCircle
                     onClick={() => handleRemove(emp.user.id)}
-                    color="error"
                     sx={{
                       position: 'absolute',
                       top: 0,
                       right: 0,
-                      transform: 'translateY(-50%) translateX(50%)',
+                      transform: 'translateY(-40%) translateX(50%)',
+                      color: 'error.main',
                     }}
                   />
                 </Stack>
