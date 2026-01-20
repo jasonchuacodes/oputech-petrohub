@@ -102,17 +102,22 @@ export const ReportDetail = () => {
         totalIncome={report.totalIncome}
         isReadOnly={isReadOnly}
       />
-      <Expenses />
+      <Expenses
+        reportId={reportId!}
+        expenses={report.expenses}
+        totalExpenses={report.totalExpenses}
+        isReadOnly={isReadOnly}
+      />
       <Lubricants />
 
       {isEditable && (
-        <Typography color="info" variant="body1">
+        <Typography color="info" variant="body2">
           This report is {report.status.toLowerCase()} and can be edited.
         </Typography>
       )}
 
       {isReadOnly && (
-        <Typography color="warning" variant="body1">
+        <Typography color="warning" variant="body2">
           This report has been submitted and cannot be edited.
         </Typography>
       )}

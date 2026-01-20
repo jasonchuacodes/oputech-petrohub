@@ -1,19 +1,22 @@
-import { MoreHorizOutlined } from '@mui/icons-material';
+import { AddOutlined, MoreHorizOutlined } from '@mui/icons-material';
 import { Stack, Typography, IconButton, Divider } from '@mui/material';
 
-import { CardContainer } from '~/components/ui';
+import { Button, CardContainer, Show } from '~/components/ui';
 import { formatCurrency, formatNumber } from '~/utils/number';
+import { useDisclosure } from '../../hooks/useDisclosure';
+import { AddExpenseModal } from './AddExpenseModal';
+import type { ReportExpense } from '~/services/report/report.types';
 
-const mockExpenses = [
-  { id: '1', name: 'Philhealth payment', amount: 12000 },
-  { id: '2', name: 'SSS payment', amount: 24500 },
-  { id: '3', name: 'PAGIBIG payment', amount: 8500 },
-  { id: '4', name: 'Oil change', amount: 10000 },
-];
+type ExpensesProps = {
+  reportId: string;
+  expenses: ReportExpense[];
+  totalExpenses: number;
+  isReadOnly: boolean;
+};
 
-const totalIncome = 12000 + 10000 + 24500 + 8500;
+export const Expenses = ({ reportId, expenses, totalExpenses, isReadOnly }: ExpensesProps) => {
+  const expenseDisclosure = useDisclosure();
 
-export const Expenses = () => {
   return (
     <Stack>
       <Stack direction="row" alignItems="center" justifyContent="space-between">
@@ -25,26 +28,45 @@ export const Expenses = () => {
         </IconButton>
       </Stack>
 
-      <CardContainer height="fit-content" spacing={1}>
+      <CardContainer height="fit-content" spacing={2}>
         <Stack spacing={1}>
-          {mockExpenses.map((income) => (
+          {expenses.map((item) => (
             <Stack
-              key={income.id}
+              key={item.id}
               direction="row"
               justifyContent="space-between"
               alignItems="center"
               spacing={1}
             >
-              <Typography variant="body2">{income.name}</Typography>
-              <Typography variant="body2">{formatNumber(income.amount, 2)}</Typography>
+              <Typography variant="body2">{item.description}</Typography>
+              <Typography variant="body2">{formatNumber(Number(item.amount), 2)}</Typography>
             </Stack>
           ))}
+
+          <Show when={expenses.length > 1}>
+            <Divider />
+            <Stack direction="row" justifyContent="space-between" alignItems="center">
+              <Typography variant="body2">Total</Typography>
+              <Typography variant="body2">{formatCurrency(totalExpenses)}</Typography>
+            </Stack>
+          </Show>
         </Stack>
-        <Divider />
-        <Stack direction="row" justifyContent="space-between" alignItems="center">
-          <Typography variant="body2">Total</Typography>
-          <Typography variant="body2">{formatCurrency(totalIncome)}</Typography>
-        </Stack>
+
+        <Show when={!isReadOnly}>
+          <Button
+            onClick={() => expenseDisclosure.setOpen(true)}
+            variant="outlined"
+            startIcon={<AddOutlined />}
+          >
+            <Typography>Add Expense</Typography>
+          </Button>
+        </Show>
+
+        <AddExpenseModal
+          open={expenseDisclosure.open}
+          onClose={() => expenseDisclosure.setOpen(false)}
+          reportId={reportId}
+        />
       </CardContainer>
     </Stack>
   );

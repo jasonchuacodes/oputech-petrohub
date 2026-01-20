@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { createReport, getReportById, getReportByShift, getReports, createIncome, deleteIncome } from './report.api';
+import { createReport, getReportById, getReportByShift, getReports, createIncome, deleteIncome, createExpense, deleteExpense } from './report.api';
 
 const useGetReportsQuery = ({ tenantId }: { tenantId?: string }) => {
   return useQuery({
@@ -72,6 +72,30 @@ const useDeleteIncomeMutation = () => {
   });
 };
 
+const useCreateExpenseMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ reportId, data }: { reportId: string; data: { description: string; amount: number } }) =>
+      createExpense(reportId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['report'] });
+    },
+  });
+};
+
+const useDeleteExpenseMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ reportId, expenseId }: { reportId: string; expenseId: string }) =>
+      deleteExpense(reportId, expenseId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['report'] });
+    },
+  });
+};
+
 export {
   useGetReportsQuery,
   useGetReportByIdQuery,
@@ -79,4 +103,6 @@ export {
   useCreateReportMutation,
   useCreateIncomeMutation,
   useDeleteIncomeMutation,
+  useCreateExpenseMutation,
+  useDeleteExpenseMutation,
 };

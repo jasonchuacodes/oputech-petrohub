@@ -1,5 +1,5 @@
 import axios from '~/lib/axiosInstance';
-import type { CreateReportPayload, Report, ReportIncome } from './report.types';
+import type { CreateReportPayload, Report, ReportIncome, ReportExpense } from './report.types';
 
 const getReports = async (tenantId: string): Promise<Report[]> => {
   const res = await axios.get('/reports', { params: { tenantId } });
@@ -41,4 +41,13 @@ const deleteIncome = async (reportId: string, incomeId: string): Promise<void> =
   await axios.delete(`/reports/${reportId}/income/${incomeId}`);
 };
 
-export { getReports, getReportById, getReportByShift, createReport, createIncome, deleteIncome };
+const createExpense = async (reportId: string, data: { description: string; amount: number }): Promise<ReportExpense> => {
+  const res = await axios.post(`/reports/${reportId}/expenses`, data);
+  return res.data.data.expense;
+};
+
+const deleteExpense = async (reportId: string, expenseId: string): Promise<void> => {
+  await axios.delete(`/reports/${reportId}/expenses/${expenseId}`);
+};
+
+export { getReports, getReportById, getReportByShift, createReport, createIncome, deleteIncome, createExpense, deleteExpense };

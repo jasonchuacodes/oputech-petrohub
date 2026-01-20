@@ -1,7 +1,7 @@
 import { AddOutlined, MoreHorizOutlined } from '@mui/icons-material';
 import { Stack, Typography, IconButton, Divider } from '@mui/material';
 
-import { Button, CardContainer } from '~/components/ui';
+import { Button, CardContainer, Show } from '~/components/ui';
 import { formatCurrency, formatNumber } from '~/utils/number';
 import { useDisclosure } from '../../hooks/useDisclosure';
 import { AddIncomeModal } from './AddIncomeModal';
@@ -28,50 +28,39 @@ export const Income = ({ reportId, income, totalIncome, isReadOnly }: IncomeProp
         </IconButton>
       </Stack>
 
-      <CardContainer height="fit-content" spacing={1}>
-        {income.length === 0 ? (
-          !isReadOnly && (
-            <Button
-              onClick={() => incomeDisclosure.setOpen(true)}
-              variant="outlined"
-              startIcon={<AddOutlined />}
+      <CardContainer height="fit-content" spacing={2}>
+        <Stack spacing={1}>
+          {income.map((item) => (
+            <Stack
+              key={item.id}
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+              spacing={1}
             >
-              <Typography>Add Income</Typography>
-            </Button>
-          )
-        ) : (
-          <>
-            <Stack spacing={1}>
-              {income.map((item) => (
-                <Stack
-                  key={item.id}
-                  direction="row"
-                  justifyContent="space-between"
-                  alignItems="center"
-                  spacing={1}
-                >
-                  <Typography variant="body2">{item.description}</Typography>
-                  <Typography variant="body2">{formatNumber(Number(item.amount), 2)}</Typography>
-                </Stack>
-              ))}
+              <Typography variant="body2">{item.description}</Typography>
+              <Typography variant="body2">{formatNumber(Number(item.amount), 2)}</Typography>
             </Stack>
+          ))}
+          
+          <Show when={income.length > 0}>
             <Divider />
             <Stack direction="row" justifyContent="space-between" alignItems="center">
               <Typography variant="body2">Total</Typography>
               <Typography variant="body2">{formatCurrency(totalIncome)}</Typography>
             </Stack>
+          </Show>
+        </Stack>
 
-            {!isReadOnly && (
-              <Button
-                onClick={() => incomeDisclosure.setOpen(true)}
-                variant="outlined"
-                startIcon={<AddOutlined />}
-              >
-                <Typography>Add Income</Typography>
-              </Button>
-            )}
-          </>
-        )}
+        <Show when={!isReadOnly}>
+          <Button
+            onClick={() => incomeDisclosure.setOpen(true)}
+            variant="outlined"
+            startIcon={<AddOutlined />}
+          >
+            <Typography>Add Income</Typography>
+          </Button>
+        </Show>
 
         <AddIncomeModal
           open={incomeDisclosure.open}
