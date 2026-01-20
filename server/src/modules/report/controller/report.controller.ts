@@ -6,11 +6,13 @@ import { AuthenticatedRequest } from '~/middlewares/requireAuth';
 import * as reportService from '../services/report.service';
 import * as entryService from '../services/entry.service';
 import * as expenseService from '../services/expense.service';
+import * as incomeService from '../services/income.service';
 import * as employeeService from '../services/employee.service';
 import { CreateReportSchema } from '../schema/createReportSchema';
 import { GetReportsSchema } from '../schema/getReportsSchema';
 import { CreateReportEntrySchema } from '../schema/createReportEntrySchema';
 import { CreateExpenseSchema } from '../schema/createExpenseSchema';
+import { CreateIncomeSchema } from '../schema/createIncomeSchema';
 import { AssignEmployeeSchema } from '../schema/assignEmployeeSchema';
 import { GetReportByShiftSchema } from '../schema/getReportByShiftSchema';
 
@@ -18,6 +20,7 @@ const validateCreateReport = createSchemaValidator(CreateReportSchema);
 const validateGetReports = createSchemaValidator(GetReportsSchema);
 const validateCreateReportEntry = createSchemaValidator(CreateReportEntrySchema);
 const validateCreateExpense = createSchemaValidator(CreateExpenseSchema);
+const validateCreateIncome = createSchemaValidator(CreateIncomeSchema);
 const validateGetReportByShift = createSchemaValidator(GetReportByShiftSchema);
 const validateAssignEmployee = createSchemaValidator(AssignEmployeeSchema);
 
@@ -180,6 +183,36 @@ const deleteExpense = async (req: Request, res: Response, next: NextFunction) =>
   }
 };
 
+const createIncome = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { reportId } = req.params;
+    const data = await validateCreateIncome(req.body);
+
+    const income = await incomeService.createIncome({
+      reportId,
+      ...data,
+    });
+
+    res.status(201).json({
+      message: 'Income created successfully',
+      data: { income },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const deleteIncome = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { reportId, incomeId } = req.params;
+    await incomeService.deleteIncome(incomeId, reportId);
+
+    res.status(204).send();
+  } catch (err) {
+    next(err);
+  }
+};
+
 const assignEmployee = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { reportId } = req.params;
@@ -220,6 +253,8 @@ export {
   deleteEntry,
   createExpense,
   deleteExpense,
+  createIncome,
+  deleteIncome,
   assignEmployee,
   removeEmployee,
 };

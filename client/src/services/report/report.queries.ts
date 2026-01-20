@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { createReport, getReportById, getReportByShift, getReports } from './report.api';
+import { createReport, getReportById, getReportByShift, getReports, createIncome, deleteIncome } from './report.api';
 
 const useGetReportsQuery = ({ tenantId }: { tenantId?: string }) => {
   return useQuery({
@@ -47,4 +47,36 @@ const useCreateReportMutation = () => {
   });
 };
 
-export { useGetReportsQuery, useGetReportByIdQuery,useGetReportByShiftQuery,  useCreateReportMutation };
+const useCreateIncomeMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ reportId, data }: { reportId: string; data: { description: string; amount: number } }) =>
+      createIncome(reportId, data),
+    onSuccess: (_, { reportId }) => {
+      // Note: We need tenantId to fully invalidate, but we can invalidate by reportId
+      queryClient.invalidateQueries({ queryKey: ['report'] });
+    },
+  });
+};
+
+const useDeleteIncomeMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ reportId, incomeId }: { reportId: string; incomeId: string }) =>
+      deleteIncome(reportId, incomeId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['report'] });
+    },
+  });
+};
+
+export {
+  useGetReportsQuery,
+  useGetReportByIdQuery,
+  useGetReportByShiftQuery,
+  useCreateReportMutation,
+  useCreateIncomeMutation,
+  useDeleteIncomeMutation,
+};

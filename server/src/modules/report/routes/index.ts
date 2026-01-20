@@ -11,6 +11,8 @@ import {
   deleteEntry,
   createExpense,
   deleteExpense,
+  createIncome,
+  deleteIncome,
   assignEmployee,
   removeEmployee,
   getReportByShift,
@@ -34,6 +36,10 @@ router.delete('/:reportId/entries/:entryId', requireAuth, asyncHandler(deleteEnt
 // Expense routes
 router.post('/:reportId/expenses', requireAuth, asyncHandler(createExpense));
 router.delete('/:reportId/expenses/:expenseId', requireAuth, asyncHandler(deleteExpense));
+
+// Income routes
+router.post('/:reportId/income', requireAuth, asyncHandler(createIncome));
+router.delete('/:reportId/income/:incomeId', requireAuth, asyncHandler(deleteIncome));
 
 // Employee routes
 router.post('/:reportId/employees', requireAuth, asyncHandler(assignEmployee));

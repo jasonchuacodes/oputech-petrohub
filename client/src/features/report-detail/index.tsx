@@ -96,7 +96,12 @@ export const ReportDetail = () => {
 
       <Shortcuts />
       <EmployeesOnDuty />
-      <Income />
+      <Income
+        reportId={reportId!}
+        income={report.income}
+        totalIncome={report.totalIncome}
+        isReadOnly={isReadOnly}
+      />
       <Expenses />
       <Lubricants />
 
