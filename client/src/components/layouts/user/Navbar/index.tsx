@@ -110,7 +110,13 @@ const Navbar = () => {
       <Box flex={1}>
         <List>
           {navItems.map(({ icon, to, label }, index) => {
-            const active = location.pathname === to;
+            const active = !!matchPath(
+              {
+                path: to,
+                end: to === pathFor({ pathname: UserRoutes.Home }),
+              },
+              location.pathname,
+            );
 
             return (
               <ListItem key={index} disablePadding sx={{ height: 40 }}>
