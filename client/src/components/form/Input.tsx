@@ -22,6 +22,7 @@ type InputProps<T extends FieldValues> = {
   multiline?: boolean;
   rows?: number;
   error?: boolean;
+  autoFocus?: boolean;
 };
 
 export const Input = <T extends FieldValues>({
@@ -40,6 +41,7 @@ export const Input = <T extends FieldValues>({
   multiline,
   rows,
   error: errorProp,
+  autoFocus,
 }: InputProps<T>) => {
   const mergedSlotProps = {
     input: {
@@ -93,6 +95,7 @@ export const Input = <T extends FieldValues>({
             multiline={multiline}
             rows={rows}
             error={error?.message ? true : errorProp}
+            autoFocus={autoFocus}
             slotProps={mergedSlotProps}
             endAdornment={endAdornment}
             startAdornment={

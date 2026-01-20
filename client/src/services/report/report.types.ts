@@ -31,8 +31,8 @@ export type ReportDisposal = {
   product: {
     id: string;
     name: string;
-    code: string;
-    unit: string;
+    code?: string;
+    unit?: string;
   };
   beforeReading: number;
   afterReading: number;

@@ -1,3 +1,4 @@
+import { Decimal } from '@prisma/client/runtime/library';
 import { prisma } from '~/db';
 import { Prisma, ReportStatus, Role } from '~/db/prisma';
 import { ConflictError, ForbiddenError, NotFoundError } from '~/errors';
@@ -68,6 +69,40 @@ const createReport = async ({ tenantId, creatorId, shiftId, shiftDate }: CreateR
     throw new NotFoundError('Shift not found');
   }
 
+  // Fetch products with latest readings and prices
+  const products = await prisma.product.findMany({
+    where: { tenantId },
+    include: {
+      productPrices: {
+        where: { effectiveFrom: { lte: shiftDate } },
+        orderBy: { effectiveFrom: 'desc' },
+        take: 1,
+      },
+      productReadings: {
+        orderBy: { createdAt: 'desc' },
+        take: 1,
+      },
+    },
+    orderBy: { name: 'asc' },
+  });
+
+  const disposalsData = products.map((product) => {
+    const beforeReading = product.productReadings[0]?.reading ?? new Decimal(0);
+    const priceSnapshot = product.productPrices[0]?.price ?? new Decimal(0);
+    const afterReading = beforeReading;
+    const netDisposal = new Decimal(0);
+    const totalSales = new Decimal(0);
+
+    return {
+      productId: product.id,
+      beforeReading,
+      afterReading,
+      netDisposal,
+      priceSnapshot,
+      totalSales,
+    };
+  });
+
   const report = await prisma.report.create({
     data: {
       tenantId,
@@ -75,6 +110,9 @@ const createReport = async ({ tenantId, creatorId, shiftId, shiftDate }: CreateR
       shiftId,
       shiftDate,
       status: ReportStatus.DRAFT,
+      disposals: {
+        create: disposalsData,
+      },
     },
     include: {
       shift: true,

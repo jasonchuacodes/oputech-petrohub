@@ -1,7 +1,12 @@
 import { InvertColors, GasMeter, Payments, AttachMoney } from '@mui/icons-material';
 import { Icon, Stack, Typography } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import type { ComponentType } from 'react';
-import { useDisclosure } from '../../hooks/useDisclosure';
+
+import { useDisclosure } from '~/hooks/useDisclosure';
+import { UserRoutes } from '~/routes';
+import { pathFor } from '~/utils/pathFor';
+
 import { AddIncomeModal } from './AddIncomeModal';
 import { AddExpenseModal } from './AddExpenseModal';
 
@@ -11,6 +16,7 @@ type ShortcutsProps = {
 };
 
 export const Shortcuts = ({ reportId, isReadOnly }: ShortcutsProps) => {
+  const navigate = useNavigate();
   const incomeDisclosure = useDisclosure();
   const expenseDisclosure = useDisclosure();
 
@@ -19,7 +25,18 @@ export const Shortcuts = ({ reportId, isReadOnly }: ShortcutsProps) => {
       <Stack spacing={1}>
         <Stack direction="row" spacing={1}>
           <ShortcutCard name="Lubricants" onClick={() => null} icon={InvertColors} />
-          <ShortcutCard name="Disposals" onClick={() => null} icon={GasMeter} />
+          <ShortcutCard
+            name="Disposals"
+            onClick={() =>
+              navigate(
+                pathFor({
+                  pathname: UserRoutes.ReportDisposal,
+                  params: { reportId },
+                }),
+              )
+            }
+            icon={GasMeter}
+          />
         </Stack>
         <Stack direction="row" spacing={1}>
           <ShortcutCard

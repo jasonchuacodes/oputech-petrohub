@@ -24,9 +24,9 @@ import { LoginAdmin } from '~/pages/auth/admin-login';
 import { Register } from '~/pages/auth/register';
 import { HomePage as UserHomePage } from '~/pages/user/home';
 import { TimesheetsPage as UserTimesheetsPage } from '~/pages/user/timesheets';
-
-import { ReportPage as UserReportPage } from '~/pages/user/report';
-import { ReportDetailPage as UserReportDetailPage } from '~/pages/user/report-detail';
+import { ReportPage } from '~/pages/user/report';
+import { ReportDetailPage as UserReportDetailPage } from '~/pages/user/report/detail';
+import { ReportDisposalPage } from '~/pages/user/report/disposal';
 import { SettingsPage as UserSettingsPage } from '~/pages/user/settings';
 import { AdminSettingsPage } from '~/pages/admin/settings';
 import { NotFoundPage } from '~/pages/NotFound';
@@ -65,6 +65,7 @@ export const UserRoutes = {
   Settings: '/settings',
   Report: '/report',
   ReportDetail: '/report/:reportId',
+  ReportDisposal: '/report/:reportId/disposal',
 };
 
 export const router = createBrowserRouter(
@@ -82,8 +83,9 @@ export const router = createBrowserRouter(
           <Route index element={<UserHomePage />} />
           <Route path={UserRoutes.Timesheets} element={<UserTimesheetsPage />} />
           <Route path={UserRoutes.Settings} element={<UserSettingsPage />} />
-          <Route path={UserRoutes.Report} element={<UserReportPage />} />
+          <Route path={UserRoutes.Report} element={<ReportPage />} />
           <Route path={UserRoutes.ReportDetail} element={<UserReportDetailPage />} />
+          <Route path={UserRoutes.ReportDisposal} element={<ReportDisposalPage />} />
         </Route>
       </Route>
 

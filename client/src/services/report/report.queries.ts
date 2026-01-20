@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { createReport, getReportById, getReportByShift, getReports, createIncome, deleteIncome, createExpense, deleteExpense, assignEmployee, removeEmployee } from './report.api';
+import { createReport, getReportById, getReportByShift, getReports, createIncome, deleteIncome, createExpense, deleteExpense, assignEmployee, removeEmployee, updateDisposal } from './report.api';
 
 const useGetReportsQuery = ({ tenantId }: { tenantId?: string }) => {
   return useQuery({
@@ -120,6 +120,18 @@ const useRemoveEmployeeMutation = () => {
   });
 };
 
+const useUpdateDisposalMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ reportId, disposalId, data }: { reportId: string; disposalId: string; data: { afterReading: number } }) =>
+      updateDisposal(reportId, disposalId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['report'] });
+    },
+  });
+};
+
 export {
   useGetReportsQuery,
   useGetReportByIdQuery,
@@ -131,4 +143,5 @@ export {
   useDeleteExpenseMutation,
   useAssignEmployeeMutation,
   useRemoveEmployeeMutation,
+  useUpdateDisposalMutation,
 };

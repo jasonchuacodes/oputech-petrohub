@@ -16,11 +16,11 @@ import {
   assignEmployee,
   removeEmployee,
   getReportByShift,
+  updateDisposal,
 } from '../controller/report.controller';
 
 const router = express.Router();
 
-// Report routes
 router.post('/', requireAuth, asyncHandler(createReport));
 router.get('/', requireAuth, asyncHandler(getReports));
 router.get('/by-shift', requireAuth, asyncHandler(getReportByShift));
@@ -29,19 +29,17 @@ router.get('/:reportId', requireAuth, asyncHandler(getReportById));
 router.patch('/:reportId/validate', requireAuth, asyncHandler(validateReport));
 router.post('/:reportId/submit', requireAuth, asyncHandler(submitReport));
 
-// Entry routes
 router.post('/:reportId/entries', requireAuth, asyncHandler(createOrUpdateEntry));
 router.delete('/:reportId/entries/:entryId', requireAuth, asyncHandler(deleteEntry));
 
-// Expense routes
 router.post('/:reportId/expenses', requireAuth, asyncHandler(createExpense));
 router.delete('/:reportId/expenses/:expenseId', requireAuth, asyncHandler(deleteExpense));
 
-// Income routes
 router.post('/:reportId/income', requireAuth, asyncHandler(createIncome));
 router.delete('/:reportId/income/:incomeId', requireAuth, asyncHandler(deleteIncome));
 
-// Employee routes
+router.put('/:reportId/disposals/:disposalId', requireAuth, asyncHandler(updateDisposal));
+
 router.post('/:reportId/employees', requireAuth, asyncHandler(assignEmployee));
 router.delete('/:reportId/employees/:userId', requireAuth, asyncHandler(removeEmployee));
 

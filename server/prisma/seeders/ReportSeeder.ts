@@ -28,7 +28,7 @@ export class ReportSeeder {
   }
 
   private formatDate(date: Date): string {
-    return date.toLocaleDateString('en-CA'); 
+    return date.toLocaleDateString('en-CA');
   }
 
   private async getPriceSnapshot(productId: string, shiftDate: Date): Promise<Decimal> {
@@ -70,12 +70,7 @@ export class ReportSeeder {
     ];
 
     // Disposal templates (meter start readings)
-    const disposalStartingReadings = [
-      1230904,
-      890450, 
-      1050230,
-      670200,
-    ];
+    const disposalStartingReadings = [1230904, 890450, 1050230, 670200];
 
     // Track current readings across shifts
     let currentReadings = [...disposalStartingReadings];
@@ -134,7 +129,7 @@ export class ReportSeeder {
         amount: new Decimal((morningTargetIncome * incomeRatios[idx]).toFixed(2)),
       }));
 
-       /**
+      /**
        * AFTERNOON SHIFT REPORT
        */
       const morningReport = await this.prisma.report.upsert({
@@ -151,10 +146,8 @@ export class ReportSeeder {
           creatorId: adminUserId,
           shiftId: shifts.morningShift.id,
           shiftDate,
-          status: ReportStatus.SUBMITTED,
-          submittedAt: new Date(
-            shiftDate.getTime() + shifts.morningShift.shiftEnd.getUTCHours() * 3600000 + 2 * 3600000,
-          ),
+          status: ReportStatus.DRAFT,
+          submittedAt: null,
           income: {
             create: morningIncomeData,
           },
@@ -274,7 +267,9 @@ export class ReportSeeder {
           shiftDate,
           status: ReportStatus.SUBMITTED,
           submittedAt: new Date(
-            shiftDate.getTime() + shifts.afternoonShift.shiftEnd.getUTCHours() * 3600000 + 2 * 3600000,
+            shiftDate.getTime() +
+              shifts.afternoonShift.shiftEnd.getUTCHours() * 3600000 +
+              2 * 3600000,
           ),
           income: {
             create: afternoonIncomeData,

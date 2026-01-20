@@ -8,6 +8,7 @@ import * as entryService from '../services/entry.service';
 import * as expenseService from '../services/expense.service';
 import * as incomeService from '../services/income.service';
 import * as employeeService from '../services/employee.service';
+import * as disposalService from '../services/disposal.service';
 import { CreateReportSchema } from '../schema/createReportSchema';
 import { GetReportsSchema } from '../schema/getReportsSchema';
 import { CreateReportEntrySchema } from '../schema/createReportEntrySchema';
@@ -15,6 +16,7 @@ import { CreateExpenseSchema } from '../schema/createExpenseSchema';
 import { CreateIncomeSchema } from '../schema/createIncomeSchema';
 import { AssignEmployeeSchema } from '../schema/assignEmployeeSchema';
 import { GetReportByShiftSchema } from '../schema/getReportByShiftSchema';
+import { UpdateDisposalSchema } from '../schema/updateDisposalSchema';
 
 const validateCreateReport = createSchemaValidator(CreateReportSchema);
 const validateGetReports = createSchemaValidator(GetReportsSchema);
@@ -23,6 +25,7 @@ const validateCreateExpense = createSchemaValidator(CreateExpenseSchema);
 const validateCreateIncome = createSchemaValidator(CreateIncomeSchema);
 const validateGetReportByShift = createSchemaValidator(GetReportByShiftSchema);
 const validateAssignEmployee = createSchemaValidator(AssignEmployeeSchema);
+const validateUpdateDisposal = createSchemaValidator(UpdateDisposalSchema);
 
 const createReport = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
@@ -242,6 +245,26 @@ const removeEmployee = async (req: Request, res: Response, next: NextFunction) =
   }
 };
 
+const updateDisposal = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { reportId, disposalId } = req.params;
+    const data = await validateUpdateDisposal(req.body);
+
+    const disposal = await disposalService.updateDisposal({
+      reportId,
+      disposalId,
+      ...data,
+    });
+
+    res.status(200).json({
+      message: 'Disposal updated successfully',
+      data: { disposal },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export {
   createReport,
   getReports,
@@ -257,4 +280,5 @@ export {
   deleteIncome,
   assignEmployee,
   removeEmployee,
+  updateDisposal,
 };

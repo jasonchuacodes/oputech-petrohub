@@ -49,7 +49,7 @@ export const ReportDetail = () => {
           variant="body1"
           p={1}
           bgcolor="background.surface"
-          borderRadius={1}
+          borderRadius={2}
         >
           {formatDate(new Date(), 'MMMM DD, YYYY')} — {report.shift.name} Shift
         </Typography>

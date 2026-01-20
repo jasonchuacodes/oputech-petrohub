@@ -35,6 +35,9 @@ export const CreateUserModal = ({ open, setOpen }: Props) => {
     formState: { isValid },
   } = useForm<CreateUserInput>({
     resolver: zodResolver(CreateUserSchema),
+    defaultValues: {
+      role: UserRole.USER
+    }
   });
 
   const { mutate: createUser } = useCreateUserMutation({
