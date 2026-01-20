@@ -1,13 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Stack, type SelectChangeEvent } from '@mui/material';
-import { useState } from 'react';
+import { Stack } from '@mui/material';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
-import { Input, Select, PasswordField } from '~/components/form';
+import { Input, FormSelect, PasswordField } from '~/components/form';
 import { CustomModal } from '~/components/ui';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
-import { UserRole, type UserRole as UserRoleType } from '~/services/user/user.types';
+import { UserRole } from '~/services/user/user.types';
 import { CreateUserSchema, type CreateUserInput } from '~/schema/createUserSchema';
 import { useCreateUserMutation } from '~/services/user/user.queries';
 import { parseBackendError } from '~/utils/parseBackendError';
@@ -29,15 +28,8 @@ type Props = {
 export const CreateUserModal = ({ open, setOpen }: Props) => {
   const { tenantId } = useTenantContext();
 
-  const [selectedRole, setSelectedRole] = useState<UserRoleType>(UserRole.USER);
-
-  const handleSelectRole = (event: SelectChangeEvent) => {
-    setSelectedRole(event.target.value as UserRoleType);
-  };
-
   const {
     handleSubmit,
-    register,
     reset,
     control,
     formState: { isValid },
@@ -115,13 +107,11 @@ export const CreateUserModal = ({ open, setOpen }: Props) => {
           copiable
           randomizer
         />
-        <Select
-          required
-          register={register}
+        <FormSelect
+          control={control}
           name="role"
           label="Role"
-          onChange={handleSelectRole}
-          selected={selectedRole}
+          required
           options={roleOptions}
         />
       </Stack>

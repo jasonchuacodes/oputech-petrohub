@@ -95,7 +95,11 @@ export const ReportDetail = () => {
       </Stack>
 
       <Shortcuts />
-      <EmployeesOnDuty />
+      <EmployeesOnDuty
+        reportId={reportId!}
+        employees={report.employees}
+        isReadOnly={isReadOnly}
+      />
       <Income
         reportId={reportId!}
         income={report.income}

@@ -50,4 +50,12 @@ const deleteExpense = async (reportId: string, expenseId: string): Promise<void>
   await axios.delete(`/reports/${reportId}/expenses/${expenseId}`);
 };
 
-export { getReports, getReportById, getReportByShift, createReport, createIncome, deleteIncome, createExpense, deleteExpense };
+const assignEmployee = async (reportId: string, userId: string): Promise<void> => {
+  await axios.post(`/reports/${reportId}/employees`, { userId });
+};
+
+const removeEmployee = async (reportId: string, userId: string): Promise<void> => {
+  await axios.delete(`/reports/${reportId}/employees/${userId}`);
+};
+
+export { getReports, getReportById, getReportByShift, createReport, createIncome, deleteIncome, createExpense, deleteExpense, assignEmployee, removeEmployee };

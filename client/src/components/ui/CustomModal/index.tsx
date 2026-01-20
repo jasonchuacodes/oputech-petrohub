@@ -67,7 +67,7 @@ export const CustomModal = ({
               py: 1.5,
             }}
           >
-            <Stack direction="row" alignItems="center" spacing={3}>
+            <Stack direction="row" alignItems="start" spacing={3}>
               {icon && (
                 <Box
                   sx={{

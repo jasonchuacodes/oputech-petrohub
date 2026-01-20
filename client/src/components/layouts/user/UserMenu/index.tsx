@@ -39,12 +39,12 @@ const UserMenu = ({ onNavigate }: { onNavigate: (to: string) => void }) => {
           bgcolor: isOpenMenu ? alpha(theme.palette.primary.light, 0.1) : '',
         }}
       >
-        <Avatar alt="profile-picture" variant="rounded" sx={{ width: 32, height: 32 }}>
+        <Avatar alt="profile-picture" variant="rounded" sx={{ width: 36, height: 36 }}>
           <Typography variant="body1">{userInitials}</Typography>
         </Avatar>
         <Stack justifyContent="start" alignItems="start" overflow="hidden" minWidth={0} flex={1}>
           <Typography
-            variant="body2"
+            variant="body1"
             fontWeight="medium"
             sx={{
               whiteSpace: 'nowrap',
@@ -86,14 +86,14 @@ const UserMenu = ({ onNavigate }: { onNavigate: (to: string) => void }) => {
         }}
       >
         <MenuItem dense onClick={handleNavigateToSettings}>
-          <Typography variant="body2">Settings</Typography>
+          <Typography variant="body1">Settings</Typography>
         </MenuItem>
         <MenuItem dense onClick={() => null}>
-          <Typography variant="body2">Help</Typography>
+          <Typography variant="body1">Help</Typography>
         </MenuItem>
         <Divider />
         <MenuItem dense onClick={logout}>
-          <Typography variant="body2">Logout</Typography>
+          <Typography variant="body1">Logout</Typography>
         </MenuItem>
       </Menu>
     </Box>

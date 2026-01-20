@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import { Input, InputWithFormat, ShiftSelect } from '~/components/form';
+import { Input, InputWithFormat } from '~/components/form';
 import { Button, Breadcrumb, Form, PageContainer, PageLayout } from '~/components/ui';
 import { useAuthContext } from '~/context/auth/useAuthContext';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
@@ -20,6 +20,7 @@ import { parseBackendError } from '~/utils/parseBackendError';
 
 import { ResetPasswordModal } from '../ResetPasswordModal';
 import { AvatarPicker } from './AvatarPicker';
+import { ShiftSelect } from './ShiftSelect';
 
 export const UserDetailPage = () => {
   const navigate = useNavigate();

@@ -139,7 +139,7 @@ const Navbar = () => {
                   <ListItemText
                     slotProps={{
                       primary: {
-                        variant: 'body2',
+                        variant: 'body1',
                       },
                     }}
                     sx={{
