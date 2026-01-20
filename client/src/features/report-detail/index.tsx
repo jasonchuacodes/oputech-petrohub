@@ -94,7 +94,7 @@ export const ReportDetail = () => {
         </CardContainer>
       </Stack>
 
-      <Shortcuts />
+      <Shortcuts reportId={reportId!} isReadOnly={isReadOnly} />
       <EmployeesOnDuty
         reportId={reportId!}
         employees={report.employees}

@@ -38,8 +38,12 @@ export const Expenses = ({ reportId, expenses, totalExpenses, isReadOnly }: Expe
               alignItems="center"
               spacing={1}
             >
-              <Typography variant="body2">{item.description}</Typography>
-              <Typography variant="body2">{formatNumber(Number(item.amount), 2)}</Typography>
+              <Typography variant="body2" color="text.secondary">
+                {item.description}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {formatNumber(Number(item.amount), 2)}
+              </Typography>
             </Stack>
           ))}
 
