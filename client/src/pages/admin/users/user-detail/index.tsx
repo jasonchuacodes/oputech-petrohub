@@ -192,6 +192,28 @@ export const UserDetailPage = () => {
                       label="Shift"
                       shifts={shifts || []}
                     />
+
+                    {shifts?.length === 0 && (
+                      <Typography variant="caption" color="text.secondary">
+                        Shift schedules have not been set. Please add a shift scheduled on the{' '}
+                        <Typography
+                          variant="caption"
+                          color="info"
+                          sx={{ cursor: 'pointer' }}
+                          onClick={() =>
+                            navigate(
+                              pathFor({
+                                pathname: AdminRoutes.TenantShifts,
+                                params: { tenantId },
+                              }),
+                            )
+                          }
+                        >
+                          shift configuration
+                        </Typography>{' '}
+                        page.
+                      </Typography>
+                    )}
                   </Grid>
                 </Grid>
                 <Divider />
