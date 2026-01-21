@@ -41,7 +41,7 @@ export const MultiSelect = <T extends object>({
 
   return (
     <Stack spacing={0.5} width="100%">
-      <Typography variant="body2" fontWeight="medium" color="text.secondary">
+      <Typography variant="body2" fontWeight="medium" color="text.primary">
         {label}
         {required && (
           <Typography component="span" color="error">

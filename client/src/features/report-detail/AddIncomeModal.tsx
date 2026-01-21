@@ -72,6 +72,7 @@ export const AddIncomeModal = ({ open, onClose, reportId }: AddIncomeModalProps)
           control={control}
           name="description"
           placeholder="e.g., Cash sales"
+          autoFocus
         />
         <NumberInput
           label="Amount"

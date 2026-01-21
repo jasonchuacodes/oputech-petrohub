@@ -80,8 +80,8 @@ export const UpdateDisposalModal = ({
       open={open}
       onClose={handleClose}
       onSubmit={handleSubmit(onSubmit)}
-      title="Update Disposal"
-      subheader={`Update reading for ${disposal.product.name}`}
+      title={`${disposal.product.name} Disposal`}
+      subheader='Update fuel product disposal reading.'
       submitText="Update"
       loading={isPending}
       maxWidth={560}
@@ -116,7 +116,7 @@ export const UpdateDisposalModal = ({
               }}
             >
               <Typography variant="body2" fontWeight={500}>
-                {formatNumber(disposal.beforeReading, 3)}
+                {disposal.beforeReading}
               </Typography>
             </Box>
           </Stack>

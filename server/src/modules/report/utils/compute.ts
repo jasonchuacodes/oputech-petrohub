@@ -5,6 +5,7 @@ interface ReportWithTotals {
   totalExpenses: number;
   totalDisposalSales: number;
   totalInventorySales: number;
+  totalSales: number;
   shortages: number;
   netTotal: number;
 }
@@ -29,7 +30,9 @@ export const computeReportTotals = (report: {
     report.inventories?.reduce((sum, inventory) => sum.add(inventory.amount), new Decimal(0)) ??
     new Decimal(0);
 
-  const shortagesDecimal = totalDisposalSalesDecimal.sub(totalIncomeDecimal);
+  const totalSalesDecimal = totalIncomeDecimal.add(totalExpensesDecimal);
+
+  const shortagesDecimal = totalDisposalSalesDecimal.sub(totalSalesDecimal);
 
   const netTotalDecimal = totalIncomeDecimal.add(totalInventorySalesDecimal).sub(totalExpensesDecimal);
 
@@ -38,6 +41,7 @@ export const computeReportTotals = (report: {
     totalExpenses: totalExpensesDecimal.toNumber(),
     totalDisposalSales: totalDisposalSalesDecimal.toNumber(),
     totalInventorySales: totalInventorySalesDecimal.toNumber(),
+    totalSales: totalSalesDecimal.toNumber(),
     shortages: shortagesDecimal.toNumber(),
     netTotal: netTotalDecimal.toNumber(),
   };

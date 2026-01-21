@@ -62,55 +62,82 @@ export const ReportDetailPage = () => {
             {report && (
               <CardContainer height="fit-content">
                 <Typography variant="h5" sx={{ fontWeight: 600 }}>
-                  {formatDate(report.shiftDate, 'MMMM DD, YYYY')} — {report.shift.name}
+                  {formatDate(report.shiftDate, 'MMMM DD, YYYY')} — {report.shift.name} Shift
                 </Typography>
               </CardContainer>
             )}
             <Stack direction="row" spacing={2}>
               <Stack flex={1} spacing={2}>
-                <CardContainer height="fit-content">
-                  <Stack spacing={1}>
+                <CardContainer height="fit-content" p={2} spacing={2} borderRadius={2}>
+                  <Stack direction="row" justifyContent="space-between">
+                    <Typography variant="body1" fontWeight={500} color="text.primary">
+                      Net Sales
+                    </Typography>
+                    <Typography variant="h2" fontWeight={600} color="primary.main">
+                      {formatCurrency(Number(report?.netTotal))}
+                    </Typography>
+                  </Stack>
+
+                  <Stack pl={2} spacing={1}>
                     <Stack direction="row" alignItems="center" justifyContent="space-between">
-                      <Typography variant="h6" color="text.primary">
-                        Total Sales
+                      <Typography variant="body2" color="text.secondary">
+                        Sales
                       </Typography>
-                      <Typography variant="h4" fontWeight="medium" color="text.primary">
-                        {formatCurrency(Number(report?.netTotal))}
+                      <Typography variant="body2" color="text.secondary">
+                        {formatCurrency(Number(report?.totalIncome))}
                       </Typography>
                     </Stack>
 
-                    <Stack spacing={1}>
-                      <Stack direction="row" justifyContent="space-between">
-                        <Typography variant="body2" color="text.secondary">
-                          Income
-                        </Typography>
-                        <Typography variant="body2" color="text.primary">
-                          {formatNumber(Number(report?.totalIncome))}
-                        </Typography>
-                      </Stack>
-                      <Stack direction="row" justifyContent="space-between">
-                        <Typography variant="body2" color="text.secondary">
-                          Expenses
-                        </Typography>
-                        <Typography variant="body2" color="text.primary">
-                          {formatNumber(Number(report?.totalExpenses))}
-                        </Typography>
-                      </Stack>
+                    <Stack direction="row" alignItems="center" justifyContent="space-between">
+                      <Typography variant="body2" color="text.secondary">
+                        Expenses
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {formatCurrency(Number(report?.totalExpenses))}
+                      </Typography>
+                    </Stack>
+                    <Stack direction="row" alignItems="center" justifyContent="space-between">
+                      <Typography variant="body2" color="text.secondary">
+                        Lubricants
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {formatCurrency(Number(report?.totalInventorySales))}
+                      </Typography>
                     </Stack>
 
                     <Divider />
-                    
-                    <Stack direction="row" justifyContent="space-between">
+
+                    <Stack direction="row" alignItems="center" justifyContent="space-between">
+                      <Typography variant="body2" color="text.primary">
+                        Total Sales
+                      </Typography>
+                      <Typography variant="body2" color="text.primary">
+                        {formatCurrency(Number(report?.totalSales))}
+                      </Typography>
+                    </Stack>
+
+                    <Stack direction="row" alignItems="center" justifyContent="space-between">
                       <Typography variant="body2" color="text.secondary">
-                        Shortages
+                        Disposals Sales
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {formatCurrency(Number(report?.totalDisposalSales))}
+                      </Typography>
+                    </Stack>
+
+                    <Divider />
+
+                    <Stack direction="row" alignItems="center" justifyContent="space-between">
+                      <Typography variant="body2" color="text.primary">
+                        {(report?.shortages ?? 0) >= 0 ? 'Shortages ' : 'Over'}
                       </Typography>
                       <Typography
                         variant="body2"
-                        color={(report?.shortages ?? 0) >= 0 ? 'error.main' : 'success.main'}
+                        color={(report?.shortages ?? 0) > 0 ? 'warning' : 'text.primary'}
                       >
-                        {(report?.shortages ?? 0) >= 0
-                          ? `(${formatCurrency(Math.abs(report?.shortages ?? 0))})`
-                          : `${formatCurrency(Math.abs(report?.shortages ?? 0))} over`}
+                        {(report?.shortages ?? 0) > 0
+                          ? `(${formatNumber(Math.abs(report?.shortages ?? 0))})`
+                          : formatNumber(Math.abs(report?.shortages ?? 0))}
                       </Typography>
                     </Stack>
                   </Stack>

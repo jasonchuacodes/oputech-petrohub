@@ -3,12 +3,14 @@ import { Box, CircularProgress, Divider, IconButton, Stack, Typography } from '@
 import { useParams } from 'react-router-dom';
 import { useState } from 'react';
 
-import { CardContainer, NoData } from '~/components/ui';
+import { CardContainer, NoData, Show } from '~/components/ui';
 import { useAuthContext } from '~/context/auth/useAuthContext';
+import { useDisclosure } from '~/hooks/useDisclosure';
 import { useGetReportByIdQuery } from '~/services/report/report.queries';
 import { formatDate } from '~/utils/date';
 import { formatCurrency, formatNumber } from '~/utils/number';
 import type { ReportDisposal as ReportDisposalType } from '~/services/report/report.types';
+import { ReportStatus } from '~/services/report/report.types';
 
 import { UpdateDisposalModal } from './UpdateDisposalModal';
 
@@ -16,7 +18,7 @@ export const ReportDisposal = () => {
   const { auth } = useAuthContext();
   const { reportId } = useParams<{ reportId: string }>();
   const [selectedDisposal, setSelectedDisposal] = useState<ReportDisposalType | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { open, onOpen, onClose } = useDisclosure();
 
   const tenantId = auth?.tenantId || null;
 
@@ -27,11 +29,11 @@ export const ReportDisposal = () => {
 
   const handleOpenModal = (disposal: ReportDisposalType) => {
     setSelectedDisposal(disposal);
-    setIsModalOpen(true);
+    onOpen();
   };
 
   const handleCloseModal = () => {
-    setIsModalOpen(false);
+    onClose();
     setSelectedDisposal(null);
   };
 
@@ -46,10 +48,6 @@ export const ReportDisposal = () => {
   if (!report) {
     return <NoData text="Report not found" />;
   }
-
-  // const isEditable =
-  //   report.status === ReportStatus.DRAFT || report.status === ReportStatus.VALIDATED;
-  // const isReadOnly = report.status === ReportStatus.SUBMITTED;
 
   const disposals = report.disposals || [];
 
@@ -78,9 +76,11 @@ export const ReportDisposal = () => {
                 <Typography variant="body1" fontWeight={600} color="text.primary">
                   {disposal.product.name}
                 </Typography>
-                <IconButton size="small" onClick={() => handleOpenModal(disposal)}>
-                  <EditOutlined />
-                </IconButton>
+                <Show when={report.status !== ReportStatus.SUBMITTED}>
+                  <IconButton size="small" onClick={() => handleOpenModal(disposal)}>
+                    <EditOutlined />
+                  </IconButton>
+                </Show>
               </Stack>
               <Stack spacing={1}>
                 <Stack direction="row" justifyContent="space-between" alignItems="center">
@@ -142,14 +142,14 @@ export const ReportDisposal = () => {
           </CardContainer>
         ))
       )}
-      {selectedDisposal && (
+      <Show when={!!selectedDisposal}>
         <UpdateDisposalModal
-          open={isModalOpen}
+          open={open}
           onClose={handleCloseModal}
           reportId={reportId!}
-          disposal={selectedDisposal}
+          disposal={selectedDisposal!}
         />
-      )}
+      </Show>
     </Stack>
   );
 };

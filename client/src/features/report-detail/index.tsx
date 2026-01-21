@@ -33,11 +33,8 @@ export const ReportDetail = () => {
     reportId: reportId!,
   });
 
-  const {
-    open: showConfirmModal,
-    onOpen: openConfirmModal,
-    onClose: closeConfirmModal,
-  } = useDisclosure();
+  const disclosure = useDisclosure();
+
   const { mutateAsync: validateReport, isPending: isValidating } = useValidateReportMutation();
   const { mutateAsync: submitReport, isPending: isSubmitting } = useSubmitReportMutation();
 
@@ -48,12 +45,18 @@ export const ReportDetail = () => {
     );
   };
 
+  const hasEmployeesAssigned = () => {
+    return report?.employees && report.employees.length > 0;
+  };
+
   const handleValidateClick = () => {
-    const changed = hasDisposalsChanged();
-    if (changed) {
+    const disposalsChanged = hasDisposalsChanged();
+    const employeesAssigned = hasEmployeesAssigned();
+
+    if (disposalsChanged && employeesAssigned) {
       handleValidate();
     } else {
-      openConfirmModal();
+      disclosure.onOpen();
     }
   };
 
@@ -61,7 +64,7 @@ export const ReportDetail = () => {
     try {
       await validateReport(reportId!);
       toast.success('Report validated successfully');
-      closeConfirmModal();
+      disclosure.onClose();
     } catch (err) {
       const message = parseBackendError(err);
       toast.error(message);
@@ -116,7 +119,7 @@ export const ReportDetail = () => {
         >
           <Stack>
             <Typography variant="body1" fontWeight={500} color="primary.alpha">
-              Total Sales
+              Net Sales
             </Typography>
             <Typography variant="h2" fontWeight={600} color="common.white">
               {formatCurrency(report?.netTotal)}
@@ -135,19 +138,18 @@ export const ReportDetail = () => {
 
             <Stack direction="row" alignItems="center" justifyContent="space-between">
               <Typography variant="body2" color="primary.alpha">
-                Lubricants Sales
-              </Typography>
-              <Typography variant="body2" color="primary.alpha">
-                {formatCurrency(report?.totalDisposalSales)}
-              </Typography>
-            </Stack>
-
-            <Stack direction="row" alignItems="center" justifyContent="space-between">
-              <Typography variant="body2" color="primary.alpha">
                 Expenses
               </Typography>
               <Typography variant="body2" color="primary.alpha">
                 {formatCurrency(report?.totalExpenses)}
+              </Typography>
+            </Stack>
+            <Stack direction="row" alignItems="center" justifyContent="space-between">
+              <Typography variant="body2" color="primary.alpha">
+                Lubricants
+              </Typography>
+              <Typography variant="body2" color="primary.alpha">
+                {formatCurrency(report?.totalInventorySales)}
               </Typography>
             </Stack>
 
@@ -155,15 +157,35 @@ export const ReportDetail = () => {
 
             <Stack direction="row" alignItems="center" justifyContent="space-between">
               <Typography variant="body2" color="primary.alpha">
-                Shortages
+                Total Sales
+              </Typography>
+              <Typography variant="body2" color="primary.alpha">
+                {formatCurrency(report?.totalSales)}
+              </Typography>
+            </Stack>
+
+            <Stack direction="row" alignItems="center" justifyContent="space-between">
+              <Typography variant="body2" color="primary.alpha">
+                Disposals Sales
+              </Typography>
+              <Typography variant="body2" color="primary.alpha">
+                {formatCurrency(report?.totalDisposalSales)}
+              </Typography>
+            </Stack>
+
+            <Divider sx={{ borderColor: 'primary.light' }} />
+
+            <Stack direction="row" alignItems="center" justifyContent="space-between">
+              <Typography variant="body2" color="primary.alpha">
+                {report.shortages >= 0 ? 'Shortages ' : 'Over'}
               </Typography>
               <Typography
                 variant="body2"
-                color={report?.shortages < 0 ? 'warning' : 'primary.alpha'}
+                color={report.shortages > 0 ? 'warning' : 'primary.alpha'}
               >
-                {report?.shortages < 0
+                {report.shortages > 0
                   ? `(${formatNumber(Math.abs(report.shortages))})`
-                  : formatNumber(report?.shortages)}
+                  : formatNumber(Math.abs(report.shortages))}
               </Typography>
             </Stack>
           </Stack>
@@ -191,18 +213,22 @@ export const ReportDetail = () => {
         totalIncome={report.totalIncome}
         isReadOnly={isReadOnly}
       />
-      <Expenses
-        reportId={reportId!}
-        expenses={report.expenses}
-        totalExpenses={report.totalExpenses}
-        isReadOnly={isReadOnly}
-      />
-      <Inventory
-        reportId={reportId!}
-        inventories={report.inventories || []}
-        totalInventorySales={report.totalInventorySales || 0}
-        isReadOnly={isReadOnly}
-      />
+      <Show when={!(isReadOnly && report.expenses.length === 0)}>
+        <Expenses
+          reportId={reportId!}
+          expenses={report.expenses}
+          totalExpenses={report.totalExpenses}
+          isReadOnly={isReadOnly}
+        />
+      </Show>
+      <Show when={!(isReadOnly && report.inventories?.length === 0)}>
+        <Inventory
+          reportId={reportId!}
+          inventories={report.inventories || []}
+          totalInventorySales={report.totalInventorySales || 0}
+          isReadOnly={isReadOnly}
+        />
+      </Show>
 
       <Show
         when={report.status === ReportStatus.VALIDATED}
@@ -211,7 +237,6 @@ export const ReportDetail = () => {
             <Button
               variant="contained"
               size="large"
-              startIcon={<CheckCircleOutline />}
               onClick={handleValidateClick}
               disabled={isValidating}
               fullWidth
@@ -234,11 +259,17 @@ export const ReportDetail = () => {
       </Show>
 
       <CustomModal
-        open={showConfirmModal}
-        onClose={closeConfirmModal}
+        open={disclosure.open}
+        onClose={disclosure.onClose}
         onSubmit={handleValidate}
         title="Validate Report?"
-        subheader="Disposals have not been updated. Are you sure you want to validate this report?"
+        subheader={
+          !hasDisposalsChanged() && !hasEmployeesAssigned()
+            ? 'Disposals have not been updated and no employees are assigned. Are you sure you want to validate this report?'
+            : !hasDisposalsChanged()
+              ? 'Disposals have not been updated. Are you sure you want to validate this report?'
+              : 'No employees are assigned. Are you sure you want to validate this report?'
+        }
         icon={CheckCircleOutline}
         submitText="Validate"
         cancelText="Cancel"

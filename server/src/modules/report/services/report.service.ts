@@ -232,7 +232,14 @@ const getReportById = async (reportId: string) => {
       entries: { include: { product: true } },
       income: true,
       expenses: true,
-      disposals: { include: { product: true } },
+      disposals: {
+        include: { product: true },
+        orderBy: {
+          product: {
+            name: 'asc',
+          },
+        },
+      },
       inventories: { include: { product: true } },
       employees: {
         include: {
@@ -345,8 +352,26 @@ const submitReport = async (reportId: string, userId: string) => {
   }
 
   return await prisma.$transaction(async (tx) => {
+    // Get disposals to extract afterReading values
+    const disposals = await tx.reportDisposal.findMany({
+      where: { reportId },
+      select: { productId: true, afterReading: true },
+    });
+
     // Process inventory deductions BEFORE updating status
     await processInventoryDeductions(reportId);
+
+    // Create ProductReading records for each disposal's afterReading
+    await Promise.all(
+      disposals.map((disposal) =>
+        tx.productReading.create({
+          data: {
+            productId: disposal.productId,
+            reading: disposal.afterReading,
+          },
+        }),
+      ),
+    );
 
     const updatedReport = await tx.report.update({
       where: { id: reportId },

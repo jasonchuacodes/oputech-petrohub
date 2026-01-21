@@ -70,6 +70,7 @@ const Navbar = () => {
 
   const routeTitles: Record<string, string> = {
     [UserRoutes.Home]: 'Dashboard',
+    [UserRoutes.ReportDisposal]: 'Disposals',
     [UserRoutes.Report]: 'Report',
     [UserRoutes.Timesheets]: 'Timesheets',
     [UserRoutes.Settings]: 'Settings',

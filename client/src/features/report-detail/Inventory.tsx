@@ -52,13 +52,13 @@ export const Inventory = ({
   };
 
   return (
-    <Stack>
+    <Stack spacing={0.5}>
       <Stack direction="row" alignItems="center" justifyContent="space-between">
         <Typography variant="body1" fontWeight={600} color="text.primary">
-          Inventory
+          Lubricants
         </Typography>
         {!isReadOnly && (
-          <IconButton onClick={() => setIsEditMode(!isEditMode)}>
+          <IconButton  size="small"  onClick={() => setIsEditMode(!isEditMode)}>
             <EditOutlined />
           </IconButton>
         )}

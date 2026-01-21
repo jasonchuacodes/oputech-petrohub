@@ -67,7 +67,13 @@ export const AddExpenseModal = ({ open, onClose, reportId }: AddExpenseModalProp
       disabled={!isValid}
     >
       <Stack spacing={2}>
-        <Input label="Description" control={control} name="description" placeholder="e.g., Fuel" />
+        <Input
+          label="Description"
+          control={control}
+          name="description"
+          placeholder="e.g., Fuel"
+          autoFocus
+        />
         <NumberInput
           label="Amount"
           startAdornment="₱"

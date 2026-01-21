@@ -86,6 +86,7 @@ export type Report = {
   disposals: ReportDisposal[];
   inventories: ReportInventory[];
   totalInventorySales: number;
+  totalSales: number;
   employees: {
     user: {
       id: string;

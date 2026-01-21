@@ -1,4 +1,4 @@
-import { AddCircle, MoreHorizOutlined, RemoveCircle } from '@mui/icons-material';
+import { AddCircle, RemoveCircle } from '@mui/icons-material';
 import { Stack, Typography, Avatar, IconButton } from '@mui/material';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
@@ -61,15 +61,10 @@ export const EmployeesOnDuty = ({ reportId, employees, isReadOnly }: EmployeesOn
   };
 
   return (
-    <Stack>
-      <Stack direction="row" alignItems="center" justifyContent="space-between">
-        <Typography variant="body1" fontWeight={600} color="text.primary">
-          On Duty
-        </Typography>
-        <IconButton>
-          <MoreHorizOutlined />
-        </IconButton>
-      </Stack>
+    <Stack spacing={0.5}>
+      <Typography variant="body1" fontWeight={600} color="text.primary">
+        On Duty
+      </Typography>
 
       <CardContainer height="fit-content">
         <Stack

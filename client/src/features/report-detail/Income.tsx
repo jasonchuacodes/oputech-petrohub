@@ -32,54 +32,56 @@ export const Income = ({ reportId, income, totalIncome, isReadOnly }: IncomeProp
   };
 
   return (
-    <Stack>
+    <Stack spacing={0.5}>
       <Stack direction="row" alignItems="center" justifyContent="space-between">
         <Typography variant="body1" fontWeight={600} color="text.primary">
           Income
         </Typography>
         {!isReadOnly && (
-          <IconButton onClick={() => setIsEditMode(!isEditMode)}>
+          <IconButton size="small" onClick={() => setIsEditMode(!isEditMode)}>
             <EditOutlined />
           </IconButton>
         )}
       </Stack>
 
       <CardContainer height="fit-content" spacing={2}>
-        <Stack spacing={1}>
-          {income.map((item) => (
-            <Stack
-              key={item.id}
-              direction="row"
-              justifyContent="space-between"
-              alignItems="center"
-              spacing={1}
-            >
-              <Typography variant="body2" color="text.secondary" sx={{ flex: 1 }}>
-                {item.description}
-              </Typography>
-              <Typography
-                variant="body2"
-                color="text.secondary"
-                sx={{ minWidth: 80, textAlign: 'right' }}
+        <Show when={income.length > 0}>
+          <Stack spacing={1}>
+            {income.map((item) => (
+              <Stack
+                key={item.id}
+                direction="row"
+                justifyContent="space-between"
+                alignItems="center"
+                spacing={1}
               >
-                {formatNumber(Number(item.amount), 2)}
-              </Typography>
-              {isEditMode && (
-                <IconButton size="small" onClick={() => handleRemove(item.id)}>
-                  <RemoveOutlined fontSize="small" />
-                </IconButton>
-              )}
-            </Stack>
-          ))}
+                <Typography variant="body2" color="text.secondary" sx={{ flex: 1 }}>
+                  {item.description}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ minWidth: 80, textAlign: 'right' }}
+                >
+                  {formatNumber(Number(item.amount), 2)}
+                </Typography>
+                {isEditMode && (
+                  <IconButton size="small" onClick={() => handleRemove(item.id)}>
+                    <RemoveOutlined fontSize="small" />
+                  </IconButton>
+                )}
+              </Stack>
+            ))}
 
-          <Show when={income.length > 1}>
-            <Divider />
-            <Stack direction="row" justifyContent="space-between" alignItems="center">
-              <Typography variant="body2">Total</Typography>
-              <Typography variant="body2">{formatCurrency(totalIncome)}</Typography>
-            </Stack>
-          </Show>
-        </Stack>
+            <Show when={income.length > 1}>
+              <Divider />
+              <Stack direction="row" justifyContent="space-between" alignItems="center">
+                <Typography variant="body2">Total</Typography>
+                <Typography variant="body2">{formatCurrency(totalIncome)}</Typography>
+              </Stack>
+            </Show>
+          </Stack>
+        </Show>
 
         <Show when={!isReadOnly}>
           <Button

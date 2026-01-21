@@ -9,6 +9,7 @@ import { pathFor } from '~/utils/pathFor';
 
 import { AddIncomeModal } from './AddIncomeModal';
 import { AddExpenseModal } from './AddExpenseModal';
+import { AddInventoryModal } from './AddInventoryModal';
 
 type ShortcutsProps = {
   reportId: string;
@@ -19,25 +20,11 @@ export const Shortcuts = ({ reportId, isReadOnly }: ShortcutsProps) => {
   const navigate = useNavigate();
   const incomeDisclosure = useDisclosure();
   const expenseDisclosure = useDisclosure();
+  const inventoryDisclosure = useDisclosure();
 
   return (
     <>
       <Stack spacing={1}>
-        <Stack direction="row" spacing={1}>
-          <ShortcutCard name="Lubricants" onClick={() => null} icon={InvertColors} />
-          <ShortcutCard
-            name="Disposals"
-            onClick={() =>
-              navigate(
-                pathFor({
-                  pathname: UserRoutes.ReportDisposal,
-                  params: { reportId },
-                }),
-              )
-            }
-            icon={GasMeter}
-          />
-        </Stack>
         <Stack direction="row" spacing={1}>
           <ShortcutCard
             name="Deposit"
@@ -52,6 +39,26 @@ export const Shortcuts = ({ reportId, isReadOnly }: ShortcutsProps) => {
             disabled={isReadOnly}
           />
         </Stack>
+        <Stack direction="row" spacing={1}>
+          <ShortcutCard
+            name="Lubricants"
+            onClick={() => inventoryDisclosure.setOpen(true)}
+            icon={InvertColors}
+            disabled={isReadOnly}
+          />
+          <ShortcutCard
+            name="Disposals"
+            onClick={() =>
+              navigate(
+                pathFor({
+                  pathname: UserRoutes.ReportDisposal,
+                  params: { reportId },
+                }),
+              )
+            }
+            icon={GasMeter}
+          />
+        </Stack>
       </Stack>
 
       <AddIncomeModal
@@ -62,6 +69,11 @@ export const Shortcuts = ({ reportId, isReadOnly }: ShortcutsProps) => {
       <AddExpenseModal
         open={expenseDisclosure.open}
         onClose={() => expenseDisclosure.setOpen(false)}
+        reportId={reportId}
+      />
+      <AddInventoryModal
+        open={inventoryDisclosure.open}
+        onClose={() => inventoryDisclosure.setOpen(false)}
         reportId={reportId}
       />
     </>
