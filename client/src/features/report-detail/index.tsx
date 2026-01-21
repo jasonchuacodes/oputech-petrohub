@@ -12,7 +12,7 @@ import { Shortcuts } from './Shortcuts';
 import { EmployeesOnDuty } from './EmployeesOnDuty';
 import { Income } from './Income';
 import { Expenses } from './Expenses';
-import { Lubricants } from './Lubricants';
+import { Inventory } from './Inventory';
 
 export const ReportDetail = () => {
   const { auth } = useAuthContext();
@@ -112,7 +112,12 @@ export const ReportDetail = () => {
         totalExpenses={report.totalExpenses}
         isReadOnly={isReadOnly}
       />
-      <Lubricants />
+      <Inventory
+        reportId={reportId!}
+        inventories={report.inventories || []}
+        totalInventorySales={report.totalInventorySales || 0}
+        isReadOnly={isReadOnly}
+      />
 
       {isEditable && (
         <Typography color="info" variant="body2">

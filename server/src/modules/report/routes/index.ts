@@ -17,9 +17,9 @@ import {
   removeEmployee,
   getReportByShift,
   updateDisposal,
-  createReportStockInventory,
-  updateReportStockInventory,
-  deleteReportStockInventory,
+  createReportInventory,
+  updateReportInventory,
+  deleteReportInventory,
 } from '../controller/report.controller';
 
 const router = express.Router();
@@ -46,8 +46,8 @@ router.put('/:reportId/disposals/:disposalId', requireAuth, asyncHandler(updateD
 router.post('/:reportId/employees', requireAuth, asyncHandler(assignEmployee));
 router.delete('/:reportId/employees/:userId', requireAuth, asyncHandler(removeEmployee));
 
-router.post('/:reportId/stock-inventories', requireAuth, asyncHandler(createReportStockInventory));
-router.put('/:reportId/stock-inventories/:productId', requireAuth, asyncHandler(updateReportStockInventory));
-router.delete('/:reportId/stock-inventories/:productId', requireAuth, asyncHandler(deleteReportStockInventory));
+router.post('/:reportId/inventory', requireAuth, asyncHandler(createReportInventory));
+router.put('/:reportId/inventory/:productId', requireAuth, asyncHandler(updateReportInventory));
+router.delete('/:reportId/inventory/:productId', requireAuth, asyncHandler(deleteReportInventory));
 
 export default router;

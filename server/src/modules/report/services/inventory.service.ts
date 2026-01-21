@@ -3,18 +3,18 @@ import { ProductCategory, ReportStatus } from '~/db/prisma';
 import { BadInputError, ConflictError, NotFoundError } from '~/errors';
 import { adjustQuantity } from '~/modules/inventory/services/inventory.service';
 
-import type { CreateReportStockInventoryPayload } from '../schema/createReportStockInventorySchema';
-import type { UpdateReportStockInventoryPayload } from '../schema/updateReportStockInventorySchema';
+import type { CreateReportInventoryPayload } from '../schema/createReportInventorySchema';
+import type { UpdateReportInventoryPayload } from '../schema/updateReportInventorySchema';
 
-interface CreateReportStockInventoryInput extends CreateReportStockInventoryPayload {
+interface CreateReportInventoryInput extends CreateReportInventoryPayload {
   reportId: string;
 }
 
-const createReportStockInventory = async ({
+const createReportInventory = async ({
   reportId,
   productId,
-  quantitySold,
-}: CreateReportStockInventoryInput) => {
+  quantity,
+}: CreateReportInventoryInput) => {
   const report = await prisma.report.findUnique({
     where: { id: reportId },
   });
@@ -56,19 +56,19 @@ const createReportStockInventory = async ({
   }
 
   const unitPrice = latestPrice.price;
-  const totalPrice = quantitySold * Number(unitPrice);
+  const totalPrice = quantity * Number(unitPrice);
 
   const entry = await prisma.reportInventory.upsert({
     where: { reportId_productId: { reportId, productId } },
     create: {
       reportId,
       productId,
-      quantitySold,
+      quantity,
       unitPriceSnapshot: unitPrice,
       totalPrice,
     },
     update: {
-      quantitySold,
+      quantity,
       totalPrice,
     },
     include: { product: true },
@@ -77,10 +77,10 @@ const createReportStockInventory = async ({
   return entry;
 };
 
-const updateReportStockInventory = async (
+const updateReportInventory = async (
   reportId: string,
   productId: string,
-  data: UpdateReportStockInventoryPayload,
+  data: UpdateReportInventoryPayload,
 ) => {
   const report = await prisma.report.findUnique({
     where: { id: reportId },
@@ -114,19 +114,19 @@ const updateReportStockInventory = async (
   }
 
   const unitPrice = entry.product.productPrices[0]?.price || entry.unitPriceSnapshot;
-  const totalPrice = data.quantitySold * Number(unitPrice);
+  const totalPrice = data.quantity * Number(unitPrice);
 
   return await prisma.reportInventory.update({
     where: { reportId_productId: { reportId, productId } },
     data: {
-      quantitySold: data.quantitySold,
+      quantity: data.quantity,
       totalPrice,
     },
     include: { product: true },
   });
 };
 
-const deleteReportStockInventory = async (reportId: string, productId: string) => {
+const deleteReportInventory = async (reportId: string, productId: string) => {
   const report = await prisma.report.findUnique({
     where: { id: reportId },
   });
@@ -152,7 +152,7 @@ const deleteReportStockInventory = async (reportId: string, productId: string) =
   });
 };
 
-const processStockInventoryDeductions = async (reportId: string) => {
+const processInventoryDeductions = async (reportId: string) => {
   const stockInventoryEntries = await prisma.reportInventory.findMany({
     where: { reportId },
     include: {
@@ -171,9 +171,9 @@ const processStockInventoryDeductions = async (reportId: string) => {
       throw new BadInputError(`Stock inventory not found for product: ${entry.product.name}`);
     }
 
-    if (entry.product.inventory.quantity < entry.quantitySold) {
+    if (entry.product.inventory.quantity < entry.quantity) {
       insufficientStock.push(
-        `${entry.product.name}: Available ${entry.product.inventory.quantity}, Required ${entry.quantitySold}`,
+        `${entry.product.name}: Available ${entry.product.inventory.quantity}, Required ${entry.quantity}`,
       );
     }
   }
@@ -184,13 +184,13 @@ const processStockInventoryDeductions = async (reportId: string) => {
 
   // If all validations pass, deduct quantities
   for (const entry of stockInventoryEntries) {
-    await adjustQuantity(entry.productId, entry.quantitySold);
+    await adjustQuantity(entry.productId, entry.quantity);
   }
 };
 
 export {
-  createReportStockInventory,
-  updateReportStockInventory,
-  deleteReportStockInventory,
-  processStockInventoryDeductions,
+  createReportInventory,
+  updateReportInventory,
+  deleteReportInventory,
+  processInventoryDeductions,
 };

@@ -6,12 +6,12 @@ import {
   updateProduct,
   deleteProduct,
 } from './product.api';
-import type { CreateProductPayload, UpdateProductPayload } from './product.types';
+import type { CreateProductPayload, ProductCategory, UpdateProductPayload } from './product.types';
 
-const useGetProductsQuery = (tenantId?: string) => {
+const useGetProductsQuery = (tenantId?: string, category?: ProductCategory) => {
   return useQuery({
-    queryKey: ['products', tenantId],
-    queryFn: () => getProductsByTenantId(tenantId!),
+    queryKey: ['products', tenantId, category],
+    queryFn: () => getProductsByTenantId(tenantId!, category),
     enabled: !!tenantId,
   });
 };

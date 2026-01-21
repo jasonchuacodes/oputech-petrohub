@@ -43,6 +43,21 @@ export type ReportDisposal = {
   updatedAt: string;
 };
 
+export type ReportInventory = {
+  id: string;
+  reportId: string;
+  productId: string;
+  product: {
+    id: string;
+    name: string;
+  };
+  quantitySold: number;
+  unitPriceSnapshot: number;
+  totalPrice: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type Employee = {
   id: string;
   name: string;
@@ -69,6 +84,8 @@ export type Report = {
   income: ReportIncome[];
   expenses: ReportExpense[];
   disposals: ReportDisposal[];
+  inventories: ReportInventory[];
+  totalInventorySales: number;
   employees: {
     user: {
       id: string;

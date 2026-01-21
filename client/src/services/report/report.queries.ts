@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { createReport, getReportById, getReportByShift, getReports, createIncome, deleteIncome, createExpense, deleteExpense, assignEmployee, removeEmployee, updateDisposal } from './report.api';
+import { createReport, getReportById, getReportByShift, getReports, createIncome, deleteIncome, createExpense, deleteExpense, assignEmployee, removeEmployee, updateDisposal, createInventory, deleteInventory } from './report.api';
 
 const useGetReportsQuery = ({ tenantId }: { tenantId?: string }) => {
   return useQuery({
@@ -53,7 +53,7 @@ const useCreateIncomeMutation = () => {
   return useMutation({
     mutationFn: ({ reportId, data }: { reportId: string; data: { description: string; amount: number } }) =>
       createIncome(reportId, data),
-    onSuccess: (_, { reportId }) => {
+    onSuccess: () => {
       // Note: We need tenantId to fully invalidate, but we can invalidate by reportId
       queryClient.invalidateQueries({ queryKey: ['report'] });
     },
@@ -90,6 +90,30 @@ const useDeleteExpenseMutation = () => {
   return useMutation({
     mutationFn: ({ reportId, expenseId }: { reportId: string; expenseId: string }) =>
       deleteExpense(reportId, expenseId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['report'] });
+    },
+  });
+};
+
+const useCreateInventoryMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ reportId, data }: { reportId: string; data: { productId: string; quantity: number } }) =>
+      createInventory(reportId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['report'] });
+    },
+  });
+};
+
+const useDeleteInventoryMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ reportId, productId }: { reportId: string; productId: string }) =>
+      deleteInventory(reportId, productId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['report'] });
     },
@@ -141,6 +165,8 @@ export {
   useDeleteIncomeMutation,
   useCreateExpenseMutation,
   useDeleteExpenseMutation,
+  useCreateInventoryMutation,
+  useDeleteInventoryMutation,
   useAssignEmployeeMutation,
   useRemoveEmployeeMutation,
   useUpdateDisposalMutation,

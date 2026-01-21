@@ -119,9 +119,8 @@ export const UpdateDisposalModal = ({
               type="number"
               placeholder="0.000"
               autoFocus
-              slotProps={{
-                input: { step: '0.001', min: '0.000' },
-              }}
+              step="0.001"
+              min="0.000"
             />
           </Stack>
         </Stack>

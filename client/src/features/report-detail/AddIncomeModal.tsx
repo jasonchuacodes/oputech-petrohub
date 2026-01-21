@@ -26,7 +26,7 @@ export const AddIncomeModal = ({ open, onClose, reportId }: AddIncomeModalProps)
   } = useForm<CreateIncomeInput>({
     defaultValues: {
       description: '',
-      amount: 0.01,
+      amount: 0,
     },
     resolver: zodResolver(CreateIncomeSchema),
   });
@@ -80,9 +80,8 @@ export const AddIncomeModal = ({ open, onClose, reportId }: AddIncomeModalProps)
           type="number"
           startAdornment="₱"
           placeholder="0.00"
-          slotProps={{
-            input: { step: '1.00', min: '0.00' },
-          }}
+          step="1.00"
+          min={0}
         />
       </Stack>
     </CustomModal>

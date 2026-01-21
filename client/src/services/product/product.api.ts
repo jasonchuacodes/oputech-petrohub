@@ -1,8 +1,13 @@
 import axios from '~/lib/axiosInstance';
 import type { Product, CreateProductPayload, UpdateProductPayload } from './product.types';
 
-const getProductsByTenantId = async (tenantId: string): Promise<Product[]> => {
-  const res = await axios.get('/products', { params: { tenantId } });
+const getProductsByTenantId = async (
+  tenantId: string,
+  category?: string
+): Promise<Product[]> => {
+  const res = await axios.get('/products', {
+    params: { tenantId, ...(category && { category }) }
+  });
   return res.data.data;
 };
 

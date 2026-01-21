@@ -81,9 +81,8 @@ export const CreateProductModal = ({ open, onClose }: CreateProductModalProps) =
           name="reading"
           type="number"
           placeholder="0.00"
-          slotProps={{
-            input: { step: '0.01', min: '0.01' },
-          }}
+          step="0.01"
+          min="0.01"
         />
         <Input
           label="Product Price"
@@ -92,9 +91,8 @@ export const CreateProductModal = ({ open, onClose }: CreateProductModalProps) =
           type="number"
           startAdornment="₱"
           placeholder="0.00"
-          slotProps={{
-            input: { step: '0.01', min: '0.01' },
-          }}
+          step="0.01"
+          min="0.01"
         />
         <Input
           label="Description (optional)"

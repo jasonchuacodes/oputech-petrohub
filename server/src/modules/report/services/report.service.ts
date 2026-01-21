@@ -4,7 +4,7 @@ import { Prisma, ProductCategory, ReportStatus, Role } from '~/db/prisma';
 import { ConflictError, ForbiddenError, NotFoundError } from '~/errors';
 
 import { computeReportTotals } from '../utils/compute';
-import { processStockInventoryDeductions } from './inventory.service';
+import { processInventoryDeductions } from './inventory.service';
 
 interface CreateReportPayload {
   tenantId: string;
@@ -345,8 +345,8 @@ const submitReport = async (reportId: string, userId: string) => {
   }
 
   return await prisma.$transaction(async (tx) => {
-    // Process stock inventory deductions BEFORE updating status
-    await processStockInventoryDeductions(reportId);
+    // Process inventory deductions BEFORE updating status
+    await processInventoryDeductions(reportId);
 
     const updatedReport = await tx.report.update({
       where: { id: reportId },

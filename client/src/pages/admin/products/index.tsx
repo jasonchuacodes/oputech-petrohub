@@ -8,6 +8,7 @@ import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { useDisclosure } from '~/hooks/useDisclosure';
 import { AdminRoutes } from '~/routes';
 import { useGetProductsQuery } from '~/services/product/product.queries';
+import { ProductCategory } from '~/services/product/product.types';
 import { formatDate } from '~/utils/date';
 import { formatCurrency } from '~/utils/number';
 import { pathFor } from '~/utils/pathFor';
@@ -18,7 +19,7 @@ import { MoreDetailsMenu } from './MoreDetailsMenu';
 export const ProductsPage = () => {
   const { tenantId } = useTenantContext();
   const disclosure = useDisclosure();
-  const { data: products, isLoading } = useGetProductsQuery(tenantId);
+  const { data: products, isLoading } = useGetProductsQuery(tenantId, ProductCategory.FUEL);
 
   return (
     <PageLayout>

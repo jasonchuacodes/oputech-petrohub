@@ -23,6 +23,9 @@ type InputProps<T extends FieldValues> = {
   rows?: number;
   error?: boolean;
   autoFocus?: boolean;
+  min?: string | number;
+  max?: string | number;
+  step?: string | number;
 };
 
 export const Input = <T extends FieldValues>({
@@ -42,14 +45,21 @@ export const Input = <T extends FieldValues>({
   rows,
   error: errorProp,
   autoFocus,
+  min,
+  max,
+  step,
 }: InputProps<T>) => {
   const mergedSlotProps = {
     input: {
+      ...(step !== undefined && { step }),
+      ...(min !== undefined && { min }),
+      ...(max !== undefined && { max }),
       sx: {
         fontSize: 'body2.fontSize',
         ...(startAdornment && { pl: 1 }),
         ...slotProps?.input?.sx,
       },
+      ...slotProps?.input,
     },
     root: {
       sx: {

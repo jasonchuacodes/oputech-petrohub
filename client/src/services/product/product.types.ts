@@ -1,3 +1,12 @@
+type ValueOf<T> = T[keyof T];
+
+export const ProductCategory = {
+  FUEL: 'FUEL',
+  STOCK_INVENTORY: 'STOCK_INVENTORY',
+} as const;
+
+export type ProductCategory = ValueOf<typeof ProductCategory>;
+
 export type ProductPrice = {
   id: string;
   price: number;
@@ -15,6 +24,7 @@ export type Product = {
   tenantId: string;
   name: string;
   description: string | null;
+  category: ProductCategory;
   productReading: ProductReading;
   productPrice: ProductPrice;
   scheduledPrice: ProductPrice | null;

@@ -1,5 +1,8 @@
 import type { Request, Response, NextFunction } from 'express';
+
+import { ProductCategory } from '~/db/prisma';
 import { createSchemaValidator } from '~/utils';
+
 import * as productService from '../services/product.service';
 import { CreateProductSchema } from '../schema/createProductSchema';
 import { UpdateProductSchema } from '../schema/updateProductSchema';
@@ -7,11 +10,7 @@ import { UpdateProductSchema } from '../schema/updateProductSchema';
 const validateCreateProduct = createSchemaValidator(CreateProductSchema);
 const validateUpdateProduct = createSchemaValidator(UpdateProductSchema);
 
-const createProduct = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
+const createProduct = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const data = await validateCreateProduct(req.body);
     const product = await productService.createProduct(data);
@@ -21,63 +20,45 @@ const createProduct = async (
   }
 };
 
-const getProductsByTenantId = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
+const getProductsByTenantId = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { tenantId } = req.query;
-    const products = await productService.getProductsByTenantId(tenantId as string);
+    const { tenantId, category } = req.query;
+
+    const products = await productService.getProductsByTenantId(
+      tenantId as string,
+      category as ProductCategory,
+    );
+
     res.status(200).json({ data: products });
   } catch (err) {
     next(err);
   }
 };
 
-const getProductById = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
+const getProductById = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { productId } = req.params;
     const { tenantId } = req.query;
-    const product = await productService.getProductById(
-      productId,
-      tenantId as string,
-    );
+    const product = await productService.getProductById(productId, tenantId as string);
     res.status(200).json({ data: product });
   } catch (err) {
     next(err);
   }
 };
 
-const updateProduct = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
+const updateProduct = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { productId } = req.params;
     const { tenantId } = req.query;
     const data = await validateUpdateProduct(req.body);
-    const product = await productService.updateProduct(
-      productId,
-      tenantId as string,
-      data,
-    );
+    const product = await productService.updateProduct(productId, tenantId as string, data);
     res.status(200).json({ message: 'Product updated successfully', data: product });
   } catch (err) {
     next(err);
   }
 };
 
-const deleteProduct = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
+const deleteProduct = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { productId } = req.params;
     const { tenantId } = req.query;
@@ -88,10 +69,4 @@ const deleteProduct = async (
   }
 };
 
-export {
-  createProduct,
-  getProductsByTenantId,
-  getProductById,
-  updateProduct,
-  deleteProduct,
-};
+export { createProduct, getProductsByTenantId, getProductById, updateProduct, deleteProduct };

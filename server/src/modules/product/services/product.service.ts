@@ -31,11 +31,11 @@ const createProduct = async (data: CreateProductPayload) => {
   return await getProductById(product.id, data.tenantId);
 };
 
-const getProductsByTenantId = async (tenantId: string) => {
+const getProductsByTenantId = async (tenantId: string, category?: ProductCategory) => {
   const now = new Date();
 
   const products = await prisma.product.findMany({
-    where: { tenantId, category: ProductCategory.FUEL },
+    where: { tenantId, category },
     include: {
       productPrices: {
         where: { effectiveFrom: { lte: now } },

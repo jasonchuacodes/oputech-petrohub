@@ -3,7 +3,7 @@ import { Stack, Typography, Avatar, IconButton } from '@mui/material';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 
-import { CardContainer, CustomModal } from '~/components/ui';
+import { CardContainer, CustomModal, Show } from '~/components/ui';
 import { MultiSelect } from '~/components/form';
 import { useAuthContext } from '~/context/auth/useAuthContext';
 import { useDisclosure } from '~/hooks/useDisclosure';
@@ -105,8 +105,7 @@ export const EmployeesOnDuty = ({ reportId, employees, isReadOnly }: EmployeesOn
               ))
             )}
           </Stack>
-
-          {!isReadOnly && (
+          <Show when={!isReadOnly && userOptions.length > 0}>
             <IconButton
               size="large"
               onClick={modalDisclosure.onOpen}
@@ -119,7 +118,7 @@ export const EmployeesOnDuty = ({ reportId, employees, isReadOnly }: EmployeesOn
             >
               <AddCircle fontSize="medium" />
             </IconButton>
-          )}
+          </Show>
         </Stack>
 
         <CustomModal

@@ -18,8 +18,8 @@ import { CreateIncomeSchema } from '../schema/createIncomeSchema';
 import { AssignEmployeeSchema } from '../schema/assignEmployeeSchema';
 import { GetReportByShiftSchema } from '../schema/getReportByShiftSchema';
 import { UpdateDisposalSchema } from '../schema/updateDisposalSchema';
-import { CreateReportStockInventorySchema } from '../schema/createReportStockInventorySchema';
-import { UpdateReportStockInventorySchema } from '../schema/updateReportStockInventorySchema';
+import { CreateReportInventorySchema } from '../schema/createReportInventorySchema';
+import { UpdateReportInventorySchema } from '../schema/updateReportInventorySchema';
 
 const validateCreateReport = createSchemaValidator(CreateReportSchema);
 const validateGetReports = createSchemaValidator(GetReportsSchema);
@@ -29,8 +29,8 @@ const validateCreateIncome = createSchemaValidator(CreateIncomeSchema);
 const validateGetReportByShift = createSchemaValidator(GetReportByShiftSchema);
 const validateAssignEmployee = createSchemaValidator(AssignEmployeeSchema);
 const validateUpdateDisposal = createSchemaValidator(UpdateDisposalSchema);
-const validateCreateReportStockInventory = createSchemaValidator(CreateReportStockInventorySchema);
-const validateUpdateReportStockInventory = createSchemaValidator(UpdateReportStockInventorySchema);
+const validateCreateReportInventory = createSchemaValidator(CreateReportInventorySchema);
+const validateUpdateReportInventory = createSchemaValidator(UpdateReportInventorySchema);
 
 const createReport = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
@@ -270,45 +270,45 @@ const updateDisposal = async (req: Request, res: Response, next: NextFunction) =
   }
 };
 
-const createReportStockInventory = async (req: Request, res: Response, next: NextFunction) => {
+const createReportInventory = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { reportId } = req.params;
-    const data = await validateCreateReportStockInventory(req.body);
+    const data = await validateCreateReportInventory(req.body);
 
-    const stockInventory = await inventoryService.createReportStockInventory({
+    const inventory = await inventoryService.createReportInventory({
       reportId,
       ...data,
     });
 
     res.status(201).json({
-      message: 'Stock inventory entry created successfully',
-      data: { stockInventory },
+      message: 'inventory entry created successfully',
+      data: { inventory },
     });
   } catch (err) {
     next(err);
   }
 };
 
-const updateReportStockInventory = async (req: Request, res: Response, next: NextFunction) => {
+const updateReportInventory = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { reportId, productId } = req.params;
-    const data = await validateUpdateReportStockInventory(req.body);
+    const data = await validateUpdateReportInventory(req.body);
 
-    const stockInventory = await inventoryService.updateReportStockInventory(reportId, productId, data);
+    const inventory = await inventoryService.updateReportInventory(reportId, productId, data);
 
     res.status(200).json({
       message: 'Stock inventory entry updated successfully',
-      data: { stockInventory },
+      data: { inventory },
     });
   } catch (err) {
     next(err);
   }
 };
 
-const deleteReportStockInventory = async (req: Request, res: Response, next: NextFunction) => {
+const deleteReportInventory = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { reportId, productId } = req.params;
-    await inventoryService.deleteReportStockInventory(reportId, productId);
+    await inventoryService.deleteReportInventory(reportId, productId);
 
     res.status(204).send();
   } catch (err) {
@@ -332,7 +332,7 @@ export {
   assignEmployee,
   removeEmployee,
   updateDisposal,
-  createReportStockInventory,
-  updateReportStockInventory,
-  deleteReportStockInventory,
+  createReportInventory,
+  updateReportInventory,
+  deleteReportInventory,
 };

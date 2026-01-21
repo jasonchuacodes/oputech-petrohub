@@ -82,9 +82,8 @@ export const CreateInventoryModal = ({ open, onClose }: CreateInventoryModalProp
           name="quantity"
           type="number"
           placeholder="0"
-          slotProps={{
-            input: { step: '1', min: '0' },
-          }}
+          step="1"
+          min="0"
         />
         <Input
           label="Price"
@@ -93,9 +92,8 @@ export const CreateInventoryModal = ({ open, onClose }: CreateInventoryModalProp
           type="number"
           startAdornment="₱"
           placeholder="0.00"
-          slotProps={{
-            input: { step: '0.01', min: '0.01' },
-          }}
+          step="0.01"
+          min="0.01"
         />
         <Input
           label="Description (optional)"

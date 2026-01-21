@@ -26,7 +26,7 @@ export const AddExpenseModal = ({ open, onClose, reportId }: AddExpenseModalProp
   } = useForm<CreateExpenseInput>({
     defaultValues: {
       description: '',
-      amount: 0.01,
+      amount: 0,
     },
     resolver: zodResolver(CreateExpenseSchema),
   });
@@ -67,12 +67,7 @@ export const AddExpenseModal = ({ open, onClose, reportId }: AddExpenseModalProp
       disabled={!isValid}
     >
       <Stack spacing={2}>
-        <Input
-          label="Description"
-          control={control}
-          name="description"
-          placeholder="e.g., Fuel"
-        />
+        <Input label="Description" control={control} name="description" placeholder="e.g., Fuel" />
         <Input
           label="Amount"
           control={control}
@@ -80,9 +75,8 @@ export const AddExpenseModal = ({ open, onClose, reportId }: AddExpenseModalProp
           type="number"
           startAdornment="₱"
           placeholder="0.00"
-          slotProps={{
-            input: { step: '1.00', min: '0.00' },
-          }}
+          step="1.00"
+          min={0}
         />
       </Stack>
     </CustomModal>

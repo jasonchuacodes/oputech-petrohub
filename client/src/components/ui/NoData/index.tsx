@@ -22,7 +22,7 @@ export const NoData = ({
       >
         <ErrorOutline fontSize="medium" sx={{ color: 'text.secondary' }} />
       </Stack>
-      <Stack spacing={1} justifyContent="center" alignItems="center" height="100%" width={400} sx={{ ...sx }}>
+      <Stack spacing={1} justifyContent="center" alignItems="center" height="100%" maxWidth={400} sx={{ ...sx }}>
         <Typography color="text.primary" variant="body1" fontWeight={600}>
           {text}
         </Typography>
