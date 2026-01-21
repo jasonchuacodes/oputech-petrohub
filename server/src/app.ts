@@ -12,6 +12,7 @@ import pusherRoutes from './modules/pusher/routes';
 import shiftRoutes from './modules/shift/routes';
 import reportRoutes from './modules/report/routes';
 import productRoutes from './modules/product/routes';
+import inventoryRoutes from './modules/inventory/routes';
 import { corsMiddleware } from './middlewares/corsMiddleware';
 
 const app = express();
@@ -30,6 +31,7 @@ app.use('/pusher', pusherRoutes);
 app.use('/shifts', shiftRoutes);
 app.use('/reports', reportRoutes);
 app.use('/products', productRoutes);
+app.use('/inventory', inventoryRoutes);
 app.use(errorHandler);
 
 export { app };

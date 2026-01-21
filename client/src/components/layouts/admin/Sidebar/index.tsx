@@ -88,7 +88,6 @@ const Sidebar = () => {
             pathname: AdminRoutes.TenantInventory,
             params: { tenantId },
           }),
-          disabled: true,
         },
       ],
     },

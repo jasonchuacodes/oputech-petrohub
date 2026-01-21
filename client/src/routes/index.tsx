@@ -14,6 +14,7 @@ import { UsersPage } from '~/pages/admin/users';
 import { BootstrapPage } from '~/pages/admin/bootstrap';
 import { HomePage } from '~/pages/admin/home';
 import { ProductsPage } from '~/pages/admin/products';
+import { InventoryPage } from '~/pages/admin/inventory';
 import { ReportsPage } from '~/pages/admin/reports';
 import { ReportDetailPage } from '~/pages/admin/reports/report-detail';
 import { ShiftsPage } from '~/pages/admin/shifts';
@@ -113,7 +114,7 @@ export const router = createBrowserRouter(
             <Route index element={<HomePage />} />
             <Route path="reports" element={<ReportsPage />} />
             <Route path="products" element={<ProductsPage />} />
-            {/* <Route path="inventory" element={<InventoryPage />} /> */}
+            <Route path="inventory" element={<InventoryPage />} />
             <Route path="reports/:reportId" element={<ReportDetailPage />} />
             <Route path="timesheets/:userId?" element={<TimesheetsPage />} />
             <Route path="shifts" element={<ShiftsPage />} />

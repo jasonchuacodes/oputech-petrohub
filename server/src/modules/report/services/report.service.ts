@@ -4,6 +4,7 @@ import { Prisma, ReportStatus, Role } from '~/db/prisma';
 import { ConflictError, ForbiddenError, NotFoundError } from '~/errors';
 
 import { computeReportTotals } from '../utils/compute';
+import { processStockInventoryDeductions } from './stock-inventory.service';
 
 interface CreateReportPayload {
   tenantId: string;
@@ -41,6 +42,7 @@ const createReport = async ({ tenantId, creatorId, shiftId, shiftDate }: CreateR
         income: true,
         expenses: true,
         disposals: { include: { product: true } },
+        stockInventories: { include: { product: true } },
         employees: {
           include: {
             user: {
@@ -145,6 +147,7 @@ const createReport = async ({ tenantId, creatorId, shiftId, shiftDate }: CreateR
       income: true,
       expenses: true,
       disposals: { include: { product: true } },
+      stockInventories: { include: { product: true } },
       employees: {
         include: {
           user: {
@@ -230,6 +233,7 @@ const getReportById = async (reportId: string) => {
       income: true,
       expenses: true,
       disposals: { include: { product: true } },
+      stockInventories: { include: { product: true } },
       employees: {
         include: {
           user: {
@@ -274,6 +278,7 @@ const getReportByShift = async ({
       income: true,
       expenses: true,
       disposals: { include: { product: true } },
+      stockInventories: { include: { product: true } },
       employees: {
         include: {
           user: {
@@ -339,32 +344,39 @@ const submitReport = async (reportId: string, userId: string) => {
     throw new ConflictError('Only validated reports can be submitted');
   }
 
-  const updatedReport = await prisma.report.update({
-    where: { id: reportId },
-    data: {
-      status: ReportStatus.SUBMITTED,
-      submittedAt: new Date(),
-    },
-    include: {
-      creator: { select: { id: true, name: true } },
-      shift: true,
-      entries: { include: { product: true } },
-      income: true,
-      expenses: true,
-      employees: {
-        include: {
-          user: {
-            select: { id: true, name: true, username: true },
+  return await prisma.$transaction(async (tx) => {
+    // Process stock inventory deductions BEFORE updating status
+    await processStockInventoryDeductions(reportId);
+
+    const updatedReport = await tx.report.update({
+      where: { id: reportId },
+      data: {
+        status: ReportStatus.SUBMITTED,
+        submittedAt: new Date(),
+      },
+      include: {
+        creator: { select: { id: true, name: true } },
+        shift: true,
+        entries: { include: { product: true } },
+        income: true,
+        expenses: true,
+        disposals: { include: { product: true } },
+        stockInventories: { include: { product: true } },
+        employees: {
+          include: {
+            user: {
+              select: { id: true, name: true, username: true },
+            },
           },
         },
       },
-    },
-  });
+    });
 
-  return {
-    ...updatedReport,
-    ...computeReportTotals(updatedReport),
-  };
+    return {
+      ...updatedReport,
+      ...computeReportTotals(updatedReport),
+    };
+  });
 };
 
 export { createReport, getReports, getReportById, getReportByShift, validateReport, submitReport };

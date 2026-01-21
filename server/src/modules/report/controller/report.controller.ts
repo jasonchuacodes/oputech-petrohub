@@ -9,6 +9,7 @@ import * as expenseService from '../services/expense.service';
 import * as incomeService from '../services/income.service';
 import * as employeeService from '../services/employee.service';
 import * as disposalService from '../services/disposal.service';
+import * as stockInventoryService from '../services/stock-inventory.service';
 import { CreateReportSchema } from '../schema/createReportSchema';
 import { GetReportsSchema } from '../schema/getReportsSchema';
 import { CreateReportEntrySchema } from '../schema/createReportEntrySchema';
@@ -17,6 +18,8 @@ import { CreateIncomeSchema } from '../schema/createIncomeSchema';
 import { AssignEmployeeSchema } from '../schema/assignEmployeeSchema';
 import { GetReportByShiftSchema } from '../schema/getReportByShiftSchema';
 import { UpdateDisposalSchema } from '../schema/updateDisposalSchema';
+import { CreateReportStockInventorySchema } from '../schema/createReportStockInventorySchema';
+import { UpdateReportStockInventorySchema } from '../schema/updateReportStockInventorySchema';
 
 const validateCreateReport = createSchemaValidator(CreateReportSchema);
 const validateGetReports = createSchemaValidator(GetReportsSchema);
@@ -26,6 +29,8 @@ const validateCreateIncome = createSchemaValidator(CreateIncomeSchema);
 const validateGetReportByShift = createSchemaValidator(GetReportByShiftSchema);
 const validateAssignEmployee = createSchemaValidator(AssignEmployeeSchema);
 const validateUpdateDisposal = createSchemaValidator(UpdateDisposalSchema);
+const validateCreateReportStockInventory = createSchemaValidator(CreateReportStockInventorySchema);
+const validateUpdateReportStockInventory = createSchemaValidator(UpdateReportStockInventorySchema);
 
 const createReport = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
@@ -265,6 +270,52 @@ const updateDisposal = async (req: Request, res: Response, next: NextFunction) =
   }
 };
 
+const createReportStockInventory = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { reportId } = req.params;
+    const data = await validateCreateReportStockInventory(req.body);
+
+    const stockInventory = await stockInventoryService.createReportStockInventory({
+      reportId,
+      ...data,
+    });
+
+    res.status(201).json({
+      message: 'Stock inventory entry created successfully',
+      data: { stockInventory },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const updateReportStockInventory = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { reportId, productId } = req.params;
+    const data = await validateUpdateReportStockInventory(req.body);
+
+    const stockInventory = await stockInventoryService.updateReportStockInventory(reportId, productId, data);
+
+    res.status(200).json({
+      message: 'Stock inventory entry updated successfully',
+      data: { stockInventory },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const deleteReportStockInventory = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { reportId, productId } = req.params;
+    await stockInventoryService.deleteReportStockInventory(reportId, productId);
+
+    res.status(204).send();
+  } catch (err) {
+    next(err);
+  }
+};
+
 export {
   createReport,
   getReports,
@@ -281,4 +332,7 @@ export {
   assignEmployee,
   removeEmployee,
   updateDisposal,
+  createReportStockInventory,
+  updateReportStockInventory,
+  deleteReportStockInventory,
 };
