@@ -1,22 +1,22 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  getStockInventoriesByTenantId,
-  getStockInventoryById,
-  createStockInventory,
-  updateStockInventory,
-  deleteStockInventory,
+  getInventoriesByTenantId,
+  getInventoryById,
+  createInventory,
+  updateInventory,
+  deleteInventory,
 } from './inventory.api';
-import type { CreateStockInventoryPayload, UpdateStockInventoryPayload } from './inventory.types';
+import type { CreateInventoryPayload, UpdateInventoryPayload } from './inventory.types';
 
-const useGetStockInventoriesQuery = (tenantId?: string) => {
+const useGetInventoriesQuery = (tenantId?: string) => {
   return useQuery({
-    queryKey: ['stock-inventories', tenantId],
-    queryFn: () => getStockInventoriesByTenantId(tenantId!),
+    queryKey: ['inventories', tenantId],
+    queryFn: () => getInventoriesByTenantId(tenantId!),
     enabled: !!tenantId,
   });
 };
 
-const useGetStockInventoryQuery = ({
+const useGetInventoryQuery = ({
   inventoryId,
   tenantId,
 }: {
@@ -24,24 +24,24 @@ const useGetStockInventoryQuery = ({
   tenantId?: string;
 }) => {
   return useQuery({
-    queryKey: ['stock-inventory', inventoryId, tenantId],
-    queryFn: () => getStockInventoryById(inventoryId!, tenantId!),
+    queryKey: ['inventory', inventoryId, tenantId],
+    queryFn: () => getInventoryById(inventoryId!, tenantId!),
     enabled: !!inventoryId && !!tenantId,
   });
 };
 
-const useCreateStockInventoryMutation = () => {
+const useCreateInventoryMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: CreateStockInventoryPayload) => createStockInventory(data),
+    mutationFn: (data: CreateInventoryPayload) => createInventory(data),
     onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['stock-inventories', variables.tenantId] });
+      queryClient.invalidateQueries({ queryKey: ['inventories', variables.tenantId] });
     },
   });
 };
 
-const useUpdateStockInventoryMutation = () => {
+const useUpdateInventoryMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -51,32 +51,32 @@ const useUpdateStockInventoryMutation = () => {
       tenantId,
     }: {
       inventoryId: string;
-      data: UpdateStockInventoryPayload;
+      data: UpdateInventoryPayload;
       tenantId: string;
-    }) => updateStockInventory(inventoryId, data, tenantId),
+    }) => updateInventory(inventoryId, data, tenantId),
     onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['stock-inventories', variables.tenantId] });
-      queryClient.invalidateQueries({ queryKey: ['stock-inventory', variables.inventoryId, variables.tenantId] });
+      queryClient.invalidateQueries({ queryKey: ['inventories', variables.tenantId] });
+      queryClient.invalidateQueries({ queryKey: ['inventory', variables.inventoryId, variables.tenantId] });
     },
   });
 };
 
-const useDeleteStockInventoryMutation = () => {
+const useDeleteInventoryMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({ inventoryId, tenantId }: { inventoryId: string; tenantId: string }) =>
-      deleteStockInventory(inventoryId, tenantId),
+      deleteInventory(inventoryId, tenantId),
     onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['stock-inventories', variables.tenantId] });
+      queryClient.invalidateQueries({ queryKey: ['inventories', variables.tenantId] });
     },
   });
 };
 
 export {
-  useGetStockInventoriesQuery,
-  useGetStockInventoryQuery,
-  useCreateStockInventoryMutation,
-  useUpdateStockInventoryMutation,
-  useDeleteStockInventoryMutation,
+  useGetInventoriesQuery,
+  useGetInventoryQuery,
+  useCreateInventoryMutation,
+  useUpdateInventoryMutation,
+  useDeleteInventoryMutation,
 };

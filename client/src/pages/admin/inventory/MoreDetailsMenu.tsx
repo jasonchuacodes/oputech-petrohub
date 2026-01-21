@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useDisclosure } from '~/hooks/useDisclosure';
 
 import { DeleteConfirmModal } from './DeleteConfirmModal';
-import { EditStockInventoryModal } from './EditStockInventoryModal';
+import { EditInventoryModal } from './EditInventoryModal';
 
 export const MoreDetailsMenu = () => {
   const [anchorElSettingsMenu, setAnchorElSettingsMenu] = useState<null | HTMLElement>(null);
@@ -64,7 +64,7 @@ export const MoreDetailsMenu = () => {
         </MenuItem>
       </Menu>
 
-      <EditStockInventoryModal open={editDisclosure.open} onClose={editDisclosure.onClose} />
+      <EditInventoryModal open={editDisclosure.open} onClose={editDisclosure.onClose} />
       <DeleteConfirmModal open={deleteDisclosure.open} onClose={deleteDisclosure.onClose} />
     </>
   );

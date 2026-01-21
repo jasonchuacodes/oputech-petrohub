@@ -1,32 +1,32 @@
 import axios from '~/lib/axiosInstance';
-import type { StockInventory, CreateStockInventoryPayload, UpdateStockInventoryPayload } from './inventory.types';
+import type { Inventory, CreateInventoryPayload, UpdateInventoryPayload } from './inventory.types';
 
-const getStockInventoriesByTenantId = async (tenantId: string): Promise<StockInventory[]> => {
+const getInventoriesByTenantId = async (tenantId: string): Promise<Inventory[]> => {
   const res = await axios.get('/inventory', { params: { tenantId } });
   return res.data.data;
 };
 
-const getStockInventoryById = async (inventoryId: string, tenantId: string): Promise<StockInventory> => {
+const getInventoryById = async (inventoryId: string, tenantId: string): Promise<Inventory> => {
   const res = await axios.get(`/inventory/${inventoryId}`, { params: { tenantId } });
   return res.data.data;
 };
 
-const createStockInventory = (data: CreateStockInventoryPayload) => {
+const createInventory = (data: CreateInventoryPayload) => {
   return axios.post('/inventory', data);
 };
 
-const updateStockInventory = (inventoryId: string, data: UpdateStockInventoryPayload, tenantId: string) => {
+const updateInventory = (inventoryId: string, data: UpdateInventoryPayload, tenantId: string) => {
   return axios.put(`/inventory/${inventoryId}`, data, { params: { tenantId } });
 };
 
-const deleteStockInventory = (inventoryId: string, tenantId: string) => {
+const deleteInventory = (inventoryId: string, tenantId: string) => {
   return axios.delete(`/inventory/${inventoryId}`, { params: { tenantId } });
 };
 
 export {
-  getStockInventoriesByTenantId,
-  getStockInventoryById,
-  createStockInventory,
-  updateStockInventory,
-  deleteStockInventory,
+  getInventoriesByTenantId,
+  getInventoryById,
+  createInventory,
+  updateInventory,
+  deleteInventory,
 };

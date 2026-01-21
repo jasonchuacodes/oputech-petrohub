@@ -3,6 +3,7 @@ import { ConflictError, NotFoundError } from '~/errors';
 
 import type { CreateProductPayload } from '../schema/createProductSchema';
 import type { UpdateProductPayload } from '../schema/updateProductSchema';
+import { ProductCategory } from '../../../db/prisma';
 
 const createProduct = async (data: CreateProductPayload) => {
   const product = await prisma.product.create({
@@ -34,7 +35,7 @@ const getProductsByTenantId = async (tenantId: string) => {
   const now = new Date();
 
   const products = await prisma.product.findMany({
-    where: { tenantId },
+    where: { tenantId, category: ProductCategory.FUEL },
     include: {
       productPrices: {
         where: { effectiveFrom: { lte: now } },

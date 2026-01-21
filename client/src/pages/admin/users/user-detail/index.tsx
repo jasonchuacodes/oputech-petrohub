@@ -186,35 +186,37 @@ export const UserDetailPage = () => {
                       Assign work shift for this user
                     </Typography>
                   </Grid>
-                  <Grid sx={{ xs: 12, md: 8 }}>
-                    <ShiftSelect
-                      control={control}
-                      name="shiftId"
-                      label="Shift"
-                      shifts={shifts || []}
-                    />
+                  <Grid size={{ xs: 12, md: 8 }}>
+                    <Stack spacing={1}>
+                      <ShiftSelect
+                        control={control}
+                        name="shiftId"
+                        label="Shift"
+                        shifts={shifts || []}
+                      />
 
-                    {shifts?.length === 0 && (
-                      <Typography variant="caption" color="text.secondary">
-                        Shift schedules have not been set. Please add a shift scheduled on the{' '}
-                        <Typography
-                          variant="caption"
-                          color="info"
-                          sx={{ cursor: 'pointer' }}
-                          onClick={() =>
-                            navigate(
-                              pathFor({
-                                pathname: AdminRoutes.TenantShifts,
-                                params: { tenantId },
-                              }),
-                            )
-                          }
-                        >
-                          shift configuration
-                        </Typography>{' '}
-                        page.
-                      </Typography>
-                    )}
+                      {shifts?.length === 0 && (
+                        <Typography variant="caption" color="text.secondary">
+                          Shift schedules have not been set. Please add a shift scheduled on the{' '}
+                          <Typography
+                            variant="caption"
+                            color="info"
+                            sx={{ cursor: 'pointer' }}
+                            onClick={() =>
+                              navigate(
+                                pathFor({
+                                  pathname: AdminRoutes.TenantShifts,
+                                  params: { tenantId },
+                                }),
+                              )
+                            }
+                          >
+                            shift configuration
+                          </Typography>{' '}
+                          page.
+                        </Typography>
+                      )}
+                    </Stack>
                   </Grid>
                 </Grid>
                 <Divider />

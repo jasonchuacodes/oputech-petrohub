@@ -3,22 +3,22 @@ import { HomeOutlined, AddOutlined } from '@mui/icons-material';
 
 import { PageHeader } from '~/components/layouts';
 import { Breadcrumb, Button, DataTable, PageContainer, PageLayout } from '~/components/ui';
-import { StockInventoryProvider } from '~/context/stock-inventory';
+import { InventoryProvider } from '~/context/inventory';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { useDisclosure } from '~/hooks/useDisclosure';
 import { AdminRoutes } from '~/routes';
-import { useGetStockInventoriesQuery } from '~/services/inventory/inventory.queries';
+import { useGetInventoriesQuery } from '~/services/inventory/inventory.queries';
 import { formatDate } from '~/utils/date';
 import { formatCurrency } from '~/utils/number';
 import { pathFor } from '~/utils/pathFor';
 
-import { CreateStockInventoryModal } from './CreateStockInventoryModal';
+import { CreateInventoryModal } from './CreateInventoryModal';
 import { MoreDetailsMenu } from './MoreDetailsMenu';
 
 export const InventoryPage = () => {
   const { tenantId } = useTenantContext();
   const disclosure = useDisclosure();
-  const { data: stockInventories, isLoading } = useGetStockInventoriesQuery(tenantId);
+  const { data: inventories, isLoading } = useGetInventoriesQuery(tenantId);
 
   return (
     <PageLayout>
@@ -53,9 +53,9 @@ export const InventoryPage = () => {
           }
         />
         <DataTable
-          id="stock-inventory-table"
+          id="inventory-table"
           collection={DataTable.collection({
-            items: stockInventories || [],
+            items: inventories || [],
             itemToValue: (item) => item.id,
             itemToString: (item) => item.productName,
           })}
@@ -105,9 +105,9 @@ export const InventoryPage = () => {
               heading: '',
               align: 'right',
               cell: (item) => (
-                <StockInventoryProvider stockInventory={item}>
+                <InventoryProvider inventory={item}>
                   <MoreDetailsMenu />
-                </StockInventoryProvider>
+                </InventoryProvider>
               ),
               orderable: false,
             },
@@ -117,7 +117,7 @@ export const InventoryPage = () => {
         />
       </PageContainer>
 
-      <CreateStockInventoryModal open={disclosure.open} onClose={disclosure.onClose} />
+      <CreateInventoryModal open={disclosure.open} onClose={disclosure.onClose} />
     </PageLayout>
   );
 };

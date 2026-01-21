@@ -1,17 +1,18 @@
 import { prisma } from '~/db';
+import { ProductCategory } from '~/db/prisma';
 import { BadInputError, ConflictError, NotFoundError } from '~/errors';
 
-import type { CreateStockInventoryPayload } from '../schema/createStockInventorySchema';
-import type { UpdateStockInventoryPayload } from '../schema/updateStockInventorySchema';
+import type { CreateInventoryPayload } from '../schema/createInventorySchema';
+import type { UpdateInventoryPayload } from '../schema/updateInventorySchema';
 
-const createStockInventory = async (data: CreateStockInventoryPayload) => {
+const createInventory = async (data: CreateInventoryPayload) => {
   return await prisma.$transaction(async (tx) => {
     const product = await tx.product.create({
       data: {
         tenantId: data.tenantId,
         name: data.name,
         description: data.description,
-        category: 'STOCK_INVENTORY',
+        category: ProductCategory.STOCK_INVENTORY,
       },
     });
 
@@ -22,24 +23,24 @@ const createStockInventory = async (data: CreateStockInventoryPayload) => {
       },
     });
 
-    await tx.stockInventory.create({
+    await tx.inventory.create({
       data: {
         productId: product.id,
         quantity: data.quantity || 0,
       },
     });
 
-    return product
+    return product;
   });
 };
 
-const getStockInventoriesByTenantId = async (tenantId: string) => {
+const getInventoriesByTenantId = async (tenantId: string) => {
   const now = new Date();
 
   const products = await prisma.product.findMany({
     where: {
       tenantId,
-      category: 'STOCK_INVENTORY',
+      category: ProductCategory.STOCK_INVENTORY,
     },
     include: {
       productPrices: {
@@ -47,30 +48,30 @@ const getStockInventoriesByTenantId = async (tenantId: string) => {
         orderBy: { effectiveFrom: 'desc' },
         take: 1,
       },
-      stockInventory: true,
+      inventory: true,
     },
     orderBy: { createdAt: 'desc' },
   });
 
   return products.map((product) => ({
-    id: product.stockInventory?.id || '',
+    id: product.inventory?.id || '',
     productId: product.id,
     productName: product.name,
     productDescription: product.description,
-    quantity: product.stockInventory?.quantity || 0,
+    quantity: product.inventory?.quantity || 0,
     currentPrice: product.productPrices[0]?.price || null,
-    updatedAt: product.stockInventory?.updatedAt || product.updatedAt,
+    updatedAt: product.inventory?.updatedAt || product.updatedAt,
   }));
 };
 
-const getStockInventoryById = async (productId: string, tenantId: string) => {
+const getInventoryById = async (productId: string, tenantId: string) => {
   const now = new Date();
 
   const product = await prisma.product.findFirst({
     where: {
       id: productId,
       tenantId,
-      category: 'STOCK_INVENTORY',
+      category: ProductCategory.STOCK_INVENTORY,
     },
     include: {
       productPrices: {
@@ -78,31 +79,35 @@ const getStockInventoryById = async (productId: string, tenantId: string) => {
         orderBy: { effectiveFrom: 'desc' },
         take: 1,
       },
-      stockInventory: true,
+      inventory: true,
     },
   });
 
-  if (!product || !product.stockInventory) {
+  if (!product || !product.inventory) {
     throw new NotFoundError('Stock inventory not found');
   }
 
   return {
-    id: product.stockInventory.id,
+    id: product.inventory.id,
     productId: product.id,
     productName: product.name,
     productDescription: product.description,
-    quantity: product.stockInventory.quantity,
+    quantity: product.inventory.quantity,
     currentPrice: product.productPrices[0]?.price || null,
-    updatedAt: product.stockInventory.updatedAt,
+    updatedAt: product.inventory.updatedAt,
   };
 };
 
-const updateStockInventory = async (productId: string, tenantId: string, data: UpdateStockInventoryPayload) => {
+const updateInventory = async (
+  productId: string,
+  tenantId: string,
+  data: UpdateInventoryPayload,
+) => {
   const product = await prisma.product.findFirst({
     where: {
       id: productId,
       tenantId,
-      category: 'STOCK_INVENTORY',
+      category: ProductCategory.STOCK_INVENTORY,
     },
     include: {
       productPrices: {
@@ -110,16 +115,16 @@ const updateStockInventory = async (productId: string, tenantId: string, data: U
         orderBy: { effectiveFrom: 'desc' },
         take: 1,
       },
-      stockInventory: true,
+      inventory: true,
     },
   });
 
-  if (!product || !product.stockInventory) {
+  if (!product || !product.inventory) {
     throw new NotFoundError('Stock inventory not found');
   }
 
   const currentPrice = product.productPrices[0]?.price;
-  const updates: Partial<UpdateStockInventoryPayload> = {};
+  const updates: Partial<UpdateInventoryPayload> = {};
 
   // Base fields
   if (data.name !== undefined && data.name !== product.name) {
@@ -141,13 +146,13 @@ const updateStockInventory = async (productId: string, tenantId: string, data: U
   }
 
   // Quantity
-  if (data.quantity !== undefined && data.quantity !== product.stockInventory.quantity) {
+  if (data.quantity !== undefined && data.quantity !== product.inventory.quantity) {
     updates.quantity = data.quantity;
   }
 
   // Early return if nothing changed
   if (Object.keys(updates).length === 0) {
-    return getStockInventoryById(productId, tenantId);
+    return getInventoryById(productId, tenantId);
   }
 
   return await prisma.$transaction(async (tx) => {
@@ -176,25 +181,25 @@ const updateStockInventory = async (productId: string, tenantId: string, data: U
 
     // 3. Update quantity
     if (updates.quantity !== undefined) {
-      await tx.stockInventory.update({
+      await tx.inventory.update({
         where: { productId },
         data: { quantity: updates.quantity },
       });
     }
 
-    return getStockInventoryById(productId, tenantId);
+    return getInventoryById(productId, tenantId);
   });
 };
 
-const deleteStockInventory = async (productId: string, tenantId: string) => {
+const deleteInventory = async (productId: string, tenantId: string) => {
   const product = await prisma.product.findFirst({
     where: {
       id: productId,
       tenantId,
-      category: 'STOCK_INVENTORY',
+      category: ProductCategory.STOCK_INVENTORY,
     },
     include: {
-      reportStockInventory: { select: { id: true } },
+      reportInventory: { select: { id: true } },
     },
   });
 
@@ -202,7 +207,7 @@ const deleteStockInventory = async (productId: string, tenantId: string) => {
     throw new NotFoundError('Stock inventory not found');
   }
 
-  if (product.reportStockInventory.length > 0) {
+  if (product.reportInventory.length > 0) {
     throw new ConflictError('Cannot delete stock inventory that is referenced in reports');
   }
 
@@ -212,7 +217,7 @@ const deleteStockInventory = async (productId: string, tenantId: string) => {
 };
 
 const adjustQuantity = async (productId: string, quantitySold: number) => {
-  const stockInventory = await prisma.stockInventory.findUnique({
+  const stockInventory = await prisma.inventory.findUnique({
     where: { productId },
   });
 
@@ -222,11 +227,11 @@ const adjustQuantity = async (productId: string, quantitySold: number) => {
 
   if (stockInventory.quantity < quantitySold) {
     throw new BadInputError(
-      `Insufficient stock. Available: ${stockInventory.quantity}, Required: ${quantitySold}`
+      `Insufficient stock. Available: ${stockInventory.quantity}, Required: ${quantitySold}`,
     );
   }
 
-  return await prisma.stockInventory.update({
+  return await prisma.inventory.update({
     where: { productId },
     data: {
       quantity: {
@@ -237,10 +242,10 @@ const adjustQuantity = async (productId: string, quantitySold: number) => {
 };
 
 export {
-  createStockInventory,
-  getStockInventoriesByTenantId,
-  getStockInventoryById,
-  updateStockInventory,
-  deleteStockInventory,
+  createInventory,
+  getInventoriesByTenantId,
+  getInventoryById,
+  updateInventory,
+  deleteInventory,
   adjustQuantity,
 };

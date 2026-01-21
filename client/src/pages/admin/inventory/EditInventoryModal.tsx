@@ -7,48 +7,48 @@ import toast from 'react-hot-toast';
 
 import { CustomModal } from '~/components/ui';
 import { Input } from '~/components/form';
-import { useStockInventoryContext } from '~/context/stock-inventory';
+import { useInventoryContext } from '~/context/inventory';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
-import { useUpdateStockInventoryMutation } from '~/services/inventory/inventory.queries';
-import { UpdateStockInventorySchema, type UpdateStockInventoryInput } from '~/schema/updateStockInventorySchema';
+import { useUpdateInventoryMutation } from '~/services/inventory/inventory.queries';
+import { UpdateInventorySchema, type UpdateInventoryInput } from '~/schema/updateInventorySchema';
 
-type EditStockInventoryModalProps = {
+type EditInventoryModalProps = {
   open: boolean;
   onClose: () => void;
 };
 
-export const EditStockInventoryModal = ({ open, onClose }: EditStockInventoryModalProps) => {
-  const { stockInventory } = useStockInventoryContext();
+export const EditInventoryModal = ({ open, onClose }: EditInventoryModalProps) => {
+  const { inventory } = useInventoryContext();
   const { tenantId } = useTenantContext();
-  const { mutateAsync: updateStockInventory, isPending } = useUpdateStockInventoryMutation();
+  const { mutateAsync: updateInventory, isPending } = useUpdateInventoryMutation();
 
-  const { control, handleSubmit, reset, formState } = useForm<UpdateStockInventoryInput>({
+  const { control, handleSubmit, reset, formState } = useForm<UpdateInventoryInput>({
     defaultValues: {
       name: '',
       description: '',
       price: 0,
       quantity: 0,
     },
-    resolver: zodResolver(UpdateStockInventorySchema),
+    resolver: zodResolver(UpdateInventorySchema),
   });
 
   useEffect(() => {
-    if (stockInventory) {
+    if (inventory) {
       reset({
-        name: stockInventory.productName,
-        description: stockInventory.productDescription || '',
-        price: stockInventory.currentPrice || 0,
-        quantity: stockInventory.quantity,
+        name: inventory.productName,
+        description: inventory.productDescription || '',
+        price: inventory.currentPrice || 0,
+        quantity: inventory.quantity,
       });
     }
-  }, [stockInventory, reset]);
+  }, [inventory, reset]);
 
-  const onSubmit = async (data: UpdateStockInventoryInput) => {
-    if (!tenantId || !stockInventory) return;
+  const onSubmit = async (data: UpdateInventoryInput) => {
+    if (!tenantId || !inventory) return;
 
     try {
-      await updateStockInventory({
-        inventoryId: stockInventory.productId,
+      await updateInventory({
+        inventoryId: inventory.productId,
         tenantId,
         data: {
           name: data.name,

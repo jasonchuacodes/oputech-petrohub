@@ -209,8 +209,8 @@ model Product {
   productReadings      ProductReading[]
   reportEntries        ReportEntry[]
   reportDisposals      ReportDisposal[]
-  stockInventory       StockInventory?
-  reportStockInventory ReportStockInventory[]
+  inventory            Inventory?
+  reportInventory      ReportInventory[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -245,7 +245,7 @@ model ProductReading {
   @@index([productId])
 }
 
-model StockInventory {
+model Inventory {
   id        String   @id @default(uuid())
   productId String   @unique
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
@@ -258,7 +258,7 @@ model StockInventory {
   @@index([productId])
 }
 
-model ReportStockInventory {
+model ReportInventory {
   id                String   @id @default(uuid())
   reportId          String
   report            Report   @relation(fields: [reportId], references: [id], onDelete: Cascade)
@@ -296,7 +296,7 @@ model Report {
   expenses         ReportExpense[]
   employees        EmployeesOnReports[]
   disposals        ReportDisposal[]
-  stockInventories ReportStockInventory[]
+  inventories      ReportInventory[]
 
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt

@@ -1,7 +1,7 @@
 import { prisma } from '~/db';
-import { ReportStatus } from '~/db/prisma';
+import { ProductCategory, ReportStatus } from '~/db/prisma';
 import { BadInputError, ConflictError, NotFoundError } from '~/errors';
-import { adjustQuantity } from '~/modules/inventory/services/stock-inventory.service';
+import { adjustQuantity } from '~/modules/inventory/services/inventory.service';
 
 import type { CreateReportStockInventoryPayload } from '../schema/createReportStockInventorySchema';
 import type { UpdateReportStockInventoryPayload } from '../schema/updateReportStockInventorySchema';
@@ -10,7 +10,11 @@ interface CreateReportStockInventoryInput extends CreateReportStockInventoryPayl
   reportId: string;
 }
 
-const createReportStockInventory = async ({ reportId, productId, quantitySold }: CreateReportStockInventoryInput) => {
+const createReportStockInventory = async ({
+  reportId,
+  productId,
+  quantitySold,
+}: CreateReportStockInventoryInput) => {
   const report = await prisma.report.findUnique({
     where: { id: reportId },
   });
@@ -27,14 +31,14 @@ const createReportStockInventory = async ({ reportId, productId, quantitySold }:
   const product = await prisma.product.findFirst({
     where: {
       id: productId,
-      category: 'STOCK_INVENTORY',
+      category: ProductCategory.STOCK_INVENTORY,
     },
     include: {
-      stockInventory: true,
+      inventory: true,
     },
   });
 
-  if (!product || !product.stockInventory) {
+  if (!product || !product.inventory) {
     throw new NotFoundError('Stock inventory product not found');
   }
 
@@ -54,7 +58,7 @@ const createReportStockInventory = async ({ reportId, productId, quantitySold }:
   const unitPrice = latestPrice.price;
   const totalPrice = quantitySold * Number(unitPrice);
 
-  const entry = await prisma.reportStockInventory.upsert({
+  const entry = await prisma.reportInventory.upsert({
     where: { reportId_productId: { reportId, productId } },
     create: {
       reportId,
@@ -76,7 +80,7 @@ const createReportStockInventory = async ({ reportId, productId, quantitySold }:
 const updateReportStockInventory = async (
   reportId: string,
   productId: string,
-  data: UpdateReportStockInventoryPayload
+  data: UpdateReportStockInventoryPayload,
 ) => {
   const report = await prisma.report.findUnique({
     where: { id: reportId },
@@ -90,7 +94,7 @@ const updateReportStockInventory = async (
     throw new ConflictError('Cannot modify submitted reports');
   }
 
-  const entry = await prisma.reportStockInventory.findUnique({
+  const entry = await prisma.reportInventory.findUnique({
     where: { reportId_productId: { reportId, productId } },
     include: {
       product: {
@@ -112,7 +116,7 @@ const updateReportStockInventory = async (
   const unitPrice = entry.product.productPrices[0]?.price || entry.unitPriceSnapshot;
   const totalPrice = data.quantitySold * Number(unitPrice);
 
-  return await prisma.reportStockInventory.update({
+  return await prisma.reportInventory.update({
     where: { reportId_productId: { reportId, productId } },
     data: {
       quantitySold: data.quantitySold,
@@ -135,7 +139,7 @@ const deleteReportStockInventory = async (reportId: string, productId: string) =
     throw new ConflictError('Cannot modify submitted reports');
   }
 
-  const entry = await prisma.reportStockInventory.findUnique({
+  const entry = await prisma.reportInventory.findUnique({
     where: { reportId_productId: { reportId, productId } },
   });
 
@@ -143,18 +147,18 @@ const deleteReportStockInventory = async (reportId: string, productId: string) =
     throw new NotFoundError('Stock inventory entry not found');
   }
 
-  await prisma.reportStockInventory.delete({
+  await prisma.reportInventory.delete({
     where: { reportId_productId: { reportId, productId } },
   });
 };
 
 const processStockInventoryDeductions = async (reportId: string) => {
-  const stockInventoryEntries = await prisma.reportStockInventory.findMany({
+  const stockInventoryEntries = await prisma.reportInventory.findMany({
     where: { reportId },
     include: {
       product: {
         include: {
-          stockInventory: true,
+          inventory: true,
         },
       },
     },
@@ -163,13 +167,13 @@ const processStockInventoryDeductions = async (reportId: string) => {
   // First, validate all quantities are available
   const insufficientStock: string[] = [];
   for (const entry of stockInventoryEntries) {
-    if (!entry.product.stockInventory) {
+    if (!entry.product.inventory) {
       throw new BadInputError(`Stock inventory not found for product: ${entry.product.name}`);
     }
 
-    if (entry.product.stockInventory.quantity < entry.quantitySold) {
+    if (entry.product.inventory.quantity < entry.quantitySold) {
       insufficientStock.push(
-        `${entry.product.name}: Available ${entry.product.stockInventory.quantity}, Required ${entry.quantitySold}`
+        `${entry.product.name}: Available ${entry.product.inventory.quantity}, Required ${entry.quantitySold}`,
       );
     }
   }

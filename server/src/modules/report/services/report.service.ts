@@ -1,10 +1,10 @@
 import { Decimal } from '@prisma/client/runtime/library';
 import { prisma } from '~/db';
-import { Prisma, ReportStatus, Role } from '~/db/prisma';
+import { Prisma, ProductCategory, ReportStatus, Role } from '~/db/prisma';
 import { ConflictError, ForbiddenError, NotFoundError } from '~/errors';
 
 import { computeReportTotals } from '../utils/compute';
-import { processStockInventoryDeductions } from './stock-inventory.service';
+import { processStockInventoryDeductions } from './inventory.service';
 
 interface CreateReportPayload {
   tenantId: string;
@@ -42,7 +42,7 @@ const createReport = async ({ tenantId, creatorId, shiftId, shiftDate }: CreateR
         income: true,
         expenses: true,
         disposals: { include: { product: true } },
-        stockInventories: { include: { product: true } },
+        inventories: { include: { product: true } },
         employees: {
           include: {
             user: {
@@ -82,7 +82,7 @@ const createReport = async ({ tenantId, creatorId, shiftId, shiftDate }: CreateR
   );
 
   const products = await prisma.product.findMany({
-    where: { tenantId },
+    where: { tenantId, category: ProductCategory.FUEL },
     include: {
       productPrices: {
         where: {
@@ -147,7 +147,7 @@ const createReport = async ({ tenantId, creatorId, shiftId, shiftDate }: CreateR
       income: true,
       expenses: true,
       disposals: { include: { product: true } },
-      stockInventories: { include: { product: true } },
+      inventories: { include: { product: true } },
       employees: {
         include: {
           user: {
@@ -233,7 +233,7 @@ const getReportById = async (reportId: string) => {
       income: true,
       expenses: true,
       disposals: { include: { product: true } },
-      stockInventories: { include: { product: true } },
+      inventories: { include: { product: true } },
       employees: {
         include: {
           user: {
@@ -278,7 +278,7 @@ const getReportByShift = async ({
       income: true,
       expenses: true,
       disposals: { include: { product: true } },
-      stockInventories: { include: { product: true } },
+      inventories: { include: { product: true } },
       employees: {
         include: {
           user: {
@@ -361,7 +361,7 @@ const submitReport = async (reportId: string, userId: string) => {
         income: true,
         expenses: true,
         disposals: { include: { product: true } },
-        stockInventories: { include: { product: true } },
+        inventories: { include: { product: true } },
         employees: {
           include: {
             user: {

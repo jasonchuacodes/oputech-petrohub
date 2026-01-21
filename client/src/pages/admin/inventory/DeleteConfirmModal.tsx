@@ -3,9 +3,9 @@ import { Stack, Typography } from '@mui/material';
 import toast from 'react-hot-toast';
 
 import { CustomModal } from '~/components/ui';
-import { useStockInventoryContext } from '~/context/stock-inventory';
+import { useInventoryContext } from '~/context/inventory';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
-import { useDeleteStockInventoryMutation } from '~/services/inventory/inventory.queries';
+import { useDeleteInventoryMutation } from '~/services/inventory/inventory.queries';
 
 type DeleteConfirmModalProps = {
   open: boolean;
@@ -13,16 +13,16 @@ type DeleteConfirmModalProps = {
 };
 
 export const DeleteConfirmModal = ({ open, onClose }: DeleteConfirmModalProps) => {
-  const { stockInventory } = useStockInventoryContext();
+  const { inventory } = useInventoryContext();
   const { tenantId } = useTenantContext();
 
-  const { mutateAsync: deleteStockInventory } = useDeleteStockInventoryMutation();
+  const { mutateAsync: deleteInventory } = useDeleteInventoryMutation();
 
   const handleConfirmDelete = async () => {
     if (!tenantId) return;
 
     try {
-      await deleteStockInventory({ inventoryId: stockInventory.productId, tenantId });
+      await deleteInventory({ inventoryId: inventory.productId, tenantId });
       toast.success('Stock inventory deleted successfully');
       onClose();
     } catch {
@@ -42,7 +42,7 @@ export const DeleteConfirmModal = ({ open, onClose }: DeleteConfirmModalProps) =
           <Typography variant="body2">
             Are you sure you want to delete{' '}
             <Typography variant="inherit" component="span" color="warning.main">
-              {stockInventory.productName}
+              {inventory.productName}
             </Typography>
             ?
           </Typography>

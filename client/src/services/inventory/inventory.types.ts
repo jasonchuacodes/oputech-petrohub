@@ -1,4 +1,4 @@
-export interface StockInventory {
+export interface Inventory {
   id: string;
   productId: string;
   productName: string;
@@ -8,7 +8,7 @@ export interface StockInventory {
   updatedAt: string;
 }
 
-export interface CreateStockInventoryPayload {
+export interface CreateInventoryPayload {
   tenantId: string;
   name: string;
   description?: string;
@@ -16,7 +16,7 @@ export interface CreateStockInventoryPayload {
   quantity?: number;
 }
 
-export interface UpdateStockInventoryPayload {
+export interface UpdateInventoryPayload {
   name?: string;
   description?: string;
   price?: number;

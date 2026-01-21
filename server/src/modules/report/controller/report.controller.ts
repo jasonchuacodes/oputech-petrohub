@@ -9,7 +9,7 @@ import * as expenseService from '../services/expense.service';
 import * as incomeService from '../services/income.service';
 import * as employeeService from '../services/employee.service';
 import * as disposalService from '../services/disposal.service';
-import * as stockInventoryService from '../services/stock-inventory.service';
+import * as inventoryService from '../services/inventory.service';
 import { CreateReportSchema } from '../schema/createReportSchema';
 import { GetReportsSchema } from '../schema/getReportsSchema';
 import { CreateReportEntrySchema } from '../schema/createReportEntrySchema';
@@ -275,7 +275,7 @@ const createReportStockInventory = async (req: Request, res: Response, next: Nex
     const { reportId } = req.params;
     const data = await validateCreateReportStockInventory(req.body);
 
-    const stockInventory = await stockInventoryService.createReportStockInventory({
+    const stockInventory = await inventoryService.createReportStockInventory({
       reportId,
       ...data,
     });
@@ -294,7 +294,7 @@ const updateReportStockInventory = async (req: Request, res: Response, next: Nex
     const { reportId, productId } = req.params;
     const data = await validateUpdateReportStockInventory(req.body);
 
-    const stockInventory = await stockInventoryService.updateReportStockInventory(reportId, productId, data);
+    const stockInventory = await inventoryService.updateReportStockInventory(reportId, productId, data);
 
     res.status(200).json({
       message: 'Stock inventory entry updated successfully',
@@ -308,7 +308,7 @@ const updateReportStockInventory = async (req: Request, res: Response, next: Nex
 const deleteReportStockInventory = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { reportId, productId } = req.params;
-    await stockInventoryService.deleteReportStockInventory(reportId, productId);
+    await inventoryService.deleteReportStockInventory(reportId, productId);
 
     res.status(204).send();
   } catch (err) {

@@ -7,36 +7,36 @@ import toast from 'react-hot-toast';
 import { CustomModal } from '~/components/ui';
 import { Input } from '~/components/form';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
-import { useCreateStockInventoryMutation } from '~/services/inventory/inventory.queries';
-import { CreateStockInventorySchema, type CreateStockInventoryInput } from '~/schema/createStockInventorySchema';
+import { useCreateInventoryMutation } from '~/services/inventory/inventory.queries';
+import { CreateInventorySchema, type CreateInventoryInput } from '~/schema/createInventorySchema';
 
-type CreateStockInventoryModalProps = {
+type CreateInventoryModalProps = {
   open: boolean;
   onClose: () => void;
 };
 
-export const CreateStockInventoryModal = ({ open, onClose }: CreateStockInventoryModalProps) => {
+export const CreateInventoryModal = ({ open, onClose }: CreateInventoryModalProps) => {
   const { tenantId } = useTenantContext();
-  const { mutateAsync: createStockInventory, isPending } = useCreateStockInventoryMutation();
+  const { mutateAsync: createInventory, isPending } = useCreateInventoryMutation();
 
   const {
     control,
     handleSubmit,
     reset,
     formState: { isValid },
-  } = useForm<CreateStockInventoryInput>({
+  } = useForm<CreateInventoryInput>({
     defaultValues: {
       name: '',
       description: '',
       quantity: 0,
     },
-    resolver: zodResolver(CreateStockInventorySchema),
+    resolver: zodResolver(CreateInventorySchema),
   });
 
-  const onSubmit = async (data: CreateStockInventoryInput) => {
+  const onSubmit = async (data: CreateInventoryInput) => {
     if (!tenantId) return;
     try {
-      await createStockInventory({
+      await createInventory({
         tenantId,
         name: data.name,
         description: data.description,
