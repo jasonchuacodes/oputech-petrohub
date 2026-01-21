@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import { CustomModal } from '~/components/ui';
-import { Input } from '~/components/form';
+import { Input, NumberInput } from '~/components/form';
 import { useCreateExpenseMutation } from '~/services/report/report.queries';
 import { CreateExpenseSchema, type CreateExpenseInput } from '~/schema/createExpenseSchema';
 
@@ -68,14 +68,13 @@ export const AddExpenseModal = ({ open, onClose, reportId }: AddExpenseModalProp
     >
       <Stack spacing={2}>
         <Input label="Description" control={control} name="description" placeholder="e.g., Fuel" />
-        <Input
+        <NumberInput
           label="Amount"
-          control={control}
-          name="amount"
-          type="number"
           startAdornment="₱"
+          control={control}
           placeholder="0.00"
-          step="1.00"
+          name="amount"
+          step={1}
           min={0}
         />
       </Stack>

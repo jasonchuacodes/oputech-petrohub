@@ -57,8 +57,8 @@ export const ReportDisposal = () => {
       <Typography
         width="fit-content"
         variant="body1"
-        p={1}
-        bgcolor="background.paper"
+        color="text.primary"
+        fontWeight={500}
         borderRadius={2}
       >
         {formatDate(new Date(report.shiftDate), 'MMMM DD, YYYY')} — {report.shift.name} Shift
@@ -88,7 +88,7 @@ export const ReportDisposal = () => {
                     Reading {`(after)`}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    {formatNumber(Number(disposal.afterReading), 2)}
+                    {formatNumber(Number(disposal.afterReading), 3)}
                   </Typography>
                 </Stack>
                 <Stack direction="row" justifyContent="space-between" alignItems="center">
@@ -96,7 +96,7 @@ export const ReportDisposal = () => {
                     Reading {`(before)`}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    {formatNumber(Number(disposal.beforeReading), 2)}
+                    {formatNumber(Number(disposal.beforeReading), 3)}
                   </Typography>
                 </Stack>
 
@@ -111,7 +111,7 @@ export const ReportDisposal = () => {
                     Net Disposal
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    {formatNumber(Number(disposal.netDisposal), 2)}
+                    {formatNumber(Number(disposal.netDisposal), 3)}
                   </Typography>
                 </Stack>
 

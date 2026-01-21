@@ -49,11 +49,14 @@ export const Input = <T extends FieldValues>({
   max,
   step,
 }: InputProps<T>) => {
+  const inputProps = {
+    ...(step !== undefined && { step }),
+    ...(min !== undefined && { min }),
+    ...(max !== undefined && { max }),
+  };
+
   const mergedSlotProps = {
     input: {
-      ...(step !== undefined && { step }),
-      ...(min !== undefined && { min }),
-      ...(max !== undefined && { max }),
       sx: {
         fontSize: 'body2.fontSize',
         ...(startAdornment && { pl: 1 }),
@@ -107,6 +110,7 @@ export const Input = <T extends FieldValues>({
             error={error?.message ? true : errorProp}
             autoFocus={autoFocus}
             slotProps={mergedSlotProps}
+            inputProps={inputProps}
             endAdornment={endAdornment}
             startAdornment={
               startAdornment ? (

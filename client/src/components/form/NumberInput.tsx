@@ -1,0 +1,206 @@
+import { Box, Button, OutlinedInput, Stack, Typography } from '@mui/material';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import type { ReactNode } from 'react';
+import { Controller, type Control, type FieldValues, type Path } from 'react-hook-form';
+
+type NumberInputProps<T extends FieldValues> = {
+  name: Path<T>;
+  control: Control<T>;
+
+  label?: string;
+  required?: boolean;
+
+  placeholder?: string;
+  disabled?: boolean;
+
+  size?: 'small' | 'medium';
+  fullWidth?: boolean;
+
+  startAdornment?: ReactNode;
+  min?: number;
+  max?: number;
+  step?: number;
+  error?: boolean;
+  autoFocus?: boolean;
+};
+
+export const NumberInput = <T extends FieldValues>({
+  name,
+  control,
+  label,
+  required = false,
+  placeholder,
+  disabled = false,
+  size = 'medium',
+  fullWidth = true,
+  startAdornment,
+  min,
+  max,
+  step = 1,
+  error: errorProp,
+  autoFocus,
+}: NumberInputProps<T>) => {
+  const slotProps = {
+    input: {
+      sx: {
+        fontSize: 'body2.fontSize',
+        ...(startAdornment && { pl: 1 }),
+        '&::-webkit-outer-spin-button, &::-webkit-inner-spin-button': {
+          WebkitAppearance: 'none',
+          margin: 0,
+        },
+        '&[type=number]': {
+          MozAppearance: 'textfield',
+        },
+      },
+    },
+    root: {
+      sx: {
+        ...(startAdornment && { padding: 0 }),
+        pr: 0,
+        '& .MuiOutlinedInput-notchedOutline': {
+          borderColor: 'divider',
+        },
+        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+          borderWidth: '2px',
+        },
+        bgcolor: 'background.paper',
+        borderRadius: 2,
+      },
+    },
+  };
+
+  return (
+    <Controller
+      name={name}
+      control={control}
+      render={({ field, fieldState: { error } }) => {
+        const currentValue = field.value as number | undefined;
+
+        const handleIncrement = () => {
+          const numValue = Number(currentValue) || 0;
+          const newValue = numValue + step;
+          if (max !== undefined && newValue > max) return;
+          field.onChange(newValue);
+        };
+
+        const handleDecrement = () => {
+          const numValue = Number(currentValue) || 0;
+          const newValue = numValue - step;
+          if (min !== undefined && newValue < min) return;
+          field.onChange(newValue);
+        };
+
+        return (
+          <Stack spacing={0.5} width={fullWidth ? '100%' : 'auto'}>
+            {label && (
+              <Typography variant="body2" fontWeight="medium" color="text.primary">
+                {label}
+                {required && (
+                  <Typography component="span" color="error">
+                    {' '}
+                    *
+                  </Typography>
+                )}
+              </Typography>
+            )}
+
+            <OutlinedInput
+              {...field}
+              value={field.value ?? ''}
+              type="number"
+              size={size}
+              fullWidth={fullWidth}
+              placeholder={placeholder}
+              disabled={disabled}
+              error={error?.message ? true : errorProp}
+              autoFocus={autoFocus}
+              slotProps={slotProps}
+              inputProps={{
+                ...(step !== undefined && { step }),
+                ...(min !== undefined && { min }),
+                ...(max !== undefined && { max }),
+              }}
+              startAdornment={
+                startAdornment ? (
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      borderRight: '1px solid',
+                      borderColor: 'divider',
+                      alignItems: 'center',
+                      alignSelf: 'stretch',
+                      px: 2,
+                      m: 0,
+                    }}
+                  >
+                    {startAdornment}
+                  </Box>
+                ) : undefined
+              }
+              endAdornment={
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    borderLeft: '1px solid',
+                    borderColor: 'divider',
+                    alignSelf: 'stretch',
+                  }}
+                >
+                  <Button
+                    onClick={handleIncrement}
+                    disabled={
+                      disabled ||
+                      (max !== undefined && currentValue !== undefined && currentValue >= max)
+                    }
+                    sx={{
+                      minWidth: 0,
+                      px: 1.5,
+                      py: 0.5,
+                      borderRadius: '0 8px 0 0',
+                      color: 'text.secondary',
+                      '&:hover': {
+                        bgcolor: 'action.hover',
+                        color: 'primary.main',
+                      },
+                    }}
+                  >
+                    <KeyboardArrowUpIcon fontSize="small" />
+                  </Button>
+                  <Button
+                    onClick={handleDecrement}
+                    disabled={
+                      disabled ||
+                      (min !== undefined && currentValue !== undefined && currentValue <= min)
+                    }
+                    sx={{
+                      minWidth: 0,
+                      px: 1.5,
+                      py: 0.5,
+                      borderRadius: '0 0 8px 0',
+                      color: 'text.secondary',
+                      '&:hover': {
+                        bgcolor: 'action.hover',
+                        color: 'primary.main',
+                      },
+                    }}
+                  >
+                    <KeyboardArrowDownIcon fontSize="small" />
+                  </Button>
+                </Box>
+              }
+            />
+
+            {errorProp && error?.message && (
+              <Typography fontSize="small" color="error">
+                {error.message}
+              </Typography>
+            )}
+          </Stack>
+        );
+      }}
+    />
+  );
+};

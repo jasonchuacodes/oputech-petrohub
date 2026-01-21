@@ -1,4 +1,4 @@
-import { Box, Divider, Stack, Typography } from '@mui/material';
+import { alpha, Box, Divider, Stack, Typography } from '@mui/material';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { EditOutlined } from '@mui/icons-material';
 import { useForm } from 'react-hook-form';
@@ -6,11 +6,12 @@ import { useMemo } from 'react';
 import toast from 'react-hot-toast';
 
 import { CustomModal } from '~/components/ui';
-import { Input } from '~/components/form';
+import { NumberInput } from '~/components/form';
 import { useUpdateDisposalMutation } from '~/services/report/report.queries';
 import { UpdateDisposalSchema, type UpdateDisposalInput } from '~/schema/updateDisposalSchema';
 import { formatCurrency, formatNumber } from '~/utils/number';
 import type { ReportDisposal } from '~/services/report/report.types';
+import theme from '~/theme';
 
 type UpdateDisposalModalProps = {
   open: boolean;
@@ -88,9 +89,17 @@ export const UpdateDisposalModal = ({
       disabled={!isValid}
     >
       <Stack spacing={2}>
-        <Stack direction="row" spacing={2}>
-          <Stack flex={1} spacing={1}>
-            <Typography variant="caption" color="textSecondary">
+        <Stack flex={1} spacing={1}>
+          <NumberInput
+            label="After Reading"
+            control={control}
+            placeholder="0.00"
+            name="afterReading"
+            step={1}
+            min={0}
+          />
+          <Stack flex={1} justifyContent="space-between" spacing={0.5}>
+            <Typography variant="body2" color="textSecondary">
               Before Reading
             </Typography>
             <Box
@@ -98,10 +107,10 @@ export const UpdateDisposalModal = ({
                 borderRadius: 2,
                 border: '1px solid',
                 borderColor: 'divider',
-                bgcolor: 'grey.100',
-                px: 1,
+                bgcolor: alpha(theme.palette.grey[100], 0.8),
+                px: 1.5,
                 py: 0.5,
-                height: 36,
+                height: 56,
                 display: 'flex',
                 alignItems: 'center',
               }}
@@ -110,18 +119,6 @@ export const UpdateDisposalModal = ({
                 {formatNumber(disposal.beforeReading, 3)}
               </Typography>
             </Box>
-          </Stack>
-          <Stack flex={1} spacing={1}>
-            <Input
-              label="After Reading"
-              control={control}
-              name="afterReading"
-              type="number"
-              placeholder="0.000"
-              autoFocus
-              step="0.001"
-              min="0.000"
-            />
           </Stack>
         </Stack>
 

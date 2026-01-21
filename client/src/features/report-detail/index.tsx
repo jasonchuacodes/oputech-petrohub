@@ -47,8 +47,8 @@ export const ReportDetail = () => {
         <Typography
           width="fit-content"
           variant="body1"
-          p={1}
-          bgcolor="background.surface"
+          color="text.primary"
+          fontWeight={500}
           borderRadius={2}
         >
           {formatDate(new Date(), 'MMMM DD, YYYY')} — {report.shift.name} Shift
@@ -95,11 +95,7 @@ export const ReportDetail = () => {
       </Stack>
 
       <Shortcuts reportId={reportId!} isReadOnly={isReadOnly} />
-      <EmployeesOnDuty
-        reportId={reportId!}
-        employees={report.employees}
-        isReadOnly={isReadOnly}
-      />
+      <EmployeesOnDuty reportId={reportId!} employees={report.employees} isReadOnly={isReadOnly} />
       <Income
         reportId={reportId!}
         income={report.income}

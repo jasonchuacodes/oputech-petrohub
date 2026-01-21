@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import { CustomModal } from '~/components/ui';
-import { Input } from '~/components/form';
+import { NumberInput } from '~/components/form';
 import { FormSelect } from '~/components/form/FormSelect';
 import { useCreateInventoryMutation } from '~/services/report/report.queries';
 import { useGetProductsQuery } from '~/services/product/product.queries';
@@ -85,16 +85,14 @@ export const AddInventoryModal = ({ open, onClose, reportId }: AddInventoryModal
           }))}
           placeholder="Select a product"
           displayEmpty
-          required
         />
-        <Input
+        <NumberInput
           label="Quantity"
           control={control}
           placeholder='Enter quantity sold'
           name="quantity"
-          type="number"
-          step="1"
-          min="0"
+          step={1}
+          min={0}
         />
       </Stack>
     </CustomModal>
