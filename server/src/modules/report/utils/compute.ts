@@ -4,6 +4,7 @@ interface ReportWithTotals {
   totalIncome: number;
   totalExpenses: number;
   totalDisposalSales: number;
+  totalInventorySales: number;
   shortages: number;
   netTotal: number;
 }
@@ -12,18 +13,32 @@ export const computeReportTotals = (report: {
   income?: { amount: Decimal }[];
   expenses?: { amount: Decimal }[];
   disposals?: { totalSales: Decimal }[];
+  inventories?: { amount: Decimal }[];
 }): ReportWithTotals => {
-  const totalIncome = report.income?.reduce((sum, income) => sum + Number(income.amount), 0) ?? 0;
+  const totalIncomeDecimal =
+    report.income?.reduce((sum, income) => sum.add(income.amount), new Decimal(0)) ?? new Decimal(0);
 
-  const totalExpenses =
-    report.expenses?.reduce((sum, expense) => sum + Number(expense.amount), 0) ?? 0;
+  const totalExpensesDecimal =
+    report.expenses?.reduce((sum, expense) => sum.add(expense.amount), new Decimal(0)) ?? new Decimal(0);
 
-  const totalDisposalSales =
-    report.disposals?.reduce((sum, disposal) => sum + Number(disposal.totalSales), 0) ?? 0;
+  const totalDisposalSalesDecimal =
+    report.disposals?.reduce((sum, disposal) => sum.add(disposal.totalSales), new Decimal(0)) ??
+    new Decimal(0);
 
-  const shortages = totalDisposalSales - totalIncome;
+  const totalInventorySalesDecimal =
+    report.inventories?.reduce((sum, inventory) => sum.add(inventory.amount), new Decimal(0)) ??
+    new Decimal(0);
 
-  const netTotal = totalIncome - totalExpenses;
+  const shortagesDecimal = totalDisposalSalesDecimal.sub(totalIncomeDecimal);
 
-  return { totalIncome, totalExpenses, totalDisposalSales, shortages, netTotal };
+  const netTotalDecimal = totalIncomeDecimal.add(totalInventorySalesDecimal).sub(totalExpensesDecimal);
+
+  return {
+    totalIncome: totalIncomeDecimal.toNumber(),
+    totalExpenses: totalExpensesDecimal.toNumber(),
+    totalDisposalSales: totalDisposalSalesDecimal.toNumber(),
+    totalInventorySales: totalInventorySalesDecimal.toNumber(),
+    shortages: shortagesDecimal.toNumber(),
+    netTotal: netTotalDecimal.toNumber(),
+  };
 };

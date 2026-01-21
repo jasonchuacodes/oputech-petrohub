@@ -11,7 +11,7 @@ export interface Inventory {
 export interface CreateInventoryPayload {
   tenantId: string;
   name: string;
-  description?: string;
+  description?: string | null,
   price: number;
   quantity?: number;
 }

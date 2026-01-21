@@ -56,7 +56,14 @@ const createReportInventory = async ({
   }
 
   const unitPrice = latestPrice.price;
-  const totalPrice = quantity * Number(unitPrice);
+
+  // Check for existing entry
+  const existing = await prisma.reportInventory.findUnique({
+    where: { reportId_productId: { reportId, productId } },
+  });
+
+  const newQuantity = existing ? existing.quantity + quantity : quantity;
+  const amount = newQuantity * Number(unitPrice);
 
   const entry = await prisma.reportInventory.upsert({
     where: { reportId_productId: { reportId, productId } },
@@ -65,11 +72,12 @@ const createReportInventory = async ({
       productId,
       quantity,
       unitPriceSnapshot: unitPrice,
-      totalPrice,
+      amount,
     },
     update: {
-      quantity,
-      totalPrice,
+      quantity: newQuantity,
+      unitPriceSnapshot: unitPrice,
+      amount,
     },
     include: { product: true },
   });
@@ -114,13 +122,13 @@ const updateReportInventory = async (
   }
 
   const unitPrice = entry.product.productPrices[0]?.price || entry.unitPriceSnapshot;
-  const totalPrice = data.quantity * Number(unitPrice);
+  const amount = data.quantity * Number(unitPrice);
 
   return await prisma.reportInventory.update({
     where: { reportId_productId: { reportId, productId } },
     data: {
       quantity: data.quantity,
-      totalPrice,
+      amount,
     },
     include: { product: true },
   });

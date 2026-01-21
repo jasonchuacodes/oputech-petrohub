@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import { CustomModal } from '~/components/ui';
-import { Input } from '~/components/form';
+import { Input, NumberInput } from '~/components/form';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { useCreateInventoryMutation } from '~/services/inventory/inventory.queries';
 import { CreateInventorySchema, type CreateInventoryInput } from '~/schema/createInventorySchema';
@@ -29,12 +29,14 @@ export const CreateInventoryModal = ({ open, onClose }: CreateInventoryModalProp
       name: '',
       description: '',
       quantity: 0,
+      price: 0,
     },
     resolver: zodResolver(CreateInventorySchema),
   });
 
   const onSubmit = async (data: CreateInventoryInput) => {
     if (!tenantId) return;
+
     try {
       await createInventory({
         tenantId,
@@ -75,26 +77,27 @@ export const CreateInventoryModal = ({ open, onClose }: CreateInventoryModalProp
           control={control}
           name="name"
           placeholder="e.g., Mobil 1 Lubricant"
+          size="medium"
         />
-        <Input
-          label="Quantity"
-          control={control}
-          name="quantity"
-          type="number"
-          placeholder="0"
-          step="1"
-          min="0"
-        />
-        <Input
-          label="Price"
-          control={control}
-          name="price"
-          type="number"
-          startAdornment="₱"
-          placeholder="0.00"
-          step="0.01"
-          min="0.01"
-        />
+        <Stack direction="row" spacing={1}>
+          <NumberInput
+            label="Quantity"
+            control={control}
+            placeholder="Enter quantity"
+            name="quantity"
+            step={1}
+            min={0}
+          />
+          <NumberInput
+            label="Price"
+            control={control}
+            placeholder="Enter price"
+            name="price"
+            step={1.0}
+            min={1.0}
+            startAdornment="₱"
+          />
+        </Stack>
         <Input
           label="Description (optional)"
           control={control}

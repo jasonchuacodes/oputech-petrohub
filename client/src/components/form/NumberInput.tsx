@@ -23,6 +23,7 @@ type NumberInputProps<T extends FieldValues> = {
   step?: number;
   error?: boolean;
   autoFocus?: boolean;
+  width?: number | string;
 };
 
 export const NumberInput = <T extends FieldValues>({
@@ -40,6 +41,7 @@ export const NumberInput = <T extends FieldValues>({
   step = 1,
   error: errorProp,
   autoFocus,
+  width,
 }: NumberInputProps<T>) => {
   const slotProps = {
     input: {
@@ -93,7 +95,7 @@ export const NumberInput = <T extends FieldValues>({
         };
 
         return (
-          <Stack spacing={0.5} width={fullWidth ? '100%' : 'auto'}>
+          <Stack spacing={0.5} width={fullWidth ? '100%' : width ? width : 'auto'}>
             {label && (
               <Typography variant="body2" fontWeight="medium" color="text.primary">
                 {label}

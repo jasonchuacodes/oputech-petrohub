@@ -25,7 +25,7 @@ export const ShiftSelect = <TFieldValues extends FieldValues = FieldValues>({
       name={name}
       control={control}
       render={({ field: { onChange, value }, fieldState: { error } }) => (
-        <Stack spacing={0.5} width={{ sm: '100%', md: 200}}>
+        <Stack spacing={0.5} width="fit-content" minWidth={{ sm: '100%', md: 200 }}>
           {label && (
             <Typography variant="body2" fontWeight="medium">
               {label}

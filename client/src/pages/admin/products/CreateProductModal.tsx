@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import { CustomModal } from '~/components/ui';
-import { Input } from '~/components/form';
+import { Input, NumberInput } from '~/components/form';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { useCreateProductMutation } from '~/services/product/product.queries';
 import { CreateProductSchema, type CreateProductInput } from '~/schema/createProductSchema';
@@ -75,25 +75,25 @@ export const CreateProductModal = ({ open, onClose }: CreateProductModalProps) =
           name="name"
           placeholder="e.g., Premium Diesel"
         />
-        <Input
-          label="Current Reading"
-          control={control}
-          name="reading"
-          type="number"
-          placeholder="0.00"
-          step="0.01"
-          min="0.01"
-        />
-        <Input
-          label="Product Price"
-          control={control}
-          name="price"
-          type="number"
-          startAdornment="₱"
-          placeholder="0.00"
-          step="0.01"
-          min="0.01"
-        />
+        <Stack direction="row" spacing={1}>
+          <NumberInput
+            label="Current Reading"
+            control={control}
+            placeholder="0.00"
+            name="reading"
+            step={1}
+            min={1}
+          />
+          <NumberInput
+            label="Product Price"
+            control={control}
+            placeholder="0.00"
+            name="price"
+            step={1}
+            min={1}
+          />
+        </Stack>
+
         <Input
           label="Description (optional)"
           control={control}

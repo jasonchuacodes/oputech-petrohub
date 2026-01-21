@@ -87,7 +87,7 @@ export const Inventory = ({
                   {formatNumber(item.quantity, 0)}
                 </Typography>
                 <Typography variant="body2" sx={{ width: 100, textAlign: 'right' }}>
-                  {formatNumber(item.totalPrice, 2)}
+                  {formatNumber(item.amount, 2)}
                 </Typography>
                 
                 {!isReadOnly && (

@@ -267,7 +267,7 @@ model ReportInventory {
 
   quantity      Int
   unitPriceSnapshot Decimal  @db.Decimal(10, 2)
-  totalPrice        Decimal  @db.Decimal(10, 2)
+  amount            Decimal  @db.Decimal(10, 2)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

@@ -53,7 +53,7 @@ export type ReportInventory = {
   };
   quantity: number;
   unitPriceSnapshot: number;
-  totalPrice: number;
+  amount: number;
   createdAt: string;
   updatedAt: string;
 };
