@@ -1,5 +1,5 @@
-import { MoreHorizOutlined } from '@mui/icons-material';
-import { Box, CircularProgress, Divider, Stack, Typography } from '@mui/material';
+import { EditOutlined } from '@mui/icons-material';
+import { Box, CircularProgress, Divider, IconButton, Stack, Typography } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import { useState } from 'react';
 
@@ -8,8 +8,9 @@ import { useAuthContext } from '~/context/auth/useAuthContext';
 import { useGetReportByIdQuery } from '~/services/report/report.queries';
 import { formatDate } from '~/utils/date';
 import { formatCurrency, formatNumber } from '~/utils/number';
-import { UpdateDisposalModal } from './UpdateDisposalModal';
 import type { ReportDisposal as ReportDisposalType } from '~/services/report/report.types';
+
+import { UpdateDisposalModal } from './UpdateDisposalModal';
 
 export const ReportDisposal = () => {
   const { auth } = useAuthContext();
@@ -77,10 +78,9 @@ export const ReportDisposal = () => {
                 <Typography variant="body1" fontWeight={600} color="text.primary">
                   {disposal.product.name}
                 </Typography>
-                <MoreHorizOutlined
-                  onClick={() => handleOpenModal(disposal)}
-                  sx={{ cursor: 'pointer' }}
-                />
+                <IconButton size="small" onClick={() => handleOpenModal(disposal)}>
+                  <EditOutlined />
+                </IconButton>
               </Stack>
               <Stack spacing={1}>
                 <Stack direction="row" justifyContent="space-between" alignItems="center">

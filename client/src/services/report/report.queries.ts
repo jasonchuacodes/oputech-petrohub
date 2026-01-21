@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { createReport, getReportById, getReportByShift, getReports, createIncome, deleteIncome, createExpense, deleteExpense, assignEmployee, removeEmployee, updateDisposal, createInventory, deleteInventory } from './report.api';
+import { createReport, getReportById, getReportByShift, getReports, createIncome, deleteIncome, createExpense, deleteExpense, assignEmployee, removeEmployee, updateDisposal, createInventory, updateInventory, deleteInventory } from './report.api';
 
 const useGetReportsQuery = ({ tenantId }: { tenantId?: string }) => {
   return useQuery({
@@ -108,6 +108,18 @@ const useCreateInventoryMutation = () => {
   });
 };
 
+const useUpdateInventoryMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ reportId, productId, data }: { reportId: string; productId: string; data: { quantity: number } }) =>
+      updateInventory(reportId, productId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['report'] });
+    },
+  });
+};
+
 const useDeleteInventoryMutation = () => {
   const queryClient = useQueryClient();
 
@@ -166,6 +178,7 @@ export {
   useCreateExpenseMutation,
   useDeleteExpenseMutation,
   useCreateInventoryMutation,
+  useUpdateInventoryMutation,
   useDeleteInventoryMutation,
   useAssignEmployeeMutation,
   useRemoveEmployeeMutation,

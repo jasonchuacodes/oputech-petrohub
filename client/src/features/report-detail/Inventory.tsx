@@ -1,10 +1,14 @@
-import { AddOutlined, MoreHorizOutlined, RemoveOutlined } from '@mui/icons-material';
+import { AddOutlined, EditOutlined, RemoveOutlined } from '@mui/icons-material';
 import { Stack, Typography, IconButton, Divider } from '@mui/material';
+import { useState } from 'react';
 import toast from 'react-hot-toast';
 
 import { Button, CardContainer, Show } from '~/components/ui';
 import { useDisclosure } from '~/hooks/useDisclosure';
-import { useDeleteInventoryMutation } from '~/services/report/report.queries';
+import {
+  useUpdateInventoryMutation,
+  useDeleteInventoryMutation,
+} from '~/services/report/report.queries';
 import type { ReportInventory } from '~/services/report/report.types';
 import { formatCurrency, formatNumber } from '~/utils/number';
 
@@ -23,15 +27,27 @@ export const Inventory = ({
   totalInventorySales,
   isReadOnly,
 }: InventoryProps) => {
+  const [isEditMode, setIsEditMode] = useState(false);
   const inventoryDisclosure = useDisclosure();
+  const { mutateAsync: updateInventory } = useUpdateInventoryMutation();
   const { mutateAsync: deleteInventory } = useDeleteInventoryMutation();
 
-  const handleDelete = async (productId: string) => {
+  const handleDecrement = async (item: ReportInventory) => {
     try {
-      await deleteInventory({ reportId, productId });
-      toast.success('Inventory item deleted successfully');
+      const newQuantity = item.quantity - 1;
+
+      if (newQuantity === 0) {
+        await deleteInventory({ reportId, productId: item.productId });
+        toast.success('Inventory item removed');
+      } else {
+        await updateInventory({
+          reportId,
+          productId: item.productId,
+          data: { quantity: newQuantity },
+        });
+      }
     } catch {
-      toast.error('Failed to delete inventory item');
+      toast.error('Failed to update inventory item');
     }
   };
 
@@ -41,9 +57,11 @@ export const Inventory = ({
         <Typography variant="body1" fontWeight={600} color="text.primary">
           Inventory
         </Typography>
-        <IconButton>
-          <MoreHorizOutlined />
-        </IconButton>
+        {!isReadOnly && (
+          <IconButton onClick={() => setIsEditMode(!isEditMode)}>
+            <EditOutlined />
+          </IconButton>
+        )}
       </Stack>
 
       <CardContainer height="fit-content" spacing={2}>
@@ -68,7 +86,7 @@ export const Inventory = ({
               >
                 Amount
               </Typography>
-              {!isReadOnly && (
+              {isEditMode && (
                 <Typography
                   variant="body2"
                   color="text.secondary"
@@ -89,13 +107,9 @@ export const Inventory = ({
                 <Typography variant="body2" sx={{ width: 100, textAlign: 'right' }}>
                   {formatNumber(item.amount, 2)}
                 </Typography>
-                
-                {!isReadOnly && (
-                  <IconButton
-                    size="small"
-                    onClick={() => handleDelete(item.productId)}
-                    sx={{ width: 40 }}
-                  >
+
+                {isEditMode && (
+                  <IconButton size="small" onClick={() => handleDecrement(item)}>
                     <RemoveOutlined fontSize="small" />
                   </IconButton>
                 )}
@@ -113,7 +127,6 @@ export const Inventory = ({
                 <Typography variant="body2" sx={{ width: 100, textAlign: 'right' }}>
                   {formatCurrency(totalInventorySales)}
                 </Typography>
-                {!isReadOnly && <Typography variant="body2" sx={{ width: 40 }} />}
               </Stack>
             </Show>
           </Stack>

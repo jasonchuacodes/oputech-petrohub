@@ -75,8 +75,17 @@ const createInventory = async (
   return res.data.data.inventory;
 };
 
+const updateInventory = async (
+  reportId: string,
+  productId: string,
+  data: { quantity: number }
+): Promise<ReportInventory> => {
+  const res = await axios.put(`/reports/${reportId}/inventory/${productId}`, data);
+  return res.data.data.inventory;
+};
+
 const deleteInventory = async (reportId: string, productId: string): Promise<void> => {
   await axios.delete(`/reports/${reportId}/inventory/${productId}`);
 };
 
-export { getReports, getReportById, getReportByShift, createReport, createIncome, deleteIncome, createExpense, deleteExpense, assignEmployee, removeEmployee, updateDisposal, createInventory, deleteInventory };
+export { getReports, getReportById, getReportByShift, createReport, createIncome, deleteIncome, createExpense, deleteExpense, assignEmployee, removeEmployee, updateDisposal, createInventory, updateInventory, deleteInventory };

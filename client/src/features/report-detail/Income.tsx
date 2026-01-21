@@ -1,11 +1,15 @@
-import { AddOutlined, MoreHorizOutlined } from '@mui/icons-material';
+import { AddOutlined, EditOutlined, RemoveOutlined } from '@mui/icons-material';
 import { Stack, Typography, IconButton, Divider } from '@mui/material';
+import { useState } from 'react';
+import toast from 'react-hot-toast';
 
 import { Button, CardContainer, Show } from '~/components/ui';
 import { formatCurrency, formatNumber } from '~/utils/number';
-import { useDisclosure } from '../../hooks/useDisclosure';
-import { AddIncomeModal } from './AddIncomeModal';
+import { useDisclosure } from '~/hooks/useDisclosure';
+import { useDeleteIncomeMutation } from '~/services/report/report.queries';
 import type { ReportIncome } from '~/services/report/report.types';
+
+import { AddIncomeModal } from './AddIncomeModal';
 
 type IncomeProps = {
   reportId: string;
@@ -15,7 +19,17 @@ type IncomeProps = {
 };
 
 export const Income = ({ reportId, income, totalIncome, isReadOnly }: IncomeProps) => {
+  const [isEditMode, setIsEditMode] = useState(false);
   const incomeDisclosure = useDisclosure();
+  const { mutateAsync: deleteIncome } = useDeleteIncomeMutation();
+
+  const handleRemove = async (incomeId: string) => {
+    try {
+      await deleteIncome({ reportId, incomeId });
+    } catch {
+      toast.error('Failed to remove income item');
+    }
+  };
 
   return (
     <Stack>
@@ -23,9 +37,11 @@ export const Income = ({ reportId, income, totalIncome, isReadOnly }: IncomeProp
         <Typography variant="body1" fontWeight={600} color="text.primary">
           Income
         </Typography>
-        <IconButton>
-          <MoreHorizOutlined />
-        </IconButton>
+        {!isReadOnly && (
+          <IconButton onClick={() => setIsEditMode(!isEditMode)}>
+            <EditOutlined />
+          </IconButton>
+        )}
       </Stack>
 
       <CardContainer height="fit-content" spacing={2}>
@@ -38,11 +54,24 @@ export const Income = ({ reportId, income, totalIncome, isReadOnly }: IncomeProp
               alignItems="center"
               spacing={1}
             >
-              <Typography variant="body2" color='text.secondary'>{item.description}</Typography>
-              <Typography variant="body2" color='text.secondary'>{formatNumber(Number(item.amount), 2)}</Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ flex: 1 }}>
+                {item.description}
+              </Typography>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ minWidth: 80, textAlign: 'right' }}
+              >
+                {formatNumber(Number(item.amount), 2)}
+              </Typography>
+              {isEditMode && (
+                <IconButton size="small" onClick={() => handleRemove(item.id)}>
+                  <RemoveOutlined fontSize="small" />
+                </IconButton>
+              )}
             </Stack>
           ))}
-          
+
           <Show when={income.length > 1}>
             <Divider />
             <Stack direction="row" justifyContent="space-between" alignItems="center">

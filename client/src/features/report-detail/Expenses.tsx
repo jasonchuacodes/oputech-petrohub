@@ -1,11 +1,15 @@
-import { AddOutlined, MoreHorizOutlined } from '@mui/icons-material';
+import { AddOutlined, EditOutlined, RemoveOutlined } from '@mui/icons-material';
 import { Stack, Typography, IconButton, Divider } from '@mui/material';
+import { useState } from 'react';
+import toast from 'react-hot-toast';
 
 import { Button, CardContainer, Show } from '~/components/ui';
 import { formatCurrency, formatNumber } from '~/utils/number';
-import { useDisclosure } from '../../hooks/useDisclosure';
-import { AddExpenseModal } from './AddExpenseModal';
+import { useDisclosure } from '~/hooks/useDisclosure';
+import { useDeleteExpenseMutation } from '~/services/report/report.queries';
 import type { ReportExpense } from '~/services/report/report.types';
+
+import { AddExpenseModal } from './AddExpenseModal';
 
 type ExpensesProps = {
   reportId: string;
@@ -15,7 +19,17 @@ type ExpensesProps = {
 };
 
 export const Expenses = ({ reportId, expenses, totalExpenses, isReadOnly }: ExpensesProps) => {
+  const [isEditMode, setIsEditMode] = useState(false);
   const expenseDisclosure = useDisclosure();
+  const { mutateAsync: deleteExpense } = useDeleteExpenseMutation();
+
+  const handleRemove = async (expenseId: string) => {
+    try {
+      await deleteExpense({ reportId, expenseId });
+    } catch {
+      toast.error('Failed to remove expense item');
+    }
+  };
 
   return (
     <Stack>
@@ -23,9 +37,11 @@ export const Expenses = ({ reportId, expenses, totalExpenses, isReadOnly }: Expe
         <Typography variant="body1" fontWeight={600} color="text.primary">
           Expenses
         </Typography>
-        <IconButton>
-          <MoreHorizOutlined />
-        </IconButton>
+        {!isReadOnly && (
+          <IconButton onClick={() => setIsEditMode(!isEditMode)}>
+            <EditOutlined />
+          </IconButton>
+        )}
       </Stack>
 
       <CardContainer height="fit-content" spacing={2}>
@@ -38,12 +54,21 @@ export const Expenses = ({ reportId, expenses, totalExpenses, isReadOnly }: Expe
               alignItems="center"
               spacing={1}
             >
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" color="text.secondary" sx={{ flex: 1 }}>
                 {item.description}
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ minWidth: 80, textAlign: 'right' }}
+              >
                 {formatNumber(Number(item.amount), 2)}
               </Typography>
+              {isEditMode && (
+                <IconButton size="small" onClick={() => handleRemove(item.id)}>
+                  <RemoveOutlined fontSize="small" />
+                </IconButton>
+              )}
             </Stack>
           ))}
 
