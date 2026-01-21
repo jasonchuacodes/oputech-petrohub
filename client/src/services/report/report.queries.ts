@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { createReport, getReportById, getReportByShift, getReports, createIncome, deleteIncome, createExpense, deleteExpense, assignEmployee, removeEmployee, updateDisposal, createInventory, updateInventory, deleteInventory } from './report.api';
+import { createReport, getReportById, getReportByShift, getReports, createIncome, deleteIncome, createExpense, deleteExpense, assignEmployee, removeEmployee, updateDisposal, validateReport, submitReport, createInventory, updateInventory, deleteInventory } from './report.api';
 
 const useGetReportsQuery = ({ tenantId }: { tenantId?: string }) => {
   return useQuery({
@@ -168,6 +168,28 @@ const useUpdateDisposalMutation = () => {
   });
 };
 
+const useValidateReportMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (reportId: string) => validateReport(reportId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['report'] });
+    },
+  });
+};
+
+const useSubmitReportMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (reportId: string) => submitReport(reportId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['report'] });
+    },
+  });
+};
+
 export {
   useGetReportsQuery,
   useGetReportByIdQuery,
@@ -183,4 +205,6 @@ export {
   useAssignEmployeeMutation,
   useRemoveEmployeeMutation,
   useUpdateDisposalMutation,
+  useValidateReportMutation,
+  useSubmitReportMutation,
 };

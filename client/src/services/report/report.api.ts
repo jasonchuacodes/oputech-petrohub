@@ -67,6 +67,16 @@ const updateDisposal = async (
   return res.data.data.disposal;
 };
 
+const validateReport = async (reportId: string): Promise<Report> => {
+  const res = await axios.patch(`/reports/${reportId}/validate`);
+  return res.data.data.report;
+};
+
+const submitReport = async (reportId: string): Promise<Report> => {
+  const res = await axios.patch(`/reports/${reportId}/submit`);
+  return res.data.data.report;
+};
+
 const createInventory = async (
   reportId: string,
   data: { productId: string; quantity: number }
@@ -88,4 +98,4 @@ const deleteInventory = async (reportId: string, productId: string): Promise<voi
   await axios.delete(`/reports/${reportId}/inventory/${productId}`);
 };
 
-export { getReports, getReportById, getReportByShift, createReport, createIncome, deleteIncome, createExpense, deleteExpense, assignEmployee, removeEmployee, updateDisposal, createInventory, updateInventory, deleteInventory };
+export { getReports, getReportById, getReportByShift, createReport, createIncome, deleteIncome, createExpense, deleteExpense, assignEmployee, removeEmployee, updateDisposal, validateReport, submitReport, createInventory, updateInventory, deleteInventory };

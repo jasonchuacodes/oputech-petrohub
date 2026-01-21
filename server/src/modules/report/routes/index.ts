@@ -30,7 +30,7 @@ router.get('/by-shift', requireAuth, asyncHandler(getReportByShift));
 router.get('/:reportId', requireAuth, asyncHandler(getReportById));
 
 router.patch('/:reportId/validate', requireAuth, asyncHandler(validateReport));
-router.post('/:reportId/submit', requireAuth, asyncHandler(submitReport));
+router.patch('/:reportId/submit', requireAuth, asyncHandler(submitReport));
 
 router.post('/:reportId/entries', requireAuth, asyncHandler(createOrUpdateEntry));
 router.delete('/:reportId/entries/:entryId', requireAuth, asyncHandler(deleteEntry));
