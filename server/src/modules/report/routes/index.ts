@@ -20,6 +20,7 @@ import {
   createReportInventory,
   updateReportInventory,
   deleteReportInventory,
+  deleteReport,
 } from '../controller/report.controller';
 
 const router = express.Router();
@@ -28,6 +29,7 @@ router.post('/', requireAuth, asyncHandler(createReport));
 router.get('/', requireAuth, asyncHandler(getReports));
 router.get('/by-shift', requireAuth, asyncHandler(getReportByShift));
 router.get('/:reportId', requireAuth, asyncHandler(getReportById));
+router.delete('/:reportId', requireAuth, asyncHandler(deleteReport));
 
 router.patch('/:reportId/validate', requireAuth, asyncHandler(validateReport));
 router.patch('/:reportId/submit', requireAuth, asyncHandler(submitReport));

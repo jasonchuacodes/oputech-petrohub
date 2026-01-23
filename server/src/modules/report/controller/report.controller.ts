@@ -53,6 +53,11 @@ const getReports = async (req: AuthenticatedRequest, res: Response, next: NextFu
   try {
     const filters = await validateGetReports({
       tenantId: req.query.tenantId as string,
+      shiftDate: req.query.shiftDate as string | undefined,
+      status: req.query.status as string | undefined,
+      startDate: req.query.startDate as string | undefined,
+      endDate: req.query.endDate as string | undefined,
+      creatorId: req.query.creatorId as string | undefined,
     });
 
     const reports = await reportService.getReports({
@@ -316,6 +321,19 @@ const deleteReportInventory = async (req: Request, res: Response, next: NextFunc
   }
 };
 
+const deleteReport = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const { reportId } = req.params;
+    await reportService.deleteReport(reportId);
+
+    res.status(200).json({
+      message: 'Report deleted successfully',
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export {
   createReport,
   getReports,
@@ -335,4 +353,5 @@ export {
   createReportInventory,
   updateReportInventory,
   deleteReportInventory,
+  deleteReport,
 };

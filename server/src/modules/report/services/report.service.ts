@@ -214,7 +214,11 @@ const getReports = async ({
         select: { entries: true, expenses: true },
       },
     },
-    orderBy: { submittedAt: 'desc' },
+    orderBy: {
+      shift: {
+        shiftStart: 'asc',
+      },
+    },
   });
 
   return reports.map((report) => ({
@@ -404,4 +408,33 @@ const submitReport = async (reportId: string, userId: string) => {
   });
 };
 
-export { createReport, getReports, getReportById, getReportByShift, validateReport, submitReport };
+const deleteReport = async (reportId: string): Promise<void> => {
+  const report = await prisma.report.findUnique({
+    where: { id: reportId },
+    select: { status: true, shift: { select: { name: true } } },
+  });
+
+  if (!report) {
+    throw new NotFoundError('Report not found');
+  }
+
+  if (report.status !== ReportStatus.DRAFT) {
+    throw new ConflictError(
+      'Only DRAFT reports can be deleted. VALIDATED and SUBMITTED reports are permanent records.',
+    );
+  }
+
+  await prisma.report.delete({
+    where: { id: reportId },
+  });
+};
+
+export {
+  createReport,
+  getReports,
+  getReportById,
+  getReportByShift,
+  validateReport,
+  submitReport,
+  deleteReport,
+};

@@ -172,7 +172,6 @@ export const ReportDetail = () => {
               </Stack>
 
               <Divider sx={{ borderColor: 'primary.light' }} />
-
               <Stack direction="row" alignItems="center" justifyContent="space-between">
                 <Typography variant="body2" color="primary.alpha">
                   Total Sales
@@ -190,20 +189,20 @@ export const ReportDetail = () => {
                   {formatCurrency(report?.totalDisposalSales)}
                 </Typography>
               </Stack>
-            </Stack>
-
-            <Stack direction="row" alignItems="center" justifyContent="space-between">
-              <Typography variant="body2" color="primary.alpha">
-                {report.shortages >= 0 ? 'Shortages ' : 'Over'}
-              </Typography>
-              <Typography
-                variant="body2"
-                color={report.shortages > 0 ? 'warning' : 'primary.alpha'}
-              >
-                {report.shortages > 0
-                  ? `(${formatNumber(Math.abs(report.shortages))})`
-                  : formatNumber(Math.abs(report.shortages))}
-              </Typography>
+              <Divider sx={{ borderColor: 'primary.light' }} />
+              <Stack direction="row" alignItems="center" justifyContent="space-between">
+                <Typography variant="body2" color="primary.alpha">
+                  {report.shortages >= 0 ? 'Shortages ' : 'Over'}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  color={report.shortages > 0 ? 'warning' : 'primary.alpha'}
+                >
+                  {report.shortages > 0
+                    ? `(${formatNumber(Math.abs(report.shortages))})`
+                    : formatNumber(Math.abs(report.shortages))}
+                </Typography>
+              </Stack>
             </Stack>
           </Stack>
 
@@ -262,48 +261,50 @@ export const ReportDetail = () => {
         />
       </Show>
 
-      <Show when={isOwner}>
-        <Show
-          when={report.status === ReportStatus.VALIDATED}
-          fallback={
-            report.status !== ReportStatus.SUBMITTED && (
-              <Button
-                variant="contained"
-                size="large"
-                onClick={handleValidateClick}
-                disabled={isValidating}
-                fullWidth
-              >
-                {isValidating ? 'Validating...' : 'Validate Report'}
-              </Button>
-            )
-          }
-        >
+      <Stack spacing={1}>
+        <Show when={isOwner}>
+          <Show
+            when={report.status === ReportStatus.VALIDATED}
+            fallback={
+              report.status !== ReportStatus.SUBMITTED && (
+                <Button
+                  variant="contained"
+                  size="large"
+                  onClick={handleValidateClick}
+                  disabled={isValidating}
+                  fullWidth
+                >
+                  {isValidating ? 'Validating...' : 'Validate Report'}
+                </Button>
+              )
+            }
+          >
+            <Button
+              variant="contained"
+              size="large"
+              startIcon={<CheckCircleOutline />}
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+              fullWidth
+            >
+              {isSubmitting ? 'Submitting...' : 'Submit Report'}
+            </Button>
+          </Show>
+        </Show>
+
+        <Show when={report.status === ReportStatus.DRAFT}>
           <Button
-            variant="contained"
+            variant="outlined"
             size="large"
-            startIcon={<CheckCircleOutline />}
-            onClick={handleSubmit}
-            disabled={isSubmitting}
+            color="error"
+            startIcon={<DeleteOutline />}
+            onClick={deleteDisclosure.onOpen}
             fullWidth
           >
-            {isSubmitting ? 'Submitting...' : 'Submit Report'}
+            Delete Report
           </Button>
         </Show>
-      </Show>
-
-      <Show when={report.status === ReportStatus.DRAFT}>
-        <Button
-          variant="outlined"
-          size="large"
-          color="error"
-          startIcon={<DeleteOutline />}
-          onClick={deleteDisclosure.onOpen}
-          fullWidth
-        >
-          Delete Report
-        </Button>
-      </Show>
+      </Stack>
 
       <CustomModal
         open={disclosure.open}

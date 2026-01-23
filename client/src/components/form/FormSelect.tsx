@@ -1,6 +1,13 @@
+import {
+  Stack,
+  MenuItem,
+  Typography,
+  FormControl,
+  FormHelperText,
+  type SelectProps as MUISelectProps,
+} from '@mui/material';
+import type { PropsWithChildren } from 'react';
 import { Controller, type Control, type FieldValues, type Path } from 'react-hook-form';
-import { Stack, MenuItem, Typography, FormControl, FormHelperText, type SelectProps as MUISelectProps } from '@mui/material';
-import type { PropsWithChildren, ReactNode } from 'react';
 
 import { Select } from '~/components/ui';
 
@@ -9,23 +16,21 @@ type SelectOption = {
   value: string;
 };
 
-type FormSelectProps<T extends FieldValues> = PropsWithChildren<
-  {
-    name: Path<T>;
-    control: Control<T>;
+type FormSelectProps<T extends FieldValues> = PropsWithChildren<{
+  name: Path<T>;
+  control: Control<T>;
 
-    label?: string;
-    required?: boolean;
-    placeholder?: string;
-    size?: 'small' | 'medium';
+  label?: string;
+  required?: boolean;
+  placeholder?: string;
+  size?: 'small' | 'medium';
 
-    options?: SelectOption[];
-    renderValue?: MUISelectProps['renderValue'];
-    displayEmpty?: boolean;
-    MenuProps?: MUISelectProps['MenuProps'];
-    sx?: MUISelectProps['sx'];
-  }
->;
+  options?: SelectOption[];
+  renderValue?: MUISelectProps['renderValue'];
+  displayEmpty?: boolean;
+  MenuProps?: MUISelectProps['MenuProps'];
+  sx?: MUISelectProps['sx'];
+}>;
 
 export const FormSelect = <T extends FieldValues>({
   name,

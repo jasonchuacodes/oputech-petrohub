@@ -1,34 +1,42 @@
 import { CalendarMonth, Description } from '@mui/icons-material';
 import { Stack, Typography } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 import { PageLayout } from '~/components/ui';
 import { useAuthContext } from '~/context/auth/useAuthContext';
-import { UserRoutes } from '~/routes';
+import { useDisclosure } from '~/hooks/useDisclosure';
 import { pathFor } from '~/utils/pathFor';
+import { UserRoutes } from '~/routes';
 
 import { PasswordChangeModal } from './PasswordChangeModal';
 import { RecentLogs } from './RecentLogs';
 import { ShortcutCard } from './ShortcutCard';
 import { TimeLogger } from './TimeLogger';
+import { ShiftSelectionModal } from './ShiftSelectionModal';
 
 export const HomePage = () => {
   const { auth } = useAuthContext();
-  const [open, setOpen] = useState(false);
+
+  const passwordModal = useDisclosure();
+  const shiftSelectionDisclosure = useDisclosure();
 
   useEffect(() => {
     if (auth?.shouldChangePassword) {
       const skipped = sessionStorage.getItem('skipPasswordChange');
 
       if (!skipped) {
-        setOpen(true);
+        passwordModal.onOpen();
       }
     }
-  }, [auth?.shouldChangePassword]);
+  }, [auth?.shouldChangePassword, passwordModal]);
 
   const handleClose = () => {
-    setOpen(false);
+    passwordModal.onClose();
     sessionStorage.setItem('skipPasswordChange', 'true');
+  };
+
+  const handleReportCardClick = () => {
+    shiftSelectionDisclosure.onOpen();
   };
 
   return (
@@ -50,18 +58,18 @@ export const HomePage = () => {
               pathname: UserRoutes.Timesheets,
             })}
           />
-          <ShortcutCard
-            icon={Description}
-            title="Report"
-            to={pathFor({
-              pathname: UserRoutes.Report,
-            })}
-          />
+          <ShortcutCard icon={Description} title="Report" to="#" onClick={handleReportCardClick} />
         </Stack>
         <RecentLogs />
       </Stack>
 
-      <PasswordChangeModal open={open} onClose={handleClose} />
+      <PasswordChangeModal open={passwordModal.open} onClose={handleClose} />
+
+      <ShiftSelectionModal
+        open={shiftSelectionDisclosure.open}
+        onClose={shiftSelectionDisclosure.onClose}
+        tenantId={auth?.tenantId}
+      />
     </PageLayout>
   );
 };

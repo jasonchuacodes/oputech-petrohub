@@ -1,7 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Avatar, Divider, Stack, Typography } from '@mui/material';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
@@ -11,7 +10,7 @@ import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
 import { InputWithFormat, Input } from '~/components/form';
-import { Button, Form } from '~/components/ui';
+import { Button, DatePicker, Form } from '~/components/ui';
 import { useAuthContext } from '~/context/auth/useAuthContext';
 import { UpdateUserSchema, type UpdateUserPayload } from '~/schema/updateUserSchema';
 import { useGetUserQuery, useUpdateUserMutation } from '~/services/user/user.queries';
@@ -141,18 +140,10 @@ export const AccountSettings = () => {
                   <Typography variant="body2" fontWeight="medium" color="text.secondary">
                     Birthday
                   </Typography>
+
                   <DatePicker
                     value={value ? dayjs(value) : null}
                     onChange={(date) => onChange(date ? date.toDate() : null)}
-                    closeOnSelect
-                    slotProps={{
-                      textField: {
-                        size: 'small',
-                        sx: { minWidth: 168 },
-                      },
-                      actionBar: { actions: ['clear'] },
-                    }}
-                    slots={{ toolbar: undefined }}
                   />
                 </Stack>
               )}

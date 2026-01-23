@@ -3,7 +3,6 @@ import {
   ChevronLeftOutlined,
   CloseOutlined,
   DashboardOutlined,
-  DescriptionOutlined,
   MenuOutlined,
 } from '@mui/icons-material';
 import {
@@ -50,13 +49,6 @@ const Navbar = () => {
       icon: DashboardOutlined,
       to: pathFor({
         pathname: UserRoutes.Home,
-      }),
-    },
-    {
-      label: 'Report',
-      icon: DescriptionOutlined,
-      to: pathFor({
-        pathname: UserRoutes.Report,
       }),
     },
     {

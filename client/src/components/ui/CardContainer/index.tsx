@@ -7,6 +7,7 @@ export const CardContainer = (props: StackProps) => {
       p={2}
       borderRadius={2}
       height='100%'
+      overflow='hidden'
       {...props}
     />
   );

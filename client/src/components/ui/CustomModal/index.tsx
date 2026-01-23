@@ -61,12 +61,7 @@ export const CustomModal = ({
             transform: 'translate(-50%, -50%)',
           }}
         >
-          <Box
-            sx={{
-              px: 2,
-              py: 1.5,
-            }}
-          >
+          <Box p={2}>
             <Stack direction="row" alignItems="start" spacing={3}>
               {icon && (
                 <Box

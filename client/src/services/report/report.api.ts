@@ -1,8 +1,29 @@
 import axios from '~/lib/axiosInstance';
-import type { CreateReportPayload, Report, ReportIncome, ReportExpense, ReportDisposal, ReportInventory } from './report.types';
+import type {
+  CreateReportPayload,
+  Report,
+  ReportIncome,
+  ReportExpense,
+  ReportDisposal,
+  ReportInventory,
+} from './report.types';
 
-const getReports = async (tenantId: string): Promise<Report[]> => {
-  const res = await axios.get('/reports', { params: { tenantId } });
+const getReports = async (
+  tenantId: string,
+  filters?: {
+    shiftDate?: string;
+    status?: string;
+    startDate?: string;
+    endDate?: string;
+    creatorId?: string;
+  },
+): Promise<Report[]> => {
+  const res = await axios.get('/reports', {
+    params: {
+      tenantId,
+      ...filters,
+    },
+  });
   return res.data.data.reports;
 };
 
@@ -32,7 +53,10 @@ const createReport = async (data: CreateReportPayload): Promise<Report> => {
   return res.data.data.report;
 };
 
-const createIncome = async (reportId: string, data: { description: string; amount: number }): Promise<ReportIncome> => {
+const createIncome = async (
+  reportId: string,
+  data: { description: string; amount: number },
+): Promise<ReportIncome> => {
   const res = await axios.post(`/reports/${reportId}/income`, data);
   return res.data.data.income;
 };
@@ -41,7 +65,10 @@ const deleteIncome = async (reportId: string, incomeId: string): Promise<void> =
   await axios.delete(`/reports/${reportId}/income/${incomeId}`);
 };
 
-const createExpense = async (reportId: string, data: { description: string; amount: number }): Promise<ReportExpense> => {
+const createExpense = async (
+  reportId: string,
+  data: { description: string; amount: number },
+): Promise<ReportExpense> => {
   const res = await axios.post(`/reports/${reportId}/expenses`, data);
   return res.data.data.expense;
 };
@@ -61,7 +88,7 @@ const removeEmployee = async (reportId: string, userId: string): Promise<void> =
 const updateDisposal = async (
   reportId: string,
   disposalId: string,
-  data: { afterReading: number }
+  data: { afterReading: number },
 ): Promise<ReportDisposal> => {
   const res = await axios.put(`/reports/${reportId}/disposals/${disposalId}`, data);
   return res.data.data.disposal;
@@ -79,7 +106,7 @@ const submitReport = async (reportId: string): Promise<Report> => {
 
 const createInventory = async (
   reportId: string,
-  data: { productId: string; quantity: number }
+  data: { productId: string; quantity: number },
 ): Promise<ReportInventory> => {
   const res = await axios.post(`/reports/${reportId}/inventory`, data);
   return res.data.data.inventory;
@@ -88,7 +115,7 @@ const createInventory = async (
 const updateInventory = async (
   reportId: string,
   productId: string,
-  data: { quantity: number }
+  data: { quantity: number },
 ): Promise<ReportInventory> => {
   const res = await axios.put(`/reports/${reportId}/inventory/${productId}`, data);
   return res.data.data.inventory;
@@ -98,4 +125,26 @@ const deleteInventory = async (reportId: string, productId: string): Promise<voi
   await axios.delete(`/reports/${reportId}/inventory/${productId}`);
 };
 
-export { getReports, getReportById, getReportByShift, createReport, createIncome, deleteIncome, createExpense, deleteExpense, assignEmployee, removeEmployee, updateDisposal, validateReport, submitReport, createInventory, updateInventory, deleteInventory };
+const deleteReport = async (reportId: string): Promise<void> => {
+  await axios.delete(`/reports/${reportId}`);
+};
+
+export {
+  getReports,
+  getReportById,
+  getReportByShift,
+  createReport,
+  createIncome,
+  deleteIncome,
+  createExpense,
+  deleteExpense,
+  assignEmployee,
+  removeEmployee,
+  updateDisposal,
+  validateReport,
+  submitReport,
+  createInventory,
+  updateInventory,
+  deleteInventory,
+  deleteReport,
+};

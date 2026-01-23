@@ -34,6 +34,9 @@ const getShiftsByTenantId = async (tenantId: string) => {
         select: { users: true },
       },
     },
+    orderBy: {
+      shiftStart: 'asc',
+    },
   });
 };
 

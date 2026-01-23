@@ -7,24 +7,34 @@ type ShortcutCardProps = {
   title: string;
   icon: React.ElementType;
   to: string;
+  onClick?: () => void;
+  disabled?: boolean;
 };
 
-export const ShortcutCard = ({ title, icon, to }: ShortcutCardProps) => {
+export const ShortcutCard = ({ title, icon, to, onClick, disabled = false }: ShortcutCardProps) => {
   const navigate = useNavigate();
 
-  const handleRedirect = () => navigate(to);
+  const handleRedirect = () => {
+    if (onClick) {
+      onClick();
+    } else {
+      navigate(to);
+    }
+  };
 
   return (
     <Button
       onClick={handleRedirect}
+      disabled={disabled}
       sx={{
         display: 'flex',
         flexDirection: 'column',
         flex: 1,
         gap: 0.5,
-        p:2,
+        p: 2,
         bgcolor: 'background.paper',
         borderRadius: 2,
+        opacity: disabled ? 0.5 : 1,
       }}
     >
       <Avatar
