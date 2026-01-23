@@ -1,7 +1,7 @@
-import { Stack, Typography, CircularProgress, Box, Divider } from '@mui/material';
-import { useParams } from 'react-router-dom';
+import { Stack, Typography, CircularProgress, Box, Divider, Alert, darken } from '@mui/material';
+import { useParams, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { CheckCircleOutline } from '@mui/icons-material';
+import { CheckCircleOutline, DeleteOutline } from '@mui/icons-material';
 
 import { CardContainer, NoData, CustomModal, Button, Show } from '~/components/ui';
 import { useAuthContext } from '~/context/auth/useAuthContext';
@@ -10,11 +10,16 @@ import {
   useGetReportByIdQuery,
   useValidateReportMutation,
   useSubmitReportMutation,
+  useDeleteReportMutation,
 } from '~/services/report/report.queries';
+import { UserRoutes } from '~/routes';
 import { ReportStatus } from '~/services/report/report.types';
+import theme from '~/theme';
 import { formatDate } from '~/utils/date';
 import { formatCurrency, formatNumber } from '~/utils/number';
 import { parseBackendError } from '~/utils/parseBackendError';
+import { pathFor } from '~/utils/pathFor';
+import { toTitleCase } from '~/utils/textUtils';
 
 import { Shortcuts } from './Shortcuts';
 import { EmployeesOnDuty } from './EmployeesOnDuty';
@@ -25,6 +30,7 @@ import { Inventory } from './Inventory';
 export const ReportDetail = () => {
   const { auth } = useAuthContext();
   const { reportId } = useParams<{ reportId: string }>();
+  const navigate = useNavigate();
 
   const tenantId = auth?.tenantId || null;
 
@@ -34,9 +40,11 @@ export const ReportDetail = () => {
   });
 
   const disclosure = useDisclosure();
+  const deleteDisclosure = useDisclosure();
 
   const { mutateAsync: validateReport, isPending: isValidating } = useValidateReportMutation();
   const { mutateAsync: submitReport, isPending: isSubmitting } = useSubmitReportMutation();
+  const { mutateAsync: deleteReport, isPending: isDeleting } = useDeleteReportMutation();
 
   const hasDisposalsChanged = (): boolean => {
     if (!report?.disposals || report.disposals.length === 0) return true;
@@ -81,6 +89,19 @@ export const ReportDetail = () => {
     }
   };
 
+  const handleDelete = async () => {
+    try {
+      await deleteReport(reportId!);
+      toast.success('Report deleted successfully');
+      navigate(pathFor({ pathname: UserRoutes.Home }));
+    } catch (err) {
+      const message = parseBackendError(err);
+      toast.error(message);
+    } finally {
+      deleteDisclosure.onClose();
+    }
+  };
+
   if (isLoading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight={400}>
@@ -93,87 +114,83 @@ export const ReportDetail = () => {
     return <NoData text="Report not found" />;
   }
 
-  const isReadOnly = report.status === ReportStatus.SUBMITTED;
+  const isOwner = auth?.id === report.creatorId;
+  const isReadOnly = report.status === ReportStatus.SUBMITTED || !isOwner;
 
   return (
     <Stack p={2} spacing={2}>
       <Stack spacing={1}>
-        <Typography
-          width="fit-content"
-          variant="body1"
-          color="text.primary"
-          fontWeight={500}
-          borderRadius={2}
-        >
-          {formatDate(new Date(), 'MMMM DD, YYYY')} — {report.shift.name} Shift
-        </Typography>
+        <Stack direction="row" alignItems="center" spacing={1} flexWrap="wrap">
+          <Typography variant="body1" color="text.primary" fontWeight={500}>
+            {formatDate(new Date(), 'MMMM DD, YYYY')} — {report.shift.name} Shift
+          </Typography>
+        </Stack>
 
         {/* Report Summary */}
         <CardContainer
-          p={3}
-          spacing={2}
+          p={0}
           borderColor="primary.main"
           borderRadius={2}
           bgcolor="primary.main"
           height="fit-content"
         >
-          <Stack>
-            <Typography variant="body1" fontWeight={500} color="primary.alpha">
-              Net Sales
-            </Typography>
-            <Typography variant="h2" fontWeight={600} color="common.white">
-              {formatCurrency(report?.netTotal)}
-            </Typography>
-          </Stack>
-
-          <Stack pl={2} spacing={1}>
-            <Stack direction="row" alignItems="center" justifyContent="space-between">
-              <Typography variant="body2" color="primary.alpha">
-                Sales
+          <Stack p={3} spacing={2}>
+            <Stack>
+              <Typography variant="body1" fontWeight={500} color="primary.alpha">
+                Net Sales
               </Typography>
-              <Typography variant="body2" color="primary.alpha">
-                {formatCurrency(report?.totalIncome)}
+              <Typography variant="h2" fontWeight={600} color="common.white">
+                {formatCurrency(report?.netTotal)}
               </Typography>
             </Stack>
 
-            <Stack direction="row" alignItems="center" justifyContent="space-between">
-              <Typography variant="body2" color="primary.alpha">
-                Expenses
-              </Typography>
-              <Typography variant="body2" color="primary.alpha">
-                {formatCurrency(report?.totalExpenses)}
-              </Typography>
-            </Stack>
-            <Stack direction="row" alignItems="center" justifyContent="space-between">
-              <Typography variant="body2" color="primary.alpha">
-                Lubricants
-              </Typography>
-              <Typography variant="body2" color="primary.alpha">
-                {formatCurrency(report?.totalInventorySales)}
-              </Typography>
-            </Stack>
+            <Stack pl={2} spacing={1}>
+              <Stack direction="row" alignItems="center" justifyContent="space-between">
+                <Typography variant="body2" color="primary.alpha">
+                  Sales
+                </Typography>
+                <Typography variant="body2" color="primary.alpha">
+                  {formatCurrency(report?.totalIncome)}
+                </Typography>
+              </Stack>
 
-            <Divider sx={{ borderColor: 'primary.light' }} />
+              <Stack direction="row" alignItems="center" justifyContent="space-between">
+                <Typography variant="body2" color="primary.alpha">
+                  Expenses
+                </Typography>
+                <Typography variant="body2" color="primary.alpha">
+                  {formatCurrency(report?.totalExpenses)}
+                </Typography>
+              </Stack>
+              <Stack direction="row" alignItems="center" justifyContent="space-between">
+                <Typography variant="body2" color="primary.alpha">
+                  Lubricants
+                </Typography>
+                <Typography variant="body2" color="primary.alpha">
+                  {formatCurrency(report?.totalInventorySales)}
+                </Typography>
+              </Stack>
 
-            <Stack direction="row" alignItems="center" justifyContent="space-between">
-              <Typography variant="body2" color="primary.alpha">
-                Total Sales
-              </Typography>
-              <Typography variant="body2" color="primary.alpha">
-                {formatCurrency(report?.totalSales)}
-              </Typography>
+              <Divider sx={{ borderColor: 'primary.light' }} />
+
+              <Stack direction="row" alignItems="center" justifyContent="space-between">
+                <Typography variant="body2" color="primary.alpha">
+                  Total Sales
+                </Typography>
+                <Typography variant="body2" color="primary.alpha">
+                  {formatCurrency(report?.totalSales)}
+                </Typography>
+              </Stack>
+
+              <Stack direction="row" alignItems="center" justifyContent="space-between">
+                <Typography variant="body2" color="primary.alpha">
+                  Disposals Sales
+                </Typography>
+                <Typography variant="body2" color="primary.alpha">
+                  {formatCurrency(report?.totalDisposalSales)}
+                </Typography>
+              </Stack>
             </Stack>
-
-            <Stack direction="row" alignItems="center" justifyContent="space-between">
-              <Typography variant="body2" color="primary.alpha">
-                Disposals Sales
-              </Typography>
-              <Typography variant="body2" color="primary.alpha">
-                {formatCurrency(report?.totalDisposalSales)}
-              </Typography>
-            </Stack>
-
-            <Divider sx={{ borderColor: 'primary.light' }} />
 
             <Stack direction="row" alignItems="center" justifyContent="space-between">
               <Typography variant="body2" color="primary.alpha">
@@ -189,30 +206,45 @@ export const ReportDetail = () => {
               </Typography>
             </Stack>
           </Stack>
-        </CardContainer>
 
-        <Show
-          when={isReadOnly}
-          fallback={
-            <Typography color="info" variant="body2">
-              This report is {report.status.toLowerCase()} and can be edited.
-            </Typography>
-          }
-        >
-          <Typography color="warning" variant="body2">
-            This report has been submitted and cannot be edited.
-          </Typography>
-        </Show>
+          <Divider sx={{ borderColor: 'primary.light' }} />
+          <Stack
+            p={2}
+            direction="row"
+            alignItems="center"
+            justifyContent="space-between"
+            bgcolor={darken(theme.palette.primary.main, 0.05)}
+          >
+            <Stack direction="row" alignItems="center" spacing={1}>
+              <Typography variant="body2" color="primary.alpha">
+                Status:
+              </Typography>
+              <Typography variant="body2" color="warning.main">
+                {toTitleCase(report.status)}
+              </Typography>
+            </Stack>
+            <Stack direction="row" alignItems="center" spacing={1}>
+              <Typography variant="body2" color="primary.alpha">
+                Created by:
+              </Typography>
+              <Typography variant="body2" color="primary.alpha">
+                {report.creator.name}
+              </Typography>
+            </Stack>
+          </Stack>
+        </CardContainer>
       </Stack>
 
       <Shortcuts reportId={reportId!} isReadOnly={isReadOnly} />
       <EmployeesOnDuty reportId={reportId!} employees={report.employees} isReadOnly={isReadOnly} />
-      <Income
-        reportId={reportId!}
-        income={report.income}
-        totalIncome={report.totalIncome}
-        isReadOnly={isReadOnly}
-      />
+      <Show when={!(isReadOnly && report.income.length === 0)}>
+        <Income
+          reportId={reportId!}
+          income={report.income}
+          totalIncome={report.totalIncome}
+          isReadOnly={isReadOnly}
+        />
+      </Show>
       <Show when={!(isReadOnly && report.expenses.length === 0)}>
         <Expenses
           reportId={reportId!}
@@ -230,31 +262,46 @@ export const ReportDetail = () => {
         />
       </Show>
 
-      <Show
-        when={report.status === ReportStatus.VALIDATED}
-        fallback={
-          report.status !== ReportStatus.SUBMITTED && (
-            <Button
-              variant="contained"
-              size="large"
-              onClick={handleValidateClick}
-              disabled={isValidating}
-              fullWidth
-            >
-              {isValidating ? 'Validating...' : 'Validate Report'}
-            </Button>
-          )
-        }
-      >
+      <Show when={isOwner}>
+        <Show
+          when={report.status === ReportStatus.VALIDATED}
+          fallback={
+            report.status !== ReportStatus.SUBMITTED && (
+              <Button
+                variant="contained"
+                size="large"
+                onClick={handleValidateClick}
+                disabled={isValidating}
+                fullWidth
+              >
+                {isValidating ? 'Validating...' : 'Validate Report'}
+              </Button>
+            )
+          }
+        >
+          <Button
+            variant="contained"
+            size="large"
+            startIcon={<CheckCircleOutline />}
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            fullWidth
+          >
+            {isSubmitting ? 'Submitting...' : 'Submit Report'}
+          </Button>
+        </Show>
+      </Show>
+
+      <Show when={report.status === ReportStatus.DRAFT}>
         <Button
-          variant="contained"
+          variant="outlined"
           size="large"
-          startIcon={<CheckCircleOutline />}
-          onClick={handleSubmit}
-          disabled={isSubmitting}
+          color="error"
+          startIcon={<DeleteOutline />}
+          onClick={deleteDisclosure.onOpen}
           fullWidth
         >
-          {isSubmitting ? 'Submitting...' : 'Submit Report'}
+          Delete Report
         </Button>
       </Show>
 
@@ -275,6 +322,38 @@ export const ReportDetail = () => {
         cancelText="Cancel"
         loading={isValidating}
       />
+
+      <CustomModal
+        open={deleteDisclosure.open}
+        onClose={deleteDisclosure.onClose}
+        onSubmit={handleDelete}
+        title="Delete Report?"
+        subheader="Are you sure you want to delete this report?"
+        type="danger"
+        icon={DeleteOutline}
+        submitText="Delete"
+        cancelText="Cancel"
+        loading={isDeleting}
+      >
+        <Stack spacing={2}>
+          <Typography variant="body2" color="text.secondary">
+            This action cannot be undone. Deleting this report will:
+          </Typography>
+          <Box component="ul" sx={{ pl: 2, mt: 0 }}>
+            <li>
+              <Typography variant="body2">Remove all report data</Typography>
+            </li>
+            <li>
+              <Typography variant="body2">
+                Allow someone else to create a report for this shift
+              </Typography>
+            </li>
+          </Box>
+          <Alert severity="warning" sx={{ mt: 1 }}>
+            This is useful if the wrong person accidentally created the report.
+          </Alert>
+        </Stack>
+      </CustomModal>
     </Stack>
   );
 };
