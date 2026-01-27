@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Typography } from '@mui/material';
 import { HomeOutlined, AddOutlined } from '@mui/icons-material';
 
@@ -18,7 +19,13 @@ import { MoreDetailsMenu } from './MoreDetailsMenu';
 export const InventoryPage = () => {
   const { tenantId } = useTenantContext();
   const disclosure = useDisclosure();
-  const { data: inventories, isLoading } = useGetInventoriesQuery(tenantId);
+
+  const [searchTerm, setSearchTerm] = useState('');
+  
+  const { data: inventories, isLoading } = useGetInventoriesQuery({
+    tenantId,
+    filters: { searchTerm: searchTerm || undefined },
+  });
 
   return (
     <PageLayout>
@@ -59,6 +66,12 @@ export const InventoryPage = () => {
             itemToValue: (item) => item.id,
             itemToString: (item) => item.productName,
           })}
+          search={{
+            enabled: true,
+            placeholder: 'Search inventory',
+            defaultValue: '',
+            onValueChange: setSearchTerm,
+          }}
           columns={[
             {
               id: 'name',

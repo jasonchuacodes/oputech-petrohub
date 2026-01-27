@@ -34,13 +34,22 @@ const createInventory = async (data: CreateInventoryPayload) => {
   });
 };
 
-const getInventoriesByTenantId = async (tenantId: string) => {
+const getInventoriesByTenantId = async (
+  tenantId: string,
+  filters?: { searchTerm?: string },
+) => {
   const now = new Date();
 
   const products = await prisma.product.findMany({
     where: {
       tenantId,
       category: ProductCategory.STOCK_INVENTORY,
+      ...(filters?.searchTerm && {
+        name: {
+          contains: filters.searchTerm,
+          mode: 'insensitive',
+        },
+      }),
     },
     include: {
       productPrices: {

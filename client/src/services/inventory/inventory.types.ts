@@ -23,3 +23,7 @@ export interface UpdateInventoryPayload {
   quantity?: number;
   effectiveFrom?: string;
 }
+
+export interface GetInventoriesFilters {
+  searchTerm?: string;
+}

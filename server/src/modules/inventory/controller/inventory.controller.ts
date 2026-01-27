@@ -27,8 +27,10 @@ const getInventoriesByTenantId = async (
   next: NextFunction,
 ) => {
   try {
-    const { tenantId } = req.query;
-    const inventories = await inventoryService.getInventoriesByTenantId(tenantId as string);
+    const { tenantId, searchTerm } = req.query;
+    const inventories = await inventoryService.getInventoriesByTenantId(tenantId as string, {
+      searchTerm: searchTerm as string | undefined,
+    });
     res.status(200).json({ data: inventories });
   } catch (err) {
     next(err);

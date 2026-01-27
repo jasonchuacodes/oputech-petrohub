@@ -1,8 +1,8 @@
 import axios from '~/lib/axiosInstance';
-import type { Inventory, CreateInventoryPayload, UpdateInventoryPayload } from './inventory.types';
+import type { Inventory, CreateInventoryPayload, UpdateInventoryPayload, GetInventoriesFilters } from './inventory.types';
 
-const getInventoriesByTenantId = async (tenantId: string): Promise<Inventory[]> => {
-  const res = await axios.get('/inventory', { params: { tenantId } });
+const getInventoriesByTenantId = async (tenantId: string, filters?: GetInventoriesFilters): Promise<Inventory[]> => {
+  const res = await axios.get('/inventory', { params: { tenantId, ...filters } });
   return res.data.data;
 };
 

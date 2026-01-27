@@ -6,12 +6,12 @@ import {
   updateInventory,
   deleteInventory,
 } from './inventory.api';
-import type { CreateInventoryPayload, UpdateInventoryPayload } from './inventory.types';
+import type { CreateInventoryPayload, UpdateInventoryPayload, GetInventoriesFilters } from './inventory.types';
 
-const useGetInventoriesQuery = (tenantId?: string) => {
+const useGetInventoriesQuery = ({ tenantId, filters }: { tenantId?: string; filters?: GetInventoriesFilters }) => {
   return useQuery({
-    queryKey: ['inventories', tenantId],
-    queryFn: () => getInventoriesByTenantId(tenantId!),
+    queryKey: ['inventories', tenantId, filters],
+    queryFn: () => getInventoriesByTenantId(tenantId!, filters),
     enabled: !!tenantId,
   });
 };
