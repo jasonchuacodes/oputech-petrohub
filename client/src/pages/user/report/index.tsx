@@ -1,8 +1,8 @@
 import { PageLayout } from '~/components/ui';
-import { ReportDetail } from '~/features/report-detail';
+import { Report } from '~/features/report';
 
 export const ReportDetailPage = () => (
   <PageLayout>
-    <ReportDetail />
+    <Report />
   </PageLayout>
 );

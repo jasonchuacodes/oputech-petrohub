@@ -1,4 +1,4 @@
-import { Stack, Typography, CircularProgress, Box, Divider, Alert, darken } from '@mui/material';
+import { Stack, Typography, CircularProgress, Box, Divider, darken } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { CheckCircleOutline, DeleteOutline } from '@mui/icons-material';
@@ -26,8 +26,9 @@ import { EmployeesOnDuty } from './EmployeesOnDuty';
 import { Income } from './Income';
 import { Expenses } from './Expenses';
 import { Inventory } from './Inventory';
+import { MoreDetailsMenu } from './MoreDetailsMenu';
 
-export const ReportDetail = () => {
+export const Report = () => {
   const { auth } = useAuthContext();
   const { reportId } = useParams<{ reportId: string }>();
   const navigate = useNavigate();
@@ -135,13 +136,18 @@ export const ReportDetail = () => {
           height="fit-content"
         >
           <Stack p={3} spacing={2}>
-            <Stack>
-              <Typography variant="body1" fontWeight={500} color="primary.alpha">
-                Net Sales
-              </Typography>
-              <Typography variant="h2" fontWeight={600} color="common.white">
-                {formatCurrency(report?.netTotal)}
-              </Typography>
+            <Stack justifyContent="space-between" direction="row" alignItems="start">
+              <Stack>
+                <Typography variant="body1" fontWeight={500} color="primary.alpha">
+                  Net Sales
+                </Typography>
+                <Typography variant="h2" fontWeight={600} color="common.white">
+                  {formatCurrency(report?.netTotal)}
+                </Typography>
+              </Stack>
+              <Show when={report.status === ReportStatus.DRAFT && isOwner}>
+                <MoreDetailsMenu onDelete={deleteDisclosure.onOpen} />
+              </Show>
             </Stack>
 
             <Stack pl={2} spacing={1}>
@@ -291,19 +297,6 @@ export const ReportDetail = () => {
             </Button>
           </Show>
         </Show>
-
-        <Show when={report.status === ReportStatus.DRAFT}>
-          <Button
-            variant="outlined"
-            size="large"
-            color="error"
-            startIcon={<DeleteOutline />}
-            onClick={deleteDisclosure.onOpen}
-            fullWidth
-          >
-            Delete Report
-          </Button>
-        </Show>
       </Stack>
 
       <CustomModal
@@ -337,22 +330,21 @@ export const ReportDetail = () => {
         loading={isDeleting}
       >
         <Stack spacing={2}>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2">
             This action cannot be undone. Deleting this report will:
           </Typography>
           <Box component="ul" sx={{ pl: 2, mt: 0 }}>
             <li>
-              <Typography variant="body2">Remove all report data</Typography>
+              <Typography variant="body2" color="text.secondary">
+                Remove all report data
+              </Typography>
             </li>
             <li>
-              <Typography variant="body2">
+              <Typography variant="body2" color="text.secondary">
                 Allow someone else to create a report for this shift
               </Typography>
             </li>
           </Box>
-          <Alert severity="warning" sx={{ mt: 1 }}>
-            This is useful if the wrong person accidentally created the report.
-          </Alert>
         </Stack>
       </CustomModal>
     </Stack>
