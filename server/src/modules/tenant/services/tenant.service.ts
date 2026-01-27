@@ -67,17 +67,25 @@ const getTenantById = async (userId: string, tenantId: string) => {
   return tenant;
 };
 
-const getTenantUsers = async (tenantId: string) => {
-  const startOfDay = new Date();
-  startOfDay.setHours(0, 0, 0, 0);
+interface GetTenantUsersFilters {
+  searchTerm?: string;
+}
 
-  const endOfDay = new Date();
-  endOfDay.setHours(23, 59, 59, 999);
-
+const getTenantUsers = async (tenantId: string, filters?: GetTenantUsersFilters) => {
   const tenantWithUsers = await prisma.tenant.findUnique({
     where: { id: tenantId },
     include: {
       users: {
+        where: filters?.searchTerm
+          ? {
+              user: {
+                name: {
+                  contains: filters.searchTerm,
+                  mode: 'insensitive',
+                },
+              },
+            }
+          : undefined,
         include: {
           user: {
             select: {

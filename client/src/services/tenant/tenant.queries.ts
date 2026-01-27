@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 
 import { createTenant, getTenant, getTenants, getTenantUsers, updateTenant } from './tenant.api';
-import type { Tenant } from './tenant.types';
+import type { Tenant, GetTenantUsersFilters } from './tenant.types';
 
 // Queries
 const useGetTenantsQuery = (): UseQueryResult<Tenant[]> => {
@@ -21,10 +21,16 @@ const useGetTenantByIdQuery = ({ tenantId }: { tenantId?: string }) => {
   });
 };
 
-const useGetTenantUsersQuery = ({ tenantId }: { tenantId?: string }) => {
+const useGetTenantUsersQuery = ({
+  tenantId,
+  filters,
+}: {
+  tenantId?: string;
+  filters?: GetTenantUsersFilters;
+}) => {
   return useQuery({
-    queryKey: ['tenantUsers', tenantId],
-    queryFn: () => getTenantUsers(tenantId!),
+    queryKey: ['tenantUsers', tenantId, filters],
+    queryFn: (context) => getTenantUsers(tenantId!, filters, context.signal),
     enabled: !!tenantId,
   });
 };

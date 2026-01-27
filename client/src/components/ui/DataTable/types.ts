@@ -18,6 +18,14 @@ export type DataTableCollection<T> = {
   itemToString: (item: T) => string;
 };
 
+export type DataTableSearchProps = {
+  enabled: boolean;
+  placeholder: string;
+  value?: string;
+  defaultValue?: string;
+  onValueChange?: (value: string) => void;
+};
+
 export type DataTableProps<T> = {
   id: string;
   collection: DataTableCollection<T>;
@@ -25,6 +33,7 @@ export type DataTableProps<T> = {
   onRowClick?: (item: T) => void;
   loading?: boolean;
   emptyMessage?: string;
+  search?: DataTableSearchProps;
 };
 
 export type SortConfig = {

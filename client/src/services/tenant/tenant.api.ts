@@ -3,7 +3,7 @@ import axios from '~/lib/axiosInstance';
 import type { CreateTenantInput } from '~/schema/createTenantSchema';
 import type { UpdateTenantPayload } from '~/schema/updateTenantSchema';
 
-import type { Tenant } from './tenant.types';
+import type { Tenant, GetTenantUsersFilters } from './tenant.types';
 import type { User } from '../user/user.types';
 
 // Queries
@@ -19,8 +19,15 @@ const getTenants = async (): Promise<Tenant[]> => {
   return res.data.data.tenants;
 };
 
-const getTenantUsers = async (tenantId: string): Promise<User[]> => {
-  const res = await axios.get(`/tenants/${tenantId}/users`);
+const getTenantUsers = async (
+  tenantId: string,
+  filters?: GetTenantUsersFilters,
+  signal?: AbortSignal,
+): Promise<User[]> => {
+  const res = await axios.get(`/tenants/${tenantId}/users`, {
+    params: { ...filters },
+    signal,
+  });
 
   return res.data.data.users;
 };

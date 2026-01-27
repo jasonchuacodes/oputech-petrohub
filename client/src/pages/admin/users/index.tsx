@@ -1,7 +1,7 @@
+import { useState } from 'react';
 import { Avatar, Stack, Typography } from '@mui/material';
-import { AddOutlined, FilterAltOutlined, HomeOutlined } from '@mui/icons-material';
+import { AddOutlined, HomeOutlined } from '@mui/icons-material';
 
-import { SearchInput } from '~/components/form';
 import { PageHeader } from '~/components/layouts';
 import {
   Breadcrumb,
@@ -26,8 +26,14 @@ import { MoreDetailsMenu } from './MoreDetailsMenu';
 export const UsersPage = () => {
   const { tenantId } = useTenantContext();
   const disclosure = useDisclosure();
+  const [searchTerm, setSearchTerm] = useState('');
 
-  const { data: users, isLoading } = useGetTenantUsersQuery({ tenantId });
+  const { data: users, isLoading } = useGetTenantUsersQuery({
+    tenantId,
+    filters: {
+      searchTerm: searchTerm || undefined,
+    },
+  });
 
   return (
     <PageLayout>
@@ -62,112 +68,99 @@ export const UsersPage = () => {
             </Button>
           }
         />
-        <Stack spacing={1}>
-          <Stack
-            alignItems="start"
-            direction="row"
-            justifyContent="space-between"
-            width="100%"
-            spacing={2}
-          >
-            <Stack direction="row" spacing={1} width={400}>
-              <SearchInput placeholder="Search employee" />
-              <Button variant="outlined" endIcon={<FilterAltOutlined fontSize="small" />}>
-                Filter
-              </Button>
-            </Stack>
-          </Stack>
-          <DataTable
-            id="admin-users-table"
-            collection={DataTable.collection({
-              items: users || [],
-              itemToValue: (user) => user.id,
-              itemToString: (user) => user.name,
-            })}
-            columns={[
-              {
-                id: 'name',
-                heading: 'Name',
-                cell: (user) => (
-                  <Link to={user.id}>
-                    <Stack
-                      direction="row"
-                      spacing={1}
-                      alignItems="center"
-                      sx={{ '&:hover .username': { fontWeight: 600, textDecoration: 'underline' } }}
-                    >
-                      <Avatar sx={{ width: 32, height: 32 }}>
-                        <Typography fontSize="small">
-                          {' '}
-                          {user.name.charAt(0).toUpperCase()}
-                        </Typography>
-                      </Avatar>
-                      <Typography variant="body2" color="text.primary" className="username">
-                        {user.name}
-                      </Typography>
-                    </Stack>
-                  </Link>
-                ),
-                orderable: true,
-                width: 300,
-              },
-              {
-                id: 'username',
-                heading: 'Username',
-                cell: (user) => (
-                  <Typography variant="body2" color="text.secondary">
-                    {user.username}
-                  </Typography>
-                ),
-                orderable: true,
-              },
-              {
-                id: 'role',
-                heading: 'Role',
-                cell: (user) => (
-                  <Typography variant="body2" color="text.secondary">
-                    {toTitleCase(user.role)}
-                  </Typography>
-                ),
-                orderable: true,
-              },
-              {
-                id: 'shift',
-                heading: 'Shift',
-                cell: (user) =>
-                  user.shiftSchedule ? (
-                    <Chip label={user.shiftSchedule.shiftName} color={user.shiftSchedule.color} />
-                  ) : (
-                    <Typography variant="body2" color="text.secondary">
-                      -
+        <DataTable
+          id="admin-users-table"
+          collection={DataTable.collection({
+            items: users || [],
+            itemToValue: (user) => user.id,
+            itemToString: (user) => user.name,
+          })}
+          search={{
+            enabled: true,
+            placeholder: 'Search employee',
+            defaultValue: '',
+            onValueChange: setSearchTerm,
+          }}
+          columns={[
+            {
+              id: 'name',
+              heading: 'Name',
+              cell: (user) => (
+                <Link to={user.id}>
+                  <Stack
+                    direction="row"
+                    spacing={1}
+                    alignItems="center"
+                    sx={{ '&:hover .username': { fontWeight: 600, textDecoration: 'underline' } }}
+                  >
+                    <Avatar sx={{ width: 32, height: 32 }}>
+                      <Typography fontSize="small"> {user.name.charAt(0).toUpperCase()}</Typography>
+                    </Avatar>
+                    <Typography variant="body2" color="text.primary" className="username">
+                      {user.name}
                     </Typography>
-                  ),
-              },
-              {
-                id: 'position',
-                heading: 'Position',
-                cell: (user) => (
+                  </Stack>
+                </Link>
+              ),
+              orderable: true,
+              width: 300,
+            },
+            {
+              id: 'username',
+              heading: 'Username',
+              cell: (user) => (
+                <Typography variant="body2" color="text.secondary">
+                  {user.username}
+                </Typography>
+              ),
+              orderable: true,
+            },
+            {
+              id: 'role',
+              heading: 'Role',
+              cell: (user) => (
+                <Typography variant="body2" color="text.secondary">
+                  {toTitleCase(user.role)}
+                </Typography>
+              ),
+              orderable: true,
+            },
+            {
+              id: 'shift',
+              heading: 'Shift',
+              cell: (user) =>
+                user.shiftSchedule ? (
+                  <Chip label={user.shiftSchedule.shiftName} color={user.shiftSchedule.color} />
+                ) : (
                   <Typography variant="body2" color="text.secondary">
-                    {user.position || '-'}
+                    -
                   </Typography>
                 ),
-              },
-              {
-                id: 'actions',
-                heading: '',
-                align: 'right',
-                cell: (user) => (
-                  <UserProvider userId={user.id} user={user}>
-                    <MoreDetailsMenu />
-                  </UserProvider>
-                ),
-                orderable: false,
-              },
-            ]}
-            loading={isLoading}
-            emptyMessage="No users found"
-          />
-        </Stack>
+            },
+            {
+              id: 'position',
+              heading: 'Position',
+              cell: (user) => (
+                <Typography variant="body2" color="text.secondary">
+                  {user.position || '-'}
+                </Typography>
+              ),
+            },
+            {
+              id: 'actions',
+              heading: '',
+              align: 'right',
+              cell: (user) => (
+                <UserProvider userId={user.id} user={user}>
+                  <MoreDetailsMenu />
+                </UserProvider>
+              ),
+              orderable: false,
+            },
+          ]}
+          loading={isLoading}
+          emptyMessage="No users found"
+        />
       </PageContainer>
 
       <CreateUserModal open={disclosure.open} setOpen={disclosure.setOpen} />

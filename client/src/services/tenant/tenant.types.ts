@@ -13,3 +13,7 @@ export type Tenant = {
 
   logoUrl?: string;
 };
+
+export interface GetTenantUsersFilters {
+  searchTerm?: string;
+}

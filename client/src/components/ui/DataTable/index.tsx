@@ -1,5 +1,5 @@
 import {
-  Box,
+  Stack,
   Table,
   TableBody,
   TableCell,
@@ -10,10 +10,14 @@ import {
 } from '@mui/material';
 import { KeyboardArrowDownOutlined } from '@mui/icons-material';
 import { useMemo, useState } from 'react';
+import { useDebouncedCallback } from 'use-debounce';
 
+import { SearchInput } from '../../form';
 import { LoadingSpinner } from '../LoadingSpinner';
 import { NoData } from '../NoData';
 import { Paper } from '../Paper';
+import { Show } from '../Show';
+import { useSearch } from './hooks/useSearch';
 import type { DataTableCollection, DataTableProps, SortConfig } from './types';
 import { compareValues, getSortableValue } from './utils';
 
@@ -24,8 +28,13 @@ export const DataTable = <T,>({
   onRowClick,
   loading = false,
   emptyMessage = 'No data available',
+  search,
 }: DataTableProps<T>) => {
   const [sortConfig, setSortConfig] = useState<SortConfig>(null);
+
+  const searchState = useSearch(search);
+  const [value, setValue] = useState(searchState.value);
+  const setExternalValue = useDebouncedCallback(searchState.setValue, 250);
 
   const handleSort = (columnId: string) => {
     setSortConfig((prevSort) => {
@@ -55,24 +64,22 @@ export const DataTable = <T,>({
     });
   }, [collection.items, sortConfig, columns]);
 
-  if (loading) {
-    return (
-      <Box display="flex" justifyContent="center" alignItems="center" pt={10}>
-        <LoadingSpinner />
-      </Box>
-    );
-  }
-
-  if (collection.items.length === 0) {
-    return (
-      <Box p={5}>
-        <NoData text={emptyMessage} />
-      </Box>
-    );
-  }
+  const empty = !loading && collection.items.length === 0;
 
   return (
     <TableContainer component={Paper} sx={{ borderRadius: 2, overflowX: 'auto', maxWidth: '100%' }}>
+      {searchState.enabled && (
+        <Stack p={2}>
+          <SearchInput
+            placeholder={searchState.placeholder}
+            value={value}
+            onChange={(newValue) => {
+              setValue(newValue);
+              setExternalValue(newValue);
+            }}
+          />
+        </Stack>
+      )}
       <Table sx={{ minWidth: 650 }} id={id}>
         <TableHead>
           <TableRow>
@@ -86,6 +93,7 @@ export const DataTable = <T,>({
                   height: 40,
                   py: 0,
                   bgcolor: 'background.surface',
+                  borderTop: '1px solid',
                   borderBottom: '1px solid',
                   borderColor: 'divider',
                   whiteSpace: 'nowrap',
@@ -114,42 +122,62 @@ export const DataTable = <T,>({
           </TableRow>
         </TableHead>
         <TableBody>
-          {sortedItems.map((item, itemIndex) => {
-            const key = collection.itemToValue(item);
-            const ariaLabel = collection.itemToString(item);
-
-            return (
-              <TableRow
-                key={key}
-                onClick={onRowClick ? () => onRowClick(item) : undefined}
-                sx={{
-                  ...(onRowClick && {
-                    cursor: 'pointer',
-                    ":hover": {
-                      backgroundColor: 'background.surface'
-                    }
-                  }),
-                }}
-                aria-label={ariaLabel}
-              >
-                {columns.map((column) => (
-                  <TableCell
-                    key={column.id}
-                    align={column.align || 'left'}
-                    component={column.id === columns[0].id ? 'th' : undefined}
-                    scope={column.id === columns[0].id ? 'row' : undefined}
-                    sx={{
-                      borderBottom: itemIndex === sortedItems.length - 1 ? undefined : '1px solid',
-                      borderColor: itemIndex === sortedItems.length - 1 ? undefined : 'divider',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {column.cell(item)}
-                  </TableCell>
-                ))}
+          <Show
+            when={!loading}
+            fallback={
+              <TableRow>
+                <TableCell colSpan={columns.length} sx={{ textAlign: 'center', py: 8 }}>
+                  <LoadingSpinner />
+                </TableCell>
               </TableRow>
-            );
-          })}
+            }
+          >
+            {sortedItems.map((item, itemIndex) => {
+              const key = collection.itemToValue(item);
+              const ariaLabel = collection.itemToString(item);
+
+              return (
+                <TableRow
+                  key={key}
+                  onClick={onRowClick ? () => onRowClick(item) : undefined}
+                  sx={{
+                    ...(onRowClick && {
+                      cursor: 'pointer',
+                      ':hover': {
+                        backgroundColor: 'background.surface',
+                      },
+                    }),
+                  }}
+                  aria-label={ariaLabel}
+                >
+                  {columns.map((column) => (
+                    <TableCell
+                      key={column.id}
+                      align={column.align || 'left'}
+                      component={column.id === columns[0].id ? 'th' : undefined}
+                      scope={column.id === columns[0].id ? 'row' : undefined}
+                      sx={{
+                        borderBottom:
+                          itemIndex === sortedItems.length - 1 ? undefined : '1px solid',
+                        borderColor: itemIndex === sortedItems.length - 1 ? undefined : 'divider',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {column.cell(item)}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              );
+            })}
+          </Show>
+
+          <Show when={empty}>
+            <TableRow>
+              <TableCell colSpan={columns.length} sx={{ textAlign: 'center', py: 8 }}>
+                <NoData text={emptyMessage} />
+              </TableCell>
+            </TableRow>
+          </Show>
         </TableBody>
       </Table>
     </TableContainer>

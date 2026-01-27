@@ -1,3 +1,4 @@
+import { SearchOutlined } from '@mui/icons-material';
 import { type OutlinedInputProps, OutlinedInput, Stack, Typography } from '@mui/material';
 
 type SearchInputProps = Omit<OutlinedInputProps, 'value' | 'onChange'> & {
@@ -15,7 +16,11 @@ export const SearchInput = ({
 }: SearchInputProps) => {
   return (
     <Stack spacing={0.5} width="100%">
-      {label && <Typography variant='body1' color='text.primary'>{label}</Typography>}
+      {label && (
+        <Typography variant="body1" color="text.primary">
+          {label}
+        </Typography>
+      )}
       <OutlinedInput
         placeholder={placeholder}
         size="small"
@@ -42,6 +47,7 @@ export const SearchInput = ({
             },
           },
         }}
+        startAdornment={<SearchOutlined sx={{ mr: 1 }} />}
         {...props}
       />
     </Stack>
