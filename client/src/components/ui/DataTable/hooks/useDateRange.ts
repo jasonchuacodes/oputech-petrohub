@@ -21,6 +21,6 @@ export function useDateRange(props?: DataTableDateRangeProps) {
     startValue,
     endValue,
     setRangeValue,
-    label: props?.label ?? 'Select Date Range',
+    label: props?.label ?? '',
   };
 }

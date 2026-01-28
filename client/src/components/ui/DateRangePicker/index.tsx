@@ -12,6 +12,7 @@ import { formatRange } from '~/utils/date';
 
 import { RangePickersDay } from './RangePickersDay';
 import { Button } from '../Button';
+import { Show } from '../Show';
 
 export type DateRange = { start: Dayjs | null; end: Dayjs | null };
 
@@ -115,10 +116,12 @@ export const DateRangePicker = ({
   const isHoveringDay = (day: Dayjs) => hoverDay?.isSame(day, 'day') ?? false;
 
   return (
-    <Stack direction='row' alignItems="center" spacing={1}>
-      <Typography variant="body2" color="text.primary">
-        {label ? label : 'Date Period'}:
-      </Typography>
+    <Stack direction="row" alignItems="center" spacing={1}>
+      <Show when={!!label}>
+        <Typography variant="body2" color="text.primary">
+          {label}:
+        </Typography>
+      </Show>
       <Button
         onClick={handleOpen}
         variant="outlined"
@@ -128,12 +131,7 @@ export const DateRangePicker = ({
           justifyContent: 'flex-start',
           bgcolor: isOpen ? alpha(theme.palette.primary.light, 0.1) : 'background.paper',
         }}
-        endIcon={
-          <CalendarTodayOutlined
-            fontSize="small"
-            sx={{ ml:2,  color: 'text.secondary' }}
-          />
-        }
+        endIcon={<CalendarTodayOutlined fontSize="small" sx={{ ml: 2, color: 'text.secondary' }} />}
       >
         <Stack direction="row" spacing={1} sx={{ flex: 1 }}>
           {selectedStart || selectedEnd ? (

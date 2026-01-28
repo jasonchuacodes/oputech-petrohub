@@ -1,39 +1,47 @@
-import { FileDownloadOutlined, HomeOutlined } from '@mui/icons-material';
-import { Box, Stack } from '@mui/material';
+import { ChevronRightOutlined, HomeOutlined } from '@mui/icons-material';
+import { Typography } from '@mui/material';
+import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import weekday from 'dayjs/plugin/weekday';
 import utc from 'dayjs/plugin/utc';
-import { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 
-import { SearchInput } from '~/components/form';
 import { PageHeader } from '~/components/layouts';
 import {
   Breadcrumb,
-  Button,
-  DateRangePicker,
-  LoadingSpinner,
-  NoData,
+  DataTable,
   PageContainer,
   PageLayout,
   type DateRange,
 } from '~/components/ui';
-import { TimesheetProvider } from '~/context/timesheet/TimesheetContext';
-import { useTimesheetContext } from '~/context/timesheet/useTimesheetContext';
 import { useGetAllTimesheetsQuery } from '~/services/timesheet/timesheet.queries';
+import type { Timesheet } from '~/services/timesheet/timesheet.types';
 import { AdminRoutes } from '~/routes';
 import { pathFor } from '~/utils/pathFor';
+import { getInitialDateRange } from '~/utils/date';
 
-import { TimesheetTable } from './TimesheetTable';
 import { TimesheetLogs } from './timesheet-logs';
 
 dayjs.extend(weekday);
 dayjs.extend(utc);
 
+const TIMESHEETS_KEY = 'timesheets';
+
+type GroupedTimesheet = {
+  userId: string;
+  userName: string;
+  totalHours: number;
+};
+
 const TimesheetsPageContent = () => {
   const { tenantId, userId } = useParams();
-  const { startDate, endDate, setStartDate, setEndDate, searchTerm, setSearchTerm } =
-    useTimesheetContext();
+  const navigate = useNavigate();
+
+  const initialRange = getInitialDateRange(TIMESHEETS_KEY);
+
+  const [startDate, setStartDate] = useState<Dayjs | null>(initialRange.startDate);
+  const [endDate, setEndDate] = useState<Dayjs | null>(initialRange.endDate);
 
   const { data: timesheets, isLoading } = useGetAllTimesheetsQuery({
     tenantId,
@@ -41,15 +49,27 @@ const TimesheetsPageContent = () => {
     endDate,
   });
 
-  const filteredTimesheets = timesheets?.filter((timesheet) =>
-    timesheet.user.name.toLocaleLowerCase().startsWith(searchTerm.toLowerCase()),
+  // Group timesheets by user
+  const groupedTimesheets = timesheets?.reduce<Record<string, GroupedTimesheet>>(
+    (acc, timesheet: Timesheet) => {
+      const key = timesheet.user.id;
+
+      if (!acc[key]) {
+        acc[key] = {
+          userId: timesheet.user.id,
+          userName: timesheet.user.name,
+          totalHours: 0,
+        };
+      }
+
+      acc[key].totalHours += timesheet.totalHours;
+
+      return acc;
+    },
+    {},
   );
 
-  useEffect(() => {
-    if (userId) {
-      setSearchTerm('');
-    }
-  }, [userId, setSearchTerm]);
+  const groupedData = Object.values(groupedTimesheets ?? {});
 
   const handleSelectDateRange = ({ start, end }: DateRange) => {
     const newStart = start?.startOf('day') ?? null;
@@ -64,7 +84,14 @@ const TimesheetsPageContent = () => {
     }
   };
 
-  const handleExport = () => alert('This feature is pending.');
+  const handleRowClick = (userId: string) => {
+    navigate(
+      pathFor({
+        pathname: AdminRoutes.TenantTimesheets,
+        params: { tenantId, userId },
+      }),
+    );
+  };
 
   return (
     <PageLayout>
@@ -91,48 +118,71 @@ const TimesheetsPageContent = () => {
             title="Timesheets"
             description="View and manage timesheet records for your team"
           />
-          <Stack spacing={1}>
-            <DateRangePicker
-              selectedStart={startDate}
-              selectedEnd={endDate}
-              label="Select Time Period"
-              onAccept={handleSelectDateRange}
-            />
-            <Stack direction="row" alignItems="end" justifyContent="space-between">
-              <SearchInput
-                placeholder="Search employee"
-                value={searchTerm}
-                onChange={setSearchTerm}
-              />
-              <Button
-                startIcon={<FileDownloadOutlined />}
-                onClick={handleExport}
-                variant="contained"
-                sx={{ height: 40, flexShrink: 0 }}
-              >
-                Export
-              </Button>
-            </Stack>
-            {isLoading ? (
-              <Box display="flex" justifyContent="center" alignItems="center" pt={10}>
-                <LoadingSpinner />
-              </Box>
-            ) : filteredTimesheets && filteredTimesheets.length > 0 ? (
-              <TimesheetTable timesheets={filteredTimesheets} />
-            ) : (
-              <Box pt={10}>
-                <NoData text="No timesheets data available." />
-              </Box>
-            )}
-          </Stack>
+
+          <DataTable
+            id="timesheets-table"
+            collection={DataTable.collection({
+              items: groupedData || [],
+              itemToValue: (item) => item.userId,
+              itemToString: (item) => item.userName,
+            })}
+            columns={[
+              {
+                id: 'userName',
+                heading: 'Name',
+                cell: (item) => (
+                  <Typography variant="body2" color="text.primary">
+                    {item.userName}
+                  </Typography>
+                ),
+                orderable: true,
+                width: 240,
+              },
+              {
+                id: 'totalHours',
+                heading: 'Total Hours',
+                cell: (item) => (
+                  <Typography variant="body2" color="text.secondary">
+                    {item.totalHours}
+                  </Typography>
+                ),
+                orderable: true,
+                width: 120,
+              },
+              {
+                id: 'actions',
+                heading: '',
+                align: 'right',
+                cell: () => (
+                  <ChevronRightOutlined
+                    fontSize="small"
+                    sx={{
+                      color: 'text.secondary',
+                      opacity: 0.6,
+                    }}
+                  />
+                ),
+                width: 50,
+              },
+            ]}
+            loading={isLoading}
+            onRowClick={(item) => handleRowClick(item.userId)}
+            emptyMessage="No timesheets data available."
+            search={{
+              enabled: true,
+              placeholder: 'Search employee',
+            }}
+            dateRange={{
+              enabled: true,
+              startValue: startDate,
+              endValue: endDate,
+              onRangeChange: handleSelectDateRange,
+            }}
+          />
         </PageContainer>
       )}
     </PageLayout>
   );
 };
 
-export const TimesheetsPage = () => (
-  <TimesheetProvider>
-    <TimesheetsPageContent />
-  </TimesheetProvider>
-);
+export const TimesheetsPage = TimesheetsPageContent;
