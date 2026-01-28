@@ -1,5 +1,5 @@
 import { Menu, Stack, Typography } from '@mui/material';
-import { ChevronRightOutlined, RestartAltOutlined } from '@mui/icons-material';
+import { CalendarTodayOutlined, RestartAltOutlined } from '@mui/icons-material';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
@@ -115,8 +115,8 @@ export const DateRangePicker = ({
   const isHoveringDay = (day: Dayjs) => hoverDay?.isSame(day, 'day') ?? false;
 
   return (
-    <Stack spacing={1}>
-      <Typography variant="body1" color="text.primary">
+    <Stack direction='row' alignItems="center" spacing={1}>
+      <Typography variant="body2" color="text.primary">
         {label ? label : 'Date Period'}:
       </Typography>
       <Button
@@ -129,9 +129,9 @@ export const DateRangePicker = ({
           bgcolor: isOpen ? alpha(theme.palette.primary.light, 0.1) : 'background.paper',
         }}
         endIcon={
-          <ChevronRightOutlined
+          <CalendarTodayOutlined
             fontSize="small"
-            sx={{ transform: 'rotate(90deg)', color: 'text.secondary' }}
+            sx={{ ml:2,  color: 'text.secondary' }}
           />
         }
       >

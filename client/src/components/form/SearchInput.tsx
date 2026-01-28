@@ -1,55 +1,52 @@
 import { SearchOutlined } from '@mui/icons-material';
-import { type OutlinedInputProps, OutlinedInput, Stack, Typography } from '@mui/material';
+import { type OutlinedInputProps, OutlinedInput } from '@mui/material';
 
 type SearchInputProps = Omit<OutlinedInputProps, 'value' | 'onChange'> & {
-  label?: string;
   value?: string | null;
   onChange?: (value: string) => void;
 };
 
 export const SearchInput = ({
-  label,
   placeholder = 'Search',
   value,
   onChange,
+  slotProps,
   ...props
 }: SearchInputProps) => {
+  const mergedSlotProps: OutlinedInputProps['slotProps'] = {
+    input: {
+      sx: {
+        fontSize: 'body2.fontSize',
+        ...slotProps?.input?.sx,
+      },
+      ...slotProps?.input,
+    },
+    root: {
+      sx: {
+        '& .MuiOutlinedInput-notchedOutline': {
+          borderColor: 'divider',
+        },
+        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+          borderWidth: '2px',
+        },
+        bgcolor: 'background.paper',
+        borderRadius: 2,
+        ...slotProps?.root?.sx,
+      },
+      ...slotProps?.root,
+    },
+  };
+
   return (
-    <Stack spacing={0.5} width="100%">
-      {label && (
-        <Typography variant="body1" color="text.primary">
-          {label}
-        </Typography>
-      )}
-      <OutlinedInput
-        placeholder={placeholder}
-        size="small"
-        fullWidth
-        value={value ?? ''}
-        onChange={(e) => onChange?.(e.target.value)}
-        sx={{
-          bgcolor: 'background.paper',
-          height: 40,
-          maxWidth: 560,
-          borderRadius: 2,
-          '& .MuiOutlinedInput-notchedOutline': {
-            borderColor: 'divider',
-          },
-          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-            borderWidth: 2,
-            borderColor: 'text.primary',
-          },
-        }}
-        slotProps={{
-          input: {
-            sx: {
-              fontSize: 'body1.fontSize',
-            },
-          },
-        }}
-        startAdornment={<SearchOutlined sx={{ mr: 1 }} />}
-        {...props}
-      />
-    </Stack>
+    <OutlinedInput
+      placeholder={placeholder}
+      size="small"
+      fullWidth
+      value={value ?? ''}
+      onChange={(e) => onChange?.(e.target.value)}
+      startAdornment={<SearchOutlined sx={{ mr: 1 }} />}
+      {...props}
+      slotProps={mergedSlotProps}
+    />
   );
 };

@@ -1,4 +1,6 @@
 import type { ReactNode } from 'react';
+import type { Dayjs } from 'dayjs';
+import type { DateRange } from '../DateRangePicker';
 
 export type SortDirection = 'asc' | 'desc';
 
@@ -26,6 +28,16 @@ export type DataTableSearchProps = {
   onValueChange?: (value: string) => void;
 };
 
+export type DataTableDateRangeProps = {
+  enabled: boolean;
+  label?: string;
+  startValue?: Dayjs | null;
+  endValue?: Dayjs | null;
+  defaultStartValue?: Dayjs | null;
+  defaultEndValue?: Dayjs | null;
+  onRangeChange?: (range: DateRange) => void;
+};
+
 export type DataTableProps<T> = {
   id: string;
   collection: DataTableCollection<T>;
@@ -34,6 +46,7 @@ export type DataTableProps<T> = {
   loading?: boolean;
   emptyMessage?: string;
   search?: DataTableSearchProps;
+  dateRange?: DataTableDateRangeProps;
 };
 
 export type SortConfig = {

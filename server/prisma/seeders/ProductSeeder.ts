@@ -10,8 +10,8 @@ export class ProductSeeder {
 
     const basePrices = {
       XCS: '55.50',
-      'XTRA 1': '58.75',
-      'XTRA 2': '52.30',
+      'XTRA 1': '54.75',
+      'XTRA 2': '54.75',
       ADO: '49.80',
     };
 

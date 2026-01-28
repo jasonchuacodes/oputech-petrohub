@@ -215,9 +215,7 @@ const getReports = async ({
       },
     },
     orderBy: {
-      shift: {
-        shiftStart: 'asc',
-      },
+      submittedAt: 'desc',
     },
   });
 

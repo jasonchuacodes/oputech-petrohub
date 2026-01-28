@@ -14,12 +14,12 @@ export class ShiftSeeder {
 
     const shiftsData = [
       {
-        name: 'Morning Shift',
+        name: '1ST',
         shiftStart: new Date('1970-01-01T05:00:00.000Z'), // 5:00 AM
         shiftEnd: new Date('1970-01-01T13:00:00.000Z'), // 1:00 PM
       },
       {
-        name: 'Afternoon Shift',
+        name: '2ND',
         shiftStart: new Date('1970-01-01T13:00:00.000Z'), // 1:00 PM
         shiftEnd: new Date('1970-01-01T21:00:00.000Z'), // 9:00 PM
       },

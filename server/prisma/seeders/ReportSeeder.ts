@@ -130,7 +130,7 @@ export class ReportSeeder {
       }));
 
       /**
-       * AFTERNOON SHIFT REPORT
+       * MORNING SHIFT REPORT
        */
       const morningReport = await this.prisma.report.upsert({
         where: {
@@ -146,8 +146,12 @@ export class ReportSeeder {
           creatorId: adminUserId,
           shiftId: shifts.morningShift.id,
           shiftDate,
-          status: ReportStatus.DRAFT,
-          submittedAt: null,
+          status: ReportStatus.SUBMITTED,
+          submittedAt: new Date(
+            shiftDate.getTime() +
+              shifts.morningShift.shiftEnd.getUTCHours() * 3600000 +
+              1 * 3600000,
+          ),
           income: {
             create: morningIncomeData,
           },

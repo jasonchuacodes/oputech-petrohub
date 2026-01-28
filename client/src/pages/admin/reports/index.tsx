@@ -8,7 +8,6 @@ import {
   Breadcrumb,
   Chip,
   DataTable,
-  DateRangePicker,
   PageContainer,
   PageLayout,
   type DateRange,
@@ -32,7 +31,13 @@ export const ReportsPage = () => {
   const [startDate, setStartDate] = useState<Dayjs | null>(initialRange.startDate);
   const [endDate, setEndDate] = useState<Dayjs | null>(initialRange.endDate);
 
-  const { data: reports, isLoading } = useGetReportsQuery({ tenantId });
+  const { data: reports, isLoading } = useGetReportsQuery({
+    tenantId,
+    filters: {
+      startDate: startDate?.toISOString(),
+      endDate: endDate?.toISOString(),
+    },
+  });
 
   const handleSelectDateRange = ({ start, end }: DateRange) => {
     const newStart = start?.startOf('day') ?? null;
@@ -76,12 +81,6 @@ export const ReportsPage = () => {
         />
         <PageHeader title="Reports" description="View the list of reports here." />
 
-        <DateRangePicker
-          selectedStart={startDate}
-          selectedEnd={endDate}
-          label="Select Time Period"
-          onAccept={handleSelectDateRange}
-        />
         <DataTable
           id="reports-table"
           collection={DataTable.collection({
@@ -156,6 +155,13 @@ export const ReportsPage = () => {
           loading={isLoading}
           onRowClick={(report) => handleRowClick(report.id)}
           emptyMessage="No reports data available."
+          dateRange={{
+            enabled: true,
+            label: 'Period',
+            startValue: startDate,
+            endValue: endDate,
+            onRangeChange: handleSelectDateRange,
+          }}
         />
       </PageContainer>
     </PageLayout>

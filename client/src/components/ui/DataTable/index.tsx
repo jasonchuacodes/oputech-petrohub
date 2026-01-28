@@ -8,15 +8,18 @@ import {
   TableRow,
   TableSortLabel,
 } from '@mui/material';
-import { KeyboardArrowDownOutlined } from '@mui/icons-material';
+import { FilterAltOutlined, KeyboardArrowDownOutlined } from '@mui/icons-material';
 import { useMemo, useState } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
 
+import { Button } from '../Button';
+import { DateRangePicker } from '../DateRangePicker';
 import { SearchInput } from '../../form';
 import { LoadingSpinner } from '../LoadingSpinner';
 import { NoData } from '../NoData';
 import { Paper } from '../Paper';
 import { Show } from '../Show';
+import { useDateRange } from './hooks/useDateRange';
 import { useSearch } from './hooks/useSearch';
 import type { DataTableCollection, DataTableProps, SortConfig } from './types';
 import { compareValues, getSortableValue } from './utils';
@@ -29,12 +32,17 @@ export const DataTable = <T,>({
   loading = false,
   emptyMessage = 'No data available',
   search,
+  dateRange,
 }: DataTableProps<T>) => {
   const [sortConfig, setSortConfig] = useState<SortConfig>(null);
 
   const searchState = useSearch(search);
   const [value, setValue] = useState(searchState.value);
   const setExternalValue = useDebouncedCallback(searchState.setValue, 250);
+
+  const dateRangeState = useDateRange(dateRange);
+  const [startValue, setStartValue] = useState(dateRangeState.startValue);
+  const [endValue, setEndValue] = useState(dateRangeState.endValue);
 
   const handleSort = (columnId: string) => {
     setSortConfig((prevSort) => {
@@ -68,18 +76,40 @@ export const DataTable = <T,>({
 
   return (
     <TableContainer component={Paper} sx={{ borderRadius: 2, overflowX: 'auto', maxWidth: '100%' }}>
-      {searchState.enabled && (
-        <Stack p={2}>
-          <SearchInput
-            placeholder={searchState.placeholder}
-            value={value}
-            onChange={(newValue) => {
-              setValue(newValue);
-              setExternalValue(newValue);
-            }}
-          />
+      {(searchState.enabled || dateRangeState.enabled) && (
+        <Stack direction="row" spacing={1} p={2}>
+          {searchState.enabled && (
+            <SearchInput
+              placeholder={searchState.placeholder}
+              value={value}
+              onChange={(newValue) => {
+                setValue(newValue);
+                setExternalValue(newValue);
+              }}
+            />
+          )}
+          {dateRangeState.enabled && (
+            <DateRangePicker
+              selectedStart={startValue}
+              selectedEnd={endValue}
+              label={dateRangeState.label}
+              onAccept={(range) => {
+                setStartValue(range.start ?? null);
+                setEndValue(range.end ?? null);
+
+                dateRangeState.setRangeValue(range);
+              }}
+            />
+          )}
+          <Button
+            startIcon={<FilterAltOutlined fontSize="small" sx={{ color: 'text.secondary' }} />}
+            variant="outlined"
+          >
+            Filter
+          </Button>
         </Stack>
       )}
+
       <Table sx={{ minWidth: 650 }} id={id}>
         <TableHead>
           <TableRow>
