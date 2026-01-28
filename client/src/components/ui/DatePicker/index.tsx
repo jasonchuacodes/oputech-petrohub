@@ -38,9 +38,15 @@ export const DatePicker = ({ label, value, onChange }: DatePickerProps) => {
                 size: 'small',
                 InputProps: {
                   sx: {
+                    '& .MuiPickersOutlinedInput-notchedOutline': {
+                      borderColor: 'divider',
+                    },
+                    '&.Mui-focused .MuiPickersOutlinedInput-notchedOutline': {
+                      borderWidth: '2px',
+                    },
                     fontSize: 'body2.fontSize',
+                    bgcolor: 'background.paper',
                     borderRadius: 2,
-                    backgroundColor: 'background.paper',
                   },
                 },
               },

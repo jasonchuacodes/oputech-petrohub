@@ -1,6 +1,7 @@
-import { Box, Container, Stack, Tab, Tabs, Typography } from '@mui/material';
+import { Box, Container, Stack, Tab, Tabs } from '@mui/material';
 import { useState } from 'react';
 
+import { PageHeader } from '~/components/layouts';
 import { PageLayout } from '~/components/ui';
 
 import { SettingsTabPanel } from './SettingsTabPanel';
@@ -17,37 +18,33 @@ export const AdminSettingsPage = () => {
   return (
     <PageLayout>
       <Stack spacing={2} p={3} bgcolor="background.paper" flex={1}>
-        <Stack spacing={0.5}>
-        <Typography variant="h6">
-          Account Settings
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Manage your company profile and preferences.
-        </Typography>
-      </Stack>
-      <Box
-        sx={{
-          borderBottom: '1px solid',
-          borderColor: 'divider',
-          position: 'sticky',
-          top: 0,
-          zIndex: 1,
-        }}
-      >
-        <Tabs value={value} onChange={handleChange}>
-          <Tab label="Account" />
-          <Tab label="Security" />
-        </Tabs>
-      </Box>
+        <PageHeader
+          title="Account Settings"
+          description=" Manage your company profile and preferences."
+        />
+        <Box
+          sx={{
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+            position: 'sticky',
+            top: 0,
+            zIndex: 1,
+          }}
+        >
+          <Tabs value={value} onChange={handleChange}>
+            <Tab label="Account" />
+            <Tab label="Security" />
+          </Tabs>
+        </Box>
 
-      <Container maxWidth="md" disableGutters>
-        <SettingsTabPanel index={0} value={value}>
-          <AccountSettings />
-        </SettingsTabPanel>
-        <SettingsTabPanel index={1} value={value}>
-          <SecuritySettings />
-        </SettingsTabPanel>
-      </Container>
+        <Container maxWidth="md" disableGutters>
+          <SettingsTabPanel index={0} value={value}>
+            <AccountSettings />
+          </SettingsTabPanel>
+          <SettingsTabPanel index={1} value={value}>
+            <SecuritySettings />
+          </SettingsTabPanel>
+        </Container>
       </Stack>
     </PageLayout>
   );
