@@ -20,16 +20,18 @@ type AnalyticsCardProps = {
   title: string;
   value: number;
   changePercentage: number;
-  chartData: AnalyticsDataPoint[];
+  datapoints: AnalyticsDataPoint[];
   valueFormatter?: (value: number) => string;
+  color?: string;
 };
 
 export const AnalyticsCard = ({
   title,
   value,
   changePercentage,
-  chartData,
+  datapoints,
   valueFormatter = (val) => val.toLocaleString(),
+  color = theme.palette.primary.main,
 }: AnalyticsCardProps) => {
   const chartOptions: ChartOptions<'line'> = {
     responsive: true,
@@ -51,11 +53,31 @@ export const AnalyticsCard = ({
           display: false,
         },
         ticks: {
-          maxTicksLimit: 10,
+          autoSkip: false,
+          maxRotation: 0,
+          callback: function (value, index, ticks) {
+            if (index === 0 || index === ticks.length - 1) {
+              return this.getLabelForValue(value as number);
+            }
+            return '';
+          },
         },
       },
       y: {
-        display: false,
+        display: true,
+        grid: {
+          display: false,
+        },
+        ticks: {
+          maxTicksLimit: 5,
+          callback: function (value) {
+            const numValue = Number(value);
+            if (numValue >= 1000) {
+              return `${(numValue / 1000).toFixed(0)}K`;
+            }
+            return numValue.toString();
+          },
+        },
       },
     },
     elements: {
@@ -63,18 +85,19 @@ export const AnalyticsCard = ({
         radius: 0,
       },
       line: {
+        tension: 0.2,
         borderWidth: 2,
       },
     },
   };
 
-  const chartDataConfig = {
-    labels: chartData.map((dp) => format(new Date(dp.timestamp), 'MMM dd')),
+  const datapointsConfig = {
+    labels: datapoints.map((dp) => format(new Date(dp.timestamp), 'MMM d')),
     datasets: [
       {
-        data: chartData.map((dp) => dp.value),
-        borderColor: theme.palette.primary.main,
-        backgroundColor: theme.palette.primary.light,
+        data: datapoints.map((dp) => dp.value),
+        borderColor: color,
+        backgroundColor: color,
       },
     ],
   };
@@ -95,7 +118,7 @@ export const AnalyticsCard = ({
       }}
     >
       <Stack spacing={1}>
-        <Typography variant="body1" color="text.primary">
+        <Typography variant="body1" color="text.primary" fontWeight={500}>
           {title}
         </Typography>
         <Typography variant="h3" color="text.primary" fontWeight={600}>
@@ -104,7 +127,7 @@ export const AnalyticsCard = ({
       </Stack>
 
       <Box sx={{ height: 160, width: '100%' }}>
-        <Line options={chartOptions} data={chartDataConfig} />
+        <Line options={chartOptions} data={datapointsConfig} />
       </Box>
 
       <Typography variant="body2" color="text.secondary">

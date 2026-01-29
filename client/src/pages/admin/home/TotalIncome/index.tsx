@@ -40,7 +40,7 @@ export const TotalIncome = () => {
       title="Total Income"
       value={mockIncomeData.value}
       changePercentage={mockIncomeData.changePercentage}
-      chartData={mockIncomeData.datapoints}
+      datapoints={mockIncomeData.datapoints}
       valueFormatter={formatCurrency}
     />
   );

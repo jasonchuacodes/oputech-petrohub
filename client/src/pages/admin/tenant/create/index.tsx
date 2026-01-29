@@ -184,7 +184,9 @@ export const CreateTenantPage = () => {
                 control={control}
                 name="description"
                 placeholder="Add a brief description"
-                sx={{ textarea: { resize: 'vertical' } }}
+                slotProps={{
+                  textarea: { resize: 'vertical' },
+                }}
               />
               <Stack alignItems="end" direction="row" spacing={1} width="100%">
                 <Button
@@ -210,11 +212,11 @@ export const CreateTenantPage = () => {
       </PageContainer>
 
       <TenantCreatedSuccessModal
-          open={!!createdTenant}
-          tenantName={createdTenant?.name ?? ''}
-          onClose={handleStayOnPage}
-          onNavigateToTenant={handleNavigateToTenant}
-        />
+        open={!!createdTenant}
+        tenantName={createdTenant?.name ?? ''}
+        onClose={handleStayOnPage}
+        onNavigateToTenant={handleNavigateToTenant}
+      />
     </PageLayout>
   );
 };
