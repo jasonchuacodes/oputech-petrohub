@@ -1,3 +1,4 @@
+import { useDashboardContext } from '~/context/dashboard';
 import type { AnalyticsData } from '~/services/analytics/analytics.types';
 import theme from '~/theme';
 import { formatCurrency } from '~/utils/number';
@@ -36,6 +37,9 @@ const mockExpensesData: AnalyticsData = {
 };
 
 export function TotalExpenses() {
+  const { preset } = useDashboardContext();
+  // TODO: Use preset with analytics query hook when backend is ready
+
   return (
     <AnalyticsCard
       title="Total Expenses"
