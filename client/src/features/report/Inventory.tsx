@@ -70,7 +70,7 @@ export const Inventory = ({
             {/* Header Row */}
             <Stack direction="row" alignItems="center">
               <Typography variant="body2" color="text.secondary" sx={{ flex: 1 }}>
-                Product
+                Name
               </Typography>
               <Typography
                 variant="body2"

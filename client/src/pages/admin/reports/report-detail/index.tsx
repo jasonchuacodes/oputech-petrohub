@@ -208,6 +208,63 @@ export const ReportDetailPage = () => {
                     </Typography>
                   </Stack>
                 </CardContainer>
+
+                {/* Lubricants */}
+                <CardContainer height="fit-content" spacing={1}>
+                  <Stack direction="row" alignItems="center" justifyContent="space-between">
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      Lubricants
+                    </Typography>
+                    <IconButton onClick={() => null} size="small">
+                      <MoreHorizOutlined fontSize="inherit" />
+                    </IconButton>
+                  </Stack>
+
+                  {/* Header */}
+                  <Stack direction="row" alignItems="center">
+                    <Typography variant="body2" color="text.secondary" sx={{ flex: 1 }}>
+                      Name
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ width: 80, textAlign: 'right' }}
+                    >
+                      Quantity
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ width: 100, textAlign: 'right' }}
+                    >
+                      Amount
+                    </Typography>
+                  </Stack>
+
+                  {/* Data Rows */}
+                  {report?.inventories.map((item) => (
+                    <Stack key={item.id} direction="row" alignItems="center" spacing={1}>
+                      <Typography variant="body2" sx={{ flex: 1 }}>
+                        {item.product.name}
+                      </Typography>
+                      <Typography variant="body2" sx={{ width: 80, textAlign: 'right' }}>
+                        {formatNumber(item.quantity, 0)}
+                      </Typography>
+                      <Typography variant="body2" sx={{ width: 100, textAlign: 'right' }}>
+                        {formatNumber(item.amount, 2)}
+                      </Typography>
+                    </Stack>
+                  ))}
+                  <Divider />
+                  <Stack direction="row" justifyContent="space-between">
+                    <Typography variant="body2" color="text.secondary">
+                      Total
+                    </Typography>
+                    <Typography variant="body2" color="text.primary">
+                      {formatCurrency(Number(report?.totalExpenses))}
+                    </Typography>
+                  </Stack>
+                </CardContainer>
               </Stack>
 
               {/* Right Section */}
