@@ -13,6 +13,7 @@ import { Line } from 'react-chartjs-2';
 
 import type { AnalyticsDataPoint } from '~/services/analytics/analytics.types';
 import theme from '~/theme';
+import { Show } from '../../../../components/ui';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip);
 
@@ -23,6 +24,7 @@ type AnalyticsCardProps = {
   datapoints: AnalyticsDataPoint[];
   valueFormatter?: (value: number) => string;
   color?: string;
+  graph?: boolean;
 };
 
 export const AnalyticsCard = ({
@@ -32,6 +34,7 @@ export const AnalyticsCard = ({
   datapoints,
   valueFormatter = (val) => val.toLocaleString(),
   color = theme.palette.primary.main,
+  graph = true,
 }: AnalyticsCardProps) => {
   const chartOptions: ChartOptions<'line'> = {
     responsive: true,
@@ -69,7 +72,7 @@ export const AnalyticsCard = ({
           display: false,
         },
         ticks: {
-          maxTicksLimit: 5,
+          maxTicksLimit: 3,
           callback: function (value) {
             const numValue = Number(value);
             if (numValue >= 1000) {
@@ -115,6 +118,7 @@ export const AnalyticsCard = ({
         display: 'flex',
         flexDirection: 'column',
         gap: 2,
+        flex: 1,
       }}
     >
       <Stack spacing={1}>
@@ -126,9 +130,11 @@ export const AnalyticsCard = ({
         </Typography>
       </Stack>
 
-      <Box sx={{ height: 160, width: '100%' }}>
-        <Line options={chartOptions} data={datapointsConfig} />
-      </Box>
+      <Show when={graph}>
+        <Box sx={{ height: 160, width: '100%' }}>
+          <Line options={chartOptions} data={datapointsConfig} />
+        </Box>
+      </Show>
 
       <Typography variant="body2" color="text.secondary">
         <Box component="span" sx={{ color: changeColor, mr: 0.5 }}>

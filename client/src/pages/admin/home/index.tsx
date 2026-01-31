@@ -5,10 +5,11 @@ import { PageContainer, PageLayout } from '~/components/ui';
 import { useAuthContext } from '~/context/auth/useAuthContext';
 import { DashboardProvider } from '~/context/dashboard';
 
-import { TotalIncome } from './TotalIncome';
-import { TotalExpenses } from './TotalExpenses';
-import { TimesheetWidget } from './TimesheetWidget';
 import { PresetFilterMenu } from './PresetFilterMenu';
+import { TotalDisposals } from './TotalDisposals';
+import { TotalExpenses } from './TotalExpenses';
+import { TotalIncome } from './TotalIncome';
+import { TimesheetWidget } from './TimesheetWidget';
 
 export const HomePage = () => {
   const { auth } = useAuthContext();
@@ -34,12 +35,19 @@ export const HomePage = () => {
               <PresetFilterMenu />
             </Stack>
             {/* Analytics */}
-            <Grid container spacing={2}>
-              <Grid size={{ xs: 12, md: 6, lg: 6 }}>
+            <Grid container spacing={2} alignItems="stretch">
+              <Grid size={{ xs: 12, md: 6, lg: 4 }} display="flex">
                 <TotalIncome />
               </Grid>
-              <Grid size={{ xs: 12, md: 6, lg: 6 }}>
+              <Grid size={{ xs: 12, md: 6, lg: 4 }} display="flex">
                 <TotalExpenses />
+              </Grid>
+              <Grid size={{ xs: 12, md: 6, lg: 4 }} >
+                <Stack spacing={1}>
+                  <TotalDisposals title="XCS Disposals" />
+                  <TotalDisposals title="XTRA Disposals" />
+                  <TotalDisposals title="ADO Disposals" />
+                </Stack>
               </Grid>
             </Grid>
           </DashboardProvider>
