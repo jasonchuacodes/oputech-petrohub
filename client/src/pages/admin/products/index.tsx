@@ -65,7 +65,7 @@ export const ProductsPage = () => {
               id: 'name',
               heading: 'Product Name',
               cell: (product) => (
-                <Stack direction="row" alignItems='center' spacing={0.5}>
+                <Stack direction="row" alignItems="center" spacing={0.5}>
                   <CircleOutlined
                     fontSize="small"
                     color={product.color === 'grey' ? undefined : product.color}
@@ -77,7 +77,7 @@ export const ProductsPage = () => {
                 </Stack>
               ),
               orderable: true,
-              width: 200,
+              width: 240,
             },
             {
               id: 'reading',

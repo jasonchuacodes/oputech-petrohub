@@ -24,8 +24,17 @@ const updateProduct = (productId: string, data: UpdateProductPayload, tenantId: 
   return axios.put(`/products/${productId}`, data, { params: { tenantId } });
 };
 
-const deleteProduct = (productId: string, tenantId: string) => {
-  return axios.delete(`/products/${productId}`, { params: { tenantId } });
+export const getProductsByType = async (tenantId: string): Promise<Product[]> => {
+  const { data } = await axios.get<{ data: Product[] }>('/products/types', {
+    params: { tenantId },
+  });
+  return data.data;
 };
 
-export { getProductsByTenantId, getProductById, createProduct, updateProduct, deleteProduct };
+export const deactivateProduct = async (productId: string, tenantId: string): Promise<void> => {
+  await axios.patch(`/products/${productId}/deactivate`, null, {
+    params: { tenantId },
+  });
+};
+
+export { getProductsByTenantId, getProductById, createProduct, updateProduct };

@@ -1,9 +1,12 @@
 import { prisma } from '~/db';
-import { ConflictError, NotFoundError } from '~/errors';
+import { Prisma, ProductCategory, ProductPrice, ProductType } from '~/db/prisma';
+import { NotFoundError } from '~/errors';
+import { Decimal } from '@prisma/client/runtime/library';
 
 import type { CreateProductPayload } from '../schema/createProductSchema';
 import type { UpdateProductPayload } from '../schema/updateProductSchema';
-import { ProductCategory } from '../../../db/prisma';
+
+type Tx = Prisma.TransactionClient;
 
 const createProduct = async (data: CreateProductPayload) => {
   const product = await prisma.product.create({
@@ -12,6 +15,8 @@ const createProduct = async (data: CreateProductPayload) => {
       name: data.name,
       description: data.description,
       color: data.color,
+      type: data.type,
+      active: true,
     },
   });
 
@@ -36,7 +41,7 @@ const getProductsByTenantId = async (tenantId: string, category?: ProductCategor
   const now = new Date();
 
   const products = await prisma.product.findMany({
-    where: { tenantId, category },
+    where: { tenantId, category, active: true },
     include: {
       productPrices: {
         where: { effectiveFrom: { lte: now } },
@@ -48,7 +53,7 @@ const getProductsByTenantId = async (tenantId: string, category?: ProductCategor
         take: 1,
       },
     },
-    orderBy: { createdAt: 'desc' },
+    orderBy: { name: 'asc' },
   });
 
   const scheduledPrices = await prisma.productPrice.findMany({
@@ -110,6 +115,51 @@ const getProductById = async (productId: string, tenantId: string) => {
   };
 };
 
+const cascadePriceUpdate = async (
+  tx: Tx,
+  tenantId: string,
+  productType: ProductType,
+  price: Decimal | number,
+  effectiveFrom: Date,
+) => {
+  const productsOfType = await tx.product.findMany({
+    where: { tenantId, type: productType, active: true },
+    select: { id: true },
+  });
+
+  const now = new Date();
+  const isScheduled = effectiveFrom > now;
+
+  for (const product of productsOfType) {
+    if (isScheduled) {
+      const futurePrices = await tx.productPrice.findMany({
+        where: { productId: product.id, effectiveFrom: { gt: now } },
+        orderBy: { effectiveFrom: 'asc' },
+      });
+
+      if (futurePrices.length > 0) {
+        await tx.productPrice.update({
+          where: { id: futurePrices[0].id },
+          data: { price, effectiveFrom },
+        });
+        if (futurePrices.length > 1) {
+          await tx.productPrice.deleteMany({
+            where: { id: { in: futurePrices.slice(1).map((price: ProductPrice) => price.id) } },
+          });
+        }
+      } else {
+        await tx.productPrice.create({
+          data: { productId: product.id, price, effectiveFrom },
+        });
+      }
+    } else {
+      await tx.productPrice.create({
+        data: { productId: product.id, price, effectiveFrom },
+      });
+    }
+  }
+};
+
 const updateProduct = async (productId: string, tenantId: string, data: UpdateProductPayload) => {
   const product = await prisma.product.findFirst({
     where: { id: productId, tenantId },
@@ -169,7 +219,11 @@ const updateProduct = async (productId: string, tenantId: string, data: UpdatePr
   }
 
   return await prisma.$transaction(async (tx) => {
-    if (updates.name !== undefined || updates.description !== undefined || updates.color !== undefined) {
+    if (
+      updates.name !== undefined ||
+      updates.description !== undefined ||
+      updates.color !== undefined
+    ) {
       await tx.product.update({
         where: { id: productId },
         data: {
@@ -181,50 +235,10 @@ const updateProduct = async (productId: string, tenantId: string, data: UpdatePr
     }
 
     if (updates.productPrice !== undefined) {
-      const now = new Date();
+      const effectiveFrom = updates.effectiveFrom ? new Date(updates.effectiveFrom) : new Date();
 
-      const futurePrices = await tx.productPrice.findMany({
-        where: {
-          productId,
-          effectiveFrom: {
-            gt: now,
-          },
-        },
-        orderBy: {
-          effectiveFrom: 'asc',
-        },
-      });
-
-      if (futurePrices.length > 0) {
-        const [priceToUpdate, ...pricesToDelete] = futurePrices;
-
-        await tx.productPrice.update({
-          where: { id: priceToUpdate.id },
-          data: {
-            price: updates.productPrice,
-            ...(updates.effectiveFrom && {
-              effectiveFrom: new Date(updates.effectiveFrom),
-            }),
-          },
-        });
-
-        if (pricesToDelete.length > 0) {
-          await tx.productPrice.deleteMany({
-            where: {
-              id: {
-                in: pricesToDelete.map((p) => p.id),
-              },
-            },
-          });
-        }
-      } else {
-        await tx.productPrice.create({
-          data: {
-            productId,
-            price: updates.productPrice,
-            effectiveFrom: updates.effectiveFrom ? new Date(updates.effectiveFrom) : now,
-          },
-        });
+      if (product.type) {
+        await cascadePriceUpdate(tx, tenantId, product.type, updates.productPrice, effectiveFrom);
       }
     }
 
@@ -241,25 +255,76 @@ const updateProduct = async (productId: string, tenantId: string, data: UpdatePr
   });
 };
 
-const deleteProduct = async (productId: string, tenantId: string) => {
-  const product = await prisma.product.findFirst({
-    where: { id: productId, tenantId },
-    include: {
-      reportDisposals: { select: { id: true } },
+const getProductsByType = async (tenantId: string) => {
+  const now = new Date();
+
+  // Get distinct product types
+  const types = await prisma.product.findMany({
+    where: {
+      tenantId,
+      category: ProductCategory.FUEL,
+      type: { not: null },
+      active: true,
     },
+    select: { type: true },
+    distinct: ['type'],
   });
 
-  if (!product) {
-    throw new NotFoundError('Product not found');
-  }
+  // For each type, get one representative product with prices
+  const products = await Promise.all(
+    types.map(async ({ type }) => {
+      const product = await prisma.product.findFirst({
+        where: { tenantId, type, active: true },
+        orderBy: { createdAt: 'desc' },
+        include: {
+          productPrices: {
+            where: { effectiveFrom: { lte: now } },
+            orderBy: { effectiveFrom: 'desc' },
+            take: 1,
+          },
+          productReadings: {
+            orderBy: { createdAt: 'desc' },
+            take: 1,
+          },
+        },
+      });
 
-  if (product.reportDisposals.length > 0) {
-    throw new ConflictError('Cannot delete product that is referenced in reports');
-  }
+      if (!product) return null;
 
-  return await prisma.product.delete({
-    where: { id: productId },
+      const scheduledPrice = await prisma.productPrice.findFirst({
+        where: {
+          productId: product.id,
+          effectiveFrom: { gt: now },
+        },
+        orderBy: { effectiveFrom: 'asc' },
+      });
+
+      return {
+        ...product,
+        productPrice: product.productPrices[0],
+        productReading: product.productReadings[0],
+        scheduledPrice,
+        productPrices: undefined,
+        productReadings: undefined,
+      };
+    }),
+  );
+
+  return products.filter((p) => p !== null);
+};
+
+const deactivateProduct = async (productId: string, tenantId: string) => {
+  return await prisma.product.update({
+    where: { id: productId, tenantId },
+    data: { active: false },
   });
 };
 
-export { createProduct, getProductsByTenantId, getProductById, updateProduct, deleteProduct };
+export {
+  createProduct,
+  getProductsByTenantId,
+  getProductById,
+  updateProduct,
+  getProductsByType,
+  deactivateProduct,
+};

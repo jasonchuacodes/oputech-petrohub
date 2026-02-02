@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import { CustomModal } from '~/components/ui';
 import { useProductContext } from '~/context/product';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
-import { useDeleteProductMutation } from '~/services/product/product.queries';
+import { useDeactivateProductMutation } from '~/services/product/product.queries';
 
 type DeleteConfirmModalProps = {
   open: boolean;
@@ -16,17 +16,17 @@ export const DeleteConfirmModal = ({ open, onClose }: DeleteConfirmModalProps) =
   const { product } = useProductContext();
   const { tenantId } = useTenantContext();
 
-  const { mutateAsync: deleteProduct } = useDeleteProductMutation();
+  const { mutateAsync: deactivateProduct } = useDeactivateProductMutation();
 
   const handleConfirmDelete = async () => {
     if (!tenantId) return;
 
     try {
-      await deleteProduct({ productId: product.id, tenantId });
-      toast.success('Product deleted successfully');
+      await deactivateProduct({ productId: product.id, tenantId });
+      toast.success('Product deactivated successfully');
       onClose();
     } catch {
-      toast.error('Cannot delete product. It may be referenced in reports.');
+      toast.error('Failed to deactivate product.');
     }
   };
 
@@ -36,11 +36,11 @@ export const DeleteConfirmModal = ({ open, onClose }: DeleteConfirmModalProps) =
       onClose={onClose}
       open={open}
       type="danger"
-      title="Delete Product Confirmation"
+      title="Deactivate Product Confirmation"
       subheader={
         <Stack spacing={1}>
           <Typography variant="body2">
-            Are you sure you want to delete{' '}
+            Are you sure you want to deactivate{' '}
             <Typography variant="inherit" component="span" color="warning.main">
               {product.name}
             </Typography>

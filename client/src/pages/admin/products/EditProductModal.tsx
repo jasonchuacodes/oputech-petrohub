@@ -1,5 +1,5 @@
 import { EditOutlined } from '@mui/icons-material';
-import { Checkbox, FormControlLabel, Stack, Typography } from '@mui/material';
+import { alpha, Box, Checkbox, FormControlLabel, Stack, Typography } from '@mui/material';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { dayjsLocal, formatDate } from '~/utils/date';
@@ -11,8 +11,10 @@ import { Input, ColorSelect, NumberInput } from '~/components/form';
 import { useProductContext } from '~/context/product';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { useUpdateProductMutation } from '~/services/product/product.queries';
-import { CreateProductSchema, type CreateProductInput } from '~/schema/createProductSchema';
+import { UpdateProductSchema, type UpdateProductInput } from '~/schema/updateProductSchema';
+import theme from '~/theme';
 import { formatCurrency } from '~/utils/number';
+import { getProductTypeDisplayName } from '~/utils/productType';
 
 type EditProductModalProps = {
   open: boolean;
@@ -24,7 +26,7 @@ export const EditProductModal = ({ open, onClose }: EditProductModalProps) => {
   const { tenantId } = useTenantContext();
   const { mutateAsync: updateProduct, isPending } = useUpdateProductMutation();
 
-  const { control, handleSubmit, reset, formState, watch, setValue } = useForm<CreateProductInput>({
+  const { control, handleSubmit, reset, formState, watch, setValue } = useForm<UpdateProductInput>({
     defaultValues: {
       name: '',
       description: '',
@@ -32,7 +34,7 @@ export const EditProductModal = ({ open, onClose }: EditProductModalProps) => {
       effectiveFrom: dayjsLocal(product.scheduledPrice?.effectiveFrom).toISOString(),
       color: 'grey',
     },
-    resolver: zodResolver(CreateProductSchema),
+    resolver: zodResolver(UpdateProductSchema),
   });
 
   const future = watch('future');
@@ -50,7 +52,7 @@ export const EditProductModal = ({ open, onClose }: EditProductModalProps) => {
     }
   }, [product, reset]);
 
-  const onSubmit = async (data: CreateProductInput) => {
+  const onSubmit = async (data: UpdateProductInput) => {
     if (!tenantId || !product) return;
 
     try {
@@ -116,6 +118,28 @@ export const EditProductModal = ({ open, onClose }: EditProductModalProps) => {
             </Stack>
           </InfoBox>
         )}
+        <Stack flex={1} justifyContent="space-between" spacing={0.5}>
+          <Typography variant="body2" color="textSecondary">
+            Type
+          </Typography>
+          <Box
+            sx={{
+              borderRadius: 2,
+              border: '1px solid',
+              borderColor: 'divider',
+              bgcolor: alpha(theme.palette.grey[100], 0.8),
+              px: 1.5,
+              py: 0.5,
+              height: 40,
+              display: 'flex',
+              alignItems: 'center',
+            }}
+          >
+            <Typography variant="body2" fontWeight={500}>
+              {getProductTypeDisplayName(product.type)}
+            </Typography>
+          </Box>
+        </Stack>
         <Input
           label="Product Name"
           control={control}
@@ -140,7 +164,6 @@ export const EditProductModal = ({ open, onClose }: EditProductModalProps) => {
             min={1}
           />
         </Stack>
-
         <FormControlLabel
           sx={{
             width: 'fit-content',
@@ -171,6 +194,8 @@ export const EditProductModal = ({ open, onClose }: EditProductModalProps) => {
             )}
           />
         </Show>
+        
+        <ColorSelect label="Color" control={control} name="color" />
         <Input
           label="Description (optional)"
           control={control}
@@ -179,8 +204,6 @@ export const EditProductModal = ({ open, onClose }: EditProductModalProps) => {
           multiline
           rows={3}
         />
-
-        <ColorSelect label="Color" control={control} name="color" />
       </Stack>
     </CustomModal>
   );

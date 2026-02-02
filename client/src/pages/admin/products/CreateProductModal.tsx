@@ -5,10 +5,11 @@ import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import { CustomModal } from '~/components/ui';
-import { Input, NumberInput, ColorSelect } from '~/components/form';
+import { Input, NumberInput, ColorSelect, FormSelect } from '~/components/form';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { useCreateProductMutation } from '~/services/product/product.queries';
 import { CreateProductSchema, type CreateProductInput } from '~/schema/createProductSchema';
+import { ProductType } from '~/services/product/product.types';
 
 type CreateProductModalProps = {
   open: boolean;
@@ -29,6 +30,7 @@ export const CreateProductModal = ({ open, onClose }: CreateProductModalProps) =
       name: '',
       description: '',
       color: 'grey',
+      type: ProductType.PREMIUM,
     },
     resolver: zodResolver(CreateProductSchema),
   });
@@ -43,6 +45,7 @@ export const CreateProductModal = ({ open, onClose }: CreateProductModalProps) =
         price: data.price,
         reading: data.reading,
         color: data.color,
+        type: data.type,
       });
       toast.success('Product created successfully');
       reset();
@@ -71,14 +74,31 @@ export const CreateProductModal = ({ open, onClose }: CreateProductModalProps) =
       disabled={!isValid}
     >
       <Stack spacing={2}>
+        <FormSelect
+          label="Product Type"
+          control={control}
+          name="type"
+          placeholder="Select product type"
+          required
+          options={[
+            { label: 'Premium', value: ProductType.PREMIUM },
+            { label: 'Unleaded', value: ProductType.GASOLINE },
+            { label: 'Diesel', value: ProductType.DIESEL },
+            { label: 'Kerosene', value: ProductType.KEROSENE },
+          ]}
+        />
+
         <Input
+          required
           label="Product Name"
           control={control}
           name="name"
-          placeholder="e.g., Premium Diesel"
+          placeholder="e.g., XTRA Unleaded"
         />
+
         <Stack direction="row" spacing={1}>
           <NumberInput
+            required
             label="Current Reading"
             control={control}
             placeholder="0.00"
@@ -87,6 +107,7 @@ export const CreateProductModal = ({ open, onClose }: CreateProductModalProps) =
             min={1}
           />
           <NumberInput
+            required
             label="Product Price"
             control={control}
             placeholder="0.00"
@@ -96,6 +117,7 @@ export const CreateProductModal = ({ open, onClose }: CreateProductModalProps) =
           />
         </Stack>
 
+        <ColorSelect label="Color" control={control} name="color" />
         <Input
           label="Description (optional)"
           control={control}
@@ -104,8 +126,6 @@ export const CreateProductModal = ({ open, onClose }: CreateProductModalProps) =
           multiline
           rows={3}
         />
-
-        <ColorSelect label="Color" control={control} name="color" />
       </Stack>
     </CustomModal>
   );

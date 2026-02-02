@@ -5,8 +5,7 @@ import { PageContainer, PageLayout, Show } from '~/components/ui';
 import { useAuthContext } from '~/context/auth/useAuthContext';
 import { DashboardProvider } from '~/context/dashboard';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
-import { useGetProductsQuery } from '~/services/product/product.queries';
-import { ProductCategory } from '~/services/product/product.types';
+import { useGetProductsByTypeQuery } from '~/services/product/product.queries';
 
 import { PresetFilterMenu } from './PresetFilterMenu';
 import { TotalDisposals } from './TotalDisposals';
@@ -19,14 +18,12 @@ export const HomePage = () => {
   const { auth } = useAuthContext();
   const { tenantId } = useTenantContext();
 
-  const { data: products, isLoading: isLoadingProducts } = useGetProductsQuery(
-    tenantId,
-    ProductCategory.FUEL,
-  );
+  const { data: productsData, isLoading: isLoadingProducts } = useGetProductsByTypeQuery(tenantId);
+  const products = productsData ?? [];
 
   return (
     <PageLayout>
-      <PageContainer maxWidth="xl">
+      <PageContainer maxWidth="xl" spacing={5}>
         <PageHeader
           title={`Welcome back, ${auth?.name || 'Admin'}!`}
           description="Get a comprehensive overview of your company's performance."
@@ -70,32 +67,34 @@ export const HomePage = () => {
         </Stack>
 
         {/* Product Prices */}
-        <Show when={!isLoadingProducts}>
-          <Stack spacing={0.5}>
-            <Typography variant="h6" sx={{ fontWeight: 600 }}>
-              Fuel Prices
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              View current fuel product prices
-            </Typography>
-          </Stack>
+        <Show when={!isLoadingProducts && products.length > 0}>
+          <Stack spacing={2}>
+            <Stack spacing={0.5}>
+              <Typography variant="h5" sx={{ fontWeight: 600 }}>
+                Fuel Prices
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                View current fuel product prices
+              </Typography>
+            </Stack>
 
-          <Grid container spacing={2} alignItems="stretch">
-            {products &&
-              products.map((product) => (
-                <Grid key={product.id} size={{ xs: 12, sm: 6, md: 4 }} display="flex">
-                  <Stack width="100%">
-                    <ProductPrice product={product} />
-                  </Stack>
-                </Grid>
-              ))}
-          </Grid>
+            <Grid container spacing={2} alignItems="stretch">
+              {products &&
+                products.map((product) => (
+                  <Grid key={product.id} size={{ xs: 12, sm: 6, md: 4 }} display="flex">
+                    <Stack width="100%" flex={1}>
+                      <ProductPrice product={product} />
+                    </Stack>
+                  </Grid>
+                ))}
+            </Grid>
+          </Stack>
         </Show>
 
         {/* Operations */}
         <Stack spacing={2}>
           <Stack spacing={0.5}>
-            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            <Typography variant="h5" sx={{ fontWeight: 600 }}>
               Operations
             </Typography>
             <Typography variant="body2" color="text.secondary">

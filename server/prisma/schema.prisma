@@ -44,6 +44,13 @@ enum ProductCategory {
   STOCK_INVENTORY
 }
 
+enum ProductType {
+  GASOLINE
+  PREMIUM
+  DIESEL
+  KEROSENE
+}
+
 model User {
   id       String  @id @default(uuid())
   username String  @unique
@@ -205,6 +212,8 @@ model Product {
   description String?
   category    ProductCategory @default(FUEL)
   color       String          @default("grey")
+  type        ProductType?
+  active      Boolean         @default(true)
 
   productPrices        ProductPrice[]
   productReadings      ProductReading[]
@@ -215,9 +224,11 @@ model Product {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([tenantId, name])
+  @@unique([tenantId, name, type])
   @@index([tenantId])
   @@index([tenantId, category])
+  @@index([tenantId, type])
+  @@index([tenantId, active])
 }
 
 model ProductPrice {

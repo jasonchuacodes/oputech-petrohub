@@ -46,6 +46,16 @@ const getProductById = async (req: Request, res: Response, next: NextFunction) =
   }
 };
 
+const getProductsByType = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { tenantId } = req.query;
+    const products = await productService.getProductsByType(tenantId as string);
+    res.status(200).json({ data: products });
+  } catch (err) {
+    next(err);
+  }
+};
+
 const updateProduct = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { productId } = req.params;
@@ -58,15 +68,22 @@ const updateProduct = async (req: Request, res: Response, next: NextFunction) =>
   }
 };
 
-const deleteProduct = async (req: Request, res: Response, next: NextFunction) => {
+const deactivateProduct = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { productId } = req.params;
     const { tenantId } = req.query;
-    await productService.deleteProduct(productId, tenantId as string);
-    res.status(204).send();
+    await productService.deactivateProduct(productId, tenantId as string);
+    res.status(200).json({ message: 'Product deactivated' });
   } catch (err) {
     next(err);
   }
 };
 
-export { createProduct, getProductsByTenantId, getProductById, updateProduct, deleteProduct };
+export {
+  createProduct,
+  getProductsByTenantId,
+  getProductById,
+  getProductsByType,
+  updateProduct,
+  deactivateProduct,
+};

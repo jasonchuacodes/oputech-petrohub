@@ -6,6 +6,7 @@ import type { Product, ProductColor } from '~/services/product/product.types';
 import theme from '~/theme';
 import { formatCurrency } from '~/utils/number';
 import { formatDate } from '~/utils/date';
+import { getProductTypeDisplayName } from '~/utils/productType';
 
 type ProductPriceProps = {
   product: Product;
@@ -25,13 +26,13 @@ export const ProductPrice = ({ product }: ProductPriceProps) => {
   const bgColor = alpha(baseColor, 0.05);
 
   return (
-    <Stack p={2} spacing={1} bgcolor="background.paper" borderRadius={2}>
+    <Stack p={2} spacing={1} bgcolor="background.paper" borderRadius={2} height="100%">
       <Stack alignItems="center" direction="row" spacing={1}>
         <Stack borderRadius={8} p={1.5} bgcolor={bgColor}>
           <LocalGasStation color={product.color === 'grey' ? undefined : product.color} />
         </Stack>
         <Typography variant="body1" fontWeight={600}>
-          {product.name}
+          {getProductTypeDisplayName(product.type)}
         </Typography>
       </Stack>
 
@@ -54,11 +55,11 @@ export const ProductPrice = ({ product }: ProductPriceProps) => {
           </Typography>
         </Stack>
         <Typography variant="body2" color="text.secondary">
-          Scheduled price change to on{' '}
+          Scheduled price change to{' '}
           <Typography variant="inherit" component="span" color="warning.main">
-            {formatCurrency(product.productPrice.price)}
-          </Typography>{' '}
-          {formatDate(product.productPrice.effectiveFrom, 'MMM DD, YYYY [at] hh:mm A')}
+            {product.scheduledPrice && formatCurrency(product.scheduledPrice.price)}{' '}
+          </Typography>
+          on {formatDate(product.productPrice.effectiveFrom, 'MMM DD, YYYY [at] hh:mm A')}
         </Typography>
       </Show>
     </Stack>

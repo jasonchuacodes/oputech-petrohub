@@ -7,6 +7,15 @@ export const ProductCategory = {
 
 export type ProductCategory = ValueOf<typeof ProductCategory>;
 
+export const ProductType = {
+  GASOLINE: 'GASOLINE',
+  PREMIUM: 'PREMIUM',
+  DIESEL: 'DIESEL',
+  KEROSENE: 'KEROSENE',
+} as const;
+
+export type ProductType = ValueOf<typeof ProductType>;
+
 export type ProductColor = 'grey' | 'error' | 'warning' | 'success' | 'info' | 'primary';
 
 export type ProductPrice = {
@@ -28,6 +37,8 @@ export type Product = {
   description: string | null;
   category: ProductCategory;
   color: ProductColor;
+  type: ProductType | null;
+  active: boolean;
   productReading: ProductReading;
   productPrice: ProductPrice;
   scheduledPrice: ProductPrice | null;
@@ -42,6 +53,7 @@ export type CreateProductPayload = {
   price: number;
   reading: number;
   color?: ProductColor;
+  type: ProductType;
 };
 
 export type UpdateProductPayload = {

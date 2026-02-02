@@ -1,4 +1,5 @@
 import z from 'zod';
+import { ProductType } from '~/db/prisma';
 
 export const CreateProductSchema = z.object({
   tenantId: z.string().uuid('Invalid tenant ID'),
@@ -7,6 +8,7 @@ export const CreateProductSchema = z.object({
   price: z.coerce.number().min(0.01),
   reading: z.coerce.number().min(1),
   color: z.enum(['grey', 'error', 'warning', 'success', 'info', 'primary']).default('grey'),
+  type: z.nativeEnum(ProductType),
 });
 
 export type CreateProductPayload = z.infer<typeof CreateProductSchema>;

@@ -10,7 +10,7 @@ export const PageHeader = ({ title, description, action }: Props) => {
   return (
     <Stack direction='row' justifyContent="space-between" alignItems="center" mb={3}>
     <Stack spacing={0.5}>
-      <Typography variant="h5" sx={{ fontWeight: 600 }}>
+      <Typography variant="h3" sx={{ fontWeight: 600 }}>
         {title}
       </Typography>
       <Typography variant="body2" color="text.secondary">

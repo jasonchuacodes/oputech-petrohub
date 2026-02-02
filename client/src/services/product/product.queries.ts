@@ -4,7 +4,8 @@ import {
   getProductById,
   createProduct,
   updateProduct,
-  deleteProduct,
+  getProductsByType,
+  deactivateProduct,
 } from './product.api';
 import type { CreateProductPayload, ProductCategory, UpdateProductPayload } from './product.types';
 
@@ -16,13 +17,7 @@ const useGetProductsQuery = (tenantId?: string, category?: ProductCategory) => {
   });
 };
 
-const useGetProductQuery = ({
-  productId,
-  tenantId,
-}: {
-  productId?: string;
-  tenantId?: string;
-}) => {
+const useGetProductQuery = ({ productId, tenantId }: { productId?: string; tenantId?: string }) => {
   return useQuery({
     queryKey: ['product', productId, tenantId],
     queryFn: () => getProductById(productId!, tenantId!),
@@ -60,14 +55,21 @@ const useUpdateProductMutation = () => {
   });
 };
 
-const useDeleteProductMutation = () => {
-  const queryClient = useQueryClient();
+const useGetProductsByTypeQuery = (tenantId?: string) => {
+  return useQuery({
+    queryKey: ['products', 'by-type', tenantId],
+    queryFn: () => getProductsByType(tenantId!),
+    enabled: !!tenantId,
+  });
+};
 
+const useDeactivateProductMutation = () => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ productId, tenantId }: { productId: string; tenantId: string }) =>
-      deleteProduct(productId, tenantId),
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['products', variables.tenantId] });
+      deactivateProduct(productId, tenantId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
     },
   });
 };
@@ -77,5 +79,6 @@ export {
   useGetProductQuery,
   useCreateProductMutation,
   useUpdateProductMutation,
-  useDeleteProductMutation,
+  useGetProductsByTypeQuery,
+  useDeactivateProductMutation,
 };
