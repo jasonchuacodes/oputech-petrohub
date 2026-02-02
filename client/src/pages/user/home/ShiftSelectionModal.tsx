@@ -1,5 +1,5 @@
-import { Description } from '@mui/icons-material';
-import { Box, CircularProgress, Divider, MenuItem, Stack, Typography } from '@mui/material';
+import { CheckCircle, Description } from '@mui/icons-material';
+import { Box, Divider, MenuItem, Stack, Typography } from '@mui/material';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
@@ -7,13 +7,12 @@ import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
 import { FormSelect } from '~/components/form/FormSelect';
-import { CustomModal, Show } from '~/components/ui';
+import { Chip, CustomModal, LoadingSpinner, Show } from '~/components/ui';
 import { UserRoutes } from '~/routes';
 import { type SelectShiftInput, SelectShiftSchema } from '~/schema/selectShiftSchema';
 import { useCreateReportMutation, useGetReportsQuery } from '~/services/report/report.queries';
-import { type Report, ReportStatus } from '~/services/report/report.types';
-import { useGetShiftsQuery } from '~/services/shift/shift.queries';
-import { type Shift } from '~/services/shift/shift.types';
+import { type Report, ReportStatus, type ShiftPeriod } from '~/services/report/report.types';
+import { useShiftPeriodsQuery } from '~/services/shift/shift.queries';
 import { dayjsLocal, formatTime } from '~/utils/date';
 import { parseBackendError } from '~/utils/parseBackendError';
 import { pathFor } from '~/utils/pathFor';
@@ -24,97 +23,94 @@ type ShiftSelectionModalProps = {
   tenantId: string | undefined;
 };
 
-type ShiftWithReport = {
-  shift: Shift;
+type ShiftPeriodWithReport = {
+  period: ShiftPeriod;
   report: Report | null;
   isEnabled: boolean;
   isCreatable: boolean;
 };
 
-const isBlockingStatus = (status: ReportStatus) =>
-  status === ReportStatus.DRAFT || status === ReportStatus.VALIDATED;
-
 const isSubmittedReport = (report: Report | null) => report?.status === ReportStatus.SUBMITTED;
+const makePeriodKey = (period: ShiftPeriod) => `${period.shiftId}|${period.periodStart}`;
 
 export const ShiftSelectionModal = ({ open, onClose, tenantId }: ShiftSelectionModalProps) => {
   const navigate = useNavigate();
   const today = dayjsLocal().startOf('day').toISOString();
 
-  const { data: shifts, isLoading: isLoadingShifts } = useGetShiftsQuery(tenantId);
+  const { data: shiftPeriods, isLoading: isLoadingPeriods } = useShiftPeriodsQuery(today);
   const { data: reports, isLoading: isLoadingReports } = useGetReportsQuery({
     tenantId,
     filters: { shiftDate: today },
   });
-
   const createReportMutation = useCreateReportMutation();
 
-  const { blockingReport, shiftOptions, defaultShiftId, allSubmitted } = useMemo(() => {
-    if (!shifts || !reports) {
-      return { blockingReport: null, shiftOptions: [], defaultShiftId: null, allSubmitted: false };
+  const { blockingReport, periodOptions, defaultPeriodKey, allSubmitted } = useMemo(() => {
+    if (!shiftPeriods || !reports) {
+      return {
+        blockingReport: null,
+        periodOptions: [],
+        defaultPeriodKey: null,
+        allSubmitted: false,
+      };
     }
 
-    const shiftsWithReports: ShiftWithReport[] = shifts.map((shift) => ({
-      shift,
-      report: reports.find((r) => r.shiftId === shift.id) || null,
+    const periodsWithReports: ShiftPeriodWithReport[] = shiftPeriods.map((period) => ({
+      period,
+      report:
+        reports.find((r) => r.shiftId === period.shiftId && r.periodStart === period.periodStart) ||
+        null,
       isEnabled: false,
       isCreatable: false,
     }));
 
-    const blocking = shiftsWithReports.find(
-      (item) => item.report && isBlockingStatus(item.report.status),
+    const blocking = periodsWithReports.find(
+      (item) =>
+        item.report &&
+        (item.report.status === ReportStatus.DRAFT ||
+          item.report.status === ReportStatus.VALIDATED),
     );
 
     if (blocking) {
       return {
         blockingReport: blocking,
-        shiftOptions: [],
-        defaultShiftId: null,
+        periodOptions: [],
+        defaultPeriodKey: null,
         allSubmitted: false,
       };
     }
 
-    const creatableIndex = shiftsWithReports.findIndex((item) => !isSubmittedReport(item.report));
+    const creatableIndex = periodsWithReports.findIndex((item) => !isSubmittedReport(item.report));
 
-    const options = shiftsWithReports.map((item, index) => ({
+    const options = periodsWithReports.map((item, index) => ({
       ...item,
       isEnabled: isSubmittedReport(item.report) || index === creatableIndex,
       isCreatable: index === creatableIndex,
     }));
 
-    const defaultId =
+    const defaultKey =
       creatableIndex >= 0
-        ? shiftsWithReports[creatableIndex].shift.id
-        : shiftsWithReports[0]?.shift.id || null;
+        ? makePeriodKey(periodsWithReports[creatableIndex].period)
+        : (periodsWithReports[0] && makePeriodKey(periodsWithReports[0].period)) || null;
 
     return {
       blockingReport: null,
-      shiftOptions: options,
-      defaultShiftId: defaultId,
+      periodOptions: options,
+      defaultPeriodKey: defaultKey,
       allSubmitted: creatableIndex === -1,
     };
-  }, [shifts, reports]);
+  }, [shiftPeriods, reports]);
 
   const { control, handleSubmit, watch, reset } = useForm<SelectShiftInput>({
     resolver: zodResolver(SelectShiftSchema),
-    defaultValues: { shiftId: blockingReport?.shift.id || defaultShiftId || '' },
+    defaultValues: {
+      periodKey: (blockingReport && makePeriodKey(blockingReport.period)) || defaultPeriodKey || '',
+    },
   });
 
-  useEffect(() => {
-    const shiftId = blockingReport?.shift.id || defaultShiftId;
-    if (shiftId) {
-      reset({ shiftId });
-    }
-  }, [blockingReport, defaultShiftId, reset]);
-
-  const selectedShiftId = watch('shiftId');
-  const selectedShiftOption = shiftOptions.find((opt) => opt.shift.id === selectedShiftId);
-
-  const submitButtonText = useMemo(() => {
-    if (blockingReport || isSubmittedReport(selectedShiftOption?.report ?? null)) {
-      return 'View Report';
-    }
-    return 'Create Report';
-  }, [blockingReport, selectedShiftOption]);
+  const selectedPeriodKey = watch('periodKey');
+  const selectedPeriodOption = periodOptions.find(
+    (opt) => makePeriodKey(opt.period) === selectedPeriodKey,
+  );
 
   const navigateToReport = (reportId: string) => {
     navigate(pathFor({ pathname: UserRoutes.ReportDetail, params: { reportId } }));
@@ -124,147 +120,133 @@ export const ShiftSelectionModal = ({ open, onClose, tenantId }: ShiftSelectionM
   const onSubmit = async (data: SelectShiftInput) => {
     if (!tenantId) return;
 
-    const blockingReportId = blockingReport?.report?.id;
-    if (blockingReportId) {
-      navigateToReport(blockingReportId);
+    if (blockingReport?.report?.id) {
+      navigateToReport(blockingReport.report.id);
       return;
     }
 
-    const selectedOption = shiftOptions.find((opt) => opt.shift.id === data.shiftId);
-    const existingReportId = selectedOption?.report?.id;
+    const selectedOption = periodOptions.find(
+      (opt) => makePeriodKey(opt.period) === data.periodKey,
+    );
 
-    if (existingReportId && isSubmittedReport(selectedOption.report)) {
-      navigateToReport(existingReportId);
+    if (selectedOption?.report?.id && isSubmittedReport(selectedOption.report)) {
+      navigateToReport(selectedOption.report.id);
       return;
     }
 
     try {
       const newReport = await createReportMutation.mutateAsync({
         tenantId,
-        shiftId: data.shiftId,
-        shiftDate: today,
+        shiftId: selectedOption!.period.shiftId,
+        periodStart: selectedOption!.period.periodStart,
+        periodEnd: selectedOption!.period.periodEnd,
       });
 
       toast.success('Report created successfully');
       navigateToReport(newReport.id);
     } catch (err) {
-      const message = parseBackendError(err);
-      toast.error(message);
+      toast.error(parseBackendError(err));
     }
   };
 
-  const isLoading = isLoadingShifts || isLoadingReports;
-
-  const renderSubheader = () => {
-    if (blockingReport) {
-      return (
-        <Typography variant="body2">
-          There is a pending report for{' '}
-          <Typography variant="inherit" component="span" color="warning.main">
-            {blockingReport.shift.name}
-          </Typography>{' '}
-          shift.
-        </Typography>
-      );
+  useEffect(() => {
+    const periodKey = (blockingReport && makePeriodKey(blockingReport.period)) || defaultPeriodKey;
+    if (periodKey) {
+      reset({ periodKey });
     }
-
-    if (allSubmitted) {
-      return (
-        <Typography variant="body2">
-          All reports have been submitted for today. Select a shift to view the report.
-        </Typography>
-      );
-    }
-
-    return (
-      <Typography variant="body2">
-        You are about to create a report for{' '}
-        <Typography variant="inherit" component="span" color="warning.main">
-          {selectedShiftOption?.shift.name || 'selected'}
-        </Typography>{' '}
-        shift
-      </Typography>
-    );
-  };
-
-  const renderContent = () => {
-    if (isLoading) {
-      return (
-        <Stack alignItems="center" justifyContent="center" py={4}>
-          <CircularProgress size={40} />
-        </Stack>
-      );
-    }
-
-    if (blockingReport) {
-      return (
-        <Stack spacing={2}>
-          <Box>
-            <Typography variant="body2" color="text.secondary">
-              Shift: <strong>{blockingReport.shift.name}</strong>
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Time: {formatTime(blockingReport.shift.shiftStart.toString())} -{' '}
-              {formatTime(blockingReport.shift.shiftEnd.toString())}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Status: <strong>{blockingReport.report?.status}</strong>
-            </Typography>
-          </Box>
-        </Stack>
-      );
-    }
-
-    return (
-      <Stack spacing={2}>
-        <FormSelect name="shiftId" control={control} label="Select Shift" required>
-          {shiftOptions.map((option) => (
-            <MenuItem key={option.shift.id} value={option.shift.id} disabled={!option.isEnabled}>
-              <Stack direction="row" justifyContent="space-between" width="100%" spacing={1}>
-                <Typography variant="body2">{option.shift.name}</Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {formatTime(option.shift.shiftStart.toString())} -{' '}
-                  {formatTime(option.shift.shiftEnd.toString())}
-                </Typography>
-              </Stack>
-            </MenuItem>
-          ))}
-        </FormSelect>
-
-        <Show when={!allSubmitted}>
-          <Divider />
-
-          <Box>
-            <Typography variant="body2" color="warning.main" fontWeight={600}>
-              Important:
-            </Typography>
-            <Box component="ul" sx={{ mt: 1, pl: 2 }}>
-              <li>
-                <Typography variant="body2">You will be marked as the report owner</Typography>
-              </li>
-              <li>
-                <Typography variant="body2">Only you can edit this report</Typography>
-              </li>
-            </Box>
-          </Box>
-        </Show>
-      </Stack>
-    );
-  };
+  }, [blockingReport, defaultPeriodKey, reset]);
 
   return (
     <CustomModal
       open={open}
       onClose={onClose}
       title="Report Selection"
-      subheader={renderSubheader()}
+      subheader={
+        blockingReport ? (
+          <Typography variant="body2">
+            There is a pending report for{' '}
+            <Typography variant="inherit" component="span" color="warning.main">
+              {blockingReport.period.shiftName}
+            </Typography>
+          </Typography>
+        ) : allSubmitted ? (
+          <Typography variant="body2">
+            All reports have been submitted for today. Select a shift period to view the report.
+          </Typography>
+        ) : (
+          <Typography variant="body2">
+            You are about to create a report for{' '}
+            <Typography variant="inherit" component="span" color="warning.main">
+              {selectedPeriodOption?.period.shiftName || 'selected'} Shift
+            </Typography>
+          </Typography>
+        )
+      }
       onSubmit={handleSubmit(onSubmit)}
-      submitText={submitButtonText}
+      submitText={useMemo(() => {
+        if (blockingReport || isSubmittedReport(selectedPeriodOption?.report ?? null)) {
+          return 'View Report';
+        }
+        return 'Create Report';
+      }, [blockingReport, selectedPeriodOption])}
       loading={createReportMutation.isPending}
       maxWidth={480}
       icon={Description}
     >
-      {renderContent()}
+      {isLoadingPeriods || isLoadingReports ? (
+        <Stack alignItems="center" justifyContent="center" py={4}>
+          <LoadingSpinner />
+        </Stack>
+      ) : blockingReport ? (
+        <Stack spacing={0.5}>
+          <Typography variant="body2" color="text.secondary">
+            Shift: <strong>{blockingReport.period.shiftName}</strong>
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Period: {formatTime(blockingReport.period.periodStart)} -{' '}
+            {formatTime(blockingReport.period.periodEnd)}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Status: <Chip label={blockingReport.report?.status} />
+          </Typography>
+        </Stack>
+      ) : (
+        <Stack spacing={2}>
+          <FormSelect name="periodKey" control={control} label="Select Shift Period" required>
+            {periodOptions.map((option) => {
+              const key = makePeriodKey(option.period);
+              return (
+                <MenuItem key={key} value={key} disabled={!option.isEnabled}>
+                  <Stack direction="row" justifyContent="space-between" width="100%" spacing={1}>
+                    <Typography variant="body2">{option.period.label}</Typography>
+                    <Show when={isSubmittedReport(option.report)}>
+                      <CheckCircle color="success" fontSize="small" />
+                    </Show>
+                  </Stack>
+                </MenuItem>
+              );
+            })}
+          </FormSelect>
+
+          <Show when={!allSubmitted}>
+            <Divider />
+
+            <Box>
+              <Typography variant="body2" color="warning.main" fontWeight={600}>
+                Important:
+              </Typography>
+              <Box component="ul" sx={{ mt: 1, pl: 2 }}>
+                <li>
+                  <Typography variant="body2">You will be marked as the report owner</Typography>
+                </li>
+                <li>
+                  <Typography variant="body2">Only you can edit this report</Typography>
+                </li>
+              </Box>
+            </Box>
+          </Show>
+        </Stack>
+      )}
     </CustomModal>
   );
 };

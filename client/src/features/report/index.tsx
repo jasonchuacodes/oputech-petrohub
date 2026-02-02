@@ -15,7 +15,7 @@ import {
 import { UserRoutes } from '~/routes';
 import { ReportStatus } from '~/services/report/report.types';
 import theme from '~/theme';
-import { formatDate } from '~/utils/date';
+import { formatDate, formatTime } from '~/utils/date';
 import { formatCurrency, formatNumber } from '~/utils/number';
 import { parseBackendError } from '~/utils/parseBackendError';
 import { pathFor } from '~/utils/pathFor';
@@ -126,6 +126,9 @@ export const Report = () => {
             {formatDate(new Date(), 'MMMM DD, YYYY')} — {report.shift.name} Shift
           </Typography>
         </Stack>
+        <Typography variant="body2" color="text.secondary">
+          Period: {formatTime(report.periodStart)} - {formatTime(report.periodEnd)}
+        </Typography>
 
         {/* Report Summary */}
         <CardContainer

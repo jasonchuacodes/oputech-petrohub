@@ -48,7 +48,7 @@ export const getShiftPeriodsWithPriceChanges = async (
       where: {
         product: { tenantId, category: ProductCategory.FUEL },
         effectiveFrom: {
-          gt: shiftStart,
+          gt: new Date(),
           lte: shiftEnd,
         },
       },

@@ -16,7 +16,7 @@ import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { PageHeader } from '~/components/layouts';
 import { AdminRoutes } from '~/routes';
 import { pathFor } from '~/utils/pathFor';
-import { formatDate, getInitialDateRange } from '~/utils/date';
+import { formatDate, formatTime, getInitialDateRange } from '~/utils/date';
 import { formatNumber } from '~/utils/number';
 import { useGetReportsQuery } from '~/services/report/report.queries';
 
@@ -105,6 +105,16 @@ export const ReportsPage = () => {
               heading: 'Shift',
               cell: (report) => <Chip label={report.shift.name} color={report.shift.color} />,
               width: 100,
+            },
+            {
+              id: 'period',
+              heading: 'Period',
+              cell: (report) => (
+                <Typography variant="body2" color="text.secondary">
+                  {formatTime(report.periodStart)} - {formatTime(report.periodEnd)}
+                </Typography>
+              ),
+              width: 140,
             },
             {
               id: 'netTotal',

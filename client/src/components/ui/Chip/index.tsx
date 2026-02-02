@@ -1,7 +1,7 @@
 import BaseChip, { type ChipProps as MuiChipProps } from '@mui/material/Chip';
 
 export type ChipProps = {
-  label: string;
+  label?: string;
   color?: 'primary' | 'secondary' | 'info' | string;
   sx?: MuiChipProps['sx'];
 };
@@ -13,7 +13,7 @@ export const Chip = ({ label, color = 'primary', sx }: ChipProps) => {
     <BaseChip
       label={label}
       sx={{
-        borderRadius: 2,
+        borderRadius: 4,
         bgcolor: isHexColor ? color : `${color}.alpha`,
         fontSize: 12,
         height: 24,

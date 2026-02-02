@@ -13,7 +13,7 @@ import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { PageHeader } from '~/components/layouts';
 import { AdminRoutes } from '~/routes';
 import { useGetReportByIdQuery } from '~/services/report/report.queries';
-import { formatDate } from '~/utils/date';
+import { formatDate, formatTime } from '~/utils/date';
 import { formatCurrency, formatNumber } from '~/utils/number';
 import { pathFor } from '~/utils/pathFor';
 
@@ -60,10 +60,15 @@ export const ReportDetailPage = () => {
         ) : (
           <Stack spacing={2}>
             {report && (
-              <CardContainer height="fit-content">
+              <CardContainer height="fit-content" spacing={2}>
                 <Typography variant="h5" sx={{ fontWeight: 600 }}>
                   {formatDate(report.shiftDate, 'MMMM DD, YYYY')} — {report.shift.name} Shift
                 </Typography>
+                <Stack spacing={1}>
+                  <Typography variant="body2" color="text.secondary">
+                    Period: {formatTime(report.periodStart)} - {formatTime(report.periodEnd)}
+                  </Typography>
+                </Stack>
               </CardContainer>
             )}
             <Stack direction="row" spacing={2}>
