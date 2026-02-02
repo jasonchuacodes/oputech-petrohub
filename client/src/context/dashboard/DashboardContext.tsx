@@ -1,24 +1,24 @@
 import { createContext, useState, type ReactNode } from 'react';
 
-export type AnalyticsPreset = 'daily' | 'weekly' | 'monthly';
+export type AnalyticsPreset = 'monthly';
 
-export interface DashboardContextValue {
+type DashboardContextValue = {
   preset: AnalyticsPreset;
   setPreset: (preset: AnalyticsPreset) => void;
-}
+};
 
-export const DashboardContext = createContext<DashboardContextValue | undefined>(undefined);
-
-interface DashboardProviderProps {
+type DashboardProviderProps = {
   children: ReactNode;
-}
+};
 
-export function DashboardProvider({ children }: DashboardProviderProps) {
-  const [preset, setPreset] = useState<AnalyticsPreset>('daily');
+const DashboardContext = createContext<DashboardContextValue | undefined>(undefined);
+
+const DashboardProvider = ({ children }: DashboardProviderProps) => {
+  const [preset, setPreset] = useState<AnalyticsPreset>('monthly');
 
   return (
-    <DashboardContext.Provider value={{ preset, setPreset }}>
-      {children}
-    </DashboardContext.Provider>
+    <DashboardContext.Provider value={{ preset, setPreset }}>{children}</DashboardContext.Provider>
   );
-}
+};
+
+export { DashboardContext, DashboardProvider };

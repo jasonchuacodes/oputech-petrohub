@@ -16,7 +16,7 @@ export const HomePage = () => {
 
   return (
     <PageLayout>
-      <PageContainer>
+      <PageContainer maxWidth='xl'>
         <PageHeader
           title={`Welcome back, ${auth?.name || 'Admin'}!`}
           description="Get a comprehensive overview of your company's performance."
@@ -36,18 +36,24 @@ export const HomePage = () => {
             </Stack>
             {/* Analytics */}
             <Grid container spacing={2} alignItems="stretch">
-              <Grid size={{ xs: 12, md: 6, lg: 4 }} display="flex">
-                <TotalIncome />
-              </Grid>
-              <Grid size={{ xs: 12, md: 6, lg: 4 }} display="flex">
-                <TotalExpenses />
-              </Grid>
-              <Grid size={{ xs: 12, md: 6, lg: 4 }} >
-                <Stack spacing={1}>
-                  <TotalDisposals title="XCS Disposals" />
-                  <TotalDisposals title="XTRA Disposals" />
-                  <TotalDisposals title="ADO Disposals" />
+              <Grid size={{ xs: 12, md: 6, lg: 6 }} display="flex">
+                <Stack width='100%'>
+                  <TotalIncome />
                 </Stack>
+              </Grid>
+              <Grid size={{ xs: 12, md: 6, lg: 6 }} display="flex">
+                <Stack width='100%'>
+                  <TotalExpenses />
+                </Stack>
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 4, lg: 4 }}>
+                <TotalDisposals title="XCS Disposals" />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 4, lg: 4 }}>
+                <TotalDisposals title="XTRA Disposals" />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 12, md: 4, lg: 4 }}>
+                <TotalDisposals title="ADO Disposals" />
               </Grid>
             </Grid>
           </DashboardProvider>

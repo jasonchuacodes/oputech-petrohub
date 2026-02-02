@@ -134,15 +134,14 @@ const updateProduct = async (productId: string, tenantId: string, data: UpdatePr
 
   const updates: Partial<UpdateProductPayload> = {};
 
-  // Base fields
   if (data.name !== undefined && data.name !== product.name) {
     updates.name = data.name;
   }
+  
   if (data.description !== undefined && data.description !== product.description) {
     updates.description = data.description;
   }
 
-  // Price - convert Decimal to number for comparison
   if (data.productPrice !== undefined) {
     const priceChanged = !currentPrice || Number(currentPrice) !== data.productPrice;
     if (priceChanged) {
@@ -153,7 +152,6 @@ const updateProduct = async (productId: string, tenantId: string, data: UpdatePr
     }
   }
 
-  // Reading - convert Decimal to number
   if (data.productReading !== undefined) {
     const readingChanged = !currentReading || Number(currentReading) !== data.productReading;
     if (readingChanged) {
@@ -161,13 +159,11 @@ const updateProduct = async (productId: string, tenantId: string, data: UpdatePr
     }
   }
 
-  // Early return if nothing changed
   if (Object.keys(updates).length === 0) {
     return getProductById(productId, tenantId);
   }
 
   return await prisma.$transaction(async (tx) => {
-    // 1. Update product base fields only if changed
     if (updates.name !== undefined || updates.description !== undefined) {
       await tx.product.update({
         where: { id: productId },
@@ -178,7 +174,6 @@ const updateProduct = async (productId: string, tenantId: string, data: UpdatePr
       });
     }
 
-    // 2. Handle product price only if changed
     if (updates.productPrice !== undefined) {
       const now = new Date();
 
@@ -197,7 +192,6 @@ const updateProduct = async (productId: string, tenantId: string, data: UpdatePr
       if (futurePrices.length > 0) {
         const [priceToUpdate, ...pricesToDelete] = futurePrices;
 
-        // Update the nearest future price
         await tx.productPrice.update({
           where: { id: priceToUpdate.id },
           data: {
@@ -208,7 +202,6 @@ const updateProduct = async (productId: string, tenantId: string, data: UpdatePr
           },
         });
 
-        // Remove other future prices
         if (pricesToDelete.length > 0) {
           await tx.productPrice.deleteMany({
             where: {
@@ -219,7 +212,6 @@ const updateProduct = async (productId: string, tenantId: string, data: UpdatePr
           });
         }
       } else {
-        // Create a future price if none exists
         await tx.productPrice.create({
           data: {
             productId,
@@ -230,7 +222,6 @@ const updateProduct = async (productId: string, tenantId: string, data: UpdatePr
       }
     }
 
-    // 3. Handle product reading only if changed
     if (updates.productReading !== undefined) {
       await tx.productReading.create({
         data: {
@@ -248,7 +239,6 @@ const deleteProduct = async (productId: string, tenantId: string) => {
   const product = await prisma.product.findFirst({
     where: { id: productId, tenantId },
     include: {
-      reportEntries: { select: { id: true } },
       reportDisposals: { select: { id: true } },
     },
   });
@@ -257,7 +247,7 @@ const deleteProduct = async (productId: string, tenantId: string) => {
     throw new NotFoundError('Product not found');
   }
 
-  if (product.reportEntries.length > 0 || product.reportDisposals.length > 0) {
+  if (product.reportDisposals.length > 0) {
     throw new ConflictError('Cannot delete product that is referenced in reports');
   }
 

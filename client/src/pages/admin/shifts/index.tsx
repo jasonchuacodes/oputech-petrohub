@@ -65,13 +65,13 @@ export const ShiftsPage = () => {
             <LoadingSpinner />
           </Box>
         ) : shifts && shifts.length > 0 ? (
-          <Stack spacing={2}>
+          <Stack spacing={1}>
             {shifts.map((shift) => (
               <ShiftProvider key={shift.id} shift={shift}>
-                <CardContainer maxWidth={560}>
+                <CardContainer maxWidth={400}>
                   <Stack direction="row" justifyContent="space-between" alignItems="start">
                     <Stack spacing={1}>
-                      <Typography variant="h6">{shift.name}</Typography>
+                      <Typography variant="h6" fontWeight={600}>{shift.name}</Typography>
                       <Stack direction="row" spacing={1} alignItems="center">
                         <Schedule fontSize="small" color="action" />
                         <Typography variant="body2" color="text.primary">

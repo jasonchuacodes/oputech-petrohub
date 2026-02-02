@@ -1,7 +1,7 @@
 import { useContext } from 'react';
-import { DashboardContext, type DashboardContextValue } from './DashboardContext';
+import { DashboardContext } from './DashboardContext';
 
-export function useDashboardContext(): DashboardContextValue {
+export const useDashboardContext = () => {
   const context = useContext(DashboardContext);
 
   if (!context) {

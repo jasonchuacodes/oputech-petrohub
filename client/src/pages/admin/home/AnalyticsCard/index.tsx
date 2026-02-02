@@ -122,16 +122,21 @@ export const AnalyticsCard = ({
       }}
     >
       <Stack spacing={1}>
-        <Typography variant="body1" color="text.primary" fontWeight={500}>
+        <Typography variant="body2" color="text.primary" fontWeight={500}>
           {title}
         </Typography>
-        <Typography variant="h3" color="text.primary" fontWeight={600}>
+        <Typography variant="h4" color="text.primary" fontWeight={600}>
           {valueFormatter(value)}
         </Typography>
       </Stack>
 
       <Show when={graph}>
-        <Box sx={{ height: 160, width: '100%' }}>
+        <Box
+          sx={{
+            height: 160,
+            width: '100%',
+          }}
+        >
           <Line options={chartOptions} data={datapointsConfig} />
         </Box>
       </Show>

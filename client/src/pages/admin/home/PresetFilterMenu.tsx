@@ -2,12 +2,11 @@ import { ChevronRightOutlined } from '@mui/icons-material';
 import { Menu, MenuItem, Typography } from '@mui/material';
 import { useState } from 'react';
 
-import { useDashboardContext, type AnalyticsPreset } from '~/context/dashboard';
 import { Button } from '~/components/ui';
+import { useDashboardContext } from '~/context/dashboard';
+import type { AnalyticsPreset } from '~/context/dashboard/DashboardContext';
 
 const presetLabels: Record<AnalyticsPreset, string> = {
-  daily: 'Daily',
-  weekly: 'Weekly',
   monthly: 'This month',
 };
 
@@ -58,12 +57,7 @@ export const PresetFilterMenu = () => {
           },
         }}
       >
-        <MenuItem onClick={() => handlePresetSelect('daily')}>
-          <Typography variant="body2">Daily</Typography>
-        </MenuItem>
-        <MenuItem onClick={() => handlePresetSelect('weekly')}>
-          <Typography variant="body2">Weekly</Typography>
-        </MenuItem>
+        {/* TODO: implement period presets: daily, weekly, monthly */}
         <MenuItem onClick={() => handlePresetSelect('monthly')}>
           <Typography variant="body2">Monthly</Typography>
         </MenuItem>

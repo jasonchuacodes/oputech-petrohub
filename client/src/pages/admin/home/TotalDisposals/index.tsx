@@ -46,7 +46,7 @@ export function TotalDisposals({ title }: { title: string }) {
       value={mockDisposalsData.value}
       changePercentage={mockDisposalsData.changePercentage}
       datapoints={mockDisposalsData.datapoints}
-      valueFormatter={(value) => formatNumber(value, 3)}
+      valueFormatter={(value) => `${formatNumber(value, 3)} L`}
       color={theme.palette.warning.main}
       graph={false}
     />
