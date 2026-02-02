@@ -7,11 +7,13 @@ import {
   getShiftById,
   updateShift,
   deleteShift,
+  getShiftPeriods,
 } from '../controller/shift.controller';
 
 const router = express.Router();
 
 router.post('/', requireAuth, asyncHandler(createShift));
+router.get('/periods', requireAuth, asyncHandler(getShiftPeriods));
 router.get('/', requireAuth, asyncHandler(getShiftsByTenantId));
 router.get('/:shiftId', requireAuth, asyncHandler(getShiftById));
 router.put('/:shiftId', requireAuth, asyncHandler(updateShift));

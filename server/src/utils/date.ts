@@ -34,3 +34,15 @@ export const applyTimeToDate = (sourceTime: Date, targetDate: Date = new Date())
 
   return fromZonedTime(targetLocal, APP_TZ);
 };
+
+/**
+ * Format time for display labels
+ * Example: "5:00 AM", "1:30 PM"
+ */
+export const formatTime = (date: Date): string => {
+  return date.toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true
+  });
+};

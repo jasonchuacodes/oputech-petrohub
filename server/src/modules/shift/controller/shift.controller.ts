@@ -4,6 +4,7 @@ import { createSchemaValidator } from '~/utils';
 import * as shiftService from '../services/shift.service';
 import { CreateShiftSchema } from '../schema/createShiftSchema';
 import { UpdateShiftSchema } from '../schema/updateShiftSchema';
+import { getShiftPeriodsWithPriceChanges } from '../utils/shift-periods';
 
 const validateCreateShift = createSchemaValidator(CreateShiftSchema);
 const validateUpdateShift = createSchemaValidator(UpdateShiftSchema);
@@ -89,4 +90,30 @@ const deleteShift = async (
   }
 };
 
-export { createShift, getShiftsByTenantId, getShiftById, updateShift, deleteShift };
+const getShiftPeriods = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { shiftDate, tenantId } = req.query;
+
+    const periods = await getShiftPeriodsWithPriceChanges(
+      tenantId as string,
+      new Date(shiftDate as string),
+    );
+
+    res.status(200).json({ data: periods });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export {
+  createShift,
+  getShiftsByTenantId,
+  getShiftById,
+  updateShift,
+  deleteShift,
+  getShiftPeriods,
+};

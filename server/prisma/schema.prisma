@@ -291,6 +291,9 @@ model Report {
   shiftDate   DateTime
   status      ReportStatus  @default(DRAFT)
 
+  periodStart DateTime
+  periodEnd   DateTime
+
   entries          ReportEntry[]
   income           ReportIncome[]
   expenses         ReportExpense[]
@@ -302,9 +305,10 @@ model Report {
   updatedAt   DateTime      @updatedAt
   submittedAt DateTime?
 
-  @@unique([tenantId, shiftDate, shiftId])
+  @@unique([tenantId, shiftDate, shiftId, periodStart])
   @@index([tenantId, status])
   @@index([tenantId, shiftDate])
+  @@index([tenantId, shiftDate, shiftId, periodStart])
   @@index([creatorId])
   @@index([shiftId])
 }
