@@ -4,7 +4,6 @@ import { createSchemaValidator } from '~/utils/schema-validator';
 import { AuthenticatedRequest } from '~/middlewares/requireAuth';
 
 import * as reportService from '../services/report.service';
-import * as entryService from '../services/entry.service';
 import * as expenseService from '../services/expense.service';
 import * as incomeService from '../services/income.service';
 import * as employeeService from '../services/employee.service';
@@ -12,7 +11,6 @@ import * as disposalService from '../services/disposal.service';
 import * as inventoryService from '../services/inventory.service';
 import { CreateReportSchema } from '../schema/createReportSchema';
 import { GetReportsSchema } from '../schema/getReportsSchema';
-import { CreateReportEntrySchema } from '../schema/createReportEntrySchema';
 import { CreateExpenseSchema } from '../schema/createExpenseSchema';
 import { CreateIncomeSchema } from '../schema/createIncomeSchema';
 import { AssignEmployeeSchema } from '../schema/assignEmployeeSchema';
@@ -23,7 +21,6 @@ import { UpdateReportInventorySchema } from '../schema/updateReportInventorySche
 
 const validateCreateReport = createSchemaValidator(CreateReportSchema);
 const validateGetReports = createSchemaValidator(GetReportsSchema);
-const validateCreateReportEntry = createSchemaValidator(CreateReportEntrySchema);
 const validateCreateExpense = createSchemaValidator(CreateExpenseSchema);
 const validateCreateIncome = createSchemaValidator(CreateIncomeSchema);
 const validateGetReportByShift = createSchemaValidator(GetReportByShiftSchema);
@@ -131,36 +128,6 @@ const submitReport = async (req: AuthenticatedRequest, res: Response, next: Next
       message: 'Report submitted successfully',
       data: { report },
     });
-  } catch (err) {
-    next(err);
-  }
-};
-
-const createOrUpdateEntry = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const { reportId } = req.params;
-    const data = await validateCreateReportEntry(req.body);
-
-    const entry = await entryService.createOrUpdateEntry({
-      reportId,
-      ...data,
-    });
-
-    res.status(201).json({
-      message: 'Entry created/updated successfully',
-      data: { entry },
-    });
-  } catch (err) {
-    next(err);
-  }
-};
-
-const deleteEntry = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const { reportId, entryId } = req.params;
-    await entryService.deleteEntry(entryId, reportId);
-
-    res.status(204).send();
   } catch (err) {
     next(err);
   }
@@ -341,8 +308,6 @@ export {
   getReportByShift,
   validateReport,
   submitReport,
-  createOrUpdateEntry,
-  deleteEntry,
   createExpense,
   deleteExpense,
   createIncome,

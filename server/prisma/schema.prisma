@@ -207,7 +207,6 @@ model Product {
 
   productPrices        ProductPrice[]
   productReadings      ProductReading[]
-  reportEntries        ReportEntry[]
   reportDisposals      ReportDisposal[]
   inventory            Inventory?
   reportInventory      ReportInventory[]
@@ -294,7 +293,6 @@ model Report {
   periodStart DateTime
   periodEnd   DateTime
 
-  entries          ReportEntry[]
   income           ReportIncome[]
   expenses         ReportExpense[]
   employees        EmployeesOnReports[]
@@ -311,26 +309,6 @@ model Report {
   @@index([tenantId, shiftDate, shiftId, periodStart])
   @@index([creatorId])
   @@index([shiftId])
-}
-
-model ReportEntry {
-  id                String   @id @default(uuid())
-  reportId          String
-  report            Report   @relation(fields: [reportId], references: [id], onDelete: Cascade)
-
-  productId         String
-  product           Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
-
-  quantity          Decimal  @db.Decimal(10, 3)
-  unitPriceSnapshot Decimal  @db.Decimal(10, 2)
-  totalPrice        Decimal  @db.Decimal(10, 2)
-
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-
-  @@unique([reportId, productId])
-  @@index([reportId])
-  @@index([productId])
 }
 
 model ReportExpense {

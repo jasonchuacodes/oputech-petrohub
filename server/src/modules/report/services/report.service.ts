@@ -53,7 +53,6 @@ const createReport = async ({
       include: {
         shift: true,
         creator: { select: { id: true, name: true } },
-        entries: { include: { product: true } },
         income: true,
         expenses: true,
         disposals: { include: { product: true } },
@@ -149,7 +148,6 @@ const createReport = async ({
     include: {
       shift: true,
       creator: { select: { id: true, name: true } },
-      entries: { include: { product: true } },
       income: true,
       expenses: true,
       disposals: { include: { product: true } },
@@ -206,7 +204,6 @@ const getReports = async ({
     include: {
       creator: { select: { id: true, name: true } },
       shift: true,
-      entries: { select: { totalPrice: true } },
       income: { select: { amount: true } },
       expenses: { select: { amount: true } },
       employees: {
@@ -217,7 +214,7 @@ const getReports = async ({
         },
       },
       _count: {
-        select: { entries: true, expenses: true },
+        select: { expenses: true },
       },
     },
     orderBy: {
@@ -237,7 +234,6 @@ const getReportById = async (reportId: string) => {
     include: {
       creator: { select: { id: true, name: true } },
       shift: true,
-      entries: { include: { product: true } },
       income: true,
       expenses: true,
       disposals: {
@@ -287,7 +283,6 @@ const getReportByShift = async ({
     include: {
       creator: { select: { id: true, name: true } },
       shift: true,
-      entries: { include: { product: true } },
       income: true,
       expenses: true,
       disposals: { include: { product: true } },
@@ -327,7 +322,6 @@ const validateReport = async (reportId: string, userId: string) => {
     include: {
       creator: { select: { id: true, name: true } },
       shift: true,
-      entries: { include: { product: true } },
       income: true,
       expenses: true,
       employees: {
@@ -388,7 +382,6 @@ const submitReport = async (reportId: string, userId: string) => {
       include: {
         creator: { select: { id: true, name: true } },
         shift: true,
-        entries: { include: { product: true } },
         income: true,
         expenses: true,
         disposals: { include: { product: true } },
