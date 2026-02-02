@@ -5,6 +5,7 @@ import {
   createShift,
   updateShift,
   deleteShift,
+  getShiftPeriods,
 } from './shift.api';
 import type { CreateShiftPayload, UpdateShiftPayload } from './shift.types';
 
@@ -73,10 +74,19 @@ const useDeleteShiftMutation = () => {
   });
 };
 
+const useShiftPeriodsQuery = (shiftDate: string | null) => {
+  return useQuery({
+    queryKey: ['shift-periods', shiftDate],
+    queryFn: () => getShiftPeriods(shiftDate!),
+    enabled: !!shiftDate,
+  });
+};
+
 export {
   useGetShiftsQuery,
   useGetShiftQuery,
   useCreateShiftMutation,
   useUpdateShiftMutation,
   useDeleteShiftMutation,
+  useShiftPeriodsQuery,
 };

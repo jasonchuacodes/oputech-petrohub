@@ -10,7 +10,8 @@ interface CreateReportPayload {
   tenantId: string;
   creatorId: string;
   shiftId: string;
-  shiftDate: Date;
+  periodStart: Date;
+  periodEnd: Date;
 }
 
 interface GetReportsFilters {
@@ -24,15 +25,29 @@ interface GetReportsFilters {
   creatorId?: string;
 }
 
-const createReport = async ({ tenantId, creatorId, shiftId, shiftDate }: CreateReportPayload) => {
-  const existing = await prisma.report.findUnique({
+const createReport = async ({
+  tenantId,
+  creatorId,
+  shiftId,
+  periodStart,
+  periodEnd,
+}: CreateReportPayload) => {
+  const shiftDate = new Date(
+    periodStart.getFullYear(),
+    periodStart.getMonth(),
+    periodStart.getDate(),
+  );
+
+  const existing = await prisma.report.findFirst({
     where: {
-      tenantId_shiftDate_shiftId: { tenantId, shiftDate, shiftId },
+      tenantId,
+      shiftDate,
+      shiftId,
+      periodStart,
     },
   });
 
   if (existing) {
-    // Return existing report with all relations
     const fullReport = await prisma.report.findUnique({
       where: { id: existing.id },
       include: {
@@ -71,22 +86,12 @@ const createReport = async ({ tenantId, creatorId, shiftId, shiftDate }: CreateR
     throw new NotFoundError('Shift not found');
   }
 
-  // Fetch products with latest readings and prices
-  const shiftStartDateTime = new Date(
-    shiftDate.getFullYear(),
-    shiftDate.getMonth(),
-    shiftDate.getDate(),
-    shift.shiftStart.getHours(),
-    shift.shiftStart.getMinutes(),
-    shift.shiftStart.getSeconds(),
-  );
-
   const products = await prisma.product.findMany({
     where: { tenantId, category: ProductCategory.FUEL },
     include: {
       productPrices: {
         where: {
-          effectiveFrom: { lte: shiftStartDateTime },
+          effectiveFrom: { lte: periodStart },
         },
         orderBy: { effectiveFrom: 'desc' },
         take: 1,
@@ -103,7 +108,6 @@ const createReport = async ({ tenantId, creatorId, shiftId, shiftDate }: CreateR
     products.map(async (product) => {
       const beforeReading = product.productReadings[0]?.reading ?? new Decimal(0);
 
-      // Get price effective at shift start, fallback to earliest price
       let priceSnapshot = product.productPrices[0]?.price ?? new Decimal(0);
 
       if (!product.productPrices[0]) {
@@ -135,6 +139,8 @@ const createReport = async ({ tenantId, creatorId, shiftId, shiftDate }: CreateR
       creatorId,
       shiftId,
       shiftDate,
+      periodStart,
+      periodEnd,
       status: ReportStatus.DRAFT,
       disposals: {
         create: disposalsData,
@@ -272,13 +278,11 @@ const getReportByShift = async ({
   shiftId: string;
   shiftDate: Date;
 }) => {
-  const report = await prisma.report.findUnique({
+  const report = await prisma.report.findFirst({
     where: {
-      tenantId_shiftDate_shiftId: {
-        tenantId,
-        shiftDate,
-        shiftId,
-      },
+      tenantId,
+      shiftDate,
+      shiftId,
     },
     include: {
       creator: { select: { id: true, name: true } },

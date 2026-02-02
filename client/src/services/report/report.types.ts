@@ -10,6 +10,14 @@ export const ReportStatus = {
 
 export type ReportStatus = ValueOf<typeof ReportStatus>;
 
+export type ShiftPeriod = {
+  shiftId: string;
+  shiftName: string;
+  periodStart: string;
+  periodEnd: string;
+  label: string;
+};
+
 export type ReportIncome = {
   id: string;
   description: string;
@@ -70,6 +78,8 @@ export type Report = {
   creatorId: string;
   shiftId: string;
   shiftDate: string;
+  periodStart: string;
+  periodEnd: string;
   status: ReportStatus;
   totalIncome: number;
   totalExpenses: number;
@@ -101,5 +111,6 @@ export type Report = {
 export type CreateReportPayload = {
   tenantId: string;
   shiftId: string;
-  shiftDate: string;
+  periodStart: string;
+  periodEnd: string;
 };

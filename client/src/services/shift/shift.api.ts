@@ -1,5 +1,6 @@
 import axios from '~/lib/axiosInstance';
 import type { Shift, CreateShiftPayload, UpdateShiftPayload } from './shift.types';
+import type { ShiftPeriod } from '../report/report.types';
 
 const getShiftsByTenantId = async (tenantId: string): Promise<Shift[]> => {
   const res = await axios.get('/shifts', { params: { tenantId } });
@@ -23,4 +24,16 @@ const deleteShift = (shiftId: string, tenantId: string) => {
   return axios.delete(`/shifts/${shiftId}`, { params: { tenantId } });
 };
 
-export { getShiftsByTenantId, getShiftById, createShift, updateShift, deleteShift };
+const getShiftPeriods = async (shiftDate: string): Promise<ShiftPeriod[]> => {
+  const res = await axios.get('/shifts/periods', { params: { shiftDate } });
+  return res.data.data;
+};
+
+export {
+  getShiftsByTenantId,
+  getShiftById,
+  createShift,
+  updateShift,
+  deleteShift,
+  getShiftPeriods,
+};
