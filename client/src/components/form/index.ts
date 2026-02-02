@@ -1,3 +1,4 @@
+export * from './ColorSelect';
 export * from './FormRow';
 export * from './FormSelect';
 export * from './Input';

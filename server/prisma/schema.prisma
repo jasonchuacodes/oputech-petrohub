@@ -204,6 +204,7 @@ model Product {
   name        String
   description String?
   category    ProductCategory @default(FUEL)
+  color       String          @default("grey")
 
   productPrices        ProductPrice[]
   productReadings      ProductReading[]

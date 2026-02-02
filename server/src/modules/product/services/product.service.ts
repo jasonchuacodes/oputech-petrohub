@@ -11,6 +11,7 @@ const createProduct = async (data: CreateProductPayload) => {
       tenantId: data.tenantId,
       name: data.name,
       description: data.description,
+      color: data.color,
     },
   });
 
@@ -137,9 +138,13 @@ const updateProduct = async (productId: string, tenantId: string, data: UpdatePr
   if (data.name !== undefined && data.name !== product.name) {
     updates.name = data.name;
   }
-  
+
   if (data.description !== undefined && data.description !== product.description) {
     updates.description = data.description;
+  }
+
+  if (data.color !== undefined && data.color !== product.color) {
+    updates.color = data.color;
   }
 
   if (data.productPrice !== undefined) {
@@ -164,12 +169,13 @@ const updateProduct = async (productId: string, tenantId: string, data: UpdatePr
   }
 
   return await prisma.$transaction(async (tx) => {
-    if (updates.name !== undefined || updates.description !== undefined) {
+    if (updates.name !== undefined || updates.description !== undefined || updates.color !== undefined) {
       await tx.product.update({
         where: { id: productId },
         data: {
           ...(updates.name !== undefined && { name: updates.name }),
           ...(updates.description !== undefined && { description: updates.description }),
+          ...(updates.color !== undefined && { color: updates.color }),
         },
       });
     }

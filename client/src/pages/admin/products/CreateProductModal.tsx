@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import { CustomModal } from '~/components/ui';
-import { Input, NumberInput } from '~/components/form';
+import { Input, NumberInput, ColorSelect } from '~/components/form';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { useCreateProductMutation } from '~/services/product/product.queries';
 import { CreateProductSchema, type CreateProductInput } from '~/schema/createProductSchema';
@@ -28,6 +28,7 @@ export const CreateProductModal = ({ open, onClose }: CreateProductModalProps) =
     defaultValues: {
       name: '',
       description: '',
+      color: 'grey',
     },
     resolver: zodResolver(CreateProductSchema),
   });
@@ -41,6 +42,7 @@ export const CreateProductModal = ({ open, onClose }: CreateProductModalProps) =
         description: data.description,
         price: data.price,
         reading: data.reading,
+        color: data.color,
       });
       toast.success('Product created successfully');
       reset();
@@ -102,6 +104,8 @@ export const CreateProductModal = ({ open, onClose }: CreateProductModalProps) =
           multiline
           rows={3}
         />
+
+        <ColorSelect label="Color" control={control} name="color" />
       </Stack>
     </CustomModal>
   );

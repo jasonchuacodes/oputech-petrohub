@@ -1,5 +1,5 @@
-import { Typography } from '@mui/material';
-import { HomeOutlined, AddOutlined } from '@mui/icons-material';
+import { Stack, Typography } from '@mui/material';
+import { HomeOutlined, AddOutlined, CircleOutlined } from '@mui/icons-material';
 
 import { PageHeader } from '~/components/layouts';
 import { Breadcrumb, Button, DataTable, PageContainer, PageLayout } from '~/components/ui';
@@ -65,9 +65,16 @@ export const ProductsPage = () => {
               id: 'name',
               heading: 'Product Name',
               cell: (product) => (
-                <Typography variant="body2" color="text.primary">
-                  {product.name}
-                </Typography>
+                <Stack direction="row" alignItems='center' spacing={0.5}>
+                  <CircleOutlined
+                    fontSize="small"
+                    color={product.color === 'grey' ? undefined : product.color}
+                    sx={product.color === 'grey' ? { color: '#9E9E9E' } : undefined}
+                  />
+                  <Typography variant="body2" color="text.primary">
+                    {product.name}
+                  </Typography>
+                </Stack>
               ),
               orderable: true,
               width: 200,

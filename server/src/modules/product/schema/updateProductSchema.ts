@@ -21,6 +21,7 @@ export const UpdateProductSchema = z.object({
     .datetime()
     .optional()
     .default(() => new Date().toISOString()),
+  color: z.enum(['grey', 'error', 'warning', 'success', 'info', 'primary']).optional(),
 });
 
 export type UpdateProductPayload = z.infer<typeof UpdateProductSchema>;

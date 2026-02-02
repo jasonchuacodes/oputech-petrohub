@@ -7,6 +7,8 @@ export const ProductCategory = {
 
 export type ProductCategory = ValueOf<typeof ProductCategory>;
 
+export type ProductColor = 'grey' | 'error' | 'warning' | 'success' | 'info' | 'primary';
+
 export type ProductPrice = {
   id: string;
   price: number;
@@ -25,6 +27,7 @@ export type Product = {
   name: string;
   description: string | null;
   category: ProductCategory;
+  color: ProductColor;
   productReading: ProductReading;
   productPrice: ProductPrice;
   scheduledPrice: ProductPrice | null;
@@ -38,6 +41,7 @@ export type CreateProductPayload = {
   description?: string;
   price: number;
   reading: number;
+  color?: ProductColor;
 };
 
 export type UpdateProductPayload = {
@@ -46,4 +50,5 @@ export type UpdateProductPayload = {
   productPrice?: number;
   productReading?: number;
   effectiveFrom?: string;
+  color?: ProductColor;
 };

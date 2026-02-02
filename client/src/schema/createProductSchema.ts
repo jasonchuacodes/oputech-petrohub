@@ -8,6 +8,7 @@ export const CreateProductSchema = z
     reading: z.coerce.number().min(0.001),
     effectiveFrom: z.string().optional(),
     future: z.boolean().optional(),
+    color: z.enum(['grey', 'error', 'warning', 'success', 'info', 'primary']).optional(),
   })
   .superRefine((data, ctx) => {
     if (data.future) {

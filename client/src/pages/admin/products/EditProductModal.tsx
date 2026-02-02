@@ -7,7 +7,7 @@ import { useEffect } from 'react';
 import toast from 'react-hot-toast';
 
 import { CustomModal, DateTimePicker, InfoBox, Show } from '~/components/ui';
-import { Input } from '~/components/form';
+import { Input, ColorSelect, NumberInput } from '~/components/form';
 import { useProductContext } from '~/context/product';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { useUpdateProductMutation } from '~/services/product/product.queries';
@@ -30,6 +30,7 @@ export const EditProductModal = ({ open, onClose }: EditProductModalProps) => {
       description: '',
       price: 0,
       effectiveFrom: dayjsLocal(product.scheduledPrice?.effectiveFrom).toISOString(),
+      color: 'grey',
     },
     resolver: zodResolver(CreateProductSchema),
   });
@@ -44,6 +45,7 @@ export const EditProductModal = ({ open, onClose }: EditProductModalProps) => {
         price: product.productPrice?.price || 0,
         reading: product.productReading?.reading || 0,
         effectiveFrom: dayjsLocal(product.scheduledPrice?.effectiveFrom).toISOString(),
+        color: product.color,
       });
     }
   }, [product, reset]);
@@ -60,6 +62,7 @@ export const EditProductModal = ({ open, onClose }: EditProductModalProps) => {
           description: data.description,
           productPrice: data.price,
           productReading: data.reading,
+          color: data.color,
           ...(data.future && {
             effectiveFrom: new Date(data.effectiveFrom!).toISOString(),
           }),
@@ -119,25 +122,25 @@ export const EditProductModal = ({ open, onClose }: EditProductModalProps) => {
           name="name"
           placeholder="e.g., Premium Diesel"
         />
-        <Input
-          label="Current Reading"
-          control={control}
-          name="reading"
-          type="number"
-          placeholder="0.00"
-          step="0.01"
-          min="0.01"
-        />
-        <Input
-          label="Product Price"
-          control={control}
-          name="price"
-          startAdornment="₱"
-          type="number"
-          placeholder="0.00"
-          step="0.01"
-          min="0.01"
-        />
+        <Stack direction="row" spacing={1}>
+          <NumberInput
+            label="Current Reading"
+            control={control}
+            placeholder="0.00"
+            name="reading"
+            step={1}
+            min={1}
+          />
+          <NumberInput
+            label="Product Price"
+            control={control}
+            placeholder="0.00"
+            name="price"
+            step={1}
+            min={1}
+          />
+        </Stack>
+
         <FormControlLabel
           sx={{
             width: 'fit-content',
@@ -176,6 +179,8 @@ export const EditProductModal = ({ open, onClose }: EditProductModalProps) => {
           multiline
           rows={3}
         />
+
+        <ColorSelect label="Color" control={control} name="color" />
       </Stack>
     </CustomModal>
   );
