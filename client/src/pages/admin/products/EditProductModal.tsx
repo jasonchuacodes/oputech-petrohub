@@ -14,7 +14,8 @@ import { useUpdateProductMutation } from '~/services/product/product.queries';
 import { UpdateProductSchema, type UpdateProductInput } from '~/schema/updateProductSchema';
 import theme from '~/theme';
 import { formatCurrency } from '~/utils/number';
-import { getProductTypeDisplayName } from '~/utils/productType';
+
+import { getProductTypeDisplayName } from './utils';
 
 type EditProductModalProps = {
   open: boolean;

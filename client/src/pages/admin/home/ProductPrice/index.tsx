@@ -2,11 +2,12 @@ import { LocalGasStation } from '@mui/icons-material';
 import { alpha, Stack, Typography, type Theme } from '@mui/material';
 
 import { Show } from '~/components/ui';
-import type { Product, ProductColor } from '~/services/product/product.types';
+import { type Product, type ProductColor } from '~/services/product/product.types';
 import theme from '~/theme';
 import { formatCurrency } from '~/utils/number';
 import { formatDate } from '~/utils/date';
-import { getProductTypeDisplayName } from '~/utils/productType';
+
+import { getProductTypeDisplayName } from '../../products/utils';
 
 type ProductPriceProps = {
   product: Product;
@@ -54,13 +55,16 @@ export const ProductPrice = ({ product }: ProductPriceProps) => {
             {formatCurrency(product.productPrice.price)}
           </Typography>
         </Stack>
-        <Typography variant="body2" color="text.secondary">
-          Scheduled price change to{' '}
-          <Typography variant="inherit" component="span" color="warning.main">
-            {product.scheduledPrice && formatCurrency(product.scheduledPrice.price)}{' '}
+
+        {product.scheduledPrice && (
+          <Typography variant="body2" color="text.secondary">
+            Scheduled price change to{' '}
+            <Typography variant="inherit" component="span" color="warning.main">
+              {formatCurrency(product.scheduledPrice.price)}{' '}
+            </Typography>
+            on {formatDate(product.scheduledPrice.effectiveFrom, 'MMMM D, YYYY [at] hh:mm A')}
           </Typography>
-          on {formatDate(product.productPrice.effectiveFrom, 'MMM DD, YYYY [at] hh:mm A')}
-        </Typography>
+        )}
       </Show>
     </Stack>
   );
