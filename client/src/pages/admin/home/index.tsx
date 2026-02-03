@@ -8,11 +8,12 @@ import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { useGetProductsByTypeQuery } from '~/services/product/product.queries';
 
 import { PresetFilterMenu } from './PresetFilterMenu';
+import { ProductPrice } from './ProductPrice';
+import { ReportCard } from './ReportCard';
 import { TotalDisposals } from './TotalDisposals';
 import { TotalExpenses } from './TotalExpenses';
 import { TotalIncome } from './TotalIncome';
-import { TimesheetWidget } from './TimesheetWidget';
-import { ProductPrice } from './ProductPrice';
+import { TimesheetCard } from './TimesheetCard';
 
 export const HomePage = () => {
   const { auth } = useAuthContext();
@@ -82,9 +83,7 @@ export const HomePage = () => {
               {products &&
                 products.map((product) => (
                   <Grid key={product.id} size={{ xs: 12, sm: 6, md: 4 }} display="flex">
-                    <Stack width="100%" flex={1}>
-                      <ProductPrice product={product} />
-                    </Stack>
+                    <ProductPrice product={product} />
                   </Grid>
                 ))}
             </Grid>
@@ -101,9 +100,12 @@ export const HomePage = () => {
               Get a comprehensive overview of your company’s performance.
             </Typography>
           </Stack>
-          <Grid container spacing={2}>
-            <Grid size={{ xs: 12, md: 12, lg: 12 }}>
-              <TimesheetWidget />
+          <Grid container spacing={2} alignItems="stretch">
+            <Grid size={{ xs: 12, md: 12, lg: 8 }} display="flex">
+              <ReportCard />
+            </Grid>
+            <Grid size={{ xs: 12, md: 12, lg: 4 }}>
+              <TimesheetCard />
             </Grid>
           </Grid>
         </Stack>

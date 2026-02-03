@@ -27,7 +27,15 @@ export const ProductPrice = ({ product }: ProductPriceProps) => {
   const bgColor = alpha(baseColor, 0.05);
 
   return (
-    <Stack p={2} spacing={1} bgcolor="background.paper" borderRadius={2} height="100%">
+    <Stack
+      p={2}
+      spacing={1}
+      bgcolor="background.paper"
+      borderRadius={2}
+      height="100%"
+      width="100%"
+      flex={1}
+    >
       <Stack alignItems="center" direction="row" spacing={1}>
         <Stack borderRadius={8} p={1.5} bgcolor={bgColor}>
           <LocalGasStation color={product.color === 'grey' ? undefined : product.color} />

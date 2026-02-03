@@ -7,7 +7,7 @@ import { CardContainer, NoData, Show } from '~/components/ui';
 import { useAuthContext } from '~/context/auth/useAuthContext';
 import { useDisclosure } from '~/hooks/useDisclosure';
 import { useGetReportByIdQuery } from '~/services/report/report.queries';
-import { formatDate } from '~/utils/date';
+import { formatDate, formatTime } from '~/utils/date';
 import { formatCurrency, formatNumber } from '~/utils/number';
 import type { ReportDisposal as ReportDisposalType } from '~/services/report/report.types';
 import { ReportStatus } from '~/services/report/report.types';
@@ -53,15 +53,17 @@ export const ReportDisposal = () => {
 
   return (
     <Stack p={2} spacing={1}>
-      <Typography
-        width="fit-content"
-        variant="body1"
-        color="text.primary"
-        fontWeight={500}
-        borderRadius={2}
-      >
-        {formatDate(new Date(report.shiftDate), 'MMMM DD, YYYY')} — {report.shift.name} Shift
-      </Typography>
+      <Stack spacing={0.5}>
+        <Stack direction="row" alignItems="center" spacing={1} flexWrap="wrap">
+          <Typography variant="body1" color="text.primary" fontWeight={500}>
+            {formatDate(new Date(), 'MMMM DD, YYYY')}
+          </Typography>
+        </Stack>
+        <Typography variant="body2" color="text.secondary">
+          {report.shift.name} Shift ({formatTime(report.periodStart)} -{' '}
+          {formatTime(report.periodEnd)})
+        </Typography>
+      </Stack>
 
       {disposals.length === 0 ? (
         <NoData

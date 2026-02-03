@@ -62,13 +62,15 @@ export const ReportDetailPage = () => {
             {report && (
               <CardContainer height="fit-content" spacing={2}>
                 <Typography variant="h5" sx={{ fontWeight: 600 }}>
-                  {formatDate(report.shiftDate, 'MMMM DD, YYYY')} — {report.shift.name} Shift
+                  {formatDate(report.shiftDate, 'MMMM DD, YYYY')}
                 </Typography>
-                <Stack spacing={1}>
+
+                <Typography variant="body2" color="text.secondary">
                   <Typography variant="body2" color="text.secondary">
-                    Period: {formatTime(report.periodStart)} - {formatTime(report.periodEnd)}
+                    {report.shift.name} Shift ({formatTime(report.periodStart)} -{' '}
+                    {formatTime(report.periodEnd)})
                   </Typography>
-                </Stack>
+                </Typography>
               </CardContainer>
             )}
             <Stack direction="row" spacing={2}>

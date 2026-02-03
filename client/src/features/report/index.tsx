@@ -121,14 +121,17 @@ export const Report = () => {
   return (
     <Stack p={2} spacing={2}>
       <Stack spacing={1}>
-        <Stack direction="row" alignItems="center" spacing={1} flexWrap="wrap">
-          <Typography variant="body1" color="text.primary" fontWeight={500}>
-            {formatDate(new Date(), 'MMMM DD, YYYY')} — {report.shift.name} Shift
+        <Stack spacing={0.5}>
+          <Stack direction="row" alignItems="center" spacing={1} flexWrap="wrap">
+            <Typography variant="body1" color="text.primary" fontWeight={500}>
+              {formatDate(new Date(), 'MMMM DD, YYYY')}
+            </Typography>
+          </Stack>
+          <Typography variant="body2" color="text.secondary">
+            {report.shift.name} Shift ({formatTime(report.periodStart)} -{' '}
+            {formatTime(report.periodEnd)})
           </Typography>
         </Stack>
-        <Typography variant="body2" color="text.secondary">
-          Period: {formatTime(report.periodStart)} - {formatTime(report.periodEnd)}
-        </Typography>
 
         {/* Report Summary */}
         <CardContainer

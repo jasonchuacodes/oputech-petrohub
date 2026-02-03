@@ -18,13 +18,14 @@ export const Widget = ({ title, to, children, props }: WidgetProps) => {
   return (
     <Stack
       maxHeight={560}
-      minHeight={240}
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        bgcolor: 'background.paper',
-        borderRadius: 2,
-      }}
+      minHeight={360}
+      width="100%"
+      height="100%"
+      flex={1}
+      display="flex"
+      flexDirection="column"
+      bgcolor="background.paper"
+      borderRadius={2}
       {...props}
     >
       <Stack
