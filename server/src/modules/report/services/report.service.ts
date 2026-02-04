@@ -200,9 +200,7 @@ const getReports = async ({
     ...(creatorId && { creatorId }),
   };
 
-  if (userRole === Role.USER) {
-    where.OR = [{ creatorId: userId }, { status: ReportStatus.SUBMITTED }];
-  } else if (userRole === Role.ADMIN) {
+  if (userRole === Role.ADMIN) {
     where.status = ReportStatus.SUBMITTED;
   }
 
