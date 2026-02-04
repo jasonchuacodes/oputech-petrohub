@@ -115,6 +115,10 @@ export const Report = () => {
     return <NoData text="Report not found" />;
   }
 
+  const [firstName, ...rest] = report.creator.name.split(' ');
+  const lastName = rest.at(-1);
+  const ownerName = `${firstName} ${lastName}`;
+
   const isOwner = auth?.id === report.creatorId;
   const isReadOnly = report.status === ReportStatus.SUBMITTED || !isOwner;
 
@@ -239,7 +243,7 @@ export const Report = () => {
                 Created by:
               </Typography>
               <Typography variant="body2" color="primary.alpha">
-                {report.creator.name}
+                {ownerName}
               </Typography>
             </Stack>
           </Stack>

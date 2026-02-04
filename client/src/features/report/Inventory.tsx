@@ -57,11 +57,11 @@ export const Inventory = ({
         <Typography variant="body1" fontWeight={600} color="text.primary">
           Lubricants
         </Typography>
-        {!isReadOnly && (
-          <IconButton  size="small"  onClick={() => setIsEditMode(!isEditMode)}>
+        <Show when={!isReadOnly && inventories.length > 0}>
+          <IconButton size="small" onClick={() => setIsEditMode(!isEditMode)}>
             <EditOutlined />
           </IconButton>
-        )}
+        </Show>
       </Stack>
 
       <CardContainer height="fit-content" spacing={2}>

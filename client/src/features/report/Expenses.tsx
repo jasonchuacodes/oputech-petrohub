@@ -37,11 +37,11 @@ export const Expenses = ({ reportId, expenses, totalExpenses, isReadOnly }: Expe
         <Typography variant="body1" fontWeight={600} color="text.primary">
           Expenses
         </Typography>
-        {!isReadOnly && (
+        <Show when={!isReadOnly && expenses.length > 0}>
           <IconButton size="small" onClick={() => setIsEditMode(!isEditMode)}>
             <EditOutlined />
           </IconButton>
-        )}
+        </Show>
       </Stack>
 
       <CardContainer height="fit-content" spacing={2}>

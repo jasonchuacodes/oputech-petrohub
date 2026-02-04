@@ -37,11 +37,11 @@ export const Income = ({ reportId, income, totalIncome, isReadOnly }: IncomeProp
         <Typography variant="body1" fontWeight={600} color="text.primary">
           Income
         </Typography>
-        {!isReadOnly && (
+        <Show when={!isReadOnly && income.length > 0}>
           <IconButton size="small" onClick={() => setIsEditMode(!isEditMode)}>
             <EditOutlined />
           </IconButton>
-        )}
+        </Show>
       </Stack>
 
       <CardContainer height="fit-content" spacing={2}>
