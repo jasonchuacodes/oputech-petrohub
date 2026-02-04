@@ -1,7 +1,5 @@
-import { Avatar, Icon, Typography } from '@mui/material';
+import { Avatar, Icon, Stack, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-
-import { Button } from '~/components/ui';
 
 type ShortcutCardProps = {
   title: string;
@@ -23,19 +21,16 @@ export const ShortcutCard = ({ title, icon, to, onClick, disabled = false }: Sho
   };
 
   return (
-    <Button
+    <Stack
       onClick={handleRedirect}
-      disabled={disabled}
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        flex: 1,
-        gap: 0.5,
-        p: 2,
-        bgcolor: 'background.paper',
-        borderRadius: 2,
-        opacity: disabled ? 0.5 : 1,
-      }}
+      justifyContent="center"
+      alignItems="center"
+      flex={1}
+      gap={0.5}
+      p={2}
+      bgcolor="background.paper"
+      borderRadius={2}
+      sx={{ opacity: disabled ? 0.5 : 1 }}
     >
       <Avatar
         sx={{
@@ -49,6 +44,6 @@ export const ShortcutCard = ({ title, icon, to, onClick, disabled = false }: Sho
       <Typography variant="body2" color="text.primary">
         {title}
       </Typography>
-    </Button>
+    </Stack>
   );
 };

@@ -26,7 +26,7 @@ export const RecentLogs = () => {
         <Link
           to="/timesheets"
           alignSelf="flex-end"
-          sx={{ fontSize: 'body2.fontSize', color: 'text.secondary', textDecoration: 'underline' }}
+          sx={{ fontSize: 'body2.fontSize', color: 'text.secondary' }}
         >
           Show All
         </Link>

@@ -50,6 +50,8 @@ export const ReportDisposal = () => {
   }
 
   const disposals = report.disposals || [];
+  const isOwner = auth?.id === report.creatorId;
+  const isReadOnly = report.status === ReportStatus.SUBMITTED || !isOwner;
 
   return (
     <Stack p={2} spacing={1}>
@@ -85,7 +87,7 @@ export const ReportDisposal = () => {
                   </Typography>
                 </Stack>
 
-                <Show when={report.status !== ReportStatus.SUBMITTED}>
+                <Show when={!isReadOnly}>
                   <IconButton size="small" onClick={() => handleOpenModal(disposal)}>
                     <EditOutlined />
                   </IconButton>

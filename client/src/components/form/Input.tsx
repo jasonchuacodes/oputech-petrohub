@@ -77,7 +77,7 @@ export const Input = <T extends FieldValues>({
           borderWidth: '2px',
         },
         minHeight: {
-          xs: 48,
+          xs: 44,
           sm: 40,
         },
         bgcolor: 'background.paper',

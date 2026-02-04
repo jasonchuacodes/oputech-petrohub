@@ -222,7 +222,7 @@ const removeEmployee = async (req: Request, res: Response, next: NextFunction) =
   }
 };
 
-const updateDisposal = async (req: Request, res: Response, next: NextFunction) => {
+const updateDisposal = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const { reportId, disposalId } = req.params;
     const data = await validateUpdateDisposal(req.body);
@@ -230,6 +230,7 @@ const updateDisposal = async (req: Request, res: Response, next: NextFunction) =
     const disposal = await disposalService.updateDisposal({
       reportId,
       disposalId,
+      userId: req.user!.id,
       ...data,
     });
 

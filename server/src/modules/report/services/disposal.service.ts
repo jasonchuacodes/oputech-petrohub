@@ -2,18 +2,20 @@ import { Decimal } from '@prisma/client/runtime/library';
 
 import { prisma } from '~/db';
 import { ReportStatus } from '~/db/prisma';
-import { ConflictError, NotFoundError } from '~/errors';
+import { ConflictError, ForbiddenError, NotFoundError } from '~/errors';
 
 interface UpdateDisposalPayload {
   reportId: string;
   disposalId: string;
   afterReading: Decimal;
+  userId: string;
 }
 
 const updateDisposal = async ({
   reportId,
   disposalId,
   afterReading,
+  userId,
 }: UpdateDisposalPayload) => {
   const report = await prisma.report.findUnique({
     where: { id: reportId },
@@ -21,6 +23,10 @@ const updateDisposal = async ({
 
   if (!report) {
     throw new NotFoundError('Report not found');
+  }
+
+  if (report.creatorId !== userId) {
+    throw new ForbiddenError('Only the report creator can edit disposals');
   }
 
   if (report.status === ReportStatus.SUBMITTED) {

@@ -32,6 +32,7 @@ const UserMenu = ({ onNavigate }: { onNavigate: (to: string) => void }) => {
         onClick={(e) => setAnchorElSettingsMenu(e.currentTarget)}
         fullWidth
         sx={{
+          height: 'fit-content',
           justifyContent: 'flex-start',
           gap: 1,
           p: 1,

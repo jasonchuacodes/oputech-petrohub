@@ -199,7 +199,7 @@ export const ShiftSelectionModal = ({ open, onClose, tenantId }: ShiftSelectionM
           <LoadingSpinner />
         </Stack>
       ) : blockingReport ? (
-        <Stack spacing={0.5}>
+        <Stack spacing={1}>
           <Stack direction="row" gap={1}>
             <Typography variant="body1" color="text.secondary">
               Shift:

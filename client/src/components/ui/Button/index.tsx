@@ -12,20 +12,24 @@ export const Button = ({ children, sx, ...props }: PropsWithChildren<ButtonProps
       flexShrink: 0,
       overflow: 'hidden',
       fontWeight: 'normal',
-      px: 1.5,
+      px: 2,
       py: 1,
+
+      height: {
+        xs: 44,
+        sm: 40,
+      },
+
       fontSize: {
         xs: 'body1.fontSize',
         sm: 'body2.fontSize',
       },
+
       ...(props.variant === 'outlined' && {
         color: 'text.primary',
         borderColor: 'divider',
-        bgcolor: 'background.paper'
+        bgcolor: 'background.paper',
       }),
-
-      ...(props.size === 'small' && { fontSize: 'body2.fontSize', height: 36 }),
-      ...(props.size === 'large' && { fontSize: 'body1.fontSize', height: 40 }),
 
       ...sx,
     }}

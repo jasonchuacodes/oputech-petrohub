@@ -71,7 +71,7 @@ export const NumberInput = <T extends FieldValues>({
           borderWidth: '2px',
         },
         height: {
-          xs: 48,
+          xs: 44,
           sm: 40,
         },
         bgcolor: 'background.paper',

@@ -5,7 +5,7 @@ export const Select = ({ children, sx, ...props }: PropsWithChildren<SelectProps
   <BaseSelect
     sx={{
       minHeight: {
-        xs: 48,
+        xs: 44,
         sm: 40,
       },
       minWidth: 240,

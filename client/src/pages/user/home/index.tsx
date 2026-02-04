@@ -20,6 +20,10 @@ export const HomePage = () => {
   const passwordModal = useDisclosure();
   const shiftSelectionDisclosure = useDisclosure();
 
+  const [firstName, ...rest] = auth?.name.split(' ') ?? [];
+  const lastName = rest.at(-1);
+  const displayName = `${firstName} ${lastName}`;
+
   useEffect(() => {
     if (auth?.shouldChangePassword) {
       const skipped = sessionStorage.getItem('skipPasswordChange');
@@ -43,8 +47,11 @@ export const HomePage = () => {
     <PageLayout>
       <Stack spacing={2} p={2} flex={1}>
         <Stack spacing={1}>
-          <Typography variant="body1" color="text.secondary">
-            Welcome back, {auth?.name?.split(' ')[0] || 'User'}!
+          <Typography variant="h6">
+            Welcome back,{' '}
+            <Typography variant="inherit" component="span" color="warning.main" fontWeight={600}>
+              {displayName || 'User'}
+            </Typography>
           </Typography>
           <TimeLogger />
         </Stack>

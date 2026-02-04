@@ -79,7 +79,7 @@ export const MultiSelect = <T extends object>({
           },
           borderRadius: 2,
           minHeight: {
-            xs: 48,
+            xs: 44,
             sm: 40,
           },
         }}
