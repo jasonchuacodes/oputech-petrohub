@@ -5,6 +5,7 @@ import { ConflictError, ForbiddenError, NotFoundError } from '~/errors';
 
 import { computeReportTotals } from '../utils/compute';
 import { processInventoryDeductions } from './inventory.service';
+import { aggregateReportIncome } from '~/modules/analytics/services/income-aggregation.service';
 
 interface CreateReportPayload {
   tenantId: string;
@@ -350,6 +351,9 @@ const submitReport = async (reportId: string, userId: string) => {
   if (report.status !== ReportStatus.VALIDATED) {
     throw new ConflictError('Only validated reports can be submitted');
   }
+
+  // Aggregate income before finalizing
+  await aggregateReportIncome(reportId);
 
   return await prisma.$transaction(async (tx) => {
     // Get disposals to extract afterReading values

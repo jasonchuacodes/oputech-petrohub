@@ -42,7 +42,7 @@ export const ReportCard = () => {
             when={reports.length > 0}
             fallback={
               <Box pt={10}>
-                <NoData text="No reports available" />
+                <NoData text="No reports available" description="No reports have been submitted yet today. Please check again later." />
               </Box>
             }
           >

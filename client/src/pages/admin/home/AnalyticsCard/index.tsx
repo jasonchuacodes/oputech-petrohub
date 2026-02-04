@@ -11,9 +11,11 @@ import {
 import { format } from 'date-fns';
 import { Line } from 'react-chartjs-2';
 
+import { Show } from '~/components/ui';
 import type { AnalyticsDataPoint } from '~/services/analytics/analytics.types';
 import theme from '~/theme';
-import { Show } from '../../../../components/ui';
+
+import { LoadingSkeleton } from './LoadingSkeleton';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip);
 
@@ -25,6 +27,7 @@ type AnalyticsCardProps = {
   valueFormatter?: (value: number) => string;
   color?: string;
   graph?: boolean;
+  loading?: boolean;
 };
 
 export const AnalyticsCard = ({
@@ -35,6 +38,7 @@ export const AnalyticsCard = ({
   valueFormatter = (val) => val.toLocaleString(),
   color = theme.palette.primary.main,
   graph = true,
+  loading = false,
 }: AnalyticsCardProps) => {
   const chartOptions: ChartOptions<'line'> = {
     responsive: true,
@@ -67,6 +71,7 @@ export const AnalyticsCard = ({
         },
       },
       y: {
+        min: 0,
         display: true,
         grid: {
           display: false,
@@ -108,6 +113,10 @@ export const AnalyticsCard = ({
   const isPositiveChange = changePercentage >= 0;
   const changeIcon = isPositiveChange ? '↑' : '↓';
   const changeColor = isPositiveChange ? 'success.main' : 'error.main';
+
+  if (loading) {
+    return <LoadingSkeleton graph={graph} />;
+  }
 
   return (
     <Stack

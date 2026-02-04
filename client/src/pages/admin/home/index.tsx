@@ -1,4 +1,4 @@
-import { Divider, Grid, Stack, Typography } from '@mui/material';
+import { Box, Divider, Grid, Stack, Typography } from '@mui/material';
 
 import { PageHeader } from '~/components/layouts';
 import { PageContainer, PageLayout, Show } from '~/components/ui';
@@ -79,14 +79,14 @@ export const HomePage = () => {
               </Typography>
             </Stack>
 
-            <Grid container spacing={2} alignItems="stretch">
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
               {products &&
                 products.map((product) => (
-                  <Grid key={product.id} size={{ xs: 12, sm: 6, md: 4 }} display="flex">
+                  <Box key={product.id} sx={{ minWidth: 240, flex: 1 }}>
                     <ProductPrice product={product} />
-                  </Grid>
+                  </Box>
                 ))}
-            </Grid>
+            </Box>
           </Stack>
         </Show>
 

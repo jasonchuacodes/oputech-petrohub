@@ -78,7 +78,7 @@ export const PasswordChangeModal = ({ open, onClose }: PasswordChangeModalProps)
               randomizer={false}
             />
             <InfoBox variant="info" title="Password requirements:">
-              <List sx={{ listStyleType: 'disc', pl: 3, m: 0 }}>
+              <List sx={{ listStyleType: 'disc', pl: 2, m: 0 }}>
                 {[
                   'At least 8 characters',
                   'One uppercase letter (A-Z)',
