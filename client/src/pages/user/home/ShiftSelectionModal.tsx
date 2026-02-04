@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
 import { FormSelect } from '~/components/form/FormSelect';
-import { Chip, CustomModal, LoadingSpinner, Show } from '~/components/ui';
+import { Chip, CustomModal, InfoBox, LoadingSpinner, Show } from '~/components/ui';
 import { UserRoutes } from '~/routes';
 import { type SelectShiftInput, SelectShiftSchema } from '~/schema/selectShiftSchema';
 import { useCreateReportMutation, useGetReportsQuery } from '~/services/report/report.queries';
@@ -100,7 +100,7 @@ export const ShiftSelectionModal = ({ open, onClose, tenantId }: ShiftSelectionM
     };
   }, [shiftPeriods, reports]);
 
-  const { control, handleSubmit, watch, reset } = useForm<SelectShiftInput>({
+  const { control, handleSubmit, watch, reset, formState } = useForm<SelectShiftInput>({
     resolver: zodResolver(SelectShiftSchema),
     defaultValues: {
       periodKey: (blockingReport && makePeriodKey(blockingReport.period)) || defaultPeriodKey || '',
@@ -158,6 +158,7 @@ export const ShiftSelectionModal = ({ open, onClose, tenantId }: ShiftSelectionM
 
   return (
     <CustomModal
+      disabled={!formState.isValid}
       open={open}
       onClose={onClose}
       title="Report Selection"
@@ -212,21 +213,32 @@ export const ShiftSelectionModal = ({ open, onClose, tenantId }: ShiftSelectionM
         </Stack>
       ) : (
         <Stack spacing={2}>
-          <FormSelect name="periodKey" control={control} label="Select Shift Period" required>
-            {periodOptions.map((option) => {
-              const key = makePeriodKey(option.period);
-              return (
-                <MenuItem key={key} value={key} disabled={!option.isEnabled}>
-                  <Stack direction="row" justifyContent="space-between" width="100%" spacing={1}>
-                    <Typography variant="body2">{option.period.label}</Typography>
-                    <Show when={isSubmittedReport(option.report)}>
-                      <CheckCircle color="success" fontSize="small" />
-                    </Show>
-                  </Stack>
-                </MenuItem>
-              );
-            })}
-          </FormSelect>
+          <Show
+            when={periodOptions.length > 0}
+            fallback={
+              <InfoBox variant="info">
+                <Typography variant="body2" color="text.secondary">
+                  There are no shifts set. Please contact your administrator .
+                </Typography>
+              </InfoBox>
+            }
+          >
+            <FormSelect name="periodKey" control={control} label="Select Shift Period" required>
+              {periodOptions.map((option) => {
+                const key = makePeriodKey(option.period);
+                return (
+                  <MenuItem key={key} value={key} disabled={!option.isEnabled}>
+                    <Stack direction="row" justifyContent="space-between" width="100%" spacing={1}>
+                      <Typography variant="body2">{option.period.label}</Typography>
+                      <Show when={isSubmittedReport(option.report)}>
+                        <CheckCircle color="success" fontSize="small" />
+                      </Show>
+                    </Stack>
+                  </MenuItem>
+                );
+              })}
+            </FormSelect>
+          </Show>
 
           <Show when={!allSubmitted}>
             <Divider />

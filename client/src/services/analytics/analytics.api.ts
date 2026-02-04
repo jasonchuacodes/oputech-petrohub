@@ -12,7 +12,22 @@ export const getTotalIncomeAnalyticsData = async (
         startDate: filters.startDate,
         endDate: filters.endDate,
       },
-      withCredentials: true,
+    }
+  );
+  return response.data.data;
+};
+
+export const getTotalExpenseAnalyticsData = async (
+  filters: AnalyticsFilters,
+): Promise<AnalyticsData> => {
+  const response = await axios.get(
+    '/analytics/expenses',
+    {
+      params: {
+        tenantId: filters.tenantId,
+        startDate: filters.startDate,
+        endDate: filters.endDate,
+      },
     }
   );
   return response.data.data;
