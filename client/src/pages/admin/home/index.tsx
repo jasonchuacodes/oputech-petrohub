@@ -49,16 +49,20 @@ const AnalyticsSection = () => {
           <TotalExpenses />
         </Stack>
       </Grid>
-      {disposalData?.map((disposal) => (
-        <Grid size={{ xs: 12, sm: 6, md: 4, lg: 4 }} key={disposal.productType}>
-          <TotalDisposals
-            title={productTypeDisplayNames[disposal.productType] || `${disposal.productType} Disposals`}
-            value={disposal.value}
-            changePercentage={disposal.changePercentage}
-            isLoading={isLoadingDisposals}
-          />
-        </Grid>
-      ))}
+
+      {disposalData &&
+        disposalData.map((disposal) => (
+          <Box key={disposal.productType} sx={{ minWidth: 240, flex: 1 }}>
+            <TotalDisposals
+              title={
+                productTypeDisplayNames[disposal.productType] || `${disposal.productType} Disposals`
+              }
+              value={disposal.value}
+              changePercentage={disposal.changePercentage}
+              isLoading={isLoadingDisposals}
+            />
+          </Box>
+        ))}
     </Grid>
   );
 };

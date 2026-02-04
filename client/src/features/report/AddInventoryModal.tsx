@@ -114,7 +114,7 @@ export const AddInventoryModal = ({ open, onClose, reportId }: AddInventoryModal
             <Typography variant="body2" color="textSecondary">
               Price{' '}
               {selectedProduct && (
-                <Typography variant="caption" component="span" color="warning.main">
+                <Typography variant="body2" component="span" color="warning.main">
                   @ {formatNumber(selectedProduct.productPrice.price)}
                 </Typography>
               )}
@@ -124,7 +124,7 @@ export const AddInventoryModal = ({ open, onClose, reportId }: AddInventoryModal
                 borderRadius: 2,
                 border: '1px solid',
                 borderColor: 'divider',
-                height: 56,
+                height: 48,
                 display: 'flex',
                 alignItems: 'center',
               }}
@@ -140,11 +140,11 @@ export const AddInventoryModal = ({ open, onClose, reportId }: AddInventoryModal
                   mr: 2,
                 }}
               >
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body1" color="text.secondary">
                   ₱
                 </Typography>
               </Box>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body1" color="text.secondary">
                 {selectedProduct ? formatNumber(selectedProduct.productPrice.price * quantity) : 0}
               </Typography>
             </Box>

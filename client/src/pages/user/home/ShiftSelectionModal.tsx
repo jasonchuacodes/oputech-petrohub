@@ -200,16 +200,31 @@ export const ShiftSelectionModal = ({ open, onClose, tenantId }: ShiftSelectionM
         </Stack>
       ) : blockingReport ? (
         <Stack spacing={0.5}>
-          <Typography variant="body2" color="text.secondary">
-            Shift: <strong>{blockingReport.period.shiftName}</strong>
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Period: {formatTime(blockingReport.period.periodStart)} -{' '}
-            {formatTime(blockingReport.period.periodEnd)}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Status: <Chip label={blockingReport.report?.status} />
-          </Typography>
+          <Stack direction="row" gap={1}>
+            <Typography variant="body1" color="text.secondary">
+              Shift:
+            </Typography>
+            <Typography variant="body1" color="text.primary">
+              {blockingReport.period.shiftName}
+            </Typography>
+          </Stack>
+          <Stack direction="row" gap={1}>
+            <Typography variant="body1" color="text.secondary">
+              Period:
+            </Typography>
+            <Typography variant="body1" color="text.primary">
+              {formatTime(blockingReport.period.periodStart)} -{' '}
+              {formatTime(blockingReport.period.periodEnd)}
+            </Typography>
+          </Stack>
+          <Stack direction="row" gap={1}>
+            <Typography variant="body1" color="text.secondary">
+              Status:
+            </Typography>
+            <Typography variant="body1" color="text.primary">
+              <Chip label={blockingReport.report?.status} />
+            </Typography>
+          </Stack>
         </Stack>
       ) : (
         <Stack spacing={2}>

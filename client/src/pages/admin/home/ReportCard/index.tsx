@@ -48,7 +48,7 @@ export const ReportCard = () => {
           >
             <Stack spacing={0} mt={2}>
               <Typography variant="body2" color="text.secondary" mb={2}>
-                Reports generated as of {dayjs().format('MMMM D, YYYY')}
+                Reports generated today - {dayjs().format('MMMM D, YYYY')}
               </Typography>
               <Box
                 sx={{

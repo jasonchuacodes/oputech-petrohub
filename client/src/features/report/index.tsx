@@ -131,7 +131,7 @@ export const Report = () => {
               {formatDate(new Date(), 'MMMM DD, YYYY')}
             </Typography>
           </Stack>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body1" color="text.secondary">
             {report.shift.name} Shift ({formatTime(report.periodStart)} -{' '}
             {formatTime(report.periodEnd)})
           </Typography>

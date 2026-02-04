@@ -46,7 +46,10 @@ export const NumberInput = <T extends FieldValues>({
   const slotProps = {
     input: {
       sx: {
-        fontSize: 'body2.fontSize',
+        fontSize: {
+          xs: 'body1.fontSize',
+          sm: 'body2.fontSize',
+        },
         ...(startAdornment && { pl: 1 }),
         '&::-webkit-outer-spin-button, &::-webkit-inner-spin-button': {
           WebkitAppearance: 'none',
@@ -66,6 +69,10 @@ export const NumberInput = <T extends FieldValues>({
         },
         '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
           borderWidth: '2px',
+        },
+        height: {
+          xs: 48,
+          sm: 40,
         },
         bgcolor: 'background.paper',
         borderRadius: 2,
@@ -158,9 +165,10 @@ export const NumberInput = <T extends FieldValues>({
                       (max !== undefined && currentValue !== undefined && currentValue >= max)
                     }
                     sx={{
-                      minWidth: 0,
-                      px: 1.5,
-                      py: 0.5,
+                      minWidth: 40,
+                      minHeight: 0,
+                      flex: 1,
+                      p: 0,
                       borderRadius: '0 8px 0 0',
                       color: 'text.secondary',
                       '&:hover': {
@@ -178,9 +186,10 @@ export const NumberInput = <T extends FieldValues>({
                       (min !== undefined && currentValue !== undefined && currentValue <= min)
                     }
                     sx={{
-                      minWidth: 0,
-                      px: 1.5,
-                      py: 0.5,
+                      minWidth: 40,
+                      minHeight: 0,
+                      flex: 1,
+                      p: 0,
                       borderRadius: '0 0 8px 0',
                       color: 'text.secondary',
                       '&:hover': {

@@ -70,7 +70,10 @@ export const InputWithFormat = <T extends object>({
               slotProps={{
                 input: {
                   sx: {
-                    fontSize: 'body2.fontSize',
+                    fontSize: {
+                      xs: 'body1.fontSize',
+                      sm: 'body2.fontSize',
+                    },
                   },
                 },
               }}

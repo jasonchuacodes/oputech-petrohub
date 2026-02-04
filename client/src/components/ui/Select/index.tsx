@@ -4,11 +4,21 @@ import type { PropsWithChildren } from 'react';
 export const Select = ({ children, sx, ...props }: PropsWithChildren<SelectProps>) => (
   <BaseSelect
     sx={{
+      minHeight: {
+        xs: 48,
+        sm: 40,
+      },
       minWidth: 240,
       borderRadius: 2,
       bgcolor: 'background.paper',
       '& .MuiSelect-select': {
-        fontSize: 'body2.fontSize',
+        fontSize: 'inherit',
+      },
+      '& .MuiTypography-root': {
+        fontSize: {
+          xs: 'body1.fontSize',
+          sm: 'body2.fontSize',
+        },
       },
       '& .MuiOutlinedInput-notchedOutline': {
         borderWidth: '1px',

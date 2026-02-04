@@ -1,6 +1,7 @@
 import type { ValueOf } from '~/utils/valueOf';
 
 import type { Shift } from '../shift/shift.types';
+import type { ProductColor } from '../product/product.types';
 
 export const ReportStatus = {
   DRAFT: 'DRAFT',
@@ -39,6 +40,7 @@ export type ReportDisposal = {
   product: {
     id: string;
     name: string;
+    color?: ProductColor;
     code?: string;
     unit?: string;
   };

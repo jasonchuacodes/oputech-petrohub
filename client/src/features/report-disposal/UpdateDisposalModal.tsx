@@ -110,12 +110,12 @@ export const UpdateDisposalModal = ({
                 bgcolor: alpha(theme.palette.grey[100], 0.8),
                 px: 1.5,
                 py: 0.5,
-                height: 56,
+                height: 48,
                 display: 'flex',
                 alignItems: 'center',
               }}
             >
-              <Typography variant="body2" fontWeight={500}>
+              <Typography variant="body1">
                 {disposal.beforeReading}
               </Typography>
             </Box>

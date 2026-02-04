@@ -14,7 +14,10 @@ export const Button = ({ children, sx, ...props }: PropsWithChildren<ButtonProps
       fontWeight: 'normal',
       px: 1.5,
       py: 1,
-
+      fontSize: {
+        xs: 'body1.fontSize',
+        sm: 'body2.fontSize',
+      },
       ...(props.variant === 'outlined' && {
         color: 'text.primary',
         borderColor: 'divider',

@@ -76,7 +76,7 @@ export const EmployeesOnDuty = ({ reportId, employees, isReadOnly }: EmployeesOn
         >
           <Stack direction="row" alignItems="center" spacing={3} flex={1} overflow="auto">
             {employees.length === 0 ? (
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body1" color="text.secondary">
                 No employees assigned
               </Typography>
             ) : (

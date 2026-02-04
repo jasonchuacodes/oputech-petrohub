@@ -77,7 +77,6 @@ export const CreateInventoryModal = ({ open, onClose }: CreateInventoryModalProp
           control={control}
           name="name"
           placeholder="e.g., Mobil 1 Lubricant"
-          size="medium"
         />
         <Stack direction="row" spacing={1}>
           <NumberInput

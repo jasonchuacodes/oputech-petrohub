@@ -63,7 +63,10 @@ export const MultiSelect = <T extends object>({
         slotProps={{
           input: {
             sx: {
-              fontSize: 'body2.fontSize',
+              fontSize: {
+                xs: 'body1.fontSize',
+                sm: 'body2.fontSize',
+              },
             },
           },
         }}
@@ -75,6 +78,10 @@ export const MultiSelect = <T extends object>({
             borderWidth: '1px',
           },
           borderRadius: 2,
+          minHeight: {
+            xs: 48,
+            sm: 40,
+          },
         }}
         renderValue={(selected) => {
           if (selected.length === 0 && placeholder) {
@@ -84,13 +91,7 @@ export const MultiSelect = <T extends object>({
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
               {selected.map((value) => {
                 const option = options.find((opt) => opt.value === value);
-                return (
-                  <Chip
-                    key={value}
-                    label={option?.label}
-                    size="small"
-                  />
-                );
+                return <Chip key={value} label={option?.label} size="small" />;
               })}
             </Box>
           );

@@ -1,4 +1,4 @@
-import { EditOutlined } from '@mui/icons-material';
+import { CircleOutlined, EditOutlined } from '@mui/icons-material';
 import { Box, CircularProgress, Divider, IconButton, Stack, Typography } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import { useState } from 'react';
@@ -59,7 +59,7 @@ export const ReportDisposal = () => {
             {formatDate(new Date(), 'MMMM DD, YYYY')}
           </Typography>
         </Stack>
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body1" color="text.secondary">
           {report.shift.name} Shift ({formatTime(report.periodStart)} -{' '}
           {formatTime(report.periodEnd)})
         </Typography>
@@ -75,9 +75,16 @@ export const ReportDisposal = () => {
           <CardContainer height="fit-content" spacing={2} key={disposal.id}>
             <Stack spacing={2}>
               <Stack direction="row" justifyContent="space-between" alignItems="center">
-                <Typography variant="body1" fontWeight={600} color="text.primary">
-                  {disposal.product.name}
-                </Typography>
+                <Stack direction="row" alignItems="center" spacing={0.5}>
+                  <CircleOutlined
+                    color={disposal.product.color === 'grey' ? undefined : disposal.product.color}
+                    sx={disposal.product.color === 'grey' ? { color: '#9E9E9E' } : undefined}
+                  />
+                  <Typography variant="body1" color="text.primary" fontWeight={600}>
+                    {disposal.product.name}
+                  </Typography>
+                </Stack>
+
                 <Show when={report.status !== ReportStatus.SUBMITTED}>
                   <IconButton size="small" onClick={() => handleOpenModal(disposal)}>
                     <EditOutlined />

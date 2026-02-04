@@ -58,7 +58,10 @@ export const Input = <T extends FieldValues>({
   const mergedSlotProps = {
     input: {
       sx: {
-        fontSize: 'body2.fontSize',
+        fontSize: {
+          xs: 'body1.fontSize',
+          sm: 'body2.fontSize',
+        },
         ...(startAdornment && { pl: 1 }),
         ...slotProps?.input?.sx,
       },
@@ -72,6 +75,10 @@ export const Input = <T extends FieldValues>({
         },
         '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
           borderWidth: '2px',
+        },
+        minHeight: {
+          xs: 48,
+          sm: 40,
         },
         bgcolor: 'background.paper',
         borderRadius: 2,
