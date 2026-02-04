@@ -7,6 +7,7 @@ import { computeReportTotals } from '../utils/compute';
 import { processInventoryDeductions } from './inventory.service';
 import { aggregateReportIncome } from '~/modules/analytics/services/income-aggregation.service';
 import { aggregateReportExpense } from '~/modules/analytics/services/expense-aggregation.service';
+import { aggregateReportDisposal } from '~/modules/analytics/services/disposal-aggregation.service';
 
 interface CreateReportPayload {
   tenantId: string;
@@ -57,7 +58,11 @@ const createReport = async ({
         creator: { select: { id: true, name: true } },
         income: true,
         expenses: true,
-        disposals: { include: { product: true } },
+        disposals: {
+          include: {
+            product: true,
+          },
+        },
         inventories: { include: { product: true } },
         employees: {
           include: {
@@ -88,7 +93,7 @@ const createReport = async ({
   }
 
   const products = await prisma.product.findMany({
-    where: { tenantId, category: ProductCategory.FUEL },
+    where: { tenantId, category: ProductCategory.FUEL, active: true },
     include: {
       productPrices: {
         where: {
@@ -354,8 +359,10 @@ const submitReport = async (reportId: string, userId: string) => {
   }
 
   // Aggregate income and expenses before finalizing
+  // TODO: do we not transfer this in the transaction?
   await aggregateReportIncome(reportId);
   await aggregateReportExpense(reportId);
+  await aggregateReportDisposal(reportId);
 
   return await prisma.$transaction(async (tx) => {
     // Get disposals to extract afterReading values

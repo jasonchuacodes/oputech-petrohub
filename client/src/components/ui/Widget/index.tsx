@@ -41,9 +41,9 @@ export const Widget = ({ title, to, children, props }: WidgetProps) => {
         </Typography>
         <Button
           size="small"
-          variant="outlined"
-          color="secondary"
-          sx={{ height: 28 }}
+          variant="text"
+          
+          sx={{ height: 36, color: 'text.secondary' }}
           onClick={() => navigate(to)}
           endIcon={<ArrowOutwardOutlined fontSize="inherit" />}
         >

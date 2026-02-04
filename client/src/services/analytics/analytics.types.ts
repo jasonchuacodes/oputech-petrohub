@@ -14,3 +14,9 @@ export type AnalyticsFilters = {
   startDate?: string;
   endDate?: string;
 };
+
+export type DisposalAnalyticsDataByType = {
+  productType: 'GASOLINE' | 'PREMIUM' | 'DIESEL' | 'KEROSENE';
+  value: number;
+  changePercentage: number;
+};

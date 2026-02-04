@@ -115,6 +115,7 @@ export const CustomModal = ({
                 {subheader && (
                   <Typography
                     variant="body2"
+                    component="span"
                     sx={{
                       fontSize: 'body2.fontSize',
                       color: 'text.secondary',

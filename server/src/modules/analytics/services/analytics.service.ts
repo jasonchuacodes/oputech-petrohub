@@ -1,7 +1,15 @@
-import { startOfMonth, endOfMonth, startOfDay, eachDayOfInterval, subDays, differenceInDays } from 'date-fns';
+import {
+  startOfMonth,
+  endOfMonth,
+  startOfDay,
+  eachDayOfInterval,
+  subDays,
+  differenceInDays,
+} from 'date-fns';
 import { Decimal } from '@prisma/client/runtime/library';
 
 import { prisma } from '~/db';
+import { ProductType } from '~/db/prisma';
 
 export interface AnalyticsDatapoint {
   value: number;
@@ -14,6 +22,12 @@ export interface AnalyticsData {
   datapoints: AnalyticsDatapoint[];
 }
 
+export interface DisposalAnalyticsDataByType {
+  productType: ProductType;
+  value: number;
+  changePercentage: number;
+}
+
 interface GetTotalIncomeAnalyticsParams {
   tenantId: string;
   startDate?: Date;
@@ -21,6 +35,12 @@ interface GetTotalIncomeAnalyticsParams {
 }
 
 interface GetTotalExpenseAnalyticsParams {
+  tenantId: string;
+  startDate?: Date;
+  endDate?: Date;
+}
+
+interface GetDisposalAnalyticsByTypeParams {
   tenantId: string;
   startDate?: Date;
   endDate?: Date;
@@ -67,12 +87,12 @@ export const getTotalIncomeAnalytics = async ({
   // Calculate totals
   const currentTotal = currentAggregations.reduce(
     (sum: Decimal, agg) => sum.add(agg.totalAmount),
-    new Decimal(0)
+    new Decimal(0),
   );
 
   const previousTotal = previousAggregations.reduce(
     (sum: Decimal, agg) => sum.add(agg.totalAmount),
-    new Decimal(0)
+    new Decimal(0),
   );
 
   // Calculate change percentage
@@ -156,12 +176,12 @@ export const getTotalExpenseAnalytics = async ({
   // Calculate totals
   const currentTotal = currentAggregations.reduce(
     (sum: Decimal, agg) => sum.add(agg.totalAmount),
-    new Decimal(0)
+    new Decimal(0),
   );
 
   const previousTotal = previousAggregations.reduce(
     (sum: Decimal, agg) => sum.add(agg.totalAmount),
-    new Decimal(0)
+    new Decimal(0),
   );
 
   // Calculate change percentage
@@ -202,4 +222,73 @@ export const getTotalExpenseAnalytics = async ({
     changePercentage: Math.round(changePercentage * 100) / 100, // Round to 2 decimals
     datapoints,
   };
+};
+
+export const getDisposalAnalyticsByType = async ({
+  tenantId,
+  startDate,
+  endDate,
+}: GetDisposalAnalyticsByTypeParams): Promise<DisposalAnalyticsDataByType[]> => {
+  const now = new Date();
+  const periodStart = startDate || startOfMonth(now);
+  const periodEnd = endDate || endOfMonth(now);
+
+  const periodDuration = differenceInDays(periodEnd, periodStart) + 1;
+  const previousPeriodEnd = subDays(periodStart, 1);
+  const previousPeriodStart = subDays(previousPeriodEnd, periodDuration - 1);
+
+  const [currentAggregations, previousAggregations, products] = await Promise.all([
+    prisma.reportDisposalAggregation.findMany({
+      where: { tenantId, hourBucket: { gte: periodStart, lte: periodEnd } },
+    }),
+    prisma.reportDisposalAggregation.findMany({
+      where: { tenantId, hourBucket: { gte: previousPeriodStart, lte: previousPeriodEnd } },
+    }),
+    prisma.product.findMany({
+      where: { active: true },
+      select: { type: true },
+    }),
+  ]);
+
+  const buildTotalsMap = (aggregations: typeof currentAggregations) => {
+    const map = new Map<ProductType, Decimal>();
+
+    for (const agg of aggregations) {
+      const existing = map.get(agg.productType);
+
+      map.set(
+        agg.productType,
+        existing ? existing.add(agg.totalDisposal) : new Decimal(agg.totalDisposal),
+      );
+    }
+
+    return map;
+  };
+
+  const currentByType = buildTotalsMap(currentAggregations);
+  const previousByType = buildTotalsMap(previousAggregations);
+
+  const productTypes = Array.from(
+    new Set(products.map((p) => p.type).filter(Boolean)),
+  ) as ProductType[];
+
+  const results: DisposalAnalyticsDataByType[] = productTypes.map((productType) => {
+    const currentTotal = currentByType.get(productType) ?? new Decimal(0);
+    const previousTotal = previousByType.get(productType) ?? new Decimal(0);
+
+    let changePercentage = 0;
+    if (previousTotal.gt(0)) {
+      changePercentage = currentTotal.sub(previousTotal).div(previousTotal).mul(100).toNumber();
+    } else if (currentTotal.gt(0)) {
+      changePercentage = 100;
+    }
+
+    return {
+      productType,
+      value: currentTotal.toNumber(),
+      changePercentage: Math.round(changePercentage * 100) / 100,
+    };
+  });
+
+  return results;
 };

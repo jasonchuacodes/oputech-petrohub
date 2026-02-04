@@ -158,7 +158,7 @@ export const ShiftSelectionModal = ({ open, onClose, tenantId }: ShiftSelectionM
 
   return (
     <CustomModal
-      disabled={!formState.isValid}
+      disabled={!blockingReport && !formState.isValid}
       open={open}
       onClose={onClose}
       title="Report Selection"
