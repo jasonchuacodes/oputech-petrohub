@@ -1,35 +1,86 @@
-import { DeleteOutlineOutlined, EditOutlined } from '@mui/icons-material';
-import { IconButton, Stack } from '@mui/material';
+import { MoreHorizOutlined } from '@mui/icons-material';
+import { IconButton, Menu, MenuItem, Typography } from '@mui/material';
 import { useState } from 'react';
+
+import { useDisclosure } from '~/hooks/useDisclosure';
 
 import { DeleteConfirmModal } from './DeleteConfirmModal';
 import { EditTimesheetModal } from './EditTimesheetModal';
+import { ViewTimesheetModal } from './ViewTimesheetModal';
 
 export const TimesheetActions = () => {
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const viewDisclosure = useDisclosure();
+  const editDisclosure = useDisclosure();
+  const deleteDisclosure = useDisclosure();
+
+  const isOpenMenu = Boolean(anchorEl);
+
+  const openMenu = (e: React.MouseEvent<HTMLElement>) => {
+    e.stopPropagation();
+    setAnchorEl(e.currentTarget);
+  };
+
+  const closeMenu = () => setAnchorEl(null);
+
+  const handleView = () => {
+    closeMenu();
+    viewDisclosure.onOpen();
+  };
 
   const handleEdit = () => {
-    setIsEditModalOpen(true);
+    closeMenu();
+    editDisclosure.onOpen();
   };
 
   const handleDelete = () => {
-    setIsDeleteModalOpen(true);
+    closeMenu();
+    deleteDisclosure.onOpen();
   };
 
   return (
     <>
-      <Stack direction="row" spacing={0.5}>
-        <IconButton onClick={handleEdit} size="small">
-          <EditOutlined fontSize="inherit" />
-        </IconButton>
-        <IconButton onClick={handleDelete} size="small">
-          <DeleteOutlineOutlined fontSize="inherit" />
-        </IconButton>
-      </Stack>
+      <IconButton onClick={openMenu} size="small">
+        <MoreHorizOutlined fontSize="inherit" sx={{ color: 'text.secondary' }} />
+      </IconButton>
 
-      <EditTimesheetModal open={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} />
-      <DeleteConfirmModal open={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} />
+      <Menu
+        anchorEl={anchorEl}
+        id="timesheet-actions-menu"
+        open={isOpenMenu}
+        onClose={closeMenu}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+        slotProps={{
+          paper: {
+            elevation: 4,
+            sx: {
+              mt: 0.5,
+              minWidth: 140,
+            },
+          },
+        }}
+      >
+        <MenuItem onClick={handleView}>
+          <Typography variant="body2">View</Typography>
+        </MenuItem>
+        <MenuItem onClick={handleEdit}>
+          <Typography variant="body2">Edit</Typography>
+        </MenuItem>
+        <MenuItem onClick={handleDelete}>
+          <Typography variant="body2">Delete</Typography>
+        </MenuItem>
+      </Menu>
+
+      <ViewTimesheetModal open={viewDisclosure.open} onClose={viewDisclosure.onClose} />
+      <EditTimesheetModal open={editDisclosure.open} onClose={editDisclosure.onClose} />
+      <DeleteConfirmModal open={deleteDisclosure.open} onClose={deleteDisclosure.onClose} />
     </>
   );
 };

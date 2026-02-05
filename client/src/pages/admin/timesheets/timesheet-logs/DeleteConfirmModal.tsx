@@ -1,4 +1,4 @@
-import { Typography } from '@mui/material';
+import { WarningAmberOutlined } from '@mui/icons-material';
 import toast from 'react-hot-toast';
 
 import { CustomModal } from '~/components/ui';
@@ -37,14 +37,11 @@ export const DeleteConfirmModal = ({ open, onClose }: DeleteConfirmModalProps) =
       open={open}
       type="danger"
       title="Delete Timesheet Confirmation"
+      subheader="Are you sure you want to delete this timesheet? All associated entries will be permanently deleted."
       submitText="Delete"
-      maxWidth={400}
+      maxWidth={500}
       loading={isDeletePending}
-    >
-      <Typography variant="body2">
-        Are you sure you want to delete this timesheet? All associated entries will be permanently
-        deleted.
-      </Typography>
-    </CustomModal>
+      icon={WarningAmberOutlined}
+    />
   );
 };

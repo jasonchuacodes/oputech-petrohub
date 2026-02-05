@@ -1,10 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Stack, TextField, Typography } from '@mui/material';
+import { CalendarMonthOutlined } from '@mui/icons-material';
+import { Stack, Typography } from '@mui/material';
 import dayjs from 'dayjs';
 import { useEffect } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
+import { NumberInput } from '~/components/form';
 import { CustomModal } from '~/components/ui';
 import { useTimesheetLogContext } from '~/context/timesheetLog';
 import { UpdateTimesheetSchema, type UpdateTimesheetParams } from '~/schema/updateTimesheetSchema';
@@ -80,7 +82,8 @@ export const EditTimesheetModal = ({ open, onClose }: EditTimesheetModalProps) =
       loading={isUpdateTimesheetPending}
       title="Edit Timesheet"
       submitText="Save Changes"
-      maxWidth={400}
+      maxWidth={500}
+      icon={CalendarMonthOutlined}
     >
       <Stack spacing={3}>
         <Stack spacing={2}>
@@ -110,34 +113,20 @@ export const EditTimesheetModal = ({ open, onClose }: EditTimesheetModalProps) =
               {lastCheckOut ? dayjs(lastCheckOut.timestamp).format('hh:mm A') : '—'}
             </Typography>
           </Stack>
-          <Stack direction="row" justifyContent="space-between" alignItems="top">
-            <Typography variant="body2" color="text.secondary">
+          <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+            <Typography variant="body2" color="text.secondary" sx={{ pt: 1 }}>
               Total Hours:
             </Typography>
-            <Controller
+            <NumberInput
               name="totalHours"
               control={control}
-              render={({ field: { onChange, value, ...field } }) => (
-                <TextField
-                  sx={{ '& .MuiInputBase-input': { fontSize: '0.875rem' }, width: 120 }}
-                  placeholder="0.00"
-                  {...field}
-                  value={value?.toFixed(2) ?? ''}
-                  onChange={(e) => {
-                    const val = parseFloat(e.target.value);
-                    onChange(isNaN(val) ? 0 : val);
-                  }}
-                  type="number"
-                  size="small"
-                  slotProps={{
-                    htmlInput: {
-                      min: 0,
-                      max: 16,
-                      step: 0.5,
-                    },
-                  }}
-                />
-              )}
+              placeholder="0.00"
+              size="small"
+              fullWidth={false}
+              width={120}
+              min={0}
+              max={16}
+              step={0.5}
             />
           </Stack>
         </Stack>

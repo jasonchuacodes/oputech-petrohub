@@ -47,6 +47,7 @@ export type DataTableProps<T> = {
   emptyMessage?: string;
   search?: DataTableSearchProps;
   dateRange?: DataTableDateRangeProps;
+  onExport?: () => void;
 };
 
 export type SortConfig = {

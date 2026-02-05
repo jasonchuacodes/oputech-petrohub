@@ -1,10 +1,8 @@
 import { ChevronRightOutlined, HomeOutlined } from '@mui/icons-material';
 import { Typography } from '@mui/material';
-import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import weekday from 'dayjs/plugin/weekday';
 import utc from 'dayjs/plugin/utc';
-import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { PageHeader } from '~/components/layouts';
@@ -15,18 +13,16 @@ import {
   PageLayout,
   type DateRange,
 } from '~/components/ui';
+import { TimesheetProvider, useTimesheetContext } from '~/context/timesheet';
 import { useGetAllTimesheetsQuery } from '~/services/timesheet/timesheet.queries';
 import type { Timesheet } from '~/services/timesheet/timesheet.types';
 import { AdminRoutes } from '~/routes';
 import { pathFor } from '~/utils/pathFor';
-import { getInitialDateRange } from '~/utils/date';
 
 import { TimesheetLogs } from './timesheet-logs';
 
 dayjs.extend(weekday);
 dayjs.extend(utc);
-
-const TIMESHEETS_KEY = 'timesheets';
 
 type GroupedTimesheet = {
   userId: string;
@@ -37,11 +33,7 @@ type GroupedTimesheet = {
 const TimesheetsPageContent = () => {
   const { tenantId, userId } = useParams();
   const navigate = useNavigate();
-
-  const initialRange = getInitialDateRange(TIMESHEETS_KEY);
-
-  const [startDate, setStartDate] = useState<Dayjs | null>(initialRange.startDate);
-  const [endDate, setEndDate] = useState<Dayjs | null>(initialRange.endDate);
+  const { startDate, endDate, setStartDate, setEndDate } = useTimesheetContext();
 
   const { data: timesheets, isLoading } = useGetAllTimesheetsQuery({
     tenantId,
@@ -185,4 +177,10 @@ const TimesheetsPageContent = () => {
   );
 };
 
-export const TimesheetsPage = TimesheetsPageContent;
+export const TimesheetsPage = () => {
+  return (
+    <TimesheetProvider>
+      <TimesheetsPageContent />
+    </TimesheetProvider>
+  );
+};

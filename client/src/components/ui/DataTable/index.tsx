@@ -8,7 +8,11 @@ import {
   TableRow,
   TableSortLabel,
 } from '@mui/material';
-import { FilterAltOutlined, KeyboardArrowDownOutlined } from '@mui/icons-material';
+import {
+  FilterAltOutlined,
+  KeyboardArrowDownOutlined,
+  FileDownloadOutlined,
+} from '@mui/icons-material';
 import { useMemo, useState } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
 
@@ -33,6 +37,7 @@ export const DataTable = <T,>({
   emptyMessage = 'No data available',
   search,
   dateRange,
+  onExport,
 }: DataTableProps<T>) => {
   const [sortConfig, setSortConfig] = useState<SortConfig>(null);
 
@@ -76,37 +81,49 @@ export const DataTable = <T,>({
 
   return (
     <TableContainer component={Paper} sx={{ borderRadius: 2, overflowX: 'auto', maxWidth: '100%' }}>
-      {(searchState.enabled || dateRangeState.enabled) && (
-        <Stack direction="row" spacing={1} p={2}>
-          {searchState.enabled && (
-            <SearchInput
-              placeholder={searchState.placeholder}
-              value={value}
-              onChange={(newValue) => {
-                setValue(newValue);
-                setExternalValue(newValue);
-              }}
-            />
-          )}
-          {dateRangeState.enabled && (
-            <DateRangePicker
-              selectedStart={startValue}
-              selectedEnd={endValue}
-              label={dateRangeState.label}
-              onAccept={(range) => {
-                setStartValue(range.start ?? null);
-                setEndValue(range.end ?? null);
+      {(searchState.enabled || dateRangeState.enabled || onExport) && (
+        <Stack direction="row" spacing={1} p={2} justifyContent="space-between" alignItems="center">
+          <Stack direction="row" spacing={1} alignItems="center">
+            {searchState.enabled && (
+              <SearchInput
+                placeholder={searchState.placeholder}
+                value={value}
+                onChange={(newValue) => {
+                  setValue(newValue);
+                  setExternalValue(newValue);
+                }}
+              />
+            )}
+            {dateRangeState.enabled && (
+              <DateRangePicker
+                selectedStart={startValue}
+                selectedEnd={endValue}
+                label={dateRangeState.label}
+                onAccept={(range) => {
+                  setStartValue(range.start ?? null);
+                  setEndValue(range.end ?? null);
 
-                dateRangeState.setRangeValue(range);
-              }}
-            />
-          )}
-          <Button
-            startIcon={<FilterAltOutlined fontSize="small" sx={{ color: 'text.secondary' }} />}
-            variant="outlined"
-          >
-            Filter
-          </Button>
+                  dateRangeState.setRangeValue(range);
+                }}
+              />
+            )}
+            <Button
+              startIcon={<FilterAltOutlined fontSize="small" sx={{ color: 'text.secondary' }} />}
+              variant="outlined"
+            >
+              Filter
+            </Button>
+          </Stack>
+          <Show when={!!onExport}>
+            <Button
+              startIcon={<FileDownloadOutlined />}
+              onClick={onExport}
+              variant="contained"
+              sx={{ height: 40, flexShrink: 0 }}
+            >
+              Export
+            </Button>
+          </Show>
         </Stack>
       )}
 

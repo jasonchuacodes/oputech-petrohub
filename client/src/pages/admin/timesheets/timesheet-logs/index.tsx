@@ -1,42 +1,24 @@
-import { FileDownloadOutlined } from '@mui/icons-material';
-import {
-  Box,
-  Divider,
-  Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-} from '@mui/material';
-import { useParams, useNavigate } from 'react-router-dom';
+import { HomeOutlined } from '@mui/icons-material';
+import { Stack, Tooltip, Typography } from '@mui/material';
+import { useParams } from 'react-router-dom';
 
-import {
-  BackButton,
-  Button,
-  DateRangePicker,
-  LoadingSpinner,
-  NoData,
-  PageContainer,
-  Paper,
-  type DateRange,
-} from '~/components/ui';
+import { PageHeader } from '~/components/layouts';
+import { Breadcrumb, DataTable, PageContainer, type DateRange } from '~/components/ui';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { useTimesheetContext } from '~/context/timesheet/useTimesheetContext';
 import { TimesheetLogProvider } from '~/context/timesheetLog';
 import { AdminRoutes } from '~/routes';
 import { useGetUserQuery } from '~/services/user/user.queries';
 import { useGetUserTimesheetsQuery } from '~/services/timesheet/timesheet.queries';
+import { TimesheetEntryActionEnum } from '~/services/timesheet/timesheet.types';
+import { formatDate, formatTime } from '~/utils/date';
 import { pathFor } from '~/utils/pathFor';
 
 import { UserHeader } from './UserHeader';
-import { TimesheetRow } from './TimesheetRow';
+import { TimesheetActions } from './TimesheetActions';
 
 export const TimesheetLogs = () => {
   const { userId } = useParams();
-  const navigate = useNavigate();
   const { tenantId } = useTenantContext();
   const { startDate, endDate, setStartDate, setEndDate } = useTimesheetContext();
 
@@ -64,90 +46,126 @@ export const TimesheetLogs = () => {
     }
   };
 
-  const handleGoBack = () => {
-    navigate(
-      pathFor({
-        pathname: AdminRoutes.TenantTimesheets,
-        params: { tenantId },
-      }),
-    );
-  };
-
   if (!userId) {
     return null;
   }
 
   return (
-    <PageContainer maxWidth="md" stackSx={{ justifyContent: 'start', alignItems: 'stretch' }}>
-      <BackButton
-          text="Go back"
-          onClick={handleGoBack}
-          to={pathFor({
-            pathname: AdminRoutes.TenantTimesheets,
-            params: { tenantId },
-          })}
-        />
+    <PageContainer maxWidth="lg" stackSx={{ justifyContent: 'start', alignItems: 'stretch' }}>
+      <Breadcrumb
+        items={[
+          {
+            icon: HomeOutlined,
+            label: 'Home',
+            to: pathFor({
+              pathname: AdminRoutes.TenantHome,
+              params: { tenantId },
+            }),
+          },
+          {
+            label: 'Timesheets',
+            to: pathFor({
+              pathname: AdminRoutes.TenantTimesheets,
+              params: { tenantId },
+            }),
+          },
+          {
+            label: 'Timesheet Logs',
+          },
+        ]}
+      />
+      <PageHeader
+        title="Timesheet Logs"
+        description="View and manage detailed timesheet entries and check-in/check-out records"
+      />
 
-        <Typography variant="h6" fontWeight="bold">
-          Timesheet Logs
-        </Typography>
+      <Stack direction="row" justifyContent="space-between" alignItems="center">
+        <UserHeader user={user} isLoading={isLoadingUser} />
+      </Stack>
 
-        <Stack direction="row" justifyContent="space-between" alignItems="center">
-          <UserHeader user={user} isLoading={isLoadingUser} />
-        </Stack>
-
-        <Divider />
-
-        <Stack direction="row" alignItems="end" justifyContent="space-between">
-          <DateRangePicker
-            onAccept={handleSelectDateRange}
-            selectedStart={startDate}
-            selectedEnd={endDate}
-          />
-          <Button
-            startIcon={<FileDownloadOutlined />}
-            onClick={() => null}
-            variant="contained"
-            sx={{ height: 40, flexShrink: 0 }}
-          >
-            Export
-          </Button>
-        </Stack>
-
-        {isLoading ? (
-          <Box display="flex" justifyContent="center" alignItems="center" pt={10}>
-            <LoadingSpinner />
-          </Box>
-        ) : timesheetLogs && timesheetLogs.length > 0 ? (
-          <TableContainer component={Paper} sx={{ border: '1px solid', borderColor: 'divider' }}>
-            <Table sx={{ minWidth: 650 }}>
-              <TableHead>
-                <TableRow>
-                  <TableCell sx={{ maxWidth: 240 }}>Date</TableCell>
-                  <TableCell align="left">Check In</TableCell>
-                  <TableCell align="left">Check Out</TableCell>
-                  <TableCell align="left" sx={{ width: 256 }}>
-                    Total Hours
-                  </TableCell>
-                  <TableCell align="left" sx={{ width: 120 }}>
-                    Actions
-                  </TableCell>
-                  <TableCell />
-                </TableRow>
-              </TableHead>
-
-              <TableBody>
-                {timesheetLogs.map((timesheet) => (
-                  <TimesheetLogProvider key={timesheet.id} timesheetLog={timesheet}>
-                    <TimesheetRow />
-                  </TimesheetLogProvider>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        ) : (
-          <NoData text="No timesheets data available." />
-        )}
+      <DataTable
+        id="timesheet-logs-table"
+        collection={DataTable.collection({
+          items: timesheetLogs ?? [],
+          itemToValue: (timesheet) => timesheet.id,
+          itemToString: (timesheet) => `Timesheet for ${timesheet.createdAt}`,
+        })}
+        dateRange={{
+          enabled: true,
+          startValue: startDate,
+          endValue: endDate,
+          onRangeChange: handleSelectDateRange,
+        }}
+        onExport={() => null}
+        columns={[
+          {
+            id: 'date',
+            heading: 'Date',
+            orderable: true,
+            width: 240,
+            cell: (timesheet) => (
+              <Typography variant="body2">{formatDate(timesheet.createdAt)}</Typography>
+            ),
+          },
+          {
+            id: 'checkIn',
+            heading: 'Check In',
+            cell: (timesheet) => {
+              const firstCheckIn = timesheet.entries.find(
+                (e) => e.action === TimesheetEntryActionEnum.CHECK_IN,
+              );
+              return (
+                <Tooltip title="First In">
+                  <Typography variant="body2" color="text.secondary">
+                    {firstCheckIn ? formatTime(firstCheckIn.timestamp) : '—'}
+                  </Typography>
+                </Tooltip>
+              );
+            },
+          },
+          {
+            id: 'checkOut',
+            heading: 'Check Out',
+            cell: (timesheet) => {
+              const lastCheckOut = [...timesheet.entries]
+                .reverse()
+                .find((e) => e.action === TimesheetEntryActionEnum.CHECK_OUT);
+              return (
+                <Tooltip title="Last Out">
+                  <Typography variant="body2" color="text.secondary">
+                    {lastCheckOut ? formatTime(lastCheckOut.timestamp) : '—'}
+                  </Typography>
+                </Tooltip>
+              );
+            },
+          },
+          {
+            id: 'totalHours',
+            heading: 'Total Hours',
+            orderable: true,
+            width: 256,
+            cell: (timesheet) => (
+              <Typography
+                variant="body2"
+                color="text.secondary"
+              >{`${timesheet.totalHours.toFixed(2)} hrs`}</Typography>
+            ),
+          },
+          {
+            id: 'actions',
+            heading: '',
+            align: 'right',
+            width: 120,
+            cell: (timesheet) => (
+              <TimesheetLogProvider timesheetLog={timesheet}>
+                <TimesheetActions />
+              </TimesheetLogProvider>
+            ),
+          },
+        ]}
+        loading={isLoading}
+        emptyMessage="No timesheets data available."
+      />
     </PageContainer>
   );
 };

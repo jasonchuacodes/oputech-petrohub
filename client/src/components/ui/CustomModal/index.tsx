@@ -29,6 +29,7 @@ type Props = Omit<ModalProps, 'children'> & {
   onCancel?: () => void;
   onSubmit?: () => void;
   icon?: ComponentType;
+  hideActions?: boolean;
 };
 
 export const CustomModal = ({
@@ -45,6 +46,7 @@ export const CustomModal = ({
   onSubmit,
   type = 'default',
   icon,
+  hideActions = false,
   ...modalProps
 }: Props) => {
   return (
@@ -145,35 +147,37 @@ export const CustomModal = ({
               {children}
             </CardContent>
           )}
-          <CardActions
-            sx={{
-              width: '100%',
-              borderTop: '1px solid',
-              borderColor: 'divider',
-              justifyContent: 'flex-end',
-              p: 2,
-              flexShrink: 0,
-            }}
-          >
-            <Button
-              disableElevation={true}
-              onClick={onCancel ?? onClose}
-              type="button"
-              variant="outlined"
+          {!hideActions && (
+            <CardActions
+              sx={{
+                width: '100%',
+                borderTop: '1px solid',
+                borderColor: 'divider',
+                justifyContent: 'flex-end',
+                p: 2,
+                flexShrink: 0,
+              }}
             >
-              {cancelText}
-            </Button>
-            <Button
-              disabled={disabled}
-              loading={loading}
-              type="submit"
-              variant="contained"
-              onClick={onSubmit}
-              color={type === 'danger' ? 'error' : 'primary'}
-            >
-              {submitText}
-            </Button>
-          </CardActions>
+              <Button
+                disableElevation={true}
+                onClick={onCancel ?? onClose}
+                type="button"
+                variant="outlined"
+              >
+                {cancelText}
+              </Button>
+              <Button
+                disabled={disabled}
+                loading={loading}
+                type="submit"
+                variant="contained"
+                onClick={onSubmit}
+                color={type === 'danger' ? 'error' : 'primary'}
+              >
+                {submitText}
+              </Button>
+            </CardActions>
+          )}
         </Card>
       </Box>
     </Modal>
