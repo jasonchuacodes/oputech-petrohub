@@ -6,6 +6,7 @@ export const UpdateInventorySchema = z.object({
   price: z.coerce.number().min(0.01).optional(),
   quantity: z.coerce.number().int().min(0).optional(),
   effectiveFrom: z.string().datetime().optional(),
+  lowStockThreshold: z.coerce.number().int().min(1).optional().nullable(),
 });
 
 export type UpdateInventoryPayload = z.infer<typeof UpdateInventorySchema>;

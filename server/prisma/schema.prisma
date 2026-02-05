@@ -217,6 +217,7 @@ model Product {
   color       String          @default("grey")
   type        ProductType?
   active      Boolean         @default(true)
+  lowStockThreshold Int?
 
   productPrices        ProductPrice[]
   productReadings      ProductReading[]

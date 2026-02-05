@@ -13,6 +13,7 @@ const createInventory = async (data: CreateInventoryPayload) => {
         name: data.name,
         description: data.description,
         category: ProductCategory.STOCK_INVENTORY,
+        lowStockThreshold: data.lowStockThreshold ?? null,
       },
     });
 
@@ -69,6 +70,7 @@ const getInventoriesByTenantId = async (
     productDescription: product.description,
     quantity: product.inventory?.quantity || 0,
     currentPrice: product.productPrices[0]?.price || null,
+    lowStockThreshold: product.lowStockThreshold,
     updatedAt: product.inventory?.updatedAt || product.updatedAt,
   }));
 };
@@ -103,6 +105,7 @@ const getInventoryById = async (productId: string, tenantId: string) => {
     productDescription: product.description,
     quantity: product.inventory.quantity,
     currentPrice: product.productPrices[0]?.price || null,
+    lowStockThreshold: product.lowStockThreshold,
     updatedAt: product.inventory.updatedAt,
   };
 };
@@ -159,6 +162,11 @@ const updateInventory = async (
     updates.quantity = data.quantity;
   }
 
+  // Low stock threshold
+  if (data.lowStockThreshold !== undefined && data.lowStockThreshold !== product.lowStockThreshold) {
+    updates.lowStockThreshold = data.lowStockThreshold;
+  }
+
   // Early return if nothing changed
   if (Object.keys(updates).length === 0) {
     return getInventoryById(productId, tenantId);
@@ -166,12 +174,13 @@ const updateInventory = async (
 
   return await prisma.$transaction(async (tx) => {
     // 1. Update product base fields
-    if (updates.name !== undefined || updates.description !== undefined) {
+    if (updates.name !== undefined || updates.description !== undefined || updates.lowStockThreshold !== undefined) {
       await tx.product.update({
         where: { id: productId },
         data: {
           ...(updates.name !== undefined && { name: updates.name }),
           ...(updates.description !== undefined && { description: updates.description }),
+          ...(updates.lowStockThreshold !== undefined && { lowStockThreshold: updates.lowStockThreshold }),
         },
       });
     }

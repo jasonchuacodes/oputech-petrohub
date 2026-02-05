@@ -3,13 +3,14 @@ import { Typography } from '@mui/material';
 import { HomeOutlined, AddOutlined } from '@mui/icons-material';
 
 import { PageHeader } from '~/components/layouts';
-import { Breadcrumb, Button, DataTable, PageContainer, PageLayout } from '~/components/ui';
+import { Breadcrumb, Button, Chip, DataTable, PageContainer, PageLayout } from '~/components/ui';
 import { InventoryProvider } from '~/context/inventory';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { useDisclosure } from '~/hooks/useDisclosure';
 import { AdminRoutes } from '~/routes';
 import { useGetInventoriesQuery } from '~/services/inventory/inventory.queries';
 import { formatDate } from '~/utils/date';
+import { getStockStatus, getStockStatusConfig } from '~/pages/admin/inventory/utils';
 import { formatCurrency } from '~/utils/number';
 import { pathFor } from '~/utils/pathFor';
 
@@ -21,7 +22,7 @@ export const InventoryPage = () => {
   const disclosure = useDisclosure();
 
   const [searchTerm, setSearchTerm] = useState('');
-  
+
   const { data: inventories, isLoading } = useGetInventoriesQuery({
     tenantId,
     filters: { searchTerm: searchTerm || undefined },
@@ -84,6 +85,7 @@ export const InventoryPage = () => {
               orderable: true,
               width: 200,
             },
+
             {
               id: 'quantity',
               heading: 'Quantity',
@@ -103,6 +105,23 @@ export const InventoryPage = () => {
                 </Typography>
               ),
               width: 160,
+            },
+            {
+              id: 'status',
+              heading: 'Status',
+              cell: (item) => {
+                const status = getStockStatus(item.quantity, item.lowStockThreshold);
+                if (!status) {
+                  return (
+                    <Typography variant="body2" color="text.secondary">
+                      -
+                    </Typography>
+                  );
+                }
+                const config = getStockStatusConfig(status);
+                return <Chip label={config.label} color={config.color} />;
+              },
+              width: 140,
             },
             {
               id: 'updatedAt',

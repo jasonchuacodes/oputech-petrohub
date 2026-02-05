@@ -30,6 +30,7 @@ export const CreateInventoryModal = ({ open, onClose }: CreateInventoryModalProp
       description: '',
       quantity: 0,
       price: 0,
+      lowStockThreshold: null,
     },
     resolver: zodResolver(CreateInventorySchema),
   });
@@ -44,6 +45,7 @@ export const CreateInventoryModal = ({ open, onClose }: CreateInventoryModalProp
         description: data.description,
         price: data.price,
         quantity: data.quantity,
+        lowStockThreshold: data.lowStockThreshold,
       });
       toast.success('Stock inventory created successfully');
       reset();
@@ -97,6 +99,15 @@ export const CreateInventoryModal = ({ open, onClose }: CreateInventoryModalProp
             startAdornment="₱"
           />
         </Stack>
+        <NumberInput
+          label="Low Stock Threshold (optional)"
+          control={control}
+          placeholder="Set threshold for low stock alert"
+          name="lowStockThreshold"
+          step={1}
+          min={1}
+          helperText="Alert will show when quantity is at or below this value"
+        />
         <Input
           label="Description (optional)"
           control={control}

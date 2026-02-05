@@ -5,6 +5,7 @@ export interface Inventory {
   productDescription?: string;
   quantity: number;
   currentPrice: number | null;
+  lowStockThreshold: number | null;
   updatedAt: string;
 }
 
@@ -14,6 +15,7 @@ export interface CreateInventoryPayload {
   description?: string | null,
   price: number;
   quantity?: number;
+  lowStockThreshold?: number | null;
 }
 
 export interface UpdateInventoryPayload {
@@ -22,6 +24,7 @@ export interface UpdateInventoryPayload {
   price?: number;
   quantity?: number;
   effectiveFrom?: string;
+  lowStockThreshold?: number | null;
 }
 
 export interface GetInventoriesFilters {

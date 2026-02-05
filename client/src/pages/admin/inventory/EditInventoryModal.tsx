@@ -6,7 +6,7 @@ import { useEffect } from 'react';
 import toast from 'react-hot-toast';
 
 import { CustomModal } from '~/components/ui';
-import { Input } from '~/components/form';
+import { Input, NumberInput } from '~/components/form';
 import { useInventoryContext } from '~/context/inventory';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { useUpdateInventoryMutation } from '~/services/inventory/inventory.queries';
@@ -28,6 +28,7 @@ export const EditInventoryModal = ({ open, onClose }: EditInventoryModalProps) =
       description: '',
       price: 0,
       quantity: 0,
+      lowStockThreshold: null,
     },
     resolver: zodResolver(UpdateInventorySchema),
   });
@@ -39,6 +40,7 @@ export const EditInventoryModal = ({ open, onClose }: EditInventoryModalProps) =
         description: inventory.productDescription || '',
         price: inventory.currentPrice || 0,
         quantity: inventory.quantity,
+        lowStockThreshold: inventory.lowStockThreshold,
       });
     }
   }, [inventory, reset]);
@@ -55,6 +57,7 @@ export const EditInventoryModal = ({ open, onClose }: EditInventoryModalProps) =
           description: data.description,
           price: data.price,
           quantity: data.quantity,
+          lowStockThreshold: data.lowStockThreshold === '' ? null : data.lowStockThreshold,
         },
       });
 
@@ -90,15 +93,24 @@ export const EditInventoryModal = ({ open, onClose }: EditInventoryModalProps) =
           name="name"
           placeholder="e.g., Mobil 1 Lubricant"
         />
-        <Input
-          label="Quantity"
-          control={control}
-          name="quantity"
-          type="number"
-          placeholder="0"
-          step="1"
-          min="0"
-        />
+        <Stack direction="row" spacing={1}>
+          <NumberInput
+            label="Quantity"
+            control={control}
+            name="quantity"
+            placeholder="0"
+            step={1}
+            min={0}
+          />
+          <NumberInput
+            label="Low Stock Threshold (optional)"
+            control={control}
+            name="lowStockThreshold"
+            placeholder="Set threshold"
+            step={1}
+            min={1}
+          />
+        </Stack>
         <Input
           label="Price"
           control={control}
