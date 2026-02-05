@@ -10,6 +10,7 @@ const updateProductSchema = z.object({
   color: z.enum(['grey', 'error', 'warning', 'success', 'info', 'primary']).optional(),
 });
 
+// TODO: refine this further. if future is true, effectiveFrom must be a valid date in the future - and the price should be different from the current price
 const refineFn = (data: { future?: boolean; effectiveFrom?: string }, ctx: z.RefinementCtx) => {
   if (data.future) {
     if (!data.effectiveFrom) {

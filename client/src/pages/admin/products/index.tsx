@@ -132,7 +132,7 @@ export const ProductsPage = () => {
               heading: 'Last Updated',
               cell: (product) => (
                 <Typography variant="body2" color="text.secondary">
-                  {formatDate(product.updatedAt, 'YYYY-MM-DD hh:mm')}
+                  {formatDate(product.productPrice.effectiveFrom, 'YYYY-MM-DD hh:mm')}
                 </Typography>
               ),
             },

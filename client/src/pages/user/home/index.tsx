@@ -21,7 +21,7 @@ export const HomePage = () => {
   const shiftSelectionDisclosure = useDisclosure();
 
   const [firstName, ...rest] = auth?.name.split(' ') ?? [];
-  const lastName = rest.at(-1);
+  const lastName = rest.at(-1) ?? '';
   const displayName = `${firstName} ${lastName}`;
 
   useEffect(() => {

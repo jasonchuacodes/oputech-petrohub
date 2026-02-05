@@ -116,7 +116,7 @@ export const Report = () => {
   }
 
   const [firstName, ...rest] = report.creator.name.split(' ');
-  const lastName = rest.at(-1);
+  const lastName = rest.at(-1) ?? '';
   const ownerName = `${firstName} ${lastName}`;
 
   const isOwner = auth?.id === report.creatorId;

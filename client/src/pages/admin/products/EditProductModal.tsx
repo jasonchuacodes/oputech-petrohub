@@ -84,6 +84,9 @@ export const EditProductModal = ({ open, onClose }: EditProductModalProps) => {
   };
 
   return (
+    // TODO: disable submit button if form is invalid
+    // invalid state is when the form is invalid and there are no changes (dirtyFields is empty)
+    // this is to prevent submitting the form when there are no changes
     <CustomModal
       onSubmit={handleSubmit(onSubmit)}
       onClose={handleClose}

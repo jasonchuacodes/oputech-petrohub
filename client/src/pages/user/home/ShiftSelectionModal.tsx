@@ -167,8 +167,8 @@ export const ShiftSelectionModal = ({ open, onClose, tenantId }: ShiftSelectionM
           <Typography variant="body2">
             There is a pending report for{' '}
             <Typography variant="inherit" component="span" color="warning.main">
-              {blockingReport.period.shiftName}
-            </Typography>
+              {blockingReport.period.shiftName} Shift
+            </Typography> 
           </Typography>
         ) : allSubmitted ? (
           <Typography variant="body2">

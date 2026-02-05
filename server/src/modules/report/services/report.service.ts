@@ -97,7 +97,7 @@ const createReport = async ({
     include: {
       productPrices: {
         where: {
-          effectiveFrom: { lte: periodStart },
+          effectiveFrom: { lte: periodEnd },
         },
         orderBy: { effectiveFrom: 'desc' },
         take: 1,
@@ -117,11 +117,11 @@ const createReport = async ({
       let priceSnapshot = product.productPrices[0]?.price ?? new Decimal(0);
 
       if (!product.productPrices[0]) {
-        const earliestPrice = await prisma.productPrice.findFirst({
+        const latestPrice = await prisma.productPrice.findFirst({
           where: { productId: product.id },
-          orderBy: { effectiveFrom: 'asc' },
+          orderBy: { effectiveFrom: 'desc' },
         });
-        priceSnapshot = earliestPrice?.price ?? new Decimal(0);
+        priceSnapshot = latestPrice?.price ?? new Decimal(0);
       }
 
       const afterReading = beforeReading;

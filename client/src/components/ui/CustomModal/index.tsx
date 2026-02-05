@@ -53,15 +53,18 @@ export const CustomModal = ({
         <Card
           sx={{
             position: 'absolute',
-            maxWidth: maxWidth ? maxWidth : 560,
-            maxHeight: 720,
+            maxWidth: maxWidth ?? 560,
             top: '50%',
             left: '50%',
-            width: '95%',
+            width: { xs: '98%', sm: '95%' },
+            maxHeight: { xs: '90vh', sm: 720 },
             transform: 'translate(-50%, -50%)',
+            display: 'flex',
+            flexDirection: 'column',
+            minHeight: 0,
           }}
         >
-          <Box p={2}>
+          <Box p={2} sx={{ flexShrink: 0 }}>
             <Stack direction="row" alignItems="start" spacing={3}>
               {icon && (
                 <Box
@@ -136,6 +139,7 @@ export const CustomModal = ({
                 flexGrow: 1,
                 overflow: 'auto',
                 pt: 2,
+                minHeight: 0,
               }}
             >
               {children}
@@ -148,6 +152,7 @@ export const CustomModal = ({
               borderColor: 'divider',
               justifyContent: 'flex-end',
               p: 2,
+              flexShrink: 0,
             }}
           >
             <Button
