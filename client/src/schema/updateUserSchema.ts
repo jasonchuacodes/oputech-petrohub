@@ -1,6 +1,7 @@
 import z from 'zod';
 
 import { UserRole } from '../services/user/user.types';
+import { RateType } from '../services/salary/salary.types';
 
 export const UpdateUserSchema = z
   .object({
@@ -42,6 +43,9 @@ export const UpdateUserSchema = z
       .optional()
       .nullable(),
     shiftId: z.string().uuid().optional().nullable(),
+    rate: z.coerce.number().nonnegative().optional().nullable(),
+    rateType: z.nativeEnum(RateType).optional().nullable(),
+    effectiveFrom: z.string().optional().nullable(),
   });
 
 export type UpdateUserInput = z.infer<typeof UpdateUserSchema>;

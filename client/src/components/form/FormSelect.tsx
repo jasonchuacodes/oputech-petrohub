@@ -29,6 +29,7 @@ type FormSelectProps<T extends FieldValues> = PropsWithChildren<{
   renderValue?: MUISelectProps['renderValue'];
   displayEmpty?: boolean;
   MenuProps?: MUISelectProps['MenuProps'];
+  width?: number | string;
   sx?: MUISelectProps['sx'];
 }>;
 
@@ -44,6 +45,7 @@ export const FormSelect = <T extends FieldValues>({
   renderValue,
   displayEmpty,
   MenuProps,
+  width,
   sx,
 }: FormSelectProps<T>) => {
   return (
@@ -51,7 +53,7 @@ export const FormSelect = <T extends FieldValues>({
       name={name}
       control={control}
       render={({ field: { onChange, value }, fieldState: { error } }) => (
-        <Stack spacing={0.5} width="100%">
+        <Stack spacing={0.5} width={width ? width : '100%'}>
           {label && (
             <Typography variant="body2" fontWeight="medium" color="text.primary">
               {label}

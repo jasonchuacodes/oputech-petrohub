@@ -43,6 +43,21 @@ export const NumberInput = <T extends FieldValues>({
   autoFocus,
   width,
 }: NumberInputProps<T>) => {
+  // Calculate decimal places from step for rounding
+  const getDecimalPlaces = (stepValue: number) => {
+    const stepStr = stepValue.toString();
+    if (stepStr.includes('.')) {
+      return stepStr.split('.')[1].length;
+    }
+    return 0;
+  };
+
+  const decimalPlaces = getDecimalPlaces(step);
+
+  const roundToStep = (value: number) => {
+    return Number(value.toFixed(decimalPlaces));
+  };
+
   const slotProps = {
     input: {
       sx: {
@@ -89,16 +104,28 @@ export const NumberInput = <T extends FieldValues>({
 
         const handleIncrement = () => {
           const numValue = Number(currentValue) || 0;
-          const newValue = numValue + step;
+          const newValue = roundToStep(numValue + step);
           if (max !== undefined && newValue > max) return;
           field.onChange(newValue);
         };
 
         const handleDecrement = () => {
           const numValue = Number(currentValue) || 0;
-          const newValue = numValue - step;
+          const newValue = roundToStep(numValue - step);
           if (min !== undefined && newValue < min) return;
           field.onChange(newValue);
+        };
+
+        const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+          const value = e.target.value;
+          if (value === '') {
+            field.onChange('');
+            return;
+          }
+          const numValue = Number(value);
+          if (!isNaN(numValue)) {
+            field.onChange(roundToStep(numValue));
+          }
         };
 
         return (
@@ -118,6 +145,7 @@ export const NumberInput = <T extends FieldValues>({
             <OutlinedInput
               {...field}
               value={field.value ?? ''}
+              onChange={handleInputChange}
               type="number"
               size={size}
               fullWidth={fullWidth}

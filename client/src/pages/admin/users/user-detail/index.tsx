@@ -1,14 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { HomeOutlined } from '@mui/icons-material';
-import { Divider, Grid, Stack, Typography } from '@mui/material';
+import { Stack } from '@mui/material';
 import { useForm } from 'react-hook-form';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import toast from 'react-hot-toast';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
-import { Input, InputWithFormat } from '~/components/form';
-import { Button, Breadcrumb, Form, PageContainer, PageLayout } from '~/components/ui';
-import { useAuthContext } from '~/context/auth/useAuthContext';
+import { Button, Breadcrumb, Form, PageContainer, PageLayout, Show } from '~/components/ui';
+import { PageHeader } from '~/components/layouts';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { AdminRoutes } from '~/routes';
 import { useGetUserQuery, useUpdateUserMutation } from '~/services/user/user.queries';
@@ -17,20 +16,35 @@ import { useGetShiftsQuery } from '~/services/shift/shift.queries';
 import { UpdateUserSchema, type UpdateUserPayload } from '~/schema/updateUserSchema';
 import { pathFor } from '~/utils/pathFor';
 import { parseBackendError } from '~/utils/parseBackendError';
+import {
+  useGetCurrentSalaryRateQuery,
+  useCreateSalaryRateMutation,
+} from '~/services/salary/salary.queries';
+import { RateType } from '~/services/salary/salary.types';
 
-import { ResetPasswordModal } from '../ResetPasswordModal';
-import { AvatarPicker } from './AvatarPicker';
-import { ShiftSelect } from './ShiftSelect';
+import { BasicDetail } from './BasicDetail';
+import { DeleteUser } from './DeleteUser';
+import { GovernmentDetails } from './GovernmentDetails';
+import { JobDetail } from './JobDetail';
+import { ResetPassword } from './ResetPassword';
 
 export const UserDetailPage = () => {
-  const navigate = useNavigate();
   const { userId } = useParams();
-  const { auth } = useAuthContext();
+
   const { tenantId } = useTenantContext();
 
-  const [isResetPasswordModalOpen, setIsResetPasswordModalOpen] = useState(false);
+  const { data: user, isLoading: isLoadingUser } = useGetUserQuery({
+    tenantId,
+    userId,
+  });
 
-  const initialValues = {
+  const { data: shifts } = useGetShiftsQuery(tenantId);
+  const { data: currentSalaryRate } = useGetCurrentSalaryRateQuery(userId, tenantId);
+
+  const { mutateAsync: updateUser, isPending: isUpdatePending } = useUpdateUserMutation();
+  const { mutateAsync: createSalaryRate } = useCreateSalaryRateMutation();
+
+  const initialValues: UpdateUserPayload = {
     name: '',
     address: null,
     position: null,
@@ -40,6 +54,9 @@ export const UserDetailPage = () => {
     sss: null,
     tin: null,
     shiftId: null,
+    rate: null,
+    rateType: null,
+    effectiveFrom: null,
   };
 
   const {
@@ -50,17 +67,8 @@ export const UserDetailPage = () => {
   } = useForm<UpdateUserPayload>({
     defaultValues: initialValues,
     resolver: zodResolver(UpdateUserSchema),
-    mode: 'onBlur',
+    mode: 'onChange',
   });
-
-  const { data: user, isLoading: isLoadingUser } = useGetUserQuery({
-    tenantId,
-    userId,
-  });
-
-  const { data: shifts } = useGetShiftsQuery(tenantId);
-
-  const { mutateAsync: updateUser, isPending: isUpdatePending } = useUpdateUserMutation();
 
   useEffect(() => {
     if (isLoadingUser) return;
@@ -75,18 +83,44 @@ export const UserDetailPage = () => {
       sss: user?.sss ?? null,
       tin: user?.tin ?? null,
       shiftId: user?.shiftSchedule?.shiftId ?? null,
+      rate: currentSalaryRate?.rate ?? null,
+      rateType: currentSalaryRate?.rateType ?? RateType.HOURLY,
+      effectiveFrom: null,
     });
-  }, [isLoadingUser, user, reset]);
+  }, [isLoadingUser, user, currentSalaryRate, reset]);
 
   const onSubmit = async (data: UpdateUserPayload) => {
     if (!tenantId || !userId) return;
+
     try {
-      const payload = {
-        ...data,
+      const userPayload = {
+        name: data.name,
+        address: data.address,
+        position: data.position,
+        contact: data.contact,
+        pagibig: data.pagibig,
+        philhealth: data.philhealth,
+        sss: data.sss,
+        tin: data.tin,
         shiftId: data.shiftId || null,
       };
 
-      await updateUser({ data: payload as UpdateUserPayload, tenantId, userId });
+      await updateUser({ data: userPayload, tenantId, userId });
+
+      if (
+        data.rate !== null &&
+        data.rate !== undefined &&
+        data.rateType &&
+        (data.rate !== currentSalaryRate?.rate || data.rateType !== currentSalaryRate?.rateType)
+      ) {
+        await createSalaryRate({
+          userId,
+          tenantId,
+          rate: data.rate,
+          rateType: data.rateType,
+          effectiveFrom: data.effectiveFrom || undefined,
+        });
+      }
 
       toast.success('User updated successfully');
     } catch (err) {
@@ -95,10 +129,12 @@ export const UserDetailPage = () => {
     }
   };
 
+  const isEmployee = user?.role === UserRole.USER;
+
   return (
     <PageLayout>
       <Form onSubmit={handleSubmit(onSubmit)} sx={{ height: '100%' }}>
-        <PageContainer>
+        <PageContainer spacing={3}>
           <Breadcrumb
             items={[
               {
@@ -121,214 +157,15 @@ export const UserDetailPage = () => {
               },
             ]}
           />
+          <PageHeader title="User Profile" description="View and manage the user details here. " />
 
-          <Stack spacing={4}>
-            <Grid container spacing={6}>
-              <Grid size={{ xs: 12, md: 4 }}>
-                <Typography variant="body2" fontWeight="medium">
-                  Personal Information
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Basic information about the user
-                </Typography>
-              </Grid>
-              <Grid size={{ xs: 12, md: 8 }}>
-                <Stack spacing={2}>
-                  <AvatarPicker name={user?.name} />
-                  <Stack spacing={0.5}>
-                    <Typography variant="body2" fontWeight="medium">
-                      Full Name
-                    </Typography>
-                    <Input
-                      required
-                      fullWidth
-                      control={control}
-                      name="name"
-                      placeholder="John Doe"
-                    />
-                  </Stack>
-                  <Stack spacing={0.5}>
-                    <Typography variant="body2" fontWeight="medium">
-                      Contact Number
-                    </Typography>
-                    <InputWithFormat
-                      control={control}
-                      name="contact"
-                      pattern="9999-999-9999"
-                      placeholder="0000-000-0000"
-                    />
-                  </Stack>
-                  <Stack spacing={0.5}>
-                    <Typography variant="body2" fontWeight="medium">
-                      Address
-                    </Typography>
-                    <Input control={control} name="address" placeholder="Manila, Philippines" />
-                  </Stack>
-                  <Stack spacing={0.5}>
-                    <Typography variant="body2" fontWeight="medium">
-                      Position
-                    </Typography>
-                    <Input control={control} name="position" placeholder="Operations Manager" />
-                  </Stack>
-                </Stack>
-              </Grid>
-            </Grid>
-            <Divider />
-
-            {user?.role === UserRole.USER && (
-              <>
-                <Grid container spacing={6}>
-                  <Grid size={{ xs: 12, md: 4 }}>
-                    <Typography variant="body2" fontWeight="medium">
-                      Shift Schedule
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Assign work shift for this user
-                    </Typography>
-                  </Grid>
-                  <Grid size={{ xs: 12, md: 8 }}>
-                    <Stack spacing={1}>
-                      <ShiftSelect
-                        control={control}
-                        name="shiftId"
-                        label="Shift"
-                        shifts={shifts || []}
-                      />
-
-                      {shifts?.length === 0 && (
-                        <Typography variant="caption" color="text.secondary">
-                          Shift schedules have not been set. Please add a shift scheduled on the{' '}
-                          <Typography
-                            variant="caption"
-                            color="info"
-                            sx={{ cursor: 'pointer' }}
-                            onClick={() =>
-                              navigate(
-                                pathFor({
-                                  pathname: AdminRoutes.TenantShifts,
-                                  params: { tenantId },
-                                }),
-                              )
-                            }
-                          >
-                            shift configuration
-                          </Typography>{' '}
-                          page.
-                        </Typography>
-                      )}
-                    </Stack>
-                  </Grid>
-                </Grid>
-                <Divider />
-              </>
-            )}
-
-            <Grid container spacing={6}>
-              <Grid size={{ xs: 12, md: 4 }}>
-                <Typography variant="body2" fontWeight="medium">
-                  Government IDs
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Government-issued information for reference
-                </Typography>
-              </Grid>
-              <Grid size={{ xs: 12, md: 8 }}>
-                <Stack spacing={2}>
-                  <Stack spacing={0.5}>
-                    <Typography variant="body2" fontWeight="medium">
-                      TIN
-                    </Typography>
-                    <InputWithFormat
-                      control={control}
-                      name="tin"
-                      pattern="999-999-999-999"
-                      placeholder="000-000-000-000"
-                    />
-                  </Stack>
-                  <Stack spacing={0.5}>
-                    <Typography variant="body2" fontWeight="medium">
-                      SSS
-                    </Typography>
-                    <InputWithFormat
-                      control={control}
-                      name="sss"
-                      pattern="99-9999999-9"
-                      placeholder="00-0000000-0"
-                    />
-                  </Stack>
-                  <Stack spacing={0.5}>
-                    <Typography variant="body2" fontWeight="medium">
-                      PAG-IBIG
-                    </Typography>
-                    <InputWithFormat
-                      control={control}
-                      name="pagibig"
-                      pattern="99-9999999999-9"
-                      placeholder="00-0000000000-0"
-                    />
-                  </Stack>
-                  <Stack spacing={0.5}>
-                    <Typography variant="body2" fontWeight="medium">
-                      PhilHealth
-                    </Typography>
-                    <InputWithFormat
-                      control={control}
-                      name="philhealth"
-                      pattern="9999-9999-9999"
-                      placeholder="0000-0000-0000"
-                    />
-                  </Stack>
-                </Stack>
-              </Grid>
-            </Grid>
-            <Divider />
-
-            <Grid container spacing={6}>
-              <Grid size={{ xs: 12, md: 4 }}>
-                <Typography variant="body2" fontWeight="medium" color="error">
-                  Danger Zone
-                </Typography>
-              </Grid>
-              <Grid size={{ xs: 12, md: 8 }}>
-                <Stack spacing={1}>
-                  <Typography variant="body2" color="text.secondary">
-                    Manage account security settings and password controls
-                  </Typography>
-                  <Button
-                    onClick={() => setIsResetPasswordModalOpen(true)}
-                    disabled={auth?.id === userId}
-                    color="error"
-                    variant="outlined"
-                    sx={{ width: 'fit-content' }}
-                  >
-                    Reset Password
-                  </Button>
-
-                  {auth?.id === userId && (
-                    <Typography variant="caption" color="text.secondary">
-                      You cannot reset your own password here. Please go to the{' '}
-                      <Typography
-                        variant="caption"
-                        color="info"
-                        sx={{ cursor: 'pointer' }}
-                        onClick={() =>
-                          navigate(
-                            pathFor({
-                              pathname: AdminRoutes.TenantAccountSettings,
-                              params: { tenantId },
-                            }),
-                          )
-                        }
-                      >
-                        account settings
-                      </Typography>{' '}
-                      section.
-                    </Typography>
-                  )}
-                </Stack>
-              </Grid>
-            </Grid>
-          </Stack>
+          <BasicDetail control={control} user={user} />
+          <Show when={isEmployee}>
+            <JobDetail control={control} shifts={shifts || []} />
+          </Show>
+          <GovernmentDetails control={control} />
+          <ResetPassword />
+          <DeleteUser user={user} />
         </PageContainer>
 
         <Stack
@@ -336,6 +173,9 @@ export const UserDetailPage = () => {
           px={3}
           width="100%"
           bgcolor="background.paper"
+          direction="row"
+          spacing={1}
+          justifyContent="end"
           sx={{
             position: 'sticky',
             bottom: 0,
@@ -355,12 +195,6 @@ export const UserDetailPage = () => {
           </Button>
         </Stack>
       </Form>
-
-      <ResetPasswordModal
-        open={isResetPasswordModalOpen}
-        onClose={() => setIsResetPasswordModalOpen(false)}
-        userId={userId}
-      />
     </PageLayout>
   );
 };

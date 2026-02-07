@@ -2,23 +2,23 @@ import { DeleteOutlined } from '@mui/icons-material';
 import { Typography } from '@mui/material';
 
 import { CustomModal } from '~/components/ui';
-import { useUserContext } from '~/context/user/useUserContext';
+import type { User } from '~/services/user/user.types';
 
 type DeleteConfirmModalProps = {
   open: boolean;
   onClose: () => void;
   onConfirm: () => void;
   loading?: boolean;
+  user?: User;
 };
 
-export const DeleteConfirmationModal = ({
+export const DeleteConfirmModal = ({
   open,
   onClose,
   onConfirm,
   loading,
+  user,
 }: DeleteConfirmModalProps) => {
-  const { user } = useUserContext();
-
   return (
     <CustomModal
       onSubmit={onConfirm}
@@ -31,7 +31,7 @@ export const DeleteConfirmationModal = ({
           <Typography variant="body2">
             You are about to delete the account of{' '}
             <Typography variant="inherit" component="span" color="warning.main">
-              {user.name}.
+              {user?.name}.
             </Typography>
           </Typography>
           <Typography variant="body2">This action is irreversible. Are you sure?</Typography>

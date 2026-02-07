@@ -11,7 +11,7 @@ export const SettingsTabPanel = (props: TabPanelProps) => {
 
   return (
     <Box role="tabpanel" hidden={value !== index} id={`simple-tabpanel-${index}`} {...other}>
-      {value === index && <Box sx={{ p: 2 }}>{children}</Box>}
+      {value === index && <Box>{children}</Box>}
     </Box>
   );
 };

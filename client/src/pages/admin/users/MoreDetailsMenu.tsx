@@ -12,7 +12,7 @@ import { useDeleteUserMutation } from '~/services/user/user.queries';
 import { parseBackendError } from '~/utils/parseBackendError';
 import { pathFor } from '~/utils/pathFor';
 
-import { DeleteConfirmationModal } from './DeleteConfirmationModal';
+import { DeleteConfirmModal } from './DeleteConfirmModal';
 
 export const MoreDetailsMenu = () => {
   const navigate = useNavigate();
@@ -70,10 +70,7 @@ export const MoreDetailsMenu = () => {
 
   return (
     <>
-      <IconButton
-        onClick={openMenu}
-        size="small"
-      >
+      <IconButton onClick={openMenu} size="small">
         <MoreVertOutlined fontSize="inherit" sx={{ color: 'text.secondary' }} />
       </IconButton>
       <Menu
@@ -111,7 +108,7 @@ export const MoreDetailsMenu = () => {
         </MenuItem>
       </Menu>
 
-      <DeleteConfirmationModal
+      <DeleteConfirmModal
         open={isDeleteModalOpen}
         loading={isDeletePending}
         onClose={() => setIsDeleteModalOpen(false)}
