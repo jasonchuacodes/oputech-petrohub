@@ -13,15 +13,18 @@ enum Role {
   ADMIN
 }
 
-enum TimesheetStatus {
-  PENDING
-  APPROVED
-  REJECTED
-}
-
 enum TimesheetEntryAction {
   CHECK_IN
   CHECK_OUT
+}
+
+enum RateType {
+  HOURLY
+  DAILY
+}
+
+enum PayrollPeriodType {
+  WEEKLY
 }
 
 enum NotificationType {
@@ -68,13 +71,15 @@ model User {
   philhealth String?
   pagibig    String?
 
-  sessions      Session[]
-  timesheets    Timesheet[]
-  notifications Notification[]
+  sessions        Session[]
+  timesheets      Timesheet[]
+  notifications   Notification[]
   createdReports  Report[]             @relation("ReportCreator")
   assignedReports EmployeesOnReports[]
 
-  tenants TenantsOnUsers[]
+  tenants     TenantsOnUsers[]
+  salaryRates UserSalaryRate[]
+  payrolls    Payroll[]
 
   shouldChangePassword Boolean  @default(true)
   createdAt            DateTime @default(now())
@@ -97,14 +102,16 @@ model Tenant {
   logoUrl   String?
   documents Document[]
 
-  users      TenantsOnUsers[]
-  timesheets Timesheet[]
-  shifts     Shift[]
-  products   Product[]
-  reports    Report[]
-  incomeAggregations ReportIncomeAggregation[]
-  expenseAggregations ReportExpenseAggregation[]
+  users                TenantsOnUsers[]
+  timesheets           Timesheet[]
+  shifts               Shift[]
+  products             Product[]
+  reports              Report[]
+  incomeAggregations   ReportIncomeAggregation[]
+  expenseAggregations  ReportExpenseAggregation[]
   disposalAggregations ReportDisposalAggregation[]
+  salaryRates          UserSalaryRate[]
+  payrolls             Payroll[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -125,17 +132,17 @@ model TenantsOnUsers {
 }
 
 model Shift {
-  id         String   @id @default(uuid())
-  tenantId   String
-  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   name       String
   shiftStart DateTime
   shiftEnd   DateTime
   color      String
 
-  users    TenantsOnUsers[]
-  reports  Report[]
+  users   TenantsOnUsers[]
+  reports Report[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -172,9 +179,11 @@ model Timesheet {
   tenantId String
   tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
-  totalHours Float            @default(0)
-  status     TimesheetStatus  @default(PENDING)
-  entries    TimesheetEntry[]
+  totalHours Float   @default(0)
+  processed  Boolean @default(false)
+
+  entries  TimesheetEntry[]
+  payrolls PayrollTimesheet[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -207,23 +216,23 @@ model Notification {
 }
 
 model Product {
-  id          String          @id @default(uuid())
-  tenantId    String
-  tenant      Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
-  name        String
-  description String?
-  category    ProductCategory @default(FUEL)
-  color       String          @default("grey")
-  type        ProductType?
-  active      Boolean         @default(true)
+  name              String
+  description       String?
+  category          ProductCategory @default(FUEL)
+  color             String          @default("grey")
+  type              ProductType?
+  active            Boolean         @default(true)
   lowStockThreshold Int?
 
-  productPrices        ProductPrice[]
-  productReadings      ProductReading[]
-  reportDisposals      ReportDisposal[]
-  inventory            Inventory?
-  reportInventory      ReportInventory[]
+  productPrices   ProductPrice[]
+  productReadings ProductReading[]
+  reportDisposals ReportDisposal[]
+  inventory       Inventory?
+  reportInventory ReportInventory[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -236,9 +245,9 @@ model Product {
 }
 
 model ProductPrice {
-  id            String   @id @default(uuid())
-  productId     String
-  product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  id        String  @id @default(uuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   price         Decimal  @db.Decimal(10, 2)
   effectiveFrom DateTime @default(now())
@@ -249,23 +258,23 @@ model ProductPrice {
 }
 
 model ProductReading {
-  id            String   @id @default(uuid())
-  productId     String
-  product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  id        String  @id @default(uuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
-  reading       Decimal  @db.Decimal(12, 3)
+  reading Decimal @db.Decimal(12, 3)
 
-  createdAt     DateTime  @default(now())
+  createdAt DateTime @default(now())
 
   @@index([productId])
 }
 
 model Inventory {
-  id        String   @id @default(uuid())
-  productId String   @unique
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  id        String  @id @default(uuid())
+  productId String  @unique
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
-  quantity  Int      @default(0)
+  quantity Int @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -274,15 +283,15 @@ model Inventory {
 }
 
 model ReportInventory {
-  id                String   @id @default(uuid())
-  reportId          String
-  report            Report   @relation(fields: [reportId], references: [id], onDelete: Cascade)
-  productId         String
-  product           Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
+  id        String  @id @default(uuid())
+  reportId  String
+  report    Report  @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
 
-  quantity      Int
-  unitPriceSnapshot Decimal  @db.Decimal(10, 2)
-  amount            Decimal  @db.Decimal(10, 2)
+  quantity          Int
+  unitPriceSnapshot Decimal @db.Decimal(10, 2)
+  amount            Decimal @db.Decimal(10, 2)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -293,30 +302,30 @@ model ReportInventory {
 }
 
 model Report {
-  id          String        @id @default(uuid())
-  tenantId    String
-  tenant      Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
-  creatorId   String
-  creator     User          @relation("ReportCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  creatorId String
+  creator   User   @relation("ReportCreator", fields: [creatorId], references: [id], onDelete: Cascade)
 
-  shiftId     String
-  shift       Shift         @relation(fields: [shiftId], references: [id], onDelete: Restrict)
+  shiftId String
+  shift   Shift  @relation(fields: [shiftId], references: [id], onDelete: Restrict)
 
-  shiftDate   DateTime
-  status      ReportStatus  @default(DRAFT)
+  shiftDate DateTime
+  status    ReportStatus @default(DRAFT)
 
   periodStart DateTime
   periodEnd   DateTime
 
-  income           ReportIncome[]
-  expenses         ReportExpense[]
-  employees        EmployeesOnReports[]
-  disposals        ReportDisposal[]
-  inventories      ReportInventory[]
+  income      ReportIncome[]
+  expenses    ReportExpense[]
+  employees   EmployeesOnReports[]
+  disposals   ReportDisposal[]
+  inventories ReportInventory[]
 
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   submittedAt DateTime?
 
   @@unique([tenantId, shiftDate, shiftId, periodStart])
@@ -328,47 +337,47 @@ model Report {
 }
 
 model ReportExpense {
-  id          String   @id @default(uuid())
-  reportId    String
-  report      Report   @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  id       String @id @default(uuid())
+  reportId String
+  report   Report @relation(fields: [reportId], references: [id], onDelete: Cascade)
 
   description String
-  amount      Decimal  @db.Decimal(10, 2)
+  amount      Decimal @db.Decimal(10, 2)
 
-  createdAt   DateTime @default(now())
+  createdAt DateTime @default(now())
 
   @@index([reportId])
 }
 
 model ReportIncome {
-  id          String   @id @default(uuid())
-  reportId    String
-  report      Report   @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  id       String @id @default(uuid())
+  reportId String
+  report   Report @relation(fields: [reportId], references: [id], onDelete: Cascade)
 
   description String
-  amount      Decimal  @db.Decimal(10, 2)
+  amount      Decimal @db.Decimal(10, 2)
 
-  createdAt   DateTime @default(now())
+  createdAt DateTime @default(now())
 
   @@index([reportId])
 }
 
 model ReportDisposal {
-  id            String   @id @default(uuid())
-  reportId      String
-  report        Report   @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  id       String @id @default(uuid())
+  reportId String
+  report   Report @relation(fields: [reportId], references: [id], onDelete: Cascade)
 
-  productId     String
-  product       Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
 
-  beforeReading Decimal  @db.Decimal(12, 3)
-  afterReading  Decimal  @db.Decimal(12, 3)
-  netDisposal   Decimal  @db.Decimal(12, 3)
-  priceSnapshot Decimal  @db.Decimal(10, 2)
-  totalSales    Decimal  @db.Decimal(10, 2)
+  beforeReading Decimal @db.Decimal(12, 3)
+  afterReading  Decimal @db.Decimal(12, 3)
+  netDisposal   Decimal @db.Decimal(12, 3)
+  priceSnapshot Decimal @db.Decimal(10, 2)
+  totalSales    Decimal @db.Decimal(10, 2)
 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([reportId, productId])
   @@index([reportId])
@@ -376,8 +385,8 @@ model ReportDisposal {
 }
 
 model EmployeesOnReports {
-  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId   String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
 
   report   Report @relation(fields: [reportId], references: [id], onDelete: Cascade)
   reportId String
@@ -388,51 +397,111 @@ model EmployeesOnReports {
 }
 
 model ReportIncomeAggregation {
-  id            String   @id @default(uuid())
-  tenantId      String
-  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
-  hourBucket    DateTime
-  totalAmount   Decimal  @db.Decimal(12, 2)
-  incomeCount   Int      @default(0)
+  hourBucket  DateTime
+  totalAmount Decimal  @db.Decimal(12, 2)
+  incomeCount Int      @default(0)
 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([tenantId, hourBucket])
   @@index([tenantId, hourBucket])
 }
 
 model ReportExpenseAggregation {
-  id            String   @id @default(uuid())
-  tenantId      String
-  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
-  hourBucket    DateTime
-  totalAmount   Decimal  @db.Decimal(12, 2)
-  expenseCount  Int      @default(0)
+  hourBucket   DateTime
+  totalAmount  Decimal  @db.Decimal(12, 2)
+  expenseCount Int      @default(0)
 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([tenantId, hourBucket])
   @@index([tenantId, hourBucket])
 }
 
 model ReportDisposalAggregation {
-  id            String      @id @default(uuid())
-  tenantId      String
-  tenant        Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   hourBucket    DateTime
   productType   ProductType
   totalDisposal Decimal     @db.Decimal(12, 2)
   disposalCount Int         @default(0)
 
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([tenantId, hourBucket, productType])
   @@index([tenantId, hourBucket])
   @@index([tenantId, productType])
+}
+
+model UserSalaryRate {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  rate          Decimal  @db.Decimal(10, 2)
+  rateType      RateType @default(DAILY)
+  effectiveFrom DateTime @default(now())
+
+  createdAt DateTime @default(now())
+
+  @@index([userId, tenantId, effectiveFrom])
+  @@index([tenantId])
+}
+
+model Payroll {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  periodType  PayrollPeriodType
+  periodStart DateTime
+  periodEnd   DateTime
+
+  totalHours        Float    @default(0)
+  rateSnapshot      Decimal  @db.Decimal(10, 2)
+  rateTypeSnapshot  RateType
+  totalCompensation Decimal  @db.Decimal(10, 2)
+
+  timesheets PayrollTimesheet[]
+
+  createdBy String
+  createdAt DateTime @default(now())
+
+  @@index([tenantId, userId])
+  @@index([tenantId, periodStart, periodEnd])
+  @@index([userId, periodStart])
+}
+
+model PayrollTimesheet {
+  payroll   Payroll @relation(fields: [payrollId], references: [id], onDelete: Cascade)
+  payrollId String
+
+  timesheet   Timesheet @relation(fields: [timesheetId], references: [id], onDelete: Restrict)
+  timesheetId String
+
+  hoursSnapshot        Float
+  compensationSnapshot Decimal @db.Decimal(10, 2)
+
+  @@id([payrollId, timesheetId])
+  @@index([payrollId])
+  @@index([timesheetId])
 }

@@ -1,5 +1,5 @@
 import { prisma } from '~/db';
-import { Prisma, Role, TimesheetEntryAction, TimesheetStatus } from '~/db/prisma';
+import { Prisma, Role, TimesheetEntryAction } from '~/db/prisma';
 import { ConflictError, ForbiddenError, NotFoundError } from '~/errors';
 import { pusher } from '~/modules/pusher/config/pusher';
 import { applyTimeToDate, getEndOfDay, getStartOfDay } from '~/utils';
@@ -500,7 +500,6 @@ const checkOut = async (userId: string) => {
     where: { id: timesheet.id },
     data: {
       totalHours: Math.min(timesheet.totalHours + sessionHours, hoursCap),
-      status: TimesheetStatus.PENDING,
     },
   });
 

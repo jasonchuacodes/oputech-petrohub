@@ -13,6 +13,8 @@ import reportRoutes from './modules/report/routes';
 import productRoutes from './modules/product/routes';
 import inventoryRoutes from './modules/inventory/routes';
 import analyticsRoutes from './modules/analytics/routes';
+import salaryRoutes from './modules/salary/routes';
+import payrollRoutes from './modules/payroll/routes';
 import { corsMiddleware } from './middlewares/corsMiddleware';
 
 const app = express();
@@ -32,6 +34,8 @@ app.use('/reports', reportRoutes);
 app.use('/products', productRoutes);
 app.use('/inventory', inventoryRoutes);
 app.use('/analytics', analyticsRoutes);
+app.use('/salary-rates', salaryRoutes);
+app.use('/payroll', payrollRoutes);
 app.use(errorHandler);
 
 export { app };
