@@ -1,9 +1,9 @@
 import { HomeOutlined } from '@mui/icons-material';
 import { Stack, Typography } from '@mui/material';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import { PageHeader } from '~/components/layouts';
-import { Breadcrumb, DataTable, PageContainer, PageLayout } from '~/components/ui';
+import { Breadcrumb, Button, DataTable, PageContainer, PageLayout } from '~/components/ui';
 import { AdminRoutes } from '~/routes';
 import { formatCurrency, formatNumber } from '~/utils/number';
 import { pathFor } from '~/utils/pathFor';
@@ -48,6 +48,7 @@ const mockPayslipData: PayslipData[] = [
 
 export const RunPayrollPage = () => {
   const { tenantId } = useParams();
+  const navigate = useNavigate();
 
   return (
     <PageLayout>
@@ -210,6 +211,35 @@ export const RunPayrollPage = () => {
           emptyMessage="No payslips to generate."
         />
       </PageContainer>
+      <Stack
+        py={2}
+        px={3}
+        width="100%"
+        bgcolor="background.paper"
+        direction="row"
+        spacing={1}
+        justifyContent="end"
+        sx={{
+          position: 'sticky',
+          bottom: 0,
+          zIndex: 10,
+          borderTop: '1px solid',
+          borderColor: 'divider',
+        }}
+      >
+        <Button
+          variant="outlined"
+          onClick={() => navigate(-1)}
+        >
+          Cancel
+        </Button>
+        <Button
+          variant="contained"
+          onClick={() => console.log('Run Payroll clicked')}
+        >
+          Run Payroll
+        </Button>
+      </Stack>
     </PageLayout>
   );
 };
