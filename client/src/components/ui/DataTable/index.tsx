@@ -77,6 +77,11 @@ export const DataTable = <T,>({
     });
   }, [collection.items, sortConfig, columns]);
 
+  const hasSummaryRow = useMemo(
+    () => columns.some(col => col.summary !== undefined),
+    [columns]
+  );
+
   const empty = !loading && collection.items.length === 0;
 
   return (
@@ -205,7 +210,7 @@ export const DataTable = <T,>({
                       scope={column.id === columns[0].id ? 'row' : undefined}
                       sx={{
                         borderBottom:
-                          itemIndex === sortedItems.length - 1 ? undefined : '1px solid',
+                          itemIndex === sortedItems.length - 1 ? 'none' : '1px solid',
                         borderColor: itemIndex === sortedItems.length - 1 ? undefined : 'divider',
                         whiteSpace: 'nowrap',
                       }}
@@ -216,6 +221,28 @@ export const DataTable = <T,>({
                 </TableRow>
               );
             })}
+          </Show>
+
+          <Show when={hasSummaryRow && sortedItems.length > 0}>
+            <TableRow>
+              {columns.map((column) => (
+                <TableCell
+                  key={column.id}
+                  align={column.align || 'left'}
+                  component={undefined}
+                  sx={{
+                    bgcolor: 'background.surface',
+                    borderTop: '1px solid',
+                    borderBottom: 'none',
+                    borderColor: 'divider',
+                    fontWeight: 'medium',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {column.summary ? column.summary(sortedItems) : null}
+                </TableCell>
+              ))}
+            </TableRow>
           </Show>
 
           <Show when={empty}>

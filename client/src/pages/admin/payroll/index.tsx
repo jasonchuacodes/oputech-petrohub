@@ -1,6 +1,6 @@
 import { HomeOutlined, PlayArrowOutlined } from '@mui/icons-material';
 import { Stack, Typography } from '@mui/material';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import dayjs from 'dayjs';
 
 import { PageHeader } from '~/components/layouts';
@@ -65,6 +65,7 @@ const mockPayrollData: PayrollData[] = [
 
 export const PayrollPage = () => {
   const { tenantId } = useParams();
+  const navigate = useNavigate();
 
   return (
     <PageLayout>
@@ -127,7 +128,14 @@ export const PayrollPage = () => {
             size="large"
             variant="contained"
             startIcon={<PlayArrowOutlined />}
-            onClick={() => console.log('handle run payroll')}
+            onClick={() =>
+              navigate(
+                pathFor({
+                  pathname: AdminRoutes.TenantRunPayroll,
+                  params: { tenantId },
+                }),
+              )
+            }
           >
             Run Payroll
           </Button>

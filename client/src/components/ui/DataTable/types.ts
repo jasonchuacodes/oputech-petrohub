@@ -12,6 +12,7 @@ export type DataTableColumn<T> = {
   cell: (item: T) => ReactNode;
   width?: number | string;
   link?: boolean;
+  summary?: (items: T[]) => ReactNode;
 };
 
 export type DataTableCollection<T> = {
