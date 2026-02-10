@@ -120,9 +120,11 @@ const Sidebar = () => {
         },
         {
           label: 'Payroll',
-          disabled: true,
           icon: PaymentsOutlined,
-          to: '#',
+          to: pathFor({
+            pathname: AdminRoutes.TenantPayroll,
+            params: { tenantId },
+          }),
         },
       ],
     },
