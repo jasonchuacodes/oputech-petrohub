@@ -12,12 +12,12 @@ import { pathFor } from '~/utils/pathFor';
 
 import { ShiftSelect } from './ShiftSelect';
 
-interface JobDetailProps {
+interface EmploymentDetailProps {
   control: Control<UpdateUserPayload>;
   shifts: Shift[];
 }
 
-export const JobDetail = ({ control, shifts }: JobDetailProps) => {
+export const EmploymentDetail = ({ control, shifts }: EmploymentDetailProps) => {
   const navigate = useNavigate();
   const { tenantId } = useTenantContext();
 
@@ -72,8 +72,12 @@ export const JobDetail = ({ control, shifts }: JobDetailProps) => {
           />
 
           <FormSelect control={control} name="rateType" label="Rate Type" width={400}>
-            <MenuItem value={RateType.HOURLY}>Hourly</MenuItem>
-            <MenuItem value={RateType.DAILY}>Daily</MenuItem>
+            <MenuItem value={RateType.HOURLY}>
+              <Typography variant="body2">Hourly</Typography>
+            </MenuItem>
+            <MenuItem value={RateType.DAILY}>
+              <Typography variant="body2">Daily</Typography>
+            </MenuItem>
           </FormSelect>
         </Stack>
       </Stack>

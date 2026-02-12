@@ -25,7 +25,7 @@ import { RateType } from '~/services/salary/salary.types';
 import { BasicDetail } from './BasicDetail';
 import { DeleteUser } from './DeleteUser';
 import { GovernmentDetails } from './GovernmentDetails';
-import { JobDetail } from './JobDetail';
+import { EmploymentDetail } from './EmploymentDetail';
 import { ResetPassword } from './ResetPassword';
 
 export const UserDetailPage = () => {
@@ -161,7 +161,7 @@ export const UserDetailPage = () => {
 
           <BasicDetail control={control} user={user} />
           <Show when={isEmployee}>
-            <JobDetail control={control} shifts={shifts || []} />
+            <EmploymentDetail control={control} shifts={shifts || []} />
           </Show>
           <GovernmentDetails control={control} />
           <ResetPassword />

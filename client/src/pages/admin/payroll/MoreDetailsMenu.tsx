@@ -2,14 +2,19 @@ import { MoreHorizOutlined } from '@mui/icons-material';
 import { Menu, MenuItem, Typography, IconButton, Divider } from '@mui/material';
 import { useState } from 'react';
 
-type MoreDetailsMenuProps = {
-  payslipId: string;
-  onView: () => void;
-  onEdit: () => void;
-  onDelete: () => void;
-};
+import type { PayslipData } from '~/context/payroll/PayslipContext';
+import { usePayslipContext } from '~/context/payroll/usePayslipContext';
+import { useDisclosure } from '~/hooks/useDisclosure';
 
-export const MoreDetailsMenu = ({ payslipId, onView, onEdit, onDelete }: MoreDetailsMenuProps) => {
+import { ViewPayslipModal } from './ViewPayslipModal';
+import { EditPayslipModal } from './EditPayslipModal';
+
+export const MoreDetailsMenu = () => {
+  const { payslip, payslipId } = usePayslipContext();
+
+  const viewDisclosure = useDisclosure();
+  const editDisclosure = useDisclosure();
+
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const isOpen = Boolean(anchorEl);
 
@@ -18,17 +23,22 @@ export const MoreDetailsMenu = ({ payslipId, onView, onEdit, onDelete }: MoreDet
 
   const handleView = () => {
     closeMenu();
-    onView();
+    viewDisclosure.onOpen();
   };
 
   const handleEdit = () => {
     closeMenu();
-    onEdit();
+    editDisclosure.onOpen();
   };
 
   const handleDelete = () => {
     closeMenu();
-    onDelete();
+    console.log('delete', payslipId);
+  };
+
+  const handleSavePayslip = (data: { grossPay: number; deductions: PayslipData['deductions'] }) => {
+    console.log('Save payslip:', payslipId, data);
+    // TODO: Update payslip data (future implementation)
   };
 
   return (
@@ -73,6 +83,18 @@ export const MoreDetailsMenu = ({ payslipId, onView, onEdit, onDelete }: MoreDet
           </Typography>
         </MenuItem>
       </Menu>
+
+      <ViewPayslipModal
+        open={viewDisclosure.open}
+        onClose={viewDisclosure.onClose}
+        payslip={payslip}
+      />
+      <EditPayslipModal
+        open={editDisclosure.open}
+        onClose={editDisclosure.onClose}
+        payslip={payslip}
+        onSave={handleSavePayslip}
+      />
     </>
   );
 };
