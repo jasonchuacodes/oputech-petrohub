@@ -9,7 +9,7 @@ import { AdminRoutes } from '~/routes';
 import { formatCurrency, formatNumber } from '~/utils/number';
 import { pathFor } from '~/utils/pathFor';
 
-import { MoreDetailsMenu } from './MoreDetailsMenu';
+import { MoreDetailsMenu } from '../MoreDetailsMenu';
 
 type DeductionItem = {
   name: string;
