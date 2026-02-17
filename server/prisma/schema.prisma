@@ -464,6 +464,24 @@ model UserSalaryRate {
   @@index([tenantId])
 }
 
+// NAMING ISSUE: This model should be called "Payslip" not "Payroll"
+//
+// Domain Terminology:
+// - "Payroll" = The admin process of running payroll (generates multiple payslips for a period)
+// - "Payslip" = Individual employee compensation record for a specific period
+//
+// This model represents a PAYSLIP because it:
+// - Is specific to ONE user (userId field)
+// - Represents compensation for ONE period (periodStart/periodEnd)
+// - Contains individual compensation details (totalCompensation, rateSnapshot)
+//
+// What's missing:
+// - A "PayrollRun" model to represent when an admin runs payroll
+//   (would group multiple payslips created in a single admin action)
+//
+// TODO: Rename Payroll → Payslip
+// TODO: Add 'notes' field (String?) to store admin notes about adjustments/overrides
+//
 model Payroll {
   id       String @id @default(uuid())
   tenantId String
@@ -491,6 +509,24 @@ model Payroll {
   @@index([userId, periodStart])
 }
 
+// NAMING ISSUE: This should be called "PayslipTimesheet" not "PayrollTimesheet"
+//
+// Purpose:
+// - Join table linking a Payslip (currently named Payroll) to its source Timesheets
+// - Stores snapshot of hours and compensation at the time payroll was generated
+// - Preserves audit trail of which timesheets contributed to each payslip
+//
+// Why the name is wrong:
+// - "PayrollTimesheet" suggests it links the payroll process to timesheets
+// - Actually links individual PAYSLIPS to their source timesheets
+// - Should follow pattern: Payslip + Timesheet = PayslipTimesheet
+//
+// Fields:
+// - hoursSnapshot: Total hours from this timesheet at time of payroll generation
+// - compensationSnapshot: Compensation calculated for this timesheet (can be overridden)
+//
+// TODO: Rename PayrollTimesheet → PayslipTimesheet (when we rename Payroll → Payslip)
+//
 model PayrollTimesheet {
   payroll   Payroll @relation(fields: [payrollId], references: [id], onDelete: Cascade)
   payrollId String
