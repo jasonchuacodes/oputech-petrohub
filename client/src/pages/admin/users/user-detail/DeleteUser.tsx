@@ -50,11 +50,11 @@ export const DeleteUser = ({ user }: { user?: User }) => {
         loading={isPending}
         open={resetPasswordDisclosure.open}
         onClose={resetPasswordDisclosure.onClose}
-        onConfirm={() => {
+        onConfirm={async () => {
           if (!tenantId || !user?.id) return;
 
           try {
-            deleteUser({
+            await deleteUser({
               tenantId,
               userId: user.id,
             });

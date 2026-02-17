@@ -83,7 +83,7 @@ export const PayrollRunDetailPage = () => {
               }),
             },
             {
-              label: 'Payroll Details',
+              label: 'Payroll Detail',
             },
           ]}
         />

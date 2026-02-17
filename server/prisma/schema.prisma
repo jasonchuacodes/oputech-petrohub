@@ -548,7 +548,7 @@ model PayslipTimesheet {
   payslip   Payslip @relation(fields: [payslipId], references: [id], onDelete: Cascade)
   payslipId String
 
-  timesheet   Timesheet @relation(fields: [timesheetId], references: [id], onDelete: Restrict)
+  timesheet   Timesheet @relation(fields: [timesheetId], references: [id], onDelete: Cascade)
   timesheetId String
 
   hoursSnapshot        Float

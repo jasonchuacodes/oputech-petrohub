@@ -19,7 +19,7 @@ const useCreateUserMutation = ({ tenantId }: { tenantId?: string }) => {
   return useMutation({
     mutationFn: createUser,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tenantUsers', tenantId] });
+      queryClient.invalidateQueries({ queryKey: ['tenantUsers'] });
     },
   });
 };
@@ -38,7 +38,7 @@ const useUpdateUserMutation = () => {
       data: UpdateUserPayload;
     }) => updateUser(userId, data, tenantId),
     onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['tenantUsers', variables.tenantId] });
+      queryClient.invalidateQueries({ queryKey: ['tenantUsers'] });
       queryClient.invalidateQueries({ queryKey: ['tenantUser', variables.tenantId, variables.userId] });
     },
   });
@@ -50,7 +50,7 @@ const useDeleteUserMutation = () => {
   return useMutation({
     mutationFn: ({ userId }: { userId: string; tenantId: string }) => deleteUser(userId),
     onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['tenantUsers', variables.tenantId] });
+      queryClient.invalidateQueries({ queryKey: ['tenantUsers'] });
     },
   });
 };

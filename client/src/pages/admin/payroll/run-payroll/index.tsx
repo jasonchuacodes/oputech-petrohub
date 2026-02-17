@@ -64,11 +64,6 @@ export const RunPayrollPage = () => {
     setOverrides((prev) => ({ ...prev, [timesheetId]: { amount, notes } }));
   };
 
-  const handleClearOverrides = () => {
-    setOverrides({});
-    localStorage.removeItem(storageKey);
-  };
-
   const { data: timesheets = [], isLoading } = useGetAllTimesheetsQuery({
     tenantId,
     startDate: selectedWeek.start,
@@ -228,7 +223,7 @@ export const RunPayrollPage = () => {
                 summary: (items) => {
                   const total = items.reduce(
                     (sum, item) => sum + parseFloat(item.totalCompensation),
-                    0
+                    0,
                   );
                   return (
                     <Typography variant="body2" color="text.secondary">
@@ -266,7 +261,7 @@ export const RunPayrollPage = () => {
                 summary: (items) => {
                   const total = items.reduce(
                     (sum, item) => sum + parseFloat(item.totalCompensation),
-                    0
+                    0,
                   );
                   return (
                     <Typography variant="body2" color="text.primary">
@@ -311,7 +306,14 @@ export const RunPayrollPage = () => {
           borderColor: 'divider',
         }}
       >
-        <Button variant="outlined" onClick={() => navigate(-1)}>
+        <Button
+          variant="outlined"
+          onClick={() => {
+            setOverrides({});
+            localStorage.removeItem(storageKey);
+            navigate(-1);
+          }}
+        >
           Cancel
         </Button>
         <Button
@@ -328,7 +330,7 @@ export const RunPayrollPage = () => {
                   acc[userId].push(timesheet);
                   return acc;
                 },
-                {} as Record<string, typeof timesheets>
+                {} as Record<string, typeof timesheets>,
               );
 
               // Build payslips array for the runPayroll mutation
@@ -336,10 +338,12 @@ export const RunPayrollPage = () => {
               const payslips = Object.entries(timesheetsByUser).map(([userId, userTimesheets]) => {
                 const totalHours = userTimesheets.reduce((sum, ts) => sum + ts.totalHours, 0);
                 const salaryRate = userTimesheets[0]?.user.salaryRates?.[0]?.rate ?? 0;
-                const rateType = userTimesheets[0]?.user.salaryRates?.[0]?.rateType ?? SalaryRateType.DAILY;
+                const rateType =
+                  userTimesheets[0]?.user.salaryRates?.[0]?.rateType ?? SalaryRateType.DAILY;
 
                 // Convert daily rate to hourly (assuming 8 hours per day)
-                const hourlyRate = rateType === SalaryRateType.HOURLY ? salaryRate : salaryRate / HOURS_PER_DAY;
+                const hourlyRate =
+                  rateType === SalaryRateType.HOURLY ? salaryRate : salaryRate / HOURS_PER_DAY;
 
                 // Calculate total compensation with overrides
                 const timesheetIds = userTimesheets.map((ts) => ts.id);
@@ -353,9 +357,7 @@ export const RunPayrollPage = () => {
                 }, 0);
 
                 // Get notes from any override (use first one if multiple)
-                const notes = timesheetIds
-                  .map((id) => overrides[id]?.notes)
-                  .filter(Boolean)[0];
+                const notes = timesheetIds.map((id) => overrides[id]?.notes).filter(Boolean)[0];
 
                 return {
                   userId,
@@ -377,8 +379,8 @@ export const RunPayrollPage = () => {
                 payslips,
               });
 
-              // Clear overrides and navigate back
-              handleClearOverrides();
+              setOverrides({});
+              localStorage.removeItem(storageKey);
               navigate(pathFor({ pathname: AdminRoutes.TenantPayroll, params: { tenantId } }));
             } catch (error) {
               console.error('Failed to run payroll:', error);

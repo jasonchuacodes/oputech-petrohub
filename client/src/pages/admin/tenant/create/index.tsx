@@ -184,9 +184,6 @@ export const CreateTenantPage = () => {
                 control={control}
                 name="description"
                 placeholder="Add a brief description"
-                slotProps={{
-                  textarea: { resize: 'vertical' },
-                }}
               />
               <Stack alignItems="end" direction="row" spacing={1} width="100%">
                 <Button

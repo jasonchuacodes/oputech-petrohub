@@ -1,4 +1,4 @@
-import { Stack } from '@mui/material';
+import { Divider, Stack } from '@mui/material';
 
 import { Button } from '~/components/ui';
 import { usePayslipContext } from '~/context/payroll/usePayslipContext';
@@ -23,10 +23,13 @@ export const PayslipActions = ({
 
   return (
     <>
-      <Stack direction="row" spacing={1} ml={-2}>
-        <Button variant="text" size="small" onClick={disclosure.onOpen}>
-          View
-        </Button>
+      <Stack
+        direction="row"
+        spacing={1}
+        ml={-2}
+        alignItems="center"
+        divider={<Divider orientation="vertical" sx={{ height: 20 }} />}
+      >
         {paymentStatus === PaymentStatus.UNPAID && (
           <Button
             variant="text"
@@ -37,6 +40,9 @@ export const PayslipActions = ({
             Mark as Paid
           </Button>
         )}
+        <Button variant="text" size="small" onClick={disclosure.onOpen}>
+          View
+        </Button>
       </Stack>
 
       <ViewPayslipModal open={disclosure.open} onClose={disclosure.onClose} payslip={payslip} />
