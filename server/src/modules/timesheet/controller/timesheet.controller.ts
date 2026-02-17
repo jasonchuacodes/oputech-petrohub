@@ -133,6 +133,7 @@ const getAllTimesheets = async (req: AuthenticatedRequest, res: Response, next: 
       tenantId: req.query.tenantId as string,
       startDate: req.query.startDate as string,
       endDate: req.query.endDate as string,
+      processed: req.query.processed === 'true' ? true : req.query.processed === 'false' ? false : undefined,
     });
 
     const timesheets = await timesheetService.getTimesheets(filters);

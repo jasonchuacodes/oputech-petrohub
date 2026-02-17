@@ -5,6 +5,7 @@ export const GetTimesheetsSchema = z.object({
   endDate: z.string().optional(),
   userId: z.string().uuid().optional(),
   tenantId: z.string().uuid(),
+  processed: z.boolean().optional(),
 });
 
 export type GetTimesheetsInput = z.infer<typeof GetTimesheetsSchema>;

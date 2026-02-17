@@ -44,16 +44,19 @@ const getAllTimesheets = async ({
   tenantId,
   startDate,
   endDate,
+  processed,
 }: {
   tenantId?: string;
   startDate?: Dayjs | null;
   endDate?: Dayjs | null;
+  processed?: boolean;
 }): Promise<Timesheet[]> => {
   const res = await axios.get('/timesheets/all', {
     params: {
       tenantId,
       startDate: startDate ? startDate.utc().toISOString() : undefined,
       endDate: endDate ? endDate.utc().toISOString() : undefined,
+      processed,
     },
   });
 

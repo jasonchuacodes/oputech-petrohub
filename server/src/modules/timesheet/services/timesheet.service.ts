@@ -96,16 +96,19 @@ const getTimesheets = async ({
   endDate,
   username,
   tenantId,
+  processed,
 }: {
   userId?: string;
   startDate?: string;
   endDate?: string;
   username?: string;
   tenantId?: string;
+  processed?: boolean;
 }) => {
   const where: Prisma.TimesheetWhereInput = {
     userId,
     tenantId,
+    processed,
     user: username
       ? {
           name: {
@@ -137,6 +140,16 @@ const getTimesheets = async ({
           id: true,
           name: true,
           role: true,
+          position: true,
+          salaryRates: {
+            where: {
+              tenantId,
+            },
+            orderBy: {
+              effectiveFrom: 'desc',
+            },
+            take: 1,
+          },
         },
       },
     },

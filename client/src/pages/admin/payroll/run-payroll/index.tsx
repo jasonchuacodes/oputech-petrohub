@@ -1,7 +1,7 @@
 import { ErrorOutline, HomeOutlined } from '@mui/icons-material';
 import { Stack, Tooltip, Typography } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 
 import { PageHeader } from '~/components/layouts';
 import {
@@ -17,6 +17,7 @@ import { AdminRoutes } from '~/routes';
 import { formatCurrency, formatNumber } from '~/utils/number';
 import { pathFor } from '~/utils/pathFor';
 import { getLastCompletedWeek, type WeekPeriod } from '~/utils/date';
+import { useGetAllTimesheetsQuery } from '~/services/timesheet/timesheet.queries';
 
 import { MoreDetailsMenu } from './MoreDetailsMenu';
 
@@ -38,59 +39,45 @@ type PayslipData = {
   netAmount: number;
 };
 
-const mockPayslipData: PayslipData[] = [
-  {
-    id: '1',
-    name: 'John Doe',
-    position: 'Software Engineer',
-    salaryRate: 625,
-    totalHours: 40,
-    overtime: 0,
-    grossPay: 25000,
-    deductions: [
-      { name: 'SSS Contribution', amount: 1125 },
-      { name: 'PhilHealth', amount: 625 },
-      { name: 'Pag-IBIG', amount: 500 },
-      { name: 'Tax (Withholding)', amount: 250 },
-    ],
-    totalDeductions: 2500,
-    netAmount: 22500,
-  },
-  {
-    id: '2',
-    name: 'Jane Smith',
-    position: 'Project Manager',
-    salaryRate: 625,
-    totalHours: 38,
-    overtime: 0,
-    grossPay: 23750,
-    deductions: [
-      { name: 'SSS Contribution', amount: 1068.75 },
-      { name: 'PhilHealth', amount: 593.75 },
-      { name: 'Pag-IBIG', amount: 475 },
-      { name: 'Tax (Withholding)', amount: 237.5 },
-    ],
-    totalDeductions: 2375,
-    netAmount: 21375,
-  },
-  {
-    id: '3',
-    name: 'Bob Johnson',
-    position: null,
-    salaryRate: 0,
-    totalHours: 42,
-    overtime: 0,
-    grossPay: 0,
-    deductions: [],
-    totalDeductions: 0,
-    netAmount: 0,
-  },
-];
-
 export const RunPayrollPage = () => {
   const { tenantId } = useParams();
   const navigate = useNavigate();
   const [selectedWeek, setSelectedWeek] = useState<WeekPeriod>(() => getLastCompletedWeek());
+
+  // Fetch unprocessed timesheets for the selected week
+  const { data: timesheets = [], isLoading } = useGetAllTimesheetsQuery({
+    tenantId,
+    startDate: selectedWeek.start,
+    endDate: selectedWeek.end,
+    processed: false,
+  });
+
+  // Transform timesheets to PayslipData format
+  const payslipData: PayslipData[] = useMemo(
+    () =>
+      timesheets.map((timesheet) => {
+        const salaryRate = timesheet.user.salaryRates?.[0]?.rate ?? 0;
+        const grossPay = timesheet.totalHours * salaryRate;
+
+        // TODO: Calculate deductions based on actual deduction rules
+        const deductions: DeductionItem[] = [];
+        const totalDeductions = 0;
+
+        return {
+          id: timesheet.id,
+          name: timesheet.user.name,
+          position: timesheet.user.position ?? null,
+          salaryRate,
+          totalHours: timesheet.totalHours,
+          overtime: 0, // TODO: Calculate overtime from timesheet entries
+          grossPay,
+          deductions,
+          totalDeductions,
+          netAmount: grossPay - totalDeductions,
+        };
+      }),
+    [timesheets],
+  );
 
   return (
     <PageLayout>
@@ -132,8 +119,9 @@ export const RunPayrollPage = () => {
 
           <DataTable
             id="payslips-table"
+            loading={isLoading}
             collection={DataTable.collection({
-              items: mockPayslipData,
+              items: payslipData,
               itemToValue: (item) => item.id,
               itemToString: (item) => item.name,
             })}
@@ -290,7 +278,11 @@ export const RunPayrollPage = () => {
         <Button variant="outlined" onClick={() => navigate(-1)}>
           Cancel
         </Button>
-        <Button variant="contained" onClick={() => console.log('Run Payroll clicked')}>
+        <Button
+          variant="contained"
+          onClick={() => console.log('Run Payroll clicked')}
+          disabled={payslipData.length === 0 || isLoading}
+        >
           Run Payroll
         </Button>
       </Stack>

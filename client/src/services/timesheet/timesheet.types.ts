@@ -7,6 +7,7 @@ export type Timesheet = {
   user: User;
   totalHours: number;
   status: TimesheetStatus;
+  processed: boolean;
   entries: TimesheetEntry[];
   createdAt: string;
   updatedAt: string;

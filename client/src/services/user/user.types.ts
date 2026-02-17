@@ -9,6 +9,14 @@ export const UserRole = {
 
 export type UserRole = ValueOf<typeof UserRole>;
 
+export type SalaryRate = {
+  id: string;
+  rate: number;
+  rateType: 'HOURLY' | 'DAILY' | 'MONTHLY';
+  effectiveFrom: string;
+  createdAt: string;
+};
+
 export type User = {
   id: string;
   username: string;
@@ -32,6 +40,8 @@ export type User = {
   tin?: string;
   philhealth?: string;
   pagibig?: string;
+
+  salaryRates?: SalaryRate[];
 
   shiftSchedule?: {
     shiftId: string;
