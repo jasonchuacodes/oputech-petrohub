@@ -6,8 +6,8 @@ import type { PayslipData } from '~/context/payroll/PayslipContext';
 import { usePayslipContext } from '~/context/payroll/usePayslipContext';
 import { useDisclosure } from '~/hooks/useDisclosure';
 
-import { ViewPayslipModal } from './ViewPayslipModal';
-import { EditPayslipModal } from './EditPayslipModal';
+import { ViewPayslipModal } from '../ViewPayslipModal';
+import { EditPayslipModal } from '../EditPayslipModal';
 
 export const MoreDetailsMenu = () => {
   const { payslip, payslipId } = usePayslipContext();

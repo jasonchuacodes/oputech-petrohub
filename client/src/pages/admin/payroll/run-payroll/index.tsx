@@ -1,15 +1,24 @@
 import { ErrorOutline, HomeOutlined } from '@mui/icons-material';
 import { Stack, Tooltip, Typography } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useState } from 'react';
 
 import { PageHeader } from '~/components/layouts';
-import { Breadcrumb, Button, DataTable, PageContainer, PageLayout } from '~/components/ui';
+import {
+  Breadcrumb,
+  Button,
+  DataTable,
+  PageContainer,
+  PageLayout,
+  WeekPicker,
+} from '~/components/ui';
 import { PayslipProvider } from '~/context/payroll/PayslipContext';
 import { AdminRoutes } from '~/routes';
 import { formatCurrency, formatNumber } from '~/utils/number';
 import { pathFor } from '~/utils/pathFor';
+import { getLastCompletedWeek, type WeekPeriod } from '~/utils/date';
 
-import { MoreDetailsMenu } from '../MoreDetailsMenu';
+import { MoreDetailsMenu } from './MoreDetailsMenu';
 
 type DeductionItem = {
   name: string;
@@ -81,6 +90,7 @@ const mockPayslipData: PayslipData[] = [
 export const RunPayrollPage = () => {
   const { tenantId } = useParams();
   const navigate = useNavigate();
+  const [selectedWeek, setSelectedWeek] = useState<WeekPeriod>(() => getLastCompletedWeek());
 
   return (
     <PageLayout>
@@ -112,154 +122,154 @@ export const RunPayrollPage = () => {
           description="Review payroll details and and generate payrolls."
         />
 
-        <Stack direction="row" spacing={2} mb={3} bgcolor="primary.alpha"  borderRadius={2} p={2}>
-          <Typography variant="body1" color="text.secondary">
-            Period:
-          </Typography>
-          <Typography variant="body1" color="text.primary">
-            February 1, 2026 - February 7, 2026
-          </Typography>
-        </Stack>
+        <Stack spacing={3}>
+          <WeekPicker
+            label="Payroll Period"
+            selectedStart={selectedWeek.start}
+            selectedEnd={selectedWeek.end}
+            onAccept={(week) => setSelectedWeek(week)}
+          />
 
-        <DataTable
-          id="payslips-table"
-          collection={DataTable.collection({
-            items: mockPayslipData,
-            itemToValue: (item) => item.id,
-            itemToString: (item) => item.name,
-          })}
-          columns={[
-            {
-              id: 'name',
-              heading: 'Name',
-              cell: (item) => (
-                <Typography variant="body2" color="text.primary">
-                  {item.name}
-                </Typography>
-              ),
-              orderable: true,
-              width: 200,
-              summary: () => (
-                <Typography variant="body2" color="text.primary">
-                  Totals
-                </Typography>
-              ),
-            },
-            {
-              id: 'totalHours',
-              heading: 'Total Hours',
-              cell: (item) => (
-                <Typography variant="body2" color="text.secondary">
-                  {formatNumber(item.totalHours, 2)} hrs
-                </Typography>
-              ),
-              orderable: true,
-              width: 120,
-              summary: (items) => {
-                const total = items.reduce((sum, item) => sum + item.totalHours, 0);
-                return (
-                  <Typography variant="body2" color="text.secondary">
-                    {formatNumber(total, 2)} hrs
-                  </Typography>
-                );
-              },
-            },
-            {
-              id: 'grossPay',
-              heading: 'Gross Pay',
-              cell: (item) =>
-                !item.salaryRate ? (
-                  <Tooltip title="Please set the user salary rate in the user detail page.">
-                    <Stack
-                      direction="row"
-                      spacing={0.5}
-                      alignItems="center"
-                      justifyContent="center"
-                      px={1}
-                      py={0.5}
-                      border="1px solid"
-                      borderColor="divider"
-                      borderRadius={4}
-                      width="fit-content"
-                    >
-                      <ErrorOutline fontSize="small" color="disabled" />
-                      <Typography variant="caption" color="text.secondary">
-                        Rate not set
-                      </Typography>
-                    </Stack>
-                  </Tooltip>
-                ) : (
-                  <Typography variant="body2" color="text.secondary">
-                    {formatCurrency(item.grossPay)}
+          <DataTable
+            id="payslips-table"
+            collection={DataTable.collection({
+              items: mockPayslipData,
+              itemToValue: (item) => item.id,
+              itemToString: (item) => item.name,
+            })}
+            columns={[
+              {
+                id: 'name',
+                heading: 'Name',
+                cell: (item) => (
+                  <Typography variant="body2" color="text.primary">
+                    {item.name}
                   </Typography>
                 ),
-              orderable: true,
-              width: 150,
-              summary: (items) => {
-                const total = items.reduce((sum, item) => sum + item.grossPay, 0);
-                return (
-                  <Typography variant="body2" color="text.secondary">
-                    {formatCurrency(total)}
-                  </Typography>
-                );
-              },
-            },
-            {
-              id: 'deductions',
-              heading: 'Deductions',
-              cell: (item) => (
-                <Typography variant="body2" color="text.secondary">
-                  {formatCurrency(item.totalDeductions)}
-                </Typography>
-              ),
-              orderable: true,
-              width: 150,
-              summary: (items) => {
-                const total = items.reduce((sum, item) => sum + item.totalDeductions, 0);
-                return (
-                  <Typography variant="body2" color="text.secondary">
-                    {formatCurrency(total)}
-                  </Typography>
-                );
-              },
-            },
-            {
-              id: 'netAmount',
-              heading: 'Billable',
-              cell: (item) => (
-                <Typography variant="body2" color="text.primary">
-                  {formatCurrency(item.netAmount)}
-                </Typography>
-              ),
-              orderable: true,
-              width: 150,
-              summary: (items) => {
-                const total = items.reduce((sum, item) => sum + item.netAmount, 0);
-                return (
+                orderable: true,
+                width: 200,
+                summary: () => (
                   <Typography variant="body2" color="text.primary">
-                    {formatCurrency(total)}
+                    Totals
                   </Typography>
-                );
+                ),
               },
-            },
-            {
-              id: 'actions',
-              align: 'right',
-              heading: '',
-              cell: (item) => (
-                <PayslipProvider payslipId={item.id} payslip={item}>
-                  <MoreDetailsMenu />
-                </PayslipProvider>
-              ),
-              width: 100,
-            },
-          ]}
-          search={{
-            enabled: true,
-            placeholder: 'Search user',
-          }}
-          emptyMessage="No payslips to generate."
-        />
+              {
+                id: 'totalHours',
+                heading: 'Total Hours',
+                cell: (item) => (
+                  <Typography variant="body2" color="text.secondary">
+                    {formatNumber(item.totalHours, 2)} hrs
+                  </Typography>
+                ),
+                orderable: true,
+                width: 120,
+                summary: (items) => {
+                  const total = items.reduce((sum, item) => sum + item.totalHours, 0);
+                  return (
+                    <Typography variant="body2" color="text.secondary">
+                      {formatNumber(total, 2)} hrs
+                    </Typography>
+                  );
+                },
+              },
+              {
+                id: 'grossPay',
+                heading: 'Gross Pay',
+                cell: (item) =>
+                  !item.salaryRate ? (
+                    <Tooltip title="Please set the user salary rate in the user detail page.">
+                      <Stack
+                        direction="row"
+                        spacing={0.5}
+                        alignItems="center"
+                        justifyContent="center"
+                        px={1}
+                        py={0.5}
+                        border="1px solid"
+                        borderColor="divider"
+                        borderRadius={4}
+                        width="fit-content"
+                      >
+                        <ErrorOutline fontSize="small" color="disabled" />
+                        <Typography variant="caption" color="text.secondary">
+                          Rate not set
+                        </Typography>
+                      </Stack>
+                    </Tooltip>
+                  ) : (
+                    <Typography variant="body2" color="text.secondary">
+                      {formatCurrency(item.grossPay)}
+                    </Typography>
+                  ),
+                orderable: true,
+                width: 150,
+                summary: (items) => {
+                  const total = items.reduce((sum, item) => sum + item.grossPay, 0);
+                  return (
+                    <Typography variant="body2" color="text.secondary">
+                      {formatCurrency(total)}
+                    </Typography>
+                  );
+                },
+              },
+              {
+                id: 'deductions',
+                heading: 'Deductions',
+                cell: (item) => (
+                  <Typography variant="body2" color="text.secondary">
+                    {formatCurrency(item.totalDeductions)}
+                  </Typography>
+                ),
+                orderable: true,
+                width: 150,
+                summary: (items) => {
+                  const total = items.reduce((sum, item) => sum + item.totalDeductions, 0);
+                  return (
+                    <Typography variant="body2" color="text.secondary">
+                      {formatCurrency(total)}
+                    </Typography>
+                  );
+                },
+              },
+              {
+                id: 'netAmount',
+                heading: 'Billable',
+                cell: (item) => (
+                  <Typography variant="body2" color="text.primary">
+                    {formatCurrency(item.netAmount)}
+                  </Typography>
+                ),
+                orderable: true,
+                width: 150,
+                summary: (items) => {
+                  const total = items.reduce((sum, item) => sum + item.netAmount, 0);
+                  return (
+                    <Typography variant="body2" color="text.primary">
+                      {formatCurrency(total)}
+                    </Typography>
+                  );
+                },
+              },
+              {
+                id: 'actions',
+                align: 'right',
+                heading: '',
+                cell: (item) => (
+                  <PayslipProvider payslipId={item.id} payslip={item}>
+                    <MoreDetailsMenu />
+                  </PayslipProvider>
+                ),
+                width: 100,
+              },
+            ]}
+            search={{
+              enabled: true,
+              placeholder: 'Search user',
+            }}
+            emptyMessage="No payslips to generate."
+          />
+        </Stack>
       </PageContainer>
       <Stack
         py={2}

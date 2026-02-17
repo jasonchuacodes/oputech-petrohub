@@ -2,9 +2,11 @@ import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
+import isBetween from 'dayjs/plugin/isBetween';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
+dayjs.extend(isBetween);
 
 const APP_TZ = import.meta.env.VITE_TZ || 'Asia/Manila';
 
@@ -61,5 +63,58 @@ export const formatTime = (timestamp: string | null, format?: string) => {
  */
 export const dayjsLocal = (date?: string | Date): Dayjs => {
   return dayjs(date).tz(APP_TZ);
+};
+
+export type WeekPeriod = {
+  start: Dayjs;
+  end: Dayjs;
+};
+
+/**
+ * Get the last completed week (Sunday-Saturday).
+ * Current week is never considered "complete" - always returns previous week.
+ *
+ * Example: Today = Feb 15, 2026 (Sunday) → Returns Feb 8-14
+ * Example: Today = Feb 14, 2026 (Saturday) → Returns Feb 1-7
+ */
+export const getLastCompletedWeek = (referenceDate: Dayjs = dayjs()): WeekPeriod => {
+  // Get start of current week (Sunday)
+  const currentWeekStart = referenceDate.weekday(0).startOf('day');
+
+  // Go back 7 days to get last completed week's start
+  const lastWeekStart = currentWeekStart.subtract(7, 'day');
+
+  // Calculate end (Saturday)
+  const lastWeekEnd = lastWeekStart.add(6, 'day').endOf('day');
+
+  return {
+    start: lastWeekStart,
+    end: lastWeekEnd,
+  };
+};
+
+/**
+ * Get the week period for a given date.
+ * Returns the Sunday-Saturday week that contains the date.
+ */
+export const getWeekPeriod = (date: Dayjs): WeekPeriod => {
+  const weekStart = date.weekday(0).startOf('day');
+  const weekEnd = date.weekday(6).endOf('day');
+
+  return {
+    start: weekStart,
+    end: weekEnd,
+  };
+};
+
+/**
+ * Check if a date is in the current week (incomplete).
+ */
+export const isCurrentWeek = (date: Dayjs): boolean => {
+  const today = dayjs();
+  const currentWeekStart = today.weekday(0).startOf('day');
+  const currentWeekEnd = today.weekday(6).endOf('day');
+
+  return date.isBetween(currentWeekStart, currentWeekEnd, 'day', '[]');
 };
 
