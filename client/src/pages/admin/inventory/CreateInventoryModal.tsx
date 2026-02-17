@@ -45,6 +45,7 @@ export const CreateInventoryModal = ({ open, onClose }: CreateInventoryModalProp
         description: data.description,
         price: data.price,
         quantity: data.quantity,
+        // TODO: apply lowstockthreshhold
         lowStockThreshold: data.lowStockThreshold,
       });
       toast.success('Stock inventory created successfully');

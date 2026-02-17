@@ -2,6 +2,7 @@ import { MoreHorizOutlined } from '@mui/icons-material';
 import { IconButton, Menu, MenuItem, Typography } from '@mui/material';
 import { useState } from 'react';
 
+import { useTimesheetLogContext } from '~/context/timesheetLog';
 import { useDisclosure } from '~/hooks/useDisclosure';
 
 import { DeleteConfirmModal } from './DeleteConfirmModal';
@@ -9,6 +10,10 @@ import { EditTimesheetModal } from './EditTimesheetModal';
 import { ViewTimesheetModal } from './ViewTimesheetModal';
 
 export const TimesheetActions = () => {
+  const {
+    timesheetLog: { processed },
+  } = useTimesheetLogContext();
+
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const viewDisclosure = useDisclosure();
   const editDisclosure = useDisclosure();
@@ -70,10 +75,10 @@ export const TimesheetActions = () => {
         <MenuItem onClick={handleView}>
           <Typography variant="body2">View</Typography>
         </MenuItem>
-        <MenuItem onClick={handleEdit}>
+        <MenuItem onClick={handleEdit} disabled={processed}>
           <Typography variant="body2">Edit</Typography>
         </MenuItem>
-        <MenuItem onClick={handleDelete}>
+        <MenuItem onClick={handleDelete} disabled={processed}>
           <Typography variant="body2">Delete</Typography>
         </MenuItem>
       </Menu>

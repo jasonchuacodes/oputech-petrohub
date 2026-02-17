@@ -8,6 +8,7 @@ import { z } from 'zod';
 import { Input, NumberInput } from '~/components/form';
 import { Button, CustomModal, Show } from '~/components/ui';
 import { formatCurrency, formatNumber } from '~/utils/number';
+import type { Payslip } from '~/services/payroll/payroll.types';
 
 const EditPayslipSchema = z.object({
   grossPay: z.number().min(0, 'Amount must be positive'),
@@ -22,28 +23,10 @@ const EditPayslipSchema = z.object({
 
 type EditPayslipForm = z.infer<typeof EditPayslipSchema>;
 
-type DeductionItem = {
-  name: string;
-  amount: number;
-};
-
-type PayslipData = {
-  id: string;
-  name: string;
-  position: string | null;
-  salaryRate: number;
-  totalHours: number;
-  overtime: number;
-  grossPay: number;
-  deductions: DeductionItem[];
-  totalDeductions: number;
-  netAmount: number;
-};
-
 type EditPayslipModalProps = {
   open: boolean;
   onClose: () => void;
-  payslip: PayslipData | null;
+  payslip: Payslip | null;
   timesheetId: string;
   onSave: (timesheetId: string, amount: number, notes?: string) => void;
 };
@@ -63,8 +46,8 @@ export const EditPayslipModal = ({
   } = useForm<EditPayslipForm>({
     resolver: zodResolver(EditPayslipSchema),
     defaultValues: {
-      grossPay: payslip?.grossPay ?? 0,
-      deductions: payslip?.deductions ?? [],
+      grossPay: payslip ? parseFloat(payslip.totalCompensation) : 0,
+      deductions: [],
       notes: '',
     },
   });
@@ -113,7 +96,7 @@ export const EditPayslipModal = ({
                 Name
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                {payslip.name}
+                {payslip.user?.name || 'Unknown'}
               </Typography>
             </Stack>
             <Stack direction="row">
@@ -121,7 +104,7 @@ export const EditPayslipModal = ({
                 Position
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                {payslip.position ?? '—'}
+                —
               </Typography>
             </Stack>
             <Stack direction="row">
@@ -129,7 +112,8 @@ export const EditPayslipModal = ({
                 Salary Rate
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                {formatCurrency(payslip.salaryRate)}/day
+                {formatCurrency(parseFloat(payslip.rateSnapshot))}/
+                {payslip.rateTypeSnapshot.toLowerCase()}
               </Typography>
             </Stack>
           </Stack>
@@ -154,7 +138,7 @@ export const EditPayslipModal = ({
                 Overtime
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                {formatNumber(payslip.overtime, 2)} hrs
+                {formatNumber(0, 2)} hrs
               </Typography>
             </Stack>
 

@@ -3,8 +3,8 @@ import { Dayjs } from 'dayjs';
 import toast from 'react-hot-toast';
 
 import { CustomModal } from '~/components/ui';
-import { useGeneratePayrollMutation } from '~/services/payroll/payroll.queries';
-import { PayrollPeriodType } from '~/services/payroll/payroll.types';
+import { useGeneratePayslipMutation } from '~/services/payroll/payroll.queries';
+import { PayrollPeriodType, SalaryRateType } from '~/services/payroll/payroll.types';
 import type { UnprocessedTimesheet } from '~/services/payroll/payroll.types';
 import type { SalaryRate } from '~/services/salary/salary.types';
 import { parseBackendError } from '~/utils/parseBackendError';
@@ -30,7 +30,7 @@ export const CreatePayrollModal = ({
   unprocessedTimesheets,
   salaryRate,
 }: CreatePayrollModalProps) => {
-  const { mutateAsync: generatePayroll, isPending } = useGeneratePayrollMutation();
+  const { mutateAsync: generatePayslip, isPending } = useGeneratePayslipMutation();
 
   const totalHours = unprocessedTimesheets.reduce(
     (sum, timesheet) => sum + timesheet.totalHours,
@@ -41,20 +41,24 @@ export const CreatePayrollModal = ({
 
   const handleConfirm = async () => {
     try {
-      await generatePayroll({
+      await generatePayslip({
         userId,
         tenantId,
         timesheetIds: unprocessedTimesheets.map((t) => t.id),
         periodType: PayrollPeriodType.WEEKLY,
         periodStart: startDate?.toISOString() || '',
         periodEnd: endDate?.toISOString() || '',
+        totalHours,
+        rateSnapshot: salaryRate.rate.toString(),
+        rateTypeSnapshot: salaryRate.rateType as unknown as SalaryRateType,
+        totalCompensation: totalCompensation.toString(),
       });
 
-      toast.success('Payroll created successfully');
+      toast.success('Payslip created successfully');
       onClose();
     } catch (err) {
       const parsedError = parseBackendError(err);
-      toast.error(`Failed to create payroll: ${parsedError}`);
+      toast.error(`Failed to create payslip: ${parsedError}`);
     }
   };
 

@@ -30,7 +30,7 @@ export const EmploymentDetail = ({ control, shifts }: EmploymentDetailProps) => 
       {/* TODO: add these user info */}
       {/* employee id */}
       {/* hire date */}
-      {/* employment status */}
+      {/* employment status : transferred from user personal detail */}
       {/* position */}
 
       <Stack spacing={2}>

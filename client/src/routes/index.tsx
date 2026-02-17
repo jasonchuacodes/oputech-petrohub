@@ -13,6 +13,7 @@ import { TimesheetsPage } from '~/pages/admin/timesheets';
 import { UsersPage } from '~/pages/admin/users';
 import { PayrollPage } from '~/pages/admin/payroll';
 import { RunPayrollPage } from '~/pages/admin/payroll/run-payroll';
+import { PayrollRunDetailPage } from '~/pages/admin/payroll/payroll-run-detail';
 import { BootstrapPage } from '~/pages/admin/bootstrap';
 import { HomePage } from '~/pages/admin/home';
 import { ProductsPage } from '~/pages/admin/products';
@@ -60,6 +61,7 @@ export const AdminRoutes = {
   TenantUserTimesheetLogs: '/tenants/:tenantId/users/:userId/timesheets',
   TenantPayroll: '/tenants/:tenantId/payroll',
   TenantRunPayroll: '/tenants/:tenantId/payroll/run',
+  TenantPayrollRunDetail: '/tenants/:tenantId/payroll/:payrollRunId',
   TenantAccountSettings: '/tenants/:tenantId/account-settings',
 };
 
@@ -122,6 +124,7 @@ export const router = createBrowserRouter(
             <Route path="shifts" element={<ShiftsPage />} />
             <Route path="payroll" element={<PayrollPage />} />
             <Route path="payroll/run" element={<RunPayrollPage />} />
+            <Route path="payroll/:payrollRunId" element={<PayrollRunDetailPage />} />
             <Route path="users" element={<UsersPage />} />
             <Route path="users/:userId" element={<UserDetailPage />} />
             <Route path="create-tenant" element={<CreateTenantPage />} />

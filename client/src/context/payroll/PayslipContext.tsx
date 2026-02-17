@@ -1,33 +1,16 @@
 import type { ReactNode } from 'react';
 import { createContext } from 'react';
 
-type DeductionItem = {
-  name: string;
-  amount: number;
-};
-
-export type PayslipData = {
-  id: string;
-  name: string;
-  position: string | null;
-  salaryRate: number;
-  totalHours: number;
-  overtime: number;
-  grossPay: number;
-  deductions: DeductionItem[];
-  totalDeductions: number;
-  netAmount: number;
-  notes?: string;
-};
+import type { Payslip } from '~/services/payroll/payroll.types';
 
 type PayslipContextType = {
-  payslip: PayslipData;
+  payslip: Payslip;
   payslipId: string;
 };
 
 type PayslipProviderProps = {
   payslipId: string;
-  payslip: PayslipData;
+  payslip: Payslip;
   children: ReactNode;
 };
 

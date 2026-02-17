@@ -3,7 +3,7 @@ import { Stack, Tooltip, Typography } from '@mui/material';
 import { useParams } from 'react-router-dom';
 
 import { PageHeader } from '~/components/layouts';
-import { Breadcrumb, DataTable, PageContainer, type DateRange } from '~/components/ui';
+import { Breadcrumb, Chip, DataTable, PageContainer, type DateRange } from '~/components/ui';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { useTimesheetContext } from '~/context/timesheet/useTimesheetContext';
 import { TimesheetLogProvider } from '~/context/timesheetLog';
@@ -149,6 +149,18 @@ export const TimesheetLogs = () => {
                 variant="body2"
                 color="text.secondary"
               >{`${timesheet.totalHours.toFixed(2)} hrs`}</Typography>
+            ),
+          },
+          {
+            id: 'status',
+            heading: 'Status',
+            orderable: true,
+            width: 140,
+            cell: (timesheet) => (
+              <Chip
+                label={timesheet.processed ? 'Processed' : 'Pending'}
+                color={timesheet.processed ? 'success' : 'default'}
+              />
             ),
           },
           {

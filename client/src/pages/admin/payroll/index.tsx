@@ -1,5 +1,5 @@
-import { HomeOutlined, PlayArrowOutlined } from '@mui/icons-material';
-import { Stack, Typography } from '@mui/material';
+import { ChevronRightOutlined, HomeOutlined, PlayArrowOutlined } from '@mui/icons-material';
+import { Typography } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import dayjs from 'dayjs';
 
@@ -9,63 +9,26 @@ import { AdminRoutes } from '~/routes';
 import { formatCurrency } from '~/utils/number';
 import { formatRange } from '~/utils/date';
 import { pathFor } from '~/utils/pathFor';
-
-type PayrollData = {
-  id: string;
-  startDate: string;
-  endDate: string;
-  status: 'pending' | 'paid';
-  billable: number;
-};
-
-const mockPayrollData: PayrollData[] = [
-  {
-    id: '1',
-    startDate: '2026-01-01T00:00:00.000Z',
-    endDate: '2026-01-07T23:59:59.999Z',
-    status: 'pending',
-    billable: 45000,
-  },
-  {
-    id: '2',
-    startDate: '2026-01-08T00:00:00.000Z',
-    endDate: '2026-01-15T23:59:59.999Z',
-    status: 'paid',
-    billable: 89500,
-  },
-  {
-    id: '3',
-    startDate: '2026-01-16T00:00:00.000Z',
-    endDate: '2026-01-22T23:59:59.999Z',
-    status: 'paid',
-    billable: 52300,
-  },
-  {
-    id: '4',
-    startDate: '2026-01-23T00:00:00.000Z',
-    endDate: '2026-01-31T23:59:59.999Z',
-    status: 'paid',
-    billable: 67800,
-  },
-  {
-    id: '5',
-    startDate: '2025-12-16T00:00:00.000Z',
-    endDate: '2025-12-22T23:59:59.999Z',
-    status: 'paid',
-    billable: 48200,
-  },
-  {
-    id: '6',
-    startDate: '2025-12-23T00:00:00.000Z',
-    endDate: '2025-12-31T23:59:59.999Z',
-    status: 'paid',
-    billable: 71500,
-  },
-];
+import { useGetPayrollRunsQuery } from '~/services/payroll/payroll.queries';
+import { getStatusColor, getStatusLabel } from './utils';
 
 export const PayrollPage = () => {
   const { tenantId } = useParams();
   const navigate = useNavigate();
+
+  const { data: payrollRuns = [], isLoading } = useGetPayrollRunsQuery({
+    tenantId: tenantId!,
+  });
+
+  const payrollRunsWithStats = payrollRuns.map((run) => {
+    const billable =
+      run.payslips?.reduce((sum: number, p) => sum + parseFloat(p.totalCompensation), 0) || 0;
+
+    return {
+      ...run,
+      billable,
+    };
+  });
 
   return (
     <PageLayout>
@@ -88,64 +51,30 @@ export const PayrollPage = () => {
         <PageHeader
           title="Payroll Management"
           description="Manage and send payslip to your employees here."
+          action={
+            <Button
+              variant="contained"
+              startIcon={<PlayArrowOutlined />}
+              onClick={() =>
+                navigate(
+                  pathFor({
+                    pathname: AdminRoutes.TenantRunPayroll,
+                    params: { tenantId },
+                  }),
+                )
+              }
+            >
+              Run Payroll
+            </Button>
+          }
         />
-
-        {/* Run Payroll CTA Section */}
-        <Stack
-          direction="row"
-          bgcolor="background.paper"
-          p={2}
-          spacing={3}
-          borderRadius={2}
-          alignItems="start"
-          justifyContent="space-between"
-        >
-          <Stack spacing={2}>
-            <Typography variant="body1" fontWeight={600}>
-              Ready to Run Payroll
-            </Typography>
-            <Stack spacing={1}>
-              <Stack direction="row" spacing={2}>
-                <Typography variant="body2" color="text.secondary">
-                  Period:
-                </Typography>
-                <Typography variant="body2" color="text.primary">
-                  {/* Period */}
-                  February 1 - February 7, 2026
-                </Typography>
-              </Stack>
-              <Stack direction="row" spacing={2}>
-                <Typography variant="body2" color="text.secondary">
-                  Estimated Cost:
-                </Typography>
-                <Typography variant="body2" color="text.primary">
-                  {formatCurrency(24500)}
-                </Typography>
-              </Stack>
-            </Stack>
-          </Stack>
-          <Button
-            size="large"
-            variant="contained"
-            startIcon={<PlayArrowOutlined />}
-            onClick={() =>
-              navigate(
-                pathFor({
-                  pathname: AdminRoutes.TenantRunPayroll,
-                  params: { tenantId },
-                }),
-              )
-            }
-          >
-            Run Payroll
-          </Button>
-        </Stack>
         <DataTable
           id="payroll-table"
+          loading={isLoading}
           collection={DataTable.collection({
-            items: mockPayrollData,
+            items: payrollRunsWithStats,
             itemToValue: (item) => item.id,
-            itemToString: (item) => formatRange(dayjs(item.startDate), dayjs(item.endDate)),
+            itemToString: (item) => formatRange(dayjs(item.periodStart), dayjs(item.periodEnd)),
           })}
           columns={[
             {
@@ -153,7 +82,7 @@ export const PayrollPage = () => {
               heading: 'Payroll Period',
               cell: (item) => (
                 <Typography variant="body2" color="text.primary">
-                  {formatRange(dayjs(item.startDate), dayjs(item.endDate))}
+                  {formatRange(dayjs(item.periodStart), dayjs(item.periodEnd))}
                 </Typography>
               ),
               orderable: true,
@@ -164,13 +93,12 @@ export const PayrollPage = () => {
               heading: 'Status',
               cell: (item) => (
                 <Chip
-                  label={item.status}
-                  color={item.status === 'paid' ? 'success' : 'warning'}
+                  label={getStatusLabel(item.status)}
+                  color={getStatusColor(item.status)}
                   sx={{ textTransform: 'capitalize' }}
                 />
               ),
-              orderable: true,
-              width: 120,
+              width: 160,
             },
             {
               id: 'billable',
@@ -181,16 +109,33 @@ export const PayrollPage = () => {
                 </Typography>
               ),
               orderable: true,
-              width: 150,
+              width: 160,
             },
             {
               id: 'actions',
-              heading: 'Actions',
-              cell: () => <Button variant="text">View</Button>,
-              width: 100,
+              heading: '',
+              align: 'right',
+              cell: () => (
+                <ChevronRightOutlined
+                  fontSize="small"
+                  sx={{
+                    color: 'text.secondary',
+                    opacity: 0.6,
+                  }}
+                />
+              ),
+              width: 50,
             },
           ]}
-          emptyMessage="No payroll data available."
+          onRowClick={(item) =>
+            navigate(
+              pathFor({
+                pathname: AdminRoutes.TenantPayrollRunDetail,
+                params: { tenantId, payrollRunId: item.id },
+              }),
+            )
+          }
+          emptyMessage="No payroll runs yet. Click 'Run Payroll' to create your first payroll run."
           dateRange={{
             enabled: true,
             defaultStartValue: dayjs().startOf('month'),

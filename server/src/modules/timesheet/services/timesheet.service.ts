@@ -531,6 +531,24 @@ const checkOut = async (userId: string) => {
 };
 
 const updateTimesheet = async ({ timesheetId, totalHours }: UpdateTimesheetInput) => {
+  const timesheet = await prisma.timesheet.findUnique({
+    where: {
+      id: timesheetId,
+    },
+    select: {
+      id: true,
+      processed: true,
+    },
+  });
+
+  if (!timesheet) {
+    throw new NotFoundError('Timesheet not found');
+  }
+
+  if (timesheet.processed) {
+    throw new ForbiddenError('Cannot update a processed timesheet');
+  }
+
   const updatedTimesheet = await prisma.timesheet.update({
     where: {
       id: timesheetId,
@@ -546,7 +564,7 @@ const updateTimesheet = async ({ timesheetId, totalHours }: UpdateTimesheetInput
 const deleteTimesheet = async (timesheetId: string, userId: string, userRole: string) => {
   const timesheet = await prisma.timesheet.findUnique({
     where: { id: timesheetId },
-    select: { id: true, userId: true },
+    select: { id: true, userId: true, processed: true },
   });
 
   if (!timesheet) {
@@ -556,6 +574,10 @@ const deleteTimesheet = async (timesheetId: string, userId: string, userRole: st
   // Admins can delete any, users only their own
   if (userRole !== 'ADMIN' && timesheet.userId !== userId) {
     throw new ForbiddenError('Not authorized to delete this timesheet');
+  }
+
+  if (timesheet.processed) {
+    throw new ForbiddenError('Cannot delete a processed timesheet');
   }
 
   return prisma.timesheet.delete({ where: { id: timesheetId } });

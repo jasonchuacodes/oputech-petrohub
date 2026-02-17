@@ -27,6 +27,18 @@ enum PayrollPeriodType {
   WEEKLY
 }
 
+enum PayrollRunStatus {
+  PENDING    // Not all payslips paid yet (default)
+  PAID       // All payslips are paid (derived from payslips)
+  CANCELLED  // Admin cancelled/voided this run
+}
+
+enum PaymentStatus {
+  UNPAID
+  PAID
+  FAILED
+}
+
 enum NotificationType {
   PASSWORD_RESET_REQUEST
 }
@@ -79,7 +91,8 @@ model User {
 
   tenants     TenantsOnUsers[]
   salaryRates UserSalaryRate[]
-  payrolls    Payroll[]
+  payslips    Payslip[]
+  payrollRuns PayrollRun[]
 
   shouldChangePassword Boolean  @default(true)
   createdAt            DateTime @default(now())
@@ -111,7 +124,8 @@ model Tenant {
   expenseAggregations  ReportExpenseAggregation[]
   disposalAggregations ReportDisposalAggregation[]
   salaryRates          UserSalaryRate[]
-  payrolls             Payroll[]
+  payslips             Payslip[]
+  payrollRuns          PayrollRun[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -183,7 +197,7 @@ model Timesheet {
   processed  Boolean @default(false)
 
   entries  TimesheetEntry[]
-  payrolls PayrollTimesheet[]
+  payslips PayslipTimesheet[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -464,25 +478,33 @@ model UserSalaryRate {
   @@index([tenantId])
 }
 
-// NAMING ISSUE: This model should be called "Payslip" not "Payroll"
-//
-// Domain Terminology:
-// - "Payroll" = The admin process of running payroll (generates multiple payslips for a period)
-// - "Payslip" = Individual employee compensation record for a specific period
-//
-// This model represents a PAYSLIP because it:
-// - Is specific to ONE user (userId field)
-// - Represents compensation for ONE period (periodStart/periodEnd)
-// - Contains individual compensation details (totalCompensation, rateSnapshot)
-//
-// What's missing:
-// - A "PayrollRun" model to represent when an admin runs payroll
-//   (would group multiple payslips created in a single admin action)
-//
-// TODO: Rename Payroll → Payslip
-// TODO: Add 'notes' field (String?) to store admin notes about adjustments/overrides
-//
-model Payroll {
+model PayrollRun {
+  id       String   @id @default(uuid())
+  tenantId String
+  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  periodType  PayrollPeriodType
+  periodStart DateTime
+  periodEnd   DateTime
+
+  status PayrollRunStatus @default(PENDING)  // PENDING → PAID (derived from payslips)
+
+  createdBy     String
+  createdByUser User   @relation(fields: [createdBy], references: [id], onDelete: Restrict)
+
+  notes String?
+
+  payslips Payslip[]
+
+  createdAt DateTime @default(now())
+
+  @@index([tenantId])
+  @@index([tenantId, periodStart, periodEnd])
+  @@index([tenantId, status])
+  @@index([createdBy])
+}
+
+model Payslip {
   id       String @id @default(uuid())
   tenantId String
   tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
@@ -499,7 +521,17 @@ model Payroll {
   rateTypeSnapshot  RateType
   totalCompensation Decimal  @db.Decimal(10, 2)
 
-  timesheets PayrollTimesheet[]
+  payrollRunId String?
+  payrollRun   PayrollRun? @relation(fields: [payrollRunId], references: [id], onDelete: SetNull)
+
+  notes String?
+
+  paymentStatus PaymentStatus @default(UNPAID)
+  paidAt        DateTime?
+  paymentMethod String?
+  paymentNotes  String?
+
+  timesheets PayslipTimesheet[]
 
   createdBy String
   createdAt DateTime @default(now())
@@ -507,29 +539,14 @@ model Payroll {
   @@index([tenantId, userId])
   @@index([tenantId, periodStart, periodEnd])
   @@index([userId, periodStart])
+  @@index([payrollRunId])
+  @@index([paymentStatus])
+  @@index([tenantId, paymentStatus])
 }
 
-// NAMING ISSUE: This should be called "PayslipTimesheet" not "PayrollTimesheet"
-//
-// Purpose:
-// - Join table linking a Payslip (currently named Payroll) to its source Timesheets
-// - Stores snapshot of hours and compensation at the time payroll was generated
-// - Preserves audit trail of which timesheets contributed to each payslip
-//
-// Why the name is wrong:
-// - "PayrollTimesheet" suggests it links the payroll process to timesheets
-// - Actually links individual PAYSLIPS to their source timesheets
-// - Should follow pattern: Payslip + Timesheet = PayslipTimesheet
-//
-// Fields:
-// - hoursSnapshot: Total hours from this timesheet at time of payroll generation
-// - compensationSnapshot: Compensation calculated for this timesheet (can be overridden)
-//
-// TODO: Rename PayrollTimesheet → PayslipTimesheet (when we rename Payroll → Payslip)
-//
-model PayrollTimesheet {
-  payroll   Payroll @relation(fields: [payrollId], references: [id], onDelete: Cascade)
-  payrollId String
+model PayslipTimesheet {
+  payslip   Payslip @relation(fields: [payslipId], references: [id], onDelete: Cascade)
+  payslipId String
 
   timesheet   Timesheet @relation(fields: [timesheetId], references: [id], onDelete: Restrict)
   timesheetId String
@@ -537,7 +554,7 @@ model PayrollTimesheet {
   hoursSnapshot        Float
   compensationSnapshot Decimal @db.Decimal(10, 2)
 
-  @@id([payrollId, timesheetId])
-  @@index([payrollId])
+  @@id([payslipId, timesheetId])
+  @@index([payslipId])
   @@index([timesheetId])
 }

@@ -21,7 +21,7 @@ type EditTimesheetModalProps = {
 
 export const EditTimesheetModal = ({ open, onClose }: EditTimesheetModalProps) => {
   const { timesheetLog } = useTimesheetLogContext();
-  const { id: timesheetId, createdAt, entries, totalHours } = timesheetLog;
+  const { id: timesheetId, createdAt, entries, totalHours, processed } = timesheetLog;
 
   const firstCheckIn = entries.find((e) => e.action === TimesheetEntryActionEnum.CHECK_IN);
   const lastCheckOut = [...entries]
@@ -53,6 +53,11 @@ export const EditTimesheetModal = ({ open, onClose }: EditTimesheetModalProps) =
   };
 
   const onSubmit = handleSubmit(({ totalHours }: UpdateTimesheetParams) => {
+    if (processed) {
+      toast.error('That action cannot be done. Timesheet already processed.');
+      return;
+    }
+
     updateTimesheet(
       {
         timesheetId,

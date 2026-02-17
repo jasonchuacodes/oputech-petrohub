@@ -5,6 +5,7 @@ import type { User } from '../user/user.types';
 export type Timesheet = {
   id: string;
   user: User;
+  tenantId: string;
   totalHours: number;
   status: TimesheetStatus;
   processed: boolean;

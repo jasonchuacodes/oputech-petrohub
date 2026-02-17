@@ -6,18 +6,13 @@ import utc from 'dayjs/plugin/utc';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { PageHeader } from '~/components/layouts';
-import {
-  Breadcrumb,
-  DataTable,
-  PageContainer,
-  PageLayout,
-  type DateRange,
-} from '~/components/ui';
+import { Breadcrumb, DataTable, PageContainer, PageLayout, type DateRange } from '~/components/ui';
 import { TimesheetProvider, useTimesheetContext } from '~/context/timesheet';
 import { useGetAllTimesheetsQuery } from '~/services/timesheet/timesheet.queries';
 import type { Timesheet } from '~/services/timesheet/timesheet.types';
 import { AdminRoutes } from '~/routes';
 import { pathFor } from '~/utils/pathFor';
+import { formatNumber } from '~/utils/number';
 
 import { TimesheetLogs } from './timesheet-logs';
 
@@ -41,7 +36,6 @@ const TimesheetsPageContent = () => {
     endDate,
   });
 
-  // Group timesheets by user
   const groupedTimesheets = timesheets?.reduce<Record<string, GroupedTimesheet>>(
     (acc, timesheet: Timesheet) => {
       const key = timesheet.user.id;
@@ -60,30 +54,6 @@ const TimesheetsPageContent = () => {
     },
     {},
   );
-
-  const groupedData = Object.values(groupedTimesheets ?? {});
-
-  const handleSelectDateRange = ({ start, end }: DateRange) => {
-    const newStart = start?.startOf('day') ?? null;
-    const newEnd = end?.endOf('day') ?? null;
-
-    const hasChanged =
-      (newStart && !newStart.isSame(startDate)) || (newEnd && !newEnd.isSame(endDate));
-
-    if (hasChanged) {
-      setStartDate(newStart);
-      setEndDate(newEnd);
-    }
-  };
-
-  const handleRowClick = (userId: string) => {
-    navigate(
-      pathFor({
-        pathname: AdminRoutes.TenantTimesheets,
-        params: { tenantId, userId },
-      }),
-    );
-  };
 
   return (
     <PageLayout>
@@ -114,7 +84,7 @@ const TimesheetsPageContent = () => {
           <DataTable
             id="timesheets-table"
             collection={DataTable.collection({
-              items: groupedData || [],
+              items: Object.values(groupedTimesheets ?? {}) || [],
               itemToValue: (item) => item.userId,
               itemToString: (item) => item.userName,
             })}
@@ -135,7 +105,7 @@ const TimesheetsPageContent = () => {
                 heading: 'Total Hours',
                 cell: (item) => (
                   <Typography variant="body2" color="text.secondary">
-                    {item.totalHours}
+                    {formatNumber(item.totalHours, 2)} hrs
                   </Typography>
                 ),
                 orderable: true,
@@ -154,11 +124,17 @@ const TimesheetsPageContent = () => {
                     }}
                   />
                 ),
-                width: 50,
               },
             ]}
             loading={isLoading}
-            onRowClick={(item) => handleRowClick(item.userId)}
+            onRowClick={(item) =>
+              navigate(
+                pathFor({
+                  pathname: AdminRoutes.TenantTimesheets,
+                  params: { tenantId, userId: item.userId },
+                }),
+              )
+            }
             emptyMessage="No timesheets data available."
             search={{
               enabled: true,
@@ -168,7 +144,18 @@ const TimesheetsPageContent = () => {
               enabled: true,
               startValue: startDate,
               endValue: endDate,
-              onRangeChange: handleSelectDateRange,
+              onRangeChange: ({ start, end }: DateRange) => {
+                const newStart = start?.startOf('day') ?? null;
+                const newEnd = end?.endOf('day') ?? null;
+
+                const hasChanged =
+                  (newStart && !newStart.isSame(startDate)) || (newEnd && !newEnd.isSame(endDate));
+
+                if (hasChanged) {
+                  setStartDate(newStart);
+                  setEndDate(newEnd);
+                }
+              },
             }}
           />
         </PageContainer>

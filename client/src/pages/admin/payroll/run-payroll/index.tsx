@@ -18,32 +18,22 @@ import { formatCurrency, formatNumber } from '~/utils/number';
 import { pathFor } from '~/utils/pathFor';
 import { getLastCompletedWeek, type WeekPeriod } from '~/utils/date';
 import { useGetAllTimesheetsQuery } from '~/services/timesheet/timesheet.queries';
+import { useRunPayrollMutation } from '~/services/payroll/payroll.queries';
+import {
+  PaymentStatus,
+  PayrollPeriodType,
+  SalaryRateType,
+  type Payslip,
+} from '~/services/payroll/payroll.types';
 
 import { MoreDetailsMenu } from './MoreDetailsMenu';
-
-type DeductionItem = {
-  name: string;
-  amount: number;
-};
-
-type PayslipData = {
-  id: string;
-  name: string;
-  position: string | null;
-  salaryRate: number;
-  totalHours: number;
-  overtime: number;
-  grossPay: number;
-  deductions: DeductionItem[];
-  totalDeductions: number;
-  netAmount: number;
-  notes?: string;
-};
 
 export const RunPayrollPage = () => {
   const { tenantId } = useParams();
   const navigate = useNavigate();
   const [selectedWeek, setSelectedWeek] = useState<WeekPeriod>(() => getLastCompletedWeek());
+
+  const runPayrollMutation = useRunPayrollMutation();
 
   const storageKey = useMemo(
     () =>
@@ -86,35 +76,40 @@ export const RunPayrollPage = () => {
     processed: false,
   });
 
-  const payslipData: PayslipData[] = useMemo(
+  const payslipData: Payslip[] = useMemo(
     () =>
       timesheets.map((timesheet) => {
         const salaryRate = timesheet.user.salaryRates?.[0]?.rate ?? 0;
-        const calculatedGrossPay = timesheet.totalHours * salaryRate;
+        const rateType = timesheet.user.salaryRates?.[0]?.rateType ?? SalaryRateType.DAILY;
 
-        // Use override if exists, otherwise use calculated
+        const HOURS_PER_DAY = 8;
+        const hourlyRate =
+          rateType === SalaryRateType.HOURLY ? salaryRate : salaryRate / HOURS_PER_DAY;
+
+        const calculatedGrossPay = timesheet.totalHours * hourlyRate;
+
         const override = overrides[timesheet.id];
         const grossPay = override?.amount ?? calculatedGrossPay;
 
-        // TODO: Calculate deductions based on actual deduction rules
-        const deductions: DeductionItem[] = [];
-        const totalDeductions = 0;
-
         return {
           id: timesheet.id,
-          name: timesheet.user.name,
-          position: timesheet.user.position ?? null,
-          salaryRate,
+          tenantId: timesheet.tenantId,
+          userId: timesheet.user.id,
+          periodType: PayrollPeriodType.WEEKLY,
+          periodStart: selectedWeek.start.toISOString(),
+          periodEnd: selectedWeek.end.toISOString(),
           totalHours: timesheet.totalHours,
-          overtime: 0, // TODO: Calculate overtime from timesheet entries
-          grossPay,
-          deductions,
-          totalDeductions,
-          netAmount: grossPay - totalDeductions,
+          rateSnapshot: salaryRate.toString(),
+          rateTypeSnapshot: rateType,
+          totalCompensation: grossPay.toString(),
+          user: timesheet.user,
           notes: override?.notes,
+          paymentStatus: PaymentStatus.UNPAID,
+          createdBy: '',
+          createdAt: new Date().toISOString(),
         };
       }),
-    [timesheets, overrides],
+    [timesheets, overrides, selectedWeek],
   );
 
   return (
@@ -161,7 +156,7 @@ export const RunPayrollPage = () => {
             collection={DataTable.collection({
               items: payslipData,
               itemToValue: (item) => item.id,
-              itemToString: (item) => item.name,
+              itemToString: (item) => item.user?.name || 'Unknown',
             })}
             columns={[
               {
@@ -169,7 +164,7 @@ export const RunPayrollPage = () => {
                 heading: 'Name',
                 cell: (item) => (
                   <Typography variant="body2" color="text.primary">
-                    {item.name}
+                    {item.user?.name || 'Unknown'}
                   </Typography>
                 ),
                 orderable: true,
@@ -203,7 +198,7 @@ export const RunPayrollPage = () => {
                 id: 'grossPay',
                 heading: 'Gross Pay',
                 cell: (item) =>
-                  !item.salaryRate ? (
+                  parseFloat(item.rateSnapshot) === 0 ? (
                     <Tooltip title="Please set the user salary rate in the user detail page.">
                       <Stack
                         direction="row"
@@ -225,13 +220,16 @@ export const RunPayrollPage = () => {
                     </Tooltip>
                   ) : (
                     <Typography variant="body2" color="text.secondary">
-                      {formatCurrency(item.grossPay)}
+                      {formatCurrency(parseFloat(item.totalCompensation))}
                     </Typography>
                   ),
                 orderable: true,
                 width: 150,
                 summary: (items) => {
-                  const total = items.reduce((sum, item) => sum + item.grossPay, 0);
+                  const total = items.reduce(
+                    (sum, item) => sum + parseFloat(item.totalCompensation),
+                    0
+                  );
                   return (
                     <Typography variant="body2" color="text.secondary">
                       {formatCurrency(total)}
@@ -242,34 +240,34 @@ export const RunPayrollPage = () => {
               {
                 id: 'deductions',
                 heading: 'Deductions',
-                cell: (item) => (
+                cell: () => (
                   <Typography variant="body2" color="text.secondary">
-                    {formatCurrency(item.totalDeductions)}
+                    {formatCurrency(0)}
                   </Typography>
                 ),
                 orderable: true,
                 width: 150,
-                summary: (items) => {
-                  const total = items.reduce((sum, item) => sum + item.totalDeductions, 0);
-                  return (
-                    <Typography variant="body2" color="text.secondary">
-                      {formatCurrency(total)}
-                    </Typography>
-                  );
-                },
+                summary: () => (
+                  <Typography variant="body2" color="text.secondary">
+                    {formatCurrency(0)}
+                  </Typography>
+                ),
               },
               {
                 id: 'netAmount',
                 heading: 'Billable',
                 cell: (item) => (
                   <Typography variant="body2" color="text.primary">
-                    {formatCurrency(item.netAmount)}
+                    {formatCurrency(parseFloat(item.totalCompensation))}
                   </Typography>
                 ),
                 orderable: true,
                 width: 150,
                 summary: (items) => {
-                  const total = items.reduce((sum, item) => sum + item.netAmount, 0);
+                  const total = items.reduce(
+                    (sum, item) => sum + parseFloat(item.totalCompensation),
+                    0
+                  );
                   return (
                     <Typography variant="body2" color="text.primary">
                       {formatCurrency(total)}
@@ -318,14 +316,77 @@ export const RunPayrollPage = () => {
         </Button>
         <Button
           variant="contained"
-          onClick={() => {
-            // TODO: Implement actual payroll generation
-            console.log('Run Payroll clicked');
-            handleClearOverrides();
+          onClick={async () => {
+            try {
+              // Group timesheets by userId and prepare payslip data
+              const timesheetsByUser = timesheets.reduce(
+                (acc, timesheet) => {
+                  const userId = timesheet.user.id;
+                  if (!acc[userId]) {
+                    acc[userId] = [];
+                  }
+                  acc[userId].push(timesheet);
+                  return acc;
+                },
+                {} as Record<string, typeof timesheets>
+              );
+
+              // Build payslips array for the runPayroll mutation
+              const HOURS_PER_DAY = 8;
+              const payslips = Object.entries(timesheetsByUser).map(([userId, userTimesheets]) => {
+                const totalHours = userTimesheets.reduce((sum, ts) => sum + ts.totalHours, 0);
+                const salaryRate = userTimesheets[0]?.user.salaryRates?.[0]?.rate ?? 0;
+                const rateType = userTimesheets[0]?.user.salaryRates?.[0]?.rateType ?? SalaryRateType.DAILY;
+
+                // Convert daily rate to hourly (assuming 8 hours per day)
+                const hourlyRate = rateType === SalaryRateType.HOURLY ? salaryRate : salaryRate / HOURS_PER_DAY;
+
+                // Calculate total compensation with overrides
+                const timesheetIds = userTimesheets.map((ts) => ts.id);
+                const totalCompensation = timesheetIds.reduce((sum, tsId) => {
+                  const override = overrides[tsId];
+                  if (override) {
+                    return sum + override.amount;
+                  }
+                  const timesheet = userTimesheets.find((t) => t.id === tsId);
+                  return sum + (timesheet?.totalHours ?? 0) * hourlyRate;
+                }, 0);
+
+                // Get notes from any override (use first one if multiple)
+                const notes = timesheetIds
+                  .map((id) => overrides[id]?.notes)
+                  .filter(Boolean)[0];
+
+                return {
+                  userId,
+                  timesheetIds,
+                  totalHours,
+                  rateSnapshot: salaryRate.toString(),
+                  rateTypeSnapshot: rateType as SalaryRateType,
+                  totalCompensation: totalCompensation.toString(),
+                  notes,
+                };
+              });
+
+              // Run payroll mutation
+              await runPayrollMutation.mutateAsync({
+                tenantId: tenantId!,
+                periodType: PayrollPeriodType.WEEKLY,
+                periodStart: selectedWeek.start.toISOString(),
+                periodEnd: selectedWeek.end.toISOString(),
+                payslips,
+              });
+
+              // Clear overrides and navigate back
+              handleClearOverrides();
+              navigate(pathFor({ pathname: AdminRoutes.TenantPayroll, params: { tenantId } }));
+            } catch (error) {
+              console.error('Failed to run payroll:', error);
+            }
           }}
-          disabled={payslipData.length === 0 || isLoading}
+          disabled={payslipData.length === 0 || isLoading || runPayrollMutation.isPending}
         >
-          Run Payroll
+          {runPayrollMutation.isPending ? 'Running Payroll...' : 'Run Payroll'}
         </Button>
       </Stack>
     </PageLayout>

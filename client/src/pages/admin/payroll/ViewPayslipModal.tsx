@@ -3,34 +3,20 @@ import { Box, Divider, Stack, Typography } from '@mui/material';
 
 import { CustomModal, Show } from '~/components/ui';
 import { formatCurrency, formatNumber } from '~/utils/number';
-
-type DeductionItem = {
-  name: string;
-  amount: number;
-};
-
-type PayslipData = {
-  id: string;
-  name: string;
-  position: string | null;
-  salaryRate: number;
-  totalHours: number;
-  overtime: number;
-  grossPay: number;
-  deductions: DeductionItem[];
-  totalDeductions: number;
-  netAmount: number;
-  notes?: string;
-};
+import type { Payslip } from '~/services/payroll/payroll.types';
 
 type ViewPayslipModalProps = {
   open: boolean;
   onClose: () => void;
-  payslip: PayslipData | null;
+  payslip: Payslip | null;
 };
 
 export const ViewPayslipModal = ({ open, onClose, payslip }: ViewPayslipModalProps) => {
   if (!payslip) return null;
+
+  // TODO: Implement deductions
+  const deductions: { name: string; amount: number }[] = [];
+  const totalDeductions = 0;
 
   return (
     <CustomModal
@@ -41,7 +27,7 @@ export const ViewPayslipModal = ({ open, onClose, payslip }: ViewPayslipModalPro
       icon={ReceiptLongOutlined}
       hideActions={true}
     >
-      <Stack spacing={3} >
+      <Stack spacing={3}>
         {/* Employee Details */}
         <Stack spacing={1}>
           <Typography variant="subtitle2" color="text.primary">
@@ -53,7 +39,7 @@ export const ViewPayslipModal = ({ open, onClose, payslip }: ViewPayslipModalPro
                 Name
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                {payslip.name}
+                {payslip.user?.name || 'Unknown'}
               </Typography>
             </Stack>
             <Stack direction="row">
@@ -61,7 +47,7 @@ export const ViewPayslipModal = ({ open, onClose, payslip }: ViewPayslipModalPro
                 Position
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                {payslip.position ?? '—'}
+                —
               </Typography>
             </Stack>
             <Stack direction="row">
@@ -69,7 +55,8 @@ export const ViewPayslipModal = ({ open, onClose, payslip }: ViewPayslipModalPro
                 Salary Rate
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                {formatCurrency(payslip.salaryRate)}/day
+                {formatCurrency(parseFloat(payslip.rateSnapshot))}/
+                {payslip.rateTypeSnapshot.toLowerCase()}
               </Typography>
             </Stack>
           </Stack>
@@ -94,7 +81,7 @@ export const ViewPayslipModal = ({ open, onClose, payslip }: ViewPayslipModalPro
                 Overtime
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                {formatNumber(payslip.overtime, 2)} hrs
+                {formatNumber(0, 2)} hrs
               </Typography>
             </Stack>
 
@@ -104,46 +91,44 @@ export const ViewPayslipModal = ({ open, onClose, payslip }: ViewPayslipModalPro
                 Gross Pay
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                {formatCurrency(payslip.grossPay)}
+                {formatCurrency(parseFloat(payslip.totalCompensation))}
               </Typography>
             </Stack>
           </Stack>
         </Stack>
 
         {/* Deductions */}
-        <Stack spacing={1}>
-          <Typography variant="subtitle2" color="text.primary">
-            Deductions:
-          </Typography>
-          <Stack pl={1} spacing={1}>
-            {payslip.deductions.map((deduction, index) => (
-              <Stack key={index} direction="row">
-                <Typography variant="body2" color="text.secondary" width="50%">
-                  {deduction.name}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {formatCurrency(deduction.amount)}
-                </Typography>
-              </Stack>
-            ))}
-            <Show when={payslip.deductions.length > 1}>
-              <Divider />
+        <Show when={deductions.length > 0}>
+          <Stack spacing={1}>
+            <Typography variant="subtitle2" color="text.primary">
+              Deductions:
+            </Typography>
+            <Stack pl={1} spacing={1}>
+              {deductions.map((deduction, index) => (
+                <Stack key={index} direction="row">
+                  <Typography variant="body2" color="text.secondary" width="50%">
+                    {deduction.name}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {formatCurrency(deduction.amount)}
+                  </Typography>
+                </Stack>
+              ))}
+              <Show when={deductions.length > 1}>
+                <Divider />
 
-              <Stack direction="row">
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  width="50%"
-                >
-                  Total Deductions
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {formatCurrency(payslip.totalDeductions)}
-                </Typography>
-              </Stack>
-            </Show>
+                <Stack direction="row">
+                  <Typography variant="body2" color="text.secondary" width="50%">
+                    Total Deductions
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {formatCurrency(totalDeductions)}
+                  </Typography>
+                </Stack>
+              </Show>
+            </Stack>
           </Stack>
-        </Stack>
+        </Show>
 
         {/* Notes */}
         <Show when={!!payslip.notes}>
@@ -166,7 +151,7 @@ export const ViewPayslipModal = ({ open, onClose, payslip }: ViewPayslipModalPro
               Net Pay
             </Typography>
             <Typography variant="body2" fontWeight={600} color="success.dark">
-              {formatCurrency(payslip.netAmount)}
+              {formatCurrency(parseFloat(payslip.totalCompensation) - totalDeductions)}
             </Typography>
           </Stack>
         </Box>

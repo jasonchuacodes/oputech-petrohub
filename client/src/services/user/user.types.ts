@@ -1,6 +1,7 @@
 import type { ValueOf } from '~/utils/valueOf';
 
 import type { Tenant } from '../tenant/tenant.types';
+import type { SalaryRateType } from '../payroll/payroll.types';
 
 export const UserRole = {
   ADMIN: 'ADMIN',
@@ -12,7 +13,7 @@ export type UserRole = ValueOf<typeof UserRole>;
 export type SalaryRate = {
   id: string;
   rate: number;
-  rateType: 'HOURLY' | 'DAILY' | 'MONTHLY';
+  rateType: SalaryRateType;
   effectiveFrom: string;
   createdAt: string;
 };
