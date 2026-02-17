@@ -17,6 +17,7 @@ export type PayslipData = {
   deductions: DeductionItem[];
   totalDeductions: number;
   netAmount: number;
+  notes?: string;
 };
 
 type PayslipContextType = {

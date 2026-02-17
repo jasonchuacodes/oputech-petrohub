@@ -223,7 +223,7 @@ export const DataTable = <T,>({
             })}
           </Show>
 
-          <Show when={hasSummaryRow && sortedItems.length > 0}>
+          <Show when={hasSummaryRow && sortedItems.length > 1}>
             <TableRow>
               {columns.map((column) => (
                 <TableCell

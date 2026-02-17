@@ -1,7 +1,7 @@
 import { ErrorOutline, HomeOutlined } from '@mui/icons-material';
 import { Stack, Tooltip, Typography } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 
 import { PageHeader } from '~/components/layouts';
 import {
@@ -37,6 +37,7 @@ type PayslipData = {
   deductions: DeductionItem[];
   totalDeductions: number;
   netAmount: number;
+  notes?: string;
 };
 
 export const RunPayrollPage = () => {
@@ -44,7 +45,40 @@ export const RunPayrollPage = () => {
   const navigate = useNavigate();
   const [selectedWeek, setSelectedWeek] = useState<WeekPeriod>(() => getLastCompletedWeek());
 
-  // Fetch unprocessed timesheets for the selected week
+  const storageKey = useMemo(
+    () =>
+      `payroll-overrides-${tenantId}-${selectedWeek.start.format('YYYY-MM-DD')}-${selectedWeek.end.format('YYYY-MM-DD')}`,
+    [tenantId, selectedWeek],
+  );
+
+  const [overrides, setOverrides] = useState<Record<string, { amount: number; notes?: string }>>(
+    {},
+  );
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(storageKey);
+      setOverrides(stored ? JSON.parse(stored) : {});
+    } catch {
+      setOverrides({});
+    }
+  }, [storageKey]);
+
+  useEffect(() => {
+    if (Object.keys(overrides).length > 0) {
+      localStorage.setItem(storageKey, JSON.stringify(overrides));
+    }
+  }, [overrides, storageKey]);
+
+  const handleUpdateCompensation = (timesheetId: string, amount: number, notes?: string) => {
+    setOverrides((prev) => ({ ...prev, [timesheetId]: { amount, notes } }));
+  };
+
+  const handleClearOverrides = () => {
+    setOverrides({});
+    localStorage.removeItem(storageKey);
+  };
+
   const { data: timesheets = [], isLoading } = useGetAllTimesheetsQuery({
     tenantId,
     startDate: selectedWeek.start,
@@ -52,12 +86,15 @@ export const RunPayrollPage = () => {
     processed: false,
   });
 
-  // Transform timesheets to PayslipData format
   const payslipData: PayslipData[] = useMemo(
     () =>
       timesheets.map((timesheet) => {
         const salaryRate = timesheet.user.salaryRates?.[0]?.rate ?? 0;
-        const grossPay = timesheet.totalHours * salaryRate;
+        const calculatedGrossPay = timesheet.totalHours * salaryRate;
+
+        // Use override if exists, otherwise use calculated
+        const override = overrides[timesheet.id];
+        const grossPay = override?.amount ?? calculatedGrossPay;
 
         // TODO: Calculate deductions based on actual deduction rules
         const deductions: DeductionItem[] = [];
@@ -74,9 +111,10 @@ export const RunPayrollPage = () => {
           deductions,
           totalDeductions,
           netAmount: grossPay - totalDeductions,
+          notes: override?.notes,
         };
       }),
-    [timesheets],
+    [timesheets, overrides],
   );
 
   return (
@@ -245,7 +283,7 @@ export const RunPayrollPage = () => {
                 heading: '',
                 cell: (item) => (
                   <PayslipProvider payslipId={item.id} payslip={item}>
-                    <MoreDetailsMenu />
+                    <MoreDetailsMenu onUpdateCompensation={handleUpdateCompensation} />
                   </PayslipProvider>
                 ),
                 width: 100,
@@ -280,7 +318,11 @@ export const RunPayrollPage = () => {
         </Button>
         <Button
           variant="contained"
-          onClick={() => console.log('Run Payroll clicked')}
+          onClick={() => {
+            // TODO: Implement actual payroll generation
+            console.log('Run Payroll clicked');
+            handleClearOverrides();
+          }}
           disabled={payslipData.length === 0 || isLoading}
         >
           Run Payroll

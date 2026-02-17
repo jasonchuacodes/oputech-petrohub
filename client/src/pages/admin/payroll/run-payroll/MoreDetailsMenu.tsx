@@ -1,15 +1,18 @@
 import { MoreHorizOutlined } from '@mui/icons-material';
-import { Menu, MenuItem, Typography, IconButton, Divider } from '@mui/material';
+import { Menu, MenuItem, Typography, IconButton } from '@mui/material';
 import { useState } from 'react';
 
-import type { PayslipData } from '~/context/payroll/PayslipContext';
 import { usePayslipContext } from '~/context/payroll/usePayslipContext';
 import { useDisclosure } from '~/hooks/useDisclosure';
 
 import { ViewPayslipModal } from '../ViewPayslipModal';
 import { EditPayslipModal } from '../EditPayslipModal';
 
-export const MoreDetailsMenu = () => {
+type Props = {
+  onUpdateCompensation: (timesheetId: string, amount: number, notes?: string) => void;
+};
+
+export const MoreDetailsMenu = ({ onUpdateCompensation }: Props) => {
   const { payslip, payslipId } = usePayslipContext();
 
   const viewDisclosure = useDisclosure();
@@ -29,16 +32,6 @@ export const MoreDetailsMenu = () => {
   const handleEdit = () => {
     closeMenu();
     editDisclosure.onOpen();
-  };
-
-  const handleDelete = () => {
-    closeMenu();
-    console.log('delete', payslipId);
-  };
-
-  const handleSavePayslip = (data: { grossPay: number; deductions: PayslipData['deductions'] }) => {
-    console.log('Save payslip:', payslipId, data);
-    // TODO: Update payslip data (future implementation)
   };
 
   return (
@@ -76,12 +69,6 @@ export const MoreDetailsMenu = () => {
         <MenuItem onClick={handleEdit}>
           <Typography variant="body2">Edit</Typography>
         </MenuItem>
-        <Divider />
-        <MenuItem onClick={handleDelete}>
-          <Typography variant="body2" color="error">
-            Delete
-          </Typography>
-        </MenuItem>
       </Menu>
 
       <ViewPayslipModal
@@ -93,7 +80,8 @@ export const MoreDetailsMenu = () => {
         open={editDisclosure.open}
         onClose={editDisclosure.onClose}
         payslip={payslip}
-        onSave={handleSavePayslip}
+        timesheetId={payslipId}
+        onSave={onUpdateCompensation}
       />
     </>
   );

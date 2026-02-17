@@ -1,20 +1,30 @@
 import { AddOutlined, ReceiptLongOutlined, RemoveOutlined } from '@mui/icons-material';
 import { Box, Divider, IconButton, Stack, Typography } from '@mui/material';
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 
 import { Input, NumberInput } from '~/components/form';
-import { Button, CustomModal } from '~/components/ui';
+import { Button, CustomModal, Show } from '~/components/ui';
 import { formatCurrency, formatNumber } from '~/utils/number';
+
+const EditPayslipSchema = z.object({
+  grossPay: z.number().min(0, 'Amount must be positive'),
+  deductions: z.array(
+    z.object({
+      name: z.string(),
+      amount: z.number(),
+    })
+  ),
+  notes: z.string().optional(),
+});
+
+type EditPayslipForm = z.infer<typeof EditPayslipSchema>;
 
 type DeductionItem = {
   name: string;
   amount: number;
-};
-
-type EditPayslipFormData = {
-  grossPay: number;
-  deductions: DeductionItem[];
 };
 
 type PayslipData = {
@@ -34,14 +44,28 @@ type EditPayslipModalProps = {
   open: boolean;
   onClose: () => void;
   payslip: PayslipData | null;
-  onSave: (data: EditPayslipFormData) => void;
+  timesheetId: string;
+  onSave: (timesheetId: string, amount: number, notes?: string) => void;
 };
 
-export const EditPayslipModal = ({ open, onClose, payslip, onSave }: EditPayslipModalProps) => {
-  const { control, handleSubmit, reset, watch } = useForm<EditPayslipFormData>({
+export const EditPayslipModal = ({
+  open,
+  onClose,
+  payslip,
+  timesheetId,
+  onSave,
+}: EditPayslipModalProps) => {
+  const {
+    control,
+    handleSubmit,
+    watch,
+    formState: { isValid },
+  } = useForm<EditPayslipForm>({
+    resolver: zodResolver(EditPayslipSchema),
     defaultValues: {
-      grossPay: 0,
-      deductions: [],
+      grossPay: payslip?.grossPay ?? 0,
+      deductions: payslip?.deductions ?? [],
+      notes: '',
     },
   });
 
@@ -50,33 +74,18 @@ export const EditPayslipModal = ({ open, onClose, payslip, onSave }: EditPayslip
     name: 'deductions',
   });
 
-  // Reset form when payslip changes
-  useEffect(() => {
-    if (payslip) {
-      reset({
-        grossPay: payslip.grossPay,
-        deductions: payslip.deductions,
-      });
-    }
-  }, [payslip, reset]);
-
-  // Auto-calculate net pay
   const grossPay = watch('grossPay');
   const deductions = watch('deductions');
 
+  // Recalculate net amount based on edited gross pay and deductions
   const netAmount = useMemo(() => {
-    const total = deductions.reduce((sum, d) => sum + (d.amount || 0), 0);
-    return (grossPay || 0) - total;
+    const totalDeductions = deductions.reduce((sum, d) => sum + (d.amount || 0), 0);
+    return (grossPay || 0) - totalDeductions;
   }, [grossPay, deductions]);
 
-  const onSubmit = (data: EditPayslipFormData) => {
-    onSave(data);
+  const onSubmit = (data: EditPayslipForm) => {
+    onSave(timesheetId, data.grossPay, data.notes);
     onClose();
-  };
-
-  const handleClose = () => {
-    onClose();
-    reset();
   };
 
   if (!payslip) return null;
@@ -84,12 +93,13 @@ export const EditPayslipModal = ({ open, onClose, payslip, onSave }: EditPayslip
   return (
     <CustomModal
       open={open}
-      onClose={handleClose}
+      onClose={onClose}
       onSubmit={handleSubmit(onSubmit)}
       title="Edit Payslip"
       subheader="Adjust gross pay and deductions before running payroll."
       icon={ReceiptLongOutlined}
       submitText="Update"
+      disabled={!isValid}
     >
       <Stack spacing={3}>
         {/* Employee Details */}
@@ -98,7 +108,7 @@ export const EditPayslipModal = ({ open, onClose, payslip, onSave }: EditPayslip
             Employee Details:
           </Typography>
           <Stack pl={1} spacing={1}>
-            <Stack direction="row" spacing={1}>
+            <Stack direction="row">
               <Typography variant="body2" color="text.secondary" width="50%">
                 Name
               </Typography>
@@ -106,7 +116,7 @@ export const EditPayslipModal = ({ open, onClose, payslip, onSave }: EditPayslip
                 {payslip.name}
               </Typography>
             </Stack>
-            <Stack direction="row" spacing={1}>
+            <Stack direction="row">
               <Typography variant="body2" color="text.secondary" width="50%">
                 Position
               </Typography>
@@ -114,7 +124,7 @@ export const EditPayslipModal = ({ open, onClose, payslip, onSave }: EditPayslip
                 {payslip.position ?? '—'}
               </Typography>
             </Stack>
-            <Stack direction="row" spacing={1}>
+            <Stack direction="row">
               <Typography variant="body2" color="text.secondary" width="50%">
                 Salary Rate
               </Typography>
@@ -131,7 +141,7 @@ export const EditPayslipModal = ({ open, onClose, payslip, onSave }: EditPayslip
             Earnings:
           </Typography>
           <Stack pl={1} spacing={1}>
-            <Stack direction="row" spacing={1}>
+            <Stack direction="row">
               <Typography variant="body2" color="text.secondary" width="50%">
                 Total Hours
               </Typography>
@@ -139,7 +149,7 @@ export const EditPayslipModal = ({ open, onClose, payslip, onSave }: EditPayslip
                 {formatNumber(payslip.totalHours, 2)} hrs
               </Typography>
             </Stack>
-            <Stack direction="row" spacing={1}>
+            <Stack direction="row">
               <Typography variant="body2" color="text.secondary" width="50%">
                 Overtime
               </Typography>
@@ -150,7 +160,7 @@ export const EditPayslipModal = ({ open, onClose, payslip, onSave }: EditPayslip
 
             <Divider />
 
-            <Stack direction="row" spacing={1} alignItems="center">
+            <Stack direction="row" alignItems="center">
               <Typography variant="body2" color="text.secondary" width="50%">
                 Gross Pay
               </Typography>
@@ -207,12 +217,41 @@ export const EditPayslipModal = ({ open, onClose, payslip, onSave }: EditPayslip
                 Add Deduction
               </Typography>
             </Button>
+
+            <Show when={deductions.length > 1}>
+              <Divider />
+
+              <Stack direction="row">
+                <Typography variant="body2" color="text.secondary" width="50%">
+                  Total Deductions
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {formatCurrency(deductions.reduce((sum, d) => sum + (d.amount || 0), 0))}
+                </Typography>
+              </Stack>
+            </Show>
+          </Stack>
+        </Stack>
+
+        {/* Notes */}
+        <Stack spacing={1}>
+          <Typography variant="subtitle2" color="text.primary">
+            Notes:
+          </Typography>
+          <Stack pl={1}>
+            <Input
+              name="notes"
+              control={control}
+              placeholder="Add notes about this adjustment (optional)"
+              multiline
+              rows={3}
+            />
           </Stack>
         </Stack>
 
         {/* Net Pay */}
         <Box bgcolor="primary.alpha" borderRadius={2} p={2}>
-          <Stack direction="row" spacing={1} alignItems="center" justifyContent="space-between">
+          <Stack direction="row" alignItems="center" justifyContent="space-between">
             <Typography variant="subtitle2" color="success.dark">
               Net Pay
             </Typography>

@@ -1,10 +1,9 @@
-import { HomeOutlined, ReceiptLongOutlined } from '@mui/icons-material';
+import { HomeOutlined } from '@mui/icons-material';
 import { Stack, Tooltip, Typography } from '@mui/material';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useParams } from 'react-router-dom';
 
 import { PageHeader } from '~/components/layouts';
-import { Breadcrumb, Button, DataTable, PageContainer, type DateRange } from '~/components/ui';
+import { Breadcrumb, DataTable, PageContainer, type DateRange } from '~/components/ui';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { useTimesheetContext } from '~/context/timesheet/useTimesheetContext';
 import { TimesheetLogProvider } from '~/context/timesheetLog';
@@ -14,19 +13,14 @@ import { useGetUserTimesheetsQuery } from '~/services/timesheet/timesheet.querie
 import { TimesheetEntryActionEnum } from '~/services/timesheet/timesheet.types';
 import { formatDate, formatTime } from '~/utils/date';
 import { pathFor } from '~/utils/pathFor';
-import { useGetCurrentSalaryRateQuery } from '~/services/salary/salary.queries';
-import { useGetUnprocessedTimesheetsQuery } from '~/services/payroll/payroll.queries';
 
 import { UserHeader } from './UserHeader';
 import { TimesheetActions } from './TimesheetActions';
-import { CreatePayrollModal } from './CreatePayrollModal';
 
 export const TimesheetLogs = () => {
   const { userId } = useParams();
-  const navigate = useNavigate();
   const { tenantId } = useTenantContext();
   const { startDate, endDate, setStartDate, setEndDate } = useTimesheetContext();
-  const [isPayrollModalOpen, setIsPayrollModalOpen] = useState(false);
 
   const { data: user, isLoading: isLoadingUser } = useGetUserQuery({
     userId,
@@ -38,22 +32,6 @@ export const TimesheetLogs = () => {
     startDate,
     endDate,
   });
-
-  const { data: salaryRate, isLoading: isLoadingSalaryRate } = useGetCurrentSalaryRateQuery(
-    userId,
-    tenantId
-  );
-
-  const { data: unprocessedTimesheets } = useGetUnprocessedTimesheetsQuery(
-    userId,
-    tenantId,
-    startDate?.toISOString(),
-    endDate?.toISOString(),
-    !!salaryRate
-  );
-
-  const canCreatePayroll =
-    !!salaryRate && !!unprocessedTimesheets && unprocessedTimesheets.length > 0;
 
   const handleSelectDateRange = ({ start, end }: DateRange) => {
     const newStart = start?.startOf('day') ?? null;
@@ -99,53 +77,6 @@ export const TimesheetLogs = () => {
       <PageHeader
         title="Timesheet Logs"
         description="View and manage detailed timesheet entries and check-in/check-out records"
-        action={
-          <Stack spacing={1}>
-            <Tooltip
-              title={
-                !salaryRate
-                  ? 'Salary rate not configured'
-                  : !canCreatePayroll
-                    ? 'No unprocessed timesheets in selected date range'
-                    : ''
-              }
-            >
-              <span>
-                <Button
-                  variant="contained"
-                  startIcon={<ReceiptLongOutlined />}
-                  onClick={() => setIsPayrollModalOpen(true)}
-                  disabled={!canCreatePayroll}
-                >
-                  Create Payroll
-                </Button>
-              </span>
-            </Tooltip>
-
-            {!isLoadingSalaryRate && !salaryRate && (
-              <Typography variant="caption" color="error" sx={{ maxWidth: 300 }}>
-                Salary rate not configured. Please set the rate on the{' '}
-                <Typography
-                  component="span"
-                  variant="caption"
-                  color="info"
-                  sx={{ cursor: 'pointer', textDecoration: 'underline' }}
-                  onClick={() =>
-                    navigate(
-                      pathFor({
-                        pathname: AdminRoutes.TenantUserDetail,
-                        params: { tenantId, userId },
-                      })
-                    )
-                  }
-                >
-                  user profile
-                </Typography>{' '}
-                page.
-              </Typography>
-            )}
-          </Stack>
-        }
       />
 
       <Stack direction="row" justifyContent="space-between" alignItems="center">
@@ -235,19 +166,6 @@ export const TimesheetLogs = () => {
         loading={isLoading}
         emptyMessage="No timesheets data available."
       />
-
-      {salaryRate && unprocessedTimesheets && (
-        <CreatePayrollModal
-          open={isPayrollModalOpen}
-          onClose={() => setIsPayrollModalOpen(false)}
-          userId={userId}
-          tenantId={tenantId!}
-          startDate={startDate}
-          endDate={endDate}
-          unprocessedTimesheets={unprocessedTimesheets}
-          salaryRate={salaryRate}
-        />
-      )}
     </PageContainer>
   );
 };

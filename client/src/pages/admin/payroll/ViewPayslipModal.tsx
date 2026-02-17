@@ -20,6 +20,7 @@ type PayslipData = {
   deductions: DeductionItem[];
   totalDeductions: number;
   netAmount: number;
+  notes?: string;
 };
 
 type ViewPayslipModalProps = {
@@ -143,6 +144,20 @@ export const ViewPayslipModal = ({ open, onClose, payslip }: ViewPayslipModalPro
             </Show>
           </Stack>
         </Stack>
+
+        {/* Notes */}
+        <Show when={!!payslip.notes}>
+          <Stack spacing={1}>
+            <Typography variant="subtitle2" color="text.primary">
+              Notes:
+            </Typography>
+            <Stack pl={1}>
+              <Typography variant="body2" color="text.secondary">
+                {payslip.notes}
+              </Typography>
+            </Stack>
+          </Stack>
+        </Show>
 
         {/* Net Pay */}
         <Box bgcolor="primary.alpha" borderRadius={2} p={2}>
