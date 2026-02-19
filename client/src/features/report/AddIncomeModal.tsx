@@ -80,7 +80,6 @@ export const AddIncomeModal = ({ open, onClose, reportId }: AddIncomeModalProps)
           control={control}
           placeholder="0.00"
           name="amount"
-          step={1}
           min={0}
         />
       </Stack>

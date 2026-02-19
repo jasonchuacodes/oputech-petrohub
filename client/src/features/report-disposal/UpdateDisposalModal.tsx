@@ -95,7 +95,6 @@ export const UpdateDisposalModal = ({
             control={control}
             placeholder="0.00"
             name="afterReading"
-            step={1}
             min={0}
           />
           <Stack flex={1} justifyContent="space-between" spacing={0.5}>

@@ -68,7 +68,6 @@ export const EmploymentDetail = ({ control, shifts }: EmploymentDetailProps) => 
             label="Salary Rate"
             placeholder="0.00"
             min={0}
-            step={1}
           />
 
           <FormSelect control={control} name="rateType" label="Rate Type" width={400}>

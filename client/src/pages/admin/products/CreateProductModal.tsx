@@ -103,7 +103,6 @@ export const CreateProductModal = ({ open, onClose }: CreateProductModalProps) =
             control={control}
             placeholder="0.00"
             name="reading"
-            step={1}
             min={1}
           />
           <NumberInput
@@ -112,7 +111,6 @@ export const CreateProductModal = ({ open, onClose }: CreateProductModalProps) =
             control={control}
             placeholder="0.00"
             name="price"
-            step={1}
             min={1}
           />
         </Stack>

@@ -38,7 +38,7 @@ export const NumberInput = <T extends FieldValues>({
   startAdornment,
   min,
   max,
-  step = 1,
+  step = 0.01,
   error: errorProp,
   autoFocus,
   width,

@@ -95,7 +95,6 @@ export const CreateInventoryModal = ({ open, onClose }: CreateInventoryModalProp
             control={control}
             placeholder="Enter price"
             name="price"
-            step={1.0}
             min={1.0}
             startAdornment="₱"
           />
@@ -107,7 +106,6 @@ export const CreateInventoryModal = ({ open, onClose }: CreateInventoryModalProp
           name="lowStockThreshold"
           step={1}
           min={1}
-          helperText="Alert will show when quantity is at or below this value"
         />
         <Input
           label="Description (optional)"
