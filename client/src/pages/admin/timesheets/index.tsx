@@ -1,3 +1,4 @@
+import { useMemo, useState } from 'react';
 import { ChevronRightOutlined, HomeOutlined } from '@mui/icons-material';
 import { Typography } from '@mui/material';
 import dayjs from 'dayjs';
@@ -29,6 +30,7 @@ const TimesheetsPageContent = () => {
   const { tenantId, userId } = useParams();
   const navigate = useNavigate();
   const { startDate, endDate, setStartDate, setEndDate } = useTimesheetContext();
+  const [searchTerm, setSearchTerm] = useState('');
 
   const { data: timesheets, isLoading } = useGetAllTimesheetsQuery({
     tenantId,
@@ -54,6 +56,20 @@ const TimesheetsPageContent = () => {
     },
     {},
   );
+
+  const filteredGroupedTimesheets = useMemo(() => {
+    if (!groupedTimesheets) return {};
+
+    const trimmedSearch = searchTerm.trim();
+    if (!trimmedSearch) return groupedTimesheets;
+
+    const searchLower = trimmedSearch.toLowerCase();
+    return Object.fromEntries(
+      Object.entries(groupedTimesheets).filter(([_, timesheet]) =>
+        timesheet.userName.toLowerCase().includes(searchLower)
+      )
+    );
+  }, [groupedTimesheets, searchTerm]);
 
   return (
     <PageLayout>
@@ -84,7 +100,7 @@ const TimesheetsPageContent = () => {
           <DataTable
             id="timesheets-table"
             collection={DataTable.collection({
-              items: Object.values(groupedTimesheets ?? {}) || [],
+              items: Object.values(filteredGroupedTimesheets ?? {}) || [],
               itemToValue: (item) => item.userId,
               itemToString: (item) => item.userName,
             })}
@@ -139,6 +155,8 @@ const TimesheetsPageContent = () => {
             search={{
               enabled: true,
               placeholder: 'Search employee',
+              defaultValue: '',
+              onValueChange: setSearchTerm,
             }}
             dateRange={{
               enabled: true,
