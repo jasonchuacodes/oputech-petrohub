@@ -2,6 +2,7 @@ import { Decimal } from '@prisma/client/runtime/library';
 
 import { prisma } from '~/db';
 import { PaymentStatus, PayrollRunStatus, RateType } from '~/db/prisma';
+import { NotFoundError } from '../../../errors';
 
 const getUnprocessedTimesheets = async (data: {
   userId: string;
@@ -243,11 +244,47 @@ const markPayslipAsPaid = async (data: {
 };
 
 const cancelPayrollRun = async (payrollRunId: string) => {
-  return prisma.payrollRun.update({
-    where: { id: payrollRunId },
-    data: {
-      status: PayrollRunStatus.CANCELLED,
-    },
+  return prisma.$transaction(async (tx) => {
+    const payrollRun = await tx.payrollRun.findUnique({
+      where: { id: payrollRunId },
+      include: {
+        payslips: {
+          include: {
+            timesheets: {
+              select: { timesheetId: true },
+            },
+          },
+        },
+      },
+    });
+
+    if (!payrollRun) {
+      throw new NotFoundError(`PayrollRun with id ${payrollRunId} not found`);
+    }
+
+    const timesheetIds = payrollRun.payslips
+      .filter((payslip) => payslip.paymentStatus !== PaymentStatus.PAID)
+      .flatMap((payslip) => payslip.timesheets.map((pt) => pt.timesheetId));
+
+    const uniqueTimesheetIds = [...new Set(timesheetIds)];
+
+    if (uniqueTimesheetIds.length > 0) {
+      await tx.timesheet.updateMany({
+        where: {
+          id: { in: uniqueTimesheetIds },
+        },
+        data: {
+          processed: false,
+        },
+      });
+    }
+
+    return tx.payrollRun.update({
+      where: { id: payrollRunId },
+      data: {
+        status: PayrollRunStatus.CANCELLED,
+      },
+    });
   });
 };
 

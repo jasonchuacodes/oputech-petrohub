@@ -2,6 +2,7 @@ import { HomeOutlined } from '@mui/icons-material';
 import { Stack, Typography, Alert } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import dayjs from 'dayjs';
+import toast from 'react-hot-toast';
 
 import { PageHeader } from '~/components/layouts';
 import { Breadcrumb, Button, Chip, DataTable, PageContainer, PageLayout } from '~/components/ui';
@@ -17,14 +18,19 @@ import {
 } from '~/services/payroll/payroll.queries';
 import { PayrollRunStatus, PaymentStatus } from '~/services/payroll/payroll.types';
 import { toTitleCase } from '~/utils/textUtils';
+import { parseBackendError } from '~/utils/parseBackendError';
+import { useDisclosure } from '~/hooks/useDisclosure';
 
 import { SummaryCard } from './SummaryCard';
 import { getStatusColor, getStatusLabel, getPaymentStatusColor } from '../utils';
 import { PayslipActions } from './PayslipActions';
+import { CancelPayrollRunModal } from './CancelPayrollRunModal';
 
 export const PayrollRunDetailPage = () => {
   const { tenantId, payrollRunId } = useParams();
   const navigate = useNavigate();
+
+  const cancelDisclosure = useDisclosure();
 
   const { data: payrollRun, isLoading } = useGetPayrollRunByIdQuery(payrollRunId);
   const markAsPaidMutation = useMarkPayslipAsPaidMutation();
@@ -42,17 +48,17 @@ export const PayrollRunDetailPage = () => {
     }
   };
 
-  // TODO: implement confirmation modal
   const handleCancelRun = async () => {
     if (!payrollRunId) return;
 
-    if (window.confirm('Are you sure you want to cancel this payroll run?')) {
-      try {
-        await cancelRunMutation.mutateAsync(payrollRunId);
-        navigate(pathFor({ pathname: AdminRoutes.TenantPayroll, params: { tenantId } }));
-      } catch (error) {
-        console.error('Failed to cancel payroll run:', error);
-      }
+    try {
+      await cancelRunMutation.mutateAsync(payrollRunId);
+      toast.success('Payroll run cancelled successfully');
+      cancelDisclosure.onClose();
+      navigate(pathFor({ pathname: AdminRoutes.TenantPayroll, params: { tenantId } }));
+    } catch (error) {
+      const errorMessage = parseBackendError(error);
+      toast.error(`Failed to cancel payroll run: ${errorMessage}`);
     }
   };
 
@@ -95,7 +101,7 @@ export const PayrollRunDetailPage = () => {
               description="View the full details and breakdown of this payroll run."
               action={
                 payrollRun.status === PayrollRunStatus.PENDING && (
-                  <Button variant="outlined" color="error" onClick={handleCancelRun}>
+                  <Button variant="outlined" color="error" onClick={cancelDisclosure.onOpen}>
                     Cancel Payroll Run
                   </Button>
                 )
@@ -235,6 +241,15 @@ export const PayrollRunDetailPage = () => {
             />
           </>
         )}
+
+        <CancelPayrollRunModal
+          open={cancelDisclosure.open}
+          onClose={cancelDisclosure.onClose}
+          onConfirm={handleCancelRun}
+          loading={cancelRunMutation.isPending}
+          periodStart={payrollRun?.periodStart}
+          periodEnd={payrollRun?.periodEnd}
+        />
       </PageContainer>
     </PageLayout>
   );
