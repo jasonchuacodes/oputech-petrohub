@@ -6,9 +6,11 @@ import { createSchemaValidator } from '~/utils';
 import * as productService from '../services/product.service';
 import { CreateProductSchema } from '../schema/createProductSchema';
 import { UpdateProductSchema } from '../schema/updateProductSchema';
+import { GetProductsSchema } from '../schema/getProductsSchema';
 
 const validateCreateProduct = createSchemaValidator(CreateProductSchema);
 const validateUpdateProduct = createSchemaValidator(UpdateProductSchema);
+const validateGetProducts = createSchemaValidator(GetProductsSchema);
 
 const createProduct = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -22,12 +24,13 @@ const createProduct = async (req: Request, res: Response, next: NextFunction) =>
 
 const getProductsByTenantId = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { tenantId, category } = req.query;
+    const { tenantId, category, searchTerm } = await validateGetProducts({
+      tenantId: req.query.tenantId as string,
+      category: req.query.category as ProductCategory | undefined,
+      searchTerm: req.query.searchTerm as string | undefined,
+    });
 
-    const products = await productService.getProductsByTenantId(
-      tenantId as string,
-      category as ProductCategory,
-    );
+    const products = await productService.getProductsByTenantId(tenantId, { category, searchTerm });
 
     res.status(200).json({ data: products });
   } catch (err) {

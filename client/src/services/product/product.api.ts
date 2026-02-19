@@ -1,12 +1,12 @@
 import axios from '~/lib/axiosInstance';
-import type { Product, CreateProductPayload, UpdateProductPayload } from './product.types';
+import type { Product, CreateProductPayload, UpdateProductPayload, GetProductsFilters } from './product.types';
 
 const getProductsByTenantId = async (
   tenantId: string,
-  category?: string
+  filters?: GetProductsFilters
 ): Promise<Product[]> => {
   const res = await axios.get('/products', {
-    params: { tenantId, ...(category && { category }) }
+    params: { tenantId, ...filters }
   });
   return res.data.data;
 };

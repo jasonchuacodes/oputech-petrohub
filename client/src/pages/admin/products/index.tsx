@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Stack, Typography } from '@mui/material';
 import { HomeOutlined, AddOutlined, CircleOutlined } from '@mui/icons-material';
 
@@ -19,7 +20,11 @@ import { MoreDetailsMenu } from './MoreDetailsMenu';
 export const ProductsPage = () => {
   const { tenantId } = useTenantContext();
   const disclosure = useDisclosure();
-  const { data: products, isLoading } = useGetProductsQuery(tenantId, ProductCategory.FUEL);
+  const [searchTerm, setSearchTerm] = useState('');
+  const { data: products, isLoading } = useGetProductsQuery(tenantId, {
+    category: ProductCategory.FUEL,
+    searchTerm: searchTerm || undefined,
+  });
 
   return (
     <PageLayout>
@@ -60,6 +65,12 @@ export const ProductsPage = () => {
             itemToValue: (product) => product.id,
             itemToString: (product) => product.name,
           })}
+          search={{
+            enabled: true,
+            placeholder: 'Search products',
+            defaultValue: '',
+            onValueChange: setSearchTerm,
+          }}
           columns={[
             {
               id: 'name',

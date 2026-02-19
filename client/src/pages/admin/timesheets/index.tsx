@@ -65,7 +65,7 @@ const TimesheetsPageContent = () => {
 
     const searchLower = trimmedSearch.toLowerCase();
     return Object.fromEntries(
-      Object.entries(groupedTimesheets).filter(([_, timesheet]) =>
+      Object.entries(groupedTimesheets).filter(([, timesheet]) =>
         timesheet.userName.toLowerCase().includes(searchLower)
       )
     );

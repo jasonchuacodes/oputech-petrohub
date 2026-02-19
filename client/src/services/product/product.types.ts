@@ -64,3 +64,8 @@ export type UpdateProductPayload = {
   effectiveFrom?: string;
   color?: ProductColor;
 };
+
+export interface GetProductsFilters {
+  category?: ProductCategory;
+  searchTerm?: string;
+}

@@ -8,6 +8,11 @@ import type { UpdateProductPayload } from '../schema/updateProductSchema';
 
 type Tx = Prisma.TransactionClient;
 
+interface GetProductsFilters {
+  category?: ProductCategory;
+  searchTerm?: string;
+}
+
 const createProduct = async (data: CreateProductPayload) => {
   const product = await prisma.product.create({
     data: {
@@ -37,11 +42,21 @@ const createProduct = async (data: CreateProductPayload) => {
   return await getProductById(product.id, data.tenantId);
 };
 
-const getProductsByTenantId = async (tenantId: string, category?: ProductCategory) => {
+const getProductsByTenantId = async (tenantId: string, filters?: GetProductsFilters) => {
   const now = new Date();
 
   const products = await prisma.product.findMany({
-    where: { tenantId, category, active: true },
+    where: {
+      tenantId,
+      category: filters?.category,
+      active: true,
+      ...(filters?.searchTerm && {
+        name: {
+          contains: filters.searchTerm,
+          mode: 'insensitive',
+        },
+      }),
+    },
     include: {
       productPrices: {
         where: { effectiveFrom: { lte: now } },
