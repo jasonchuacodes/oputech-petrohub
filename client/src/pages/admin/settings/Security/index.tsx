@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Divider, List, Stack, Typography } from '@mui/material';
+import { Container, List, Stack, Typography } from '@mui/material';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
@@ -50,9 +50,9 @@ export const SecuritySettings = () => {
   });
 
   return (
-    <Stack spacing={2}>
-      <Form onSubmit={onSubmit}>
-        <Stack justifyContent="center" alignItems="center" spacing={2} pb={2}>
+    <Form onSubmit={onSubmit} sx={{ display: 'flex', width: '100%' }}>
+      <Container disableGutters sx={{ flex: 1, overflow: 'auto' }}>
+        <Stack justifyContent="center" alignItems="center" spacing={2} p={3}>
           <Stack spacing={1} width="100%">
             <PasswordField
               required
@@ -94,22 +94,35 @@ export const SecuritySettings = () => {
               randomizer={false}
             />
           </Stack>
-
-          <Divider sx={{ width: '100%' }} />
-          <Stack width="100%" direction="row" spacing={1}>
-            <Button disableElevation={true} onClick={handleCancel} type="button" variant="outlined">
-              Cancel
-            </Button>
-            <Button
-              disabled={!isValid || isUpdatePasswordPending}
-              type="submit"
-              variant="contained"
-            >
-              Change Password
-            </Button>
-          </Stack>
         </Stack>
-      </Form>
-    </Stack>
+      </Container>
+
+      <Stack
+        px={3}
+        py={2}
+        width="100%"
+        bgcolor="background.paper"
+        direction="row"
+        spacing={1}
+        justifyContent="end"
+        sx={{
+          position: 'sticky',
+          bottom: 0,
+          zIndex: 10,
+          borderTop: '1px solid',
+          borderColor: 'divider',
+        }}
+      >
+        <Button
+          onClick={handleCancel}
+          variant="outlined"
+        >
+          Cancel
+        </Button>
+        <Button disabled={!isValid || isUpdatePasswordPending} type="submit" variant="contained">
+          Change Password
+        </Button>
+      </Stack>
+    </Form>
   );
 };

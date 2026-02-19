@@ -51,7 +51,7 @@ export const TimesheetLogs = () => {
   }
 
   return (
-    <PageContainer maxWidth="lg" stackSx={{ justifyContent: 'start', alignItems: 'stretch' }}>
+    <PageContainer maxWidth="lg" sx={{ justifyContent: 'start', alignItems: 'stretch' }}>
       <Breadcrumb
         items={[
           {

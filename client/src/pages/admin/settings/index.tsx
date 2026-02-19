@@ -1,4 +1,4 @@
-import { Box, Container, Stack, Tab, Tabs } from '@mui/material';
+import { Box, Stack, Tab, Tabs } from '@mui/material';
 import { useState } from 'react';
 
 import { PageHeader } from '~/components/layouts';
@@ -17,7 +17,7 @@ export const AdminSettingsPage = () => {
 
   return (
     <PageLayout>
-      <Stack spacing={2} p={3} bgcolor="background.paper" flex={1}>
+      <Stack spacing={3} p={3}>
         <PageHeader
           title="Account Settings"
           description=" Manage your company profile and preferences."
@@ -36,15 +36,15 @@ export const AdminSettingsPage = () => {
             <Tab label="Security" />
           </Tabs>
         </Box>
+      </Stack>
 
-        <Container maxWidth="md" disableGutters>
-          <SettingsTabPanel index={0} value={value}>
-            <AccountSettings />
-          </SettingsTabPanel>
-          <SettingsTabPanel index={1} value={value}>
-            <SecuritySettings />
-          </SettingsTabPanel>
-        </Container>
+      <Stack flex={1} overflow="auto" width="100%" height="100%">
+        <SettingsTabPanel index={0} value={value}>
+          <AccountSettings />
+        </SettingsTabPanel>
+        <SettingsTabPanel index={1} value={value}>
+          <SecuritySettings />
+        </SettingsTabPanel>
       </Stack>
     </PageLayout>
   );

@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Avatar, Divider, Stack, Typography } from '@mui/material';
+import { Avatar, Container, Stack, Typography } from '@mui/material';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { useQueryClient } from '@tanstack/react-query';
@@ -36,7 +36,7 @@ export const AccountSettings = () => {
     control,
     handleSubmit,
     reset,
-    formState: { isValid },
+    formState: { isValid, isDirty },
   } = useForm<UpdateUserPayload>({
     defaultValues: initialValues,
     resolver: zodResolver(UpdateUserSchema),
@@ -85,69 +85,82 @@ export const AccountSettings = () => {
   };
 
   return (
-    <Form onSubmit={handleSubmit(onSubmit)}>
-      <Stack justifyContent="center" alignItems="center" spacing={2} pb={2}>
-        <Stack width="100%" spacing={0.5}>
-          <Typography fontWeight="medium" color="text.secondary">
-            Personal Information:
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Manage your basic account information here.
-          </Typography>
-        </Stack>
+    <Form onSubmit={handleSubmit(onSubmit)} sx={{ width: '100%' }}>
+      <Container disableGutters sx={{ flex: 1, overflow: 'auto' }}>
+        <Stack justifyContent="center" alignItems="center" spacing={2} p={3}>
+          {/* TODO: avatar uploader */}
+          <Avatar alt="profile-picture" sx={{ width: 64, height: 64 }}>
+            <Typography fontSize="inherit">U</Typography>
+          </Avatar>
 
-        {/* TODO: avatar uploader */}
-        <Avatar alt="profile-picture" sx={{ width: 64, height: 64 }}>
-          <Typography fontSize="inherit">U</Typography>
-        </Avatar>
-
-        <Stack width="100%" spacing={1}>
-          <Input
-            required
-            control={control}
-            name="name"
-            label="Full name"
-            placeholder="Enter first name"
-          />
-          <Input control={control} name="email" label="Email" placeholder="abc@gmail.com" />
-          <Input
-            control={control}
-            name="address"
-            label="Address"
-            placeholder="123 Main Street, ABC City, ..."
-          />
-          <InputWithFormat
-            control={control}
-            name="contact"
-            label="Contact"
-            pattern="9999-999-9999"
-            placeholder="0912-345-6789"
-          />
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <Controller
+          <Stack width="100%" spacing={1}>
+            <Input
+              required
               control={control}
-              name="birthday"
-              render={({ field: { value, onChange } }) => (
-                <DatePicker
-                  label="Birthday"
-                  value={value ? dayjs(value) : null}
-                  onChange={(date) => onChange(date ? date.toDate() : null)}
-                />
-              )}
+              name="name"
+              label="Full name"
+              placeholder="Enter first name"
             />
-          </LocalizationProvider>
+            <Input control={control} name="email" label="Email" placeholder="abc@gmail.com" />
+            <InputWithFormat
+              control={control}
+              name="contact"
+              label="Contact"
+              pattern="9999-999-9999"
+              placeholder="0912-345-6789"
+            />
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <Controller
+                control={control}
+                name="birthday"
+                render={({ field: { value, onChange } }) => (
+                  <DatePicker
+                    label="Birthday"
+                    value={value ? dayjs(value) : null}
+                    onChange={(date) => onChange(date ? date.toDate() : null)}
+                  />
+                )}
+              />
+            </LocalizationProvider>
+            <Input
+              control={control}
+              name="address"
+              label="Address"
+              placeholder="123 Main Street, ABC City, ..."
+            />
+          </Stack>
         </Stack>
+      </Container>
 
-        <Divider sx={{ width: '100%' }} />
-
-        <Stack width="100%" direction="row" spacing={1}>
-          <Button disableElevation={true} onClick={handleCancel} type="button" variant="outlined">
-            Cancel
-          </Button>
-          <Button disabled={!isValid || isUpdatePending} type="submit" variant="contained">
-            Update
-          </Button>
-        </Stack>
+      <Stack
+        px={3}
+        py={2}
+        width="100%"
+        bgcolor="background.paper"
+        direction="row"
+        spacing={1}
+        justifyContent="end"
+        sx={{
+          position: 'sticky',
+          bottom: 0,
+          zIndex: 10,
+          borderTop: '1px solid',
+          borderColor: 'divider',
+        }}
+      >
+        <Button
+          onClick={handleCancel}
+          variant="outlined"
+        >
+          Cancel
+        </Button>
+        <Button
+          disabled={!isValid || !isDirty || isUpdatePending}
+          type="submit"
+          variant="contained"
+        >
+          Save Changes
+        </Button>
       </Stack>
     </Form>
   );

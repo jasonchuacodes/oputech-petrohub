@@ -7,7 +7,7 @@ interface PageContainerProps {
   spacing?: StackProps['spacing'];
   p?: StackProps['p'];
   containerSx?: ContainerProps['sx'];
-  stackSx?: StackProps['sx'];
+  sx?: StackProps['sx'];
 }
 
 export const PageContainer = ({
@@ -16,7 +16,7 @@ export const PageContainer = ({
   spacing = 3,
   p = 3,
   containerSx,
-  stackSx,
+  sx,
 }: PageContainerProps) => {
   return (
     <Container
@@ -29,7 +29,7 @@ export const PageContainer = ({
         p={p}
         bgcolor="default"
         flex={1}
-        sx={{ height: '100%', minWidth: 0, ...stackSx }}
+        sx={{ height: '100%', minWidth: 0, ...sx }}
       >
         {children}
       </Stack>
