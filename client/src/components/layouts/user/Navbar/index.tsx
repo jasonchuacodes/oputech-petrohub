@@ -4,6 +4,7 @@ import {
   CloseOutlined,
   DashboardOutlined,
   MenuOutlined,
+  ReceiptLongOutlined,
 } from '@mui/icons-material';
 import {
   Avatar,
@@ -58,6 +59,13 @@ const Navbar = () => {
         pathname: UserRoutes.Timesheets,
       }),
     },
+    {
+      label: 'Payslips',
+      icon: ReceiptLongOutlined,
+      to: pathFor({
+        pathname: UserRoutes.Payslips,
+      }),
+    },
   ];
 
   const routeTitles: Record<string, string> = {
@@ -65,6 +73,7 @@ const Navbar = () => {
     [UserRoutes.ReportDisposal]: 'Disposals',
     [UserRoutes.Report]: 'Report',
     [UserRoutes.Timesheets]: 'Timesheets',
+    [UserRoutes.Payslips]: 'Payslips',
     [UserRoutes.Settings]: 'Settings',
   };
 

@@ -1,4 +1,4 @@
-import { CalendarMonth, Description } from '@mui/icons-material';
+import { CalendarMonth, Description, ReceiptLong } from '@mui/icons-material';
 import { Stack, Typography } from '@mui/material';
 import { useEffect } from 'react';
 
@@ -57,15 +57,24 @@ export const HomePage = () => {
         </Stack>
 
         {/* Shortcut cards */}
-        <Stack direction="row" spacing={1} width="100%">
-          <ShortcutCard
-            icon={CalendarMonth}
-            title="Timesheets"
-            to={pathFor({
-              pathname: UserRoutes.Timesheets,
-            })}
-          />
+        <Stack spacing={1} width="100%">
           <ShortcutCard icon={Description} title="Report" to="#" onClick={handleReportCardClick} />
+          <Stack direction="row" spacing={1} width="100%">
+            <ShortcutCard
+              icon={CalendarMonth}
+              title="Timesheets"
+              to={pathFor({
+                pathname: UserRoutes.Timesheets,
+              })}
+            />
+            <ShortcutCard
+              icon={ReceiptLong}
+              title="Payslips"
+              to={pathFor({
+                pathname: UserRoutes.Payslips,
+              })}
+            />
+          </Stack>
         </Stack>
         <RecentLogs />
       </Stack>

@@ -27,7 +27,7 @@ export interface PayrollRun {
   periodType: PayrollPeriodType;
   periodStart: string;
   periodEnd: string;
-  status: PayrollRunStatus; // PENDING, PAID, or CANCELLED
+  status: PayrollRunStatus;
   createdBy: string;
   notes?: string | null;
   createdAt: string;
@@ -75,8 +75,8 @@ export interface GeneratePayslipInput {
   rateSnapshot: string;
   rateTypeSnapshot: SalaryRateType;
   totalCompensation: string;
-  payrollRunId?: string; // NEW FIELD - optional link to PayrollRun
-  notes?: string; // NEW FIELD
+  payrollRunId?: string;
+  notes?: string;
 }
 
 export interface RunPayrollInput {
@@ -93,7 +93,7 @@ export interface RunPayrollInput {
     totalCompensation: string;
     notes?: string;
   }>;
-  notes?: string; // Notes for the entire payroll run
+  notes?: string;
 }
 
 export interface GetPayslipsParams {

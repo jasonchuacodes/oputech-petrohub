@@ -31,7 +31,10 @@ export const formatRange = (start: Dayjs | null, end: Dayjs | null) => {
  * @param {string} key storage key
  * @returns {{ startDate: Dayjs, endDate: Dayjs }} date range object
  */
-export const getInitialDateRange = (key: string) => {
+export const getInitialDateRange = (
+  key: string,
+  defaults?: { start: Dayjs; end: Dayjs },
+) => {
   const saved = sessionStorage.getItem(key);
 
   if (saved) {
@@ -44,8 +47,8 @@ export const getInitialDateRange = (key: string) => {
   }
 
   return {
-    startDate: dayjs().weekday(0).startOf('day'),
-    endDate: dayjs().weekday(6).endOf('day'),
+    startDate: defaults?.start ?? dayjs().weekday(0).startOf('day'),
+    endDate: defaults?.end ?? dayjs().weekday(6).endOf('day'),
   };
 };
 

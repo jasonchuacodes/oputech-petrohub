@@ -206,15 +206,16 @@ const generatePayslip = async (req: AuthenticatedRequest, res: Response, next: N
 
 const getPayslips = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
-    if (req.user!.role !== Role.ADMIN) {
-      throw new UnauthorizedError('Only administrators can access payslips');
-    }
-
     const { tenantId, userId, periodStart, periodEnd } = req.query;
+
+    const isAdmin = req.user!.role === Role.ADMIN;
+    if (!isAdmin && (userId as string | undefined) !== req.user!.id) {
+      throw new UnauthorizedError('You can only access your own payslips');
+    }
 
     const payslips = await payrollService.getPayslips({
       tenantId: tenantId as string,
-      userId: userId as string | undefined,
+      userId: isAdmin ? (userId as string | undefined) : req.user!.id,
       periodStart: periodStart ? new Date(periodStart as string) : undefined,
       periodEnd: periodEnd ? new Date(periodEnd as string) : undefined,
     });
