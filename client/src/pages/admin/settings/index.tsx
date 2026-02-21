@@ -17,7 +17,7 @@ export const AdminSettingsPage = () => {
 
   return (
     <PageLayout>
-      <Stack spacing={3} p={3}>
+      <Stack spacing={3} pt={3} px={3}>
         <PageHeader
           title="Account Settings"
           description=" Manage your company profile and preferences."

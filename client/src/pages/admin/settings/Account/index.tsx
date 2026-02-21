@@ -86,8 +86,8 @@ export const AccountSettings = () => {
 
   return (
     <Form onSubmit={handleSubmit(onSubmit)} sx={{ width: '100%' }}>
-      <Container disableGutters sx={{ flex: 1, overflow: 'auto' }}>
-        <Stack justifyContent="center" alignItems="center" spacing={2} p={3}>
+      <Container maxWidth="sm" disableGutters sx={{ flex: 1, overflow: 'auto', margin: 0 }}>
+        <Stack justifyContent="center" alignItems="start" spacing={2} p={3}>
           {/* TODO: avatar uploader */}
           <Avatar alt="profile-picture" sx={{ width: 64, height: 64 }}>
             <Typography fontSize="inherit">U</Typography>
@@ -148,10 +148,7 @@ export const AccountSettings = () => {
           borderColor: 'divider',
         }}
       >
-        <Button
-          onClick={handleCancel}
-          variant="outlined"
-        >
+        <Button onClick={handleCancel} variant="outlined">
           Cancel
         </Button>
         <Button
