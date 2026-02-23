@@ -2,7 +2,7 @@ import { Stack, ThemeProvider, Typography } from '@mui/material';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker as MuiDatePicker } from '@mui/x-date-pickers/DatePicker';
-import dayjs, { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 import { Controller, type Control, type FieldValues, type Path } from 'react-hook-form';
 
 import { useDisclosure } from '~/hooks/useDisclosure';

@@ -104,6 +104,7 @@ const useGetDailyTimesheetsQuery = ({
     queryKey: ['daily-timesheets', tenantId],
     queryFn: () => getDailyTimesheets(tenantId!),
     enabled: !!tenantId,
+    refetchInterval: 30_000,
   });
 };
 

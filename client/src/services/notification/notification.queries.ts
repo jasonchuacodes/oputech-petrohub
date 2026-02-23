@@ -5,6 +5,7 @@ const useGetNotificationsQuery = () => {
   return useQuery({
     queryKey: ['notifications'],
     queryFn: () => getNotifications(),
+    refetchInterval: 30_000,
   });
 };
 

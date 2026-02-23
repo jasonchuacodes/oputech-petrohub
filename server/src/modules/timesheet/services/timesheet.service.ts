@@ -1,7 +1,6 @@
 import { prisma } from '~/db';
 import { Prisma, Role, TimesheetEntryAction } from '~/db/prisma';
 import { ConflictError, ForbiddenError, NotFoundError } from '~/errors';
-import { pusher } from '~/modules/pusher/config/pusher';
 import { applyTimeToDate, getEndOfDay, getStartOfDay } from '~/utils';
 
 import { CreateTimesheetPayload } from '../schema/createTimesheetSchema';
@@ -194,81 +193,6 @@ const getLatestTimesheets = (tenantId: string) => {
   });
 };
 
-const getUserTimesheetStatus = async (userId: string, tenantId: string) => {
-  const startOfDay = getStartOfDay();
-  const endOfDay = getEndOfDay();
-  const now = new Date();
-
-  // Fetch user with tenant relation to get shift info
-  const tenantUser = await prisma.tenantsOnUsers.findUnique({
-    where: {
-      userId_tenantId: {
-        userId,
-        tenantId,
-      },
-    },
-    select: {
-      shift: {
-        select: { shiftStart: true },
-      },
-      user: {
-        select: { id: true, name: true, email: true, role: true },
-      },
-    },
-  });
-
-  if (!tenantUser) {
-    throw new NotFoundError('User not found in tenant');
-  }
-
-  // Fetch today's timesheet entries
-  const timesheet = await prisma.timesheet.findFirst({
-    where: {
-      userId,
-      tenantId,
-      createdAt: { gte: startOfDay, lte: endOfDay },
-    },
-    select: {
-      entries: {
-        where: { timestamp: { gte: startOfDay, lte: endOfDay } },
-        orderBy: { timestamp: 'asc' },
-        select: { action: true, timestamp: true },
-      },
-    },
-  });
-
-  const entries = timesheet?.entries || [];
-
-  const checkInEntry = entries.find((e) => e.action === TimesheetEntryAction.CHECK_IN);
-  const checkOutEntries = entries.filter((e) => e.action === TimesheetEntryAction.CHECK_OUT);
-  const checkOutEntry = checkOutEntries[checkOutEntries.length - 1];
-  const latestEntry = entries[entries.length - 1];
-
-  const status: 'IN' | 'OUT' = latestEntry?.action === TimesheetEntryAction.CHECK_IN ? 'IN' : 'OUT';
-  const checkIn = checkInEntry?.timestamp || null;
-  const checkOut = checkOutEntry?.timestamp || null;
-
-  let notes = null;
-
-  if (tenantUser.shift?.shiftStart) {
-    const expectedCheckIn = applyTimeToDate(tenantUser.shift.shiftStart, now);
-    expectedCheckIn.setMinutes(expectedCheckIn.getMinutes() + 15);
-
-    if (!checkIn && now > expectedCheckIn) {
-      notes = 'Not checked in';
-    }
-  }
-
-  return {
-    ...tenantUser.user,
-    status,
-    checkIn: checkIn?.toISOString() || null,
-    checkOut: checkOut?.toISOString() || null,
-    notes,
-    shiftStart: tenantUser.shift?.shiftStart?.toISOString() || null,
-  };
-};
-
 const getDailyTimesheets = async (tenantId: string) => {
   const startOfDay = getStartOfDay();
   const endOfDay = getEndOfDay();
@@ -418,17 +342,6 @@ const checkIn = async (userId: string) => {
     });
   }
 
-  // Trigger Pusher event for check-in
-  try {
-    const userStatus = await getUserTimesheetStatus(userId, tenantId);
-    await pusher.trigger(`private-tenant-${tenantId}`, 'timesheet-updated', {
-      user: userStatus,
-      action: 'CHECK_IN',
-    });
-  } catch (error) {
-    console.error('Pusher trigger failed:', error);
-  }
-
   return result;
 };
 
@@ -515,17 +428,6 @@ const checkOut = async (userId: string) => {
       totalHours: Math.min(timesheet.totalHours + sessionHours, hoursCap),
     },
   });
-
-  // Trigger Pusher event for check-out
-  try {
-    const userStatus = await getUserTimesheetStatus(userId, timesheet.tenantId);
-    await pusher.trigger(`private-tenant-${timesheet.tenantId}`, 'timesheet-updated', {
-      user: userStatus,
-      action: 'CHECK_OUT',
-    });
-  } catch (error) {
-    console.error('Pusher trigger failed:', error);
-  }
 
   return checkOutEntry;
 };

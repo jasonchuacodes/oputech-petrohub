@@ -3,7 +3,6 @@ import dayjs from 'dayjs';
 
 import { Widget } from '~/components/ui';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
-import { useTimesheetPusher } from '~/hooks/useTimesheetPusher';
 import { useGetDailyTimesheetsQuery } from '~/services/timesheet/timesheet.queries';
 import { UserStatusEnum } from '~/services/timesheet/timesheet.types';
 import { AdminRoutes } from '~/routes';
@@ -17,8 +16,6 @@ const STATUS_COLOR_MAP = {
 export const TimesheetCard = () => {
   const { tenantId } = useTenantContext();
   const { data: users = [] } = useGetDailyTimesheetsQuery({ tenantId });
-
-  useTimesheetPusher();
 
   const navigateTo = pathFor({
     pathname: AdminRoutes.TenantTimesheets,

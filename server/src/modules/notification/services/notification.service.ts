@@ -1,31 +1,19 @@
 import { prisma } from '~/db/index';
 import { NotificationType, NotificationStatus, Prisma } from '~/db/prisma';
 import { NotFoundError, ForbiddenError } from '~/errors';
-import { pusher } from '~/modules/pusher/config/pusher';
 
 const createNotification = async (
   type: NotificationType,
   metadata: Prisma.InputJsonValue,
   recipientIds: string[],
 ) => {
-  const createdNotifications = await prisma.notification.createManyAndReturn({
+  await prisma.notification.createManyAndReturn({
     data: recipientIds.map((recipientId) => ({
       type,
       status: NotificationStatus.UNREAD,
       recipientId,
       metadata,
     })),
-  });
-
-  // Trigger Pusher event for each recipient
-  const pusherPromises = createdNotifications.map((notification) =>
-    pusher.trigger(`private-user-${notification.recipientId}`, 'notification-created', {
-      notification,
-    }),
-  );
-
-  Promise.all(pusherPromises).catch((err) => {
-    console.error('Pusher trigger failed:', err);
   });
 };
 

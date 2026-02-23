@@ -6,24 +6,15 @@ import { AppToaster } from './components/ui';
 import { InactivityWarningContainer } from './components/ui/InactivityWarning/InactivityWarningContainer';
 import { AuthProvider } from './context/auth/AuthContext';
 import { InactivityProvider } from './context/inactivity';
-import { useNotificationPusher } from './hooks/useNotificationPusher';
-import { useNotificationPolling } from './hooks/useNotificationPolling';
 import theme from './theme';
 
 const queryClient = new QueryClient();
-
-const PusherSubscriber = () => {
-  const { pusher } = useNotificationPusher();
-  useNotificationPolling(pusher);
-  return null;
-};
 
 export const AppLayout = () => {
   return (
     <>
       <CssBaseline />
       <InactivityWarningContainer />
-      <PusherSubscriber />
       <Outlet />
     </>
   );
