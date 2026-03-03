@@ -1,9 +1,18 @@
 import { Avatar, Divider, Stack, Typography } from '@mui/material';
 
+import { Button } from '~/components/ui';
+import { useTenantContext } from '~/context/tenant/useTenantContext';
+import { AdminRoutes } from '~/routes';
+import { pathFor } from '~/utils/pathFor';
+
 import { NotificationMenu } from './NotificationMenu';
 import NavbarUserMenu from './UserMenu';
+import { useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
+  const navigate = useNavigate();
+  const { tenantId } = useTenantContext();
+
   return (
     <Stack
       direction="row"
@@ -14,17 +23,28 @@ const Navbar = () => {
       borderBottom={1}
       borderColor="divider"
     >
-      <Stack direction="row" spacing={1} alignItems="center">
+      <Button
+        onClick={() =>
+          navigate(
+            pathFor({
+              pathname: AdminRoutes.TenantHome,
+              params: { tenantId },
+            }),
+          )
+        }
+        variant="text"
+        sx={{ gap: 1 }}
+      >
         <Avatar
           variant="rounded"
-          sx={{ width: 36, height: 36, bgcolor: 'primary.main', color: 'common.white' }}
+          sx={{ width: 32, height: 32, bgcolor: 'primary.main', color: 'common.white' }}
         >
           P
         </Avatar>
         <Typography variant="body1" color="text.primary" fontWeight={600}>
           PETROMATE
         </Typography>
-      </Stack>
+      </Button>
       <Stack
         direction="row"
         marginLeft="auto"

@@ -1,12 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Divider, Stack, Typography } from '@mui/material';
+import { Stack, Typography } from '@mui/material';
 import { AddOutlined } from '@mui/icons-material';
 import { useForm } from 'react-hook-form';
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
 
-import { FormRow, InputWithFormat, Input } from '~/components/form';
+import { InputWithFormat, Input } from '~/components/form';
 import { Button, Form, PageContainer, PageLayout } from '~/components/ui';
+import { PageHeader } from '~/components/layouts';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { UpdateTenantSchema, type UpdateTenantInput } from '~/schema/updateTenantSchema';
 import { useUpdateTenantMutation } from '~/services/tenant/tenant.queries';
@@ -67,14 +68,14 @@ export const TenantSettingsPage = () => {
       },
       {
         onSuccess: (data: Tenant) => {
-          toast.success('Successfully created tenant.');
+          toast.success('Successfully updated tenant.');
 
           setTenant(data);
           reset();
         },
         onError: (err) => {
           const errorMessage = parseBackendError(err);
-          toast.error(`Failed to create tenant: ${errorMessage}`);
+          toast.error(`Failed to update tenant: ${errorMessage}`);
         },
       },
     );
@@ -82,147 +83,152 @@ export const TenantSettingsPage = () => {
 
   return (
     <PageLayout>
-      <PageContainer>
-        <Form onSubmit={handleSubmit(onSubmit)} sx={{ width: '100%' }}>
-          {/* Header */}
-          <Stack
-            alignItems="start"
-            direction="column"
-            justifyContent="space-between"
-            width="100%"
-            mb={4}
-            spacing={0.5}
-          >
-            <Typography variant="h6">Tenant Settings</Typography>
-            <Typography variant="body2" color="text.secondary">
-              Manage your organization's profile, contact information, and government registration
-              details.
-            </Typography>
-          </Stack>
-          <Stack spacing={2} divider={<Divider />}>
+      <Form onSubmit={handleSubmit(onSubmit)} sx={{ width: '100%', flex: 1 }}>
+        <PageContainer spacing={3} sx={{ flex: 1 }}>
+          <PageHeader
+            title="Tenant Settings"
+            description="Manage your organization's profile, contact information, and government registration details."
+          />
+          <Stack spacing={3}>
             {/* General Info */}
-            <Stack spacing={2} justifyContent="start" alignItems="start">
-              <Stack>
-                <Typography variant="body1" fontWeight="medium">
-                  General
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Provide your company's basic details. This information helps identify and
-                  distinguish your organization within the platform.
-                </Typography>
-              </Stack>
-              <FormRow label="Name" required>
-                <Input control={control} name="name" placeholder="ABC Corporation" />
-              </FormRow>
-              <FormRow label="Email Address" required>
-                <Input control={control} name="email" placeholder="hello@abc.com" />
-              </FormRow>
-
-              <FormRow label="Contact number" required>
-                <InputWithFormat
-                  control={control}
-                  name="contact"
-                  pattern="9999-999-9999"
-                  placeholder="0925-123-1234"
-                />
-              </FormRow>
-              <FormRow label="Address">
-                <Input control={control} name="address" placeholder="123 Main Street..." />
-              </FormRow>
+            <Stack spacing={1} bgcolor="background.paper" borderRadius={2} p={2}>
+              <Typography variant="h6" fontWeight="medium">
+                General
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Provide your company's basic details. This information helps identify and
+                distinguish your organization within the platform.
+              </Typography>
+              <Input
+                required
+                fullWidth
+                control={control}
+                name="name"
+                label="Name"
+                placeholder="ABC Corporation"
+              />
+              <Input
+                required
+                fullWidth
+                control={control}
+                name="email"
+                label="Email Address"
+                placeholder="hello@abc.com"
+              />
+              <InputWithFormat
+                required
+                control={control}
+                name="contact"
+                label="Contact Number"
+                pattern="9999-999-9999"
+                placeholder="0925-123-1234"
+              />
+              <Input
+                control={control}
+                name="address"
+                label="Address"
+                placeholder="123 Main Street..."
+              />
             </Stack>
 
-            {/* Goverment Info */}
-            <Stack spacing={2} justifyContent="start" alignItems="start">
-              <Stack>
-                <Typography variant="body1" fontWeight="medium">
-                  Government
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Basic information about your company. Lorem ipsum dolor sit amet consectetur
-                  adipisicing elit. Dolore, vitae.
-                </Typography>
-              </Stack>
-              <FormRow label="TIN">
-                <InputWithFormat
-                  control={control}
-                  name="tin"
-                  pattern="999-999-999-999"
-                  placeholder="123-456-789-000"
-                />
-              </FormRow>
-
-              <FormRow label="SSS">
-                <InputWithFormat
-                  control={control}
-                  name="sss"
-                  pattern="99-9999999-9"
-                  placeholder="12-3456789-0"
-                />
-              </FormRow>
-
-              <FormRow label="PAGIBIG">
-                <InputWithFormat
-                  control={control}
-                  name="pagibig"
-                  pattern="99-9999999999-9"
-                  placeholder="12-3456789012-3"
-                />
-              </FormRow>
-
-              <FormRow label="PhilHealth">
-                <InputWithFormat
-                  control={control}
-                  name="philhealth"
-                  pattern="9999-9999-9999"
-                  placeholder="1234-5678-9012"
-                />
-              </FormRow>
+            {/* Government Info */}
+            <Stack spacing={1} bgcolor="background.paper" borderRadius={2} p={2}>
+              <Typography variant="h6" fontWeight="medium">
+                Government
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Government-issued information for compliance and reporting purposes
+              </Typography>
+              <InputWithFormat
+                control={control}
+                name="tin"
+                label="TIN"
+                pattern="999-999-999-999"
+                placeholder="123-456-789-000"
+              />
+              <InputWithFormat
+                control={control}
+                name="sss"
+                label="SSS"
+                pattern="99-9999999-9"
+                placeholder="12-3456789-0"
+              />
+              <InputWithFormat
+                control={control}
+                name="pagibig"
+                label="PAGIBIG"
+                pattern="99-9999999999-9"
+                placeholder="12-3456789012-3"
+              />
+              <InputWithFormat
+                control={control}
+                name="philhealth"
+                label="PhilHealth"
+                pattern="9999-9999-9999"
+                placeholder="1234-5678-9012"
+              />
             </Stack>
 
             {/* Other Info */}
-            <Stack spacing={2} justifyContent="start" alignItems="start">
-              <Stack>
-                <Typography variant="body1" fontWeight="medium">
-                  Additional Information
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Basic information about your company. Lorem ipsum dolor sit amet consectetur
-                  adipisicing elit. Dolore, vitae.
-                </Typography>
-              </Stack>
+            <Stack spacing={1} bgcolor="background.paper" borderRadius={2} p={2}>
+              <Typography variant="h6" fontWeight="medium">
+                Additional Information
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Optional details about your organization
+              </Typography>
               <Input
                 multiline
                 rows={3}
-                name="description"
                 control={control}
+                name="description"
+                label="Description"
                 placeholder="Add a brief description"
-                sx={{ textarea: { resize: 'vertical' } }}
               />
               <Stack alignItems="end" direction="row" spacing={1} width="100%">
-                <Button disabled startIcon={<AddOutlined />} variant="outlined">
+                <Button
+                  size="small"
+                  startIcon={<AddOutlined fontSize="inherit" />}
+                  variant="outlined"
+                >
                   Upload Files
                 </Button>
                 <Typography variant="caption">{`(Max 5 files, up to 10MB)`}</Typography>
               </Stack>
             </Stack>
-
-            <Stack justifyContent="end" direction="row" pb={2} spacing={1} width="100%">
-              {isDirty && (
-                <Button variant="outlined" onClick={() => reset()}>
-                  Cancel
-                </Button>
-              )}
-              <Button
-                disabled={!isValid || !isDirty || isUpdatePending}
-                variant="contained"
-                type="submit"
-              >
-                Save
-              </Button>
-            </Stack>
           </Stack>
-        </Form>
-      </PageContainer>
+        </PageContainer>
+
+        <Stack
+          py={2}
+          px={3}
+          width="100%"
+          bgcolor="background.paper"
+          direction="row"
+          spacing={1}
+          justifyContent="end"
+          sx={{
+            position: 'sticky',
+            bottom: 0,
+            zIndex: 10,
+            borderTop: '1px solid',
+            borderColor: 'divider',
+          }}
+        >
+          {isDirty && (
+            <Button variant="outlined" onClick={() => reset()}>
+              Cancel
+            </Button>
+          )}
+          <Button
+            disabled={!isValid || !isDirty || isUpdatePending}
+            variant="contained"
+            type="submit"
+          >
+            Save
+          </Button>
+        </Stack>
+      </Form>
     </PageLayout>
   );
 };

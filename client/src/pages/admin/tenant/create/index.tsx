@@ -70,8 +70,8 @@ export const CreateTenantPage = () => {
 
   return (
     <PageLayout>
-      <PageContainer spacing={3}>
-        <Form onSubmit={handleSubmit(onSubmit)} sx={{ width: '100%' }}>
+      <Form onSubmit={handleSubmit(onSubmit)} sx={{ width: '100%', flex: 1 }}>
+        <PageContainer spacing={3} sx={{ flex: 1 }}>
           <PageHeader
             title="Create Tenant"
             description="A tenant represents your company or organization within the platform. Creating a tenant allows you to manage users, data, and reports independently—ensuring your operations are securely separated from your other businesses using the system."
@@ -182,32 +182,32 @@ export const CreateTenantPage = () => {
               </Stack>
             </Stack>
           </Stack>
-        </Form>
-      </PageContainer>
+        </PageContainer>
 
-      <Stack
-        py={2}
-        px={3}
-        width="100%"
-        bgcolor="background.paper"
-        direction="row"
-        spacing={1}
-        justifyContent="end"
-        sx={{
-          position: 'sticky',
-          bottom: 0,
-          zIndex: 10,
-          borderTop: '1px solid',
-          borderColor: 'divider',
-        }}
-      >
-        <Button variant="outlined" onClick={handleBack}>
-          Cancel
-        </Button>
-        <Button disabled={!isValid} variant="contained" type="submit">
-          Create Tenant
-        </Button>
-      </Stack>
+        <Stack
+          py={2}
+          px={3}
+          width="100%"
+          bgcolor="background.paper"
+          direction="row"
+          spacing={1}
+          justifyContent="end"
+          sx={{
+            position: 'sticky',
+            bottom: 0,
+            zIndex: 10,
+            borderTop: '1px solid',
+            borderColor: 'divider',
+          }}
+        >
+          <Button variant="outlined" onClick={handleBack}>
+            Cancel
+          </Button>
+          <Button disabled={!isValid} variant="contained" type="submit">
+            Create Tenant
+          </Button>
+        </Stack>
+      </Form>
 
       <TenantCreatedSuccessModal
         open={!!createdTenant}
