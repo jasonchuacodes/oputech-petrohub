@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 
 import { JwtSessionPayload, JwtUserPayload, signJwt, verifyJwt } from '~/utils';
 import { UnauthorizedError, ForbiddenError } from '~/errors';
+import { isProduction } from '~/config/environment';
 import { prisma } from '../db';
 import { REFRESH_TOKEN_EXPIRY_IN_DAYS } from '~/shared/constants';
 
@@ -71,10 +72,14 @@ export const requireAuth = async (req: AuthenticatedRequest, res: Response, next
 
     res.cookie('accessToken', newAccessToken, {
       httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
       maxAge: ACCESS_TOKEN_MAX_AGE,
     });
     res.cookie('refreshToken', newRefreshToken, {
       httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
       maxAge: REFRESH_TOKEN_MAX_AGE,
     });
 

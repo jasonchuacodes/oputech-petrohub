@@ -50,7 +50,7 @@ const Sidebar = () => {
   const location = useLocation();
   const { tenantId } = useTenantContext();
 
-  const disclosure = useDisclosure(localStorage.getItem('sidebar:open') === 'true');
+  const disclosure = useDisclosure(localStorage.getItem('sidebar:open') !== 'false');
 
   useEffect(() => {
     localStorage.setItem('sidebar:open', String(disclosure.open));
