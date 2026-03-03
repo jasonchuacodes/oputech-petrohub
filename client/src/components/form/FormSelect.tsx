@@ -53,7 +53,7 @@ export const FormSelect = <T extends FieldValues>({
       name={name}
       control={control}
       render={({ field: { onChange, value }, fieldState: { error } }) => (
-        <Stack spacing={0.5} width={width ? width : '100%'}>
+        <Stack spacing={0.5} width={width ? width : '100%'} maxWidth="sm">
           {label && (
             <Typography variant="body2" fontWeight="medium" color="text.primary">
               {label}

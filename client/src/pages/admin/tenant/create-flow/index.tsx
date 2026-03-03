@@ -37,7 +37,6 @@ export const CreateTenantFlow = () => {
   const {
     control,
     handleSubmit,
-    register,
     reset,
     clearErrors,
     formState: { errors, isValid },
@@ -67,7 +66,7 @@ export const CreateTenantFlow = () => {
   const renderCreateTenantStep = () => {
     switch (stepIndex) {
       case 0:
-        return <GeneralInfo control={control} register={register} />;
+        return <GeneralInfo control={control} />;
       case 1:
         return <GovernmentInfo control={control} />;
       case 2:
@@ -112,7 +111,7 @@ export const CreateTenantFlow = () => {
         ) : (
           <ContentCard sx={{ maxWidth: 'sm', gap: 4 }}>
             <Stack spacing={1}>
-              <Typography variant="h6" textAlign="start">
+              <Typography variant="h6" textAlign="start" fontWeight={600}>
                 Create Tenant
               </Typography>
               <RadioGroup

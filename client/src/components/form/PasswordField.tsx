@@ -76,7 +76,7 @@ export const PasswordField = <T extends FieldValues>({
   );
 
   return (
-    <Stack spacing={0.5} width="100%">
+    <Stack spacing={0.5} width="100%" maxWidth="sm">
       <Stack direction="row" spacing={1} alignItems="flex-end">
         <Input
           name={name}

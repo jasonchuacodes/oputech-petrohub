@@ -129,7 +129,7 @@ export const NumberInput = <T extends FieldValues>({
         };
 
         return (
-          <Stack spacing={0.5} width={fullWidth ? '100%' : width ? width : 'auto'}>
+          <Stack spacing={0.5} width={fullWidth ? '100%' : width ? width : 'auto'} maxWidth="sm">
             {label && (
               <Typography variant="body2" fontWeight="medium" color="text.primary">
                 {label}

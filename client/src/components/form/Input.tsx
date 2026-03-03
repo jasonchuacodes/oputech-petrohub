@@ -91,7 +91,7 @@ export const Input = <T extends FieldValues>({
       name={name}
       control={control}
       render={({ field, fieldState: { error } }) => (
-        <Stack spacing={0.5} width={fullWidth ? '100%' : 'auto'}>
+        <Stack alignItems='start' spacing={0.5} width={fullWidth ? '100%' : 'auto'} maxWidth="sm">
           {label && (
             <Typography variant="body2" fontWeight="medium" color="text.primary">
               {label}

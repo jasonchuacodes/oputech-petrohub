@@ -34,7 +34,7 @@ export const InputWithFormat = <T extends object>({
         const { formatted } = formatDigitsWithPattern(rawDigits, pattern);
 
         return (
-          <Stack spacing={0.5} width="100%">
+          <Stack alignItems="start" spacing={0.5} width="100%" maxWidth="sm">
             <Typography variant="body2" fontWeight="medium" color="text.primary">
               {label}
               {required && (

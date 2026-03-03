@@ -40,7 +40,7 @@ export const MultiSelect = <T extends object>({
   const [open, setOpen] = useState(false);
 
   return (
-    <Stack spacing={0.5} width="100%">
+    <Stack spacing={0.5} width="100%" maxWidth="sm">
       <Typography variant="body2" fontWeight="medium" color="text.primary">
         {label}
         {required && (
