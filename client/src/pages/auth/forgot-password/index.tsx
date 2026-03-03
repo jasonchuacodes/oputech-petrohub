@@ -6,7 +6,8 @@ import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
 import { Input } from '~/components/form';
-import { Button, Form, Link, PageLayout } from '~/components/ui';
+import { LoginLayout } from '~/components/layouts';
+import { Button, Form, Link } from '~/components/ui';
 import { useAuthContext } from '~/context/auth/useAuthContext';
 import { ForgotPasswordSchema, type ForgotPasswordInput } from '~/schema/forgotPasswordSchema';
 import { useForgotPasswordMutation } from '~/services/auth/auth.queries';
@@ -49,17 +50,16 @@ export const ForgotPassword = () => {
   if (loading || auth) return null;
 
   return (
-    <PageLayout height="100vh">
-      <Stack direction="row" height="100%">
-        <Form
-          onSubmit={handleSubmit(onSubmit)}
-          sx={{
-            flex: 1,
-            alignItems: 'center',
-            mt: 16,
-            gap: 4,
-          }}
-        >
+    <LoginLayout>
+      <Form
+        onSubmit={handleSubmit(onSubmit)}
+        sx={{
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 4,
+        }}
+      >
           <Typography fontWeight="bold" variant="h5">
             Forgot Password
           </Typography>
@@ -70,7 +70,6 @@ export const ForgotPassword = () => {
               label="Username"
               placeholder="Enter your username"
               error={!!errors.username}
-              sx={{ fontSize: 'body2.fontSize' }}
             />
             <Button
               disabled={!isValid}
@@ -89,8 +88,7 @@ export const ForgotPassword = () => {
               Back to login
             </Link>
           </Stack>
-        </Form>
-      </Stack>
-    </PageLayout>
+      </Form>
+    </LoginLayout>
   );
 };

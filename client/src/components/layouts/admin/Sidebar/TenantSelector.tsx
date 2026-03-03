@@ -6,7 +6,6 @@ import {
   SettingsOutlined,
 } from '@mui/icons-material';
 import {
-  Avatar,
   Divider,
   IconButton,
   ListItemIcon,
@@ -87,12 +86,24 @@ const TenantSelector = () => {
   return (
     <>
       {activeTenant && (
-        <Button onClick={handleOpenMenu} sx={{ height: 40, gap: 1, alignItems: 'center' }}>
-          <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.dark' }} variant="rounded">
-            {activeTenant?.name?.charAt(0)}
-          </Avatar>
-          <Typography>{activeTenant?.name}</Typography>
-          <ChevronRight fontSize="small" sx={{ transform: 'rotate(90deg)' }} />
+        <Button
+          variant="outlined"
+          onClick={handleOpenMenu}
+          sx={{
+            width: '100%',
+            justifyContent: 'space-between',
+            px: 2,
+            gap: 1,
+            alignItems: 'center',
+            bgcolor: 'primary.main',
+            borderColor: 'primary.light',
+          }}
+        >
+          <Typography color="common.white">{activeTenant?.name}</Typography>
+          <ChevronRight
+            fontSize="small"
+            sx={{ color: 'common.white', transform: 'rotate(90deg)' }}
+          />
         </Button>
       )}
 

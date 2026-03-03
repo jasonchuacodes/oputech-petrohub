@@ -1,5 +1,5 @@
 import { KeyboardDoubleArrowRightOutlined } from '@mui/icons-material';
-import { alpha, IconButton } from '@mui/material';
+import { alpha, Box, IconButton } from '@mui/material';
 
 import theme from '~/theme';
 
@@ -11,30 +11,38 @@ export const Toggler = ({
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
   return (
-    <IconButton
-      size="small"
+    <Box
       sx={{
-        position: 'absolute',
-        bottom: 8,
-        right: open ? 8 : 4,
-        width: 48,
-        borderRadius: 2,
-        color: 'divider',
-        bgcolor: alpha(theme.palette.background.paper, 0.05),
-        transition: 'background-color 0.3s ease',
-        '&:hover': {
-          bgcolor: alpha(theme.palette.background.paper, 0.1),
-        },
+        flexShrink: 0,
+        display: 'flex',
+        justifyContent: open ? 'flex-end' : 'center',
+        borderTop: 1,
+        borderColor: 'primary.light',
+        bgcolor: 'primary.main',
+        p: 0.5,
       }}
-      onClick={() => setOpen(!open)}
     >
-      <KeyboardDoubleArrowRightOutlined
-        fontSize="small"
+      <IconButton
+        size="small"
         sx={{
-          transition: 'transform 0.3s ease',
-          transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
+          width: 48,
+          borderRadius: 2,
+          color: 'divider',
+          transition: 'background-color 0.3s ease',
+          '&:hover': {
+            bgcolor: alpha(theme.palette.background.paper, 0.1),
+          },
         }}
-      />
-    </IconButton>
+        onClick={() => setOpen(!open)}
+      >
+        <KeyboardDoubleArrowRightOutlined
+          fontSize="small"
+          sx={{
+            transition: 'transform 0.3s ease',
+            transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
+          }}
+        />
+      </IconButton>
+    </Box>
   );
 };

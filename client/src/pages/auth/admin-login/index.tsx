@@ -5,8 +5,7 @@ import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 
 import { PasswordField, Input } from '~/components/form';
-import { LoginLayout } from '~/components/layouts';
-import { Button, Form, Link } from '~/components/ui';
+import { Button, Footer, Form, Link } from '~/components/ui';
 import { useAuthContext } from '~/context/auth/useAuthContext';
 import { LoginUserSchema, type LoginUserInput } from '~/schema/loginUserSchema';
 import { useLoginMutation } from '~/services/auth/auth.queries';
@@ -56,23 +55,18 @@ export const LoginAdmin = () => {
   if (loading || auth) return null;
 
   return (
-    <LoginLayout>
-      <Stack direction="row" height="100%">
-        <Stack
-          display={{ xs: 'none', md: 'flex' }}
-          bgcolor="primary.light"
-          flex={1}
-          maxWidth="50%"
-        />
-        <Form
-          onSubmit={handleSubmit(onSubmit)}
-          sx={{
-            flex: 1,
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 4,
-          }}
-        >
+    <Stack flex={1} height="100vh" bgcolor="background.paper" direction="row">
+      <Stack
+        display={{ xs: 'none', md: 'flex' }}
+        bgcolor="primary.light"
+        flex={1}
+        maxWidth="50%"
+      />
+      <Form
+        onSubmit={handleSubmit(onSubmit)}
+        sx={{ flex: 1, alignItems: 'stretch' }}
+      >
+        <Stack flex={1} alignItems="center" justifyContent="center" gap={4}>
           <Stack alignItems="center" justifyContent="center" spacing={2}>
             <Box bgcolor="divider" borderRadius={99} height={120} width={120}></Box>
             <Stack alignItems="center" spacing={0.5}>
@@ -148,8 +142,9 @@ export const LoginAdmin = () => {
               Create an account
             </Link>
           </Stack>
-        </Form>
-      </Stack>
-    </LoginLayout>
+        </Stack>
+        <Footer />
+      </Form>
+    </Stack>
   );
 };

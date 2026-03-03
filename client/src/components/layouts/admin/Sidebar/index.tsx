@@ -11,6 +11,7 @@ import {
   WarningAmberOutlined,
 } from '@mui/icons-material';
 import {
+  Box,
   Icon,
   List,
   ListItem,
@@ -20,14 +21,17 @@ import {
   ListSubheader,
   Stack,
 } from '@mui/material';
-import { useState, type ComponentType } from 'react';
+import { type ComponentType, useEffect } from 'react';
 import { matchPath, useLocation, useNavigate } from 'react-router-dom';
 
+import { Show } from '~/components/ui';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
+import { useDisclosure } from '~/hooks/useDisclosure';
 import { AdminRoutes } from '~/routes';
 import { pathFor } from '~/utils/pathFor';
 
 import { Toggler } from './Toggler';
+import TenantSelector from './TenantSelector';
 
 export type NavItem = {
   disabled?: boolean;
@@ -46,7 +50,11 @@ const Sidebar = () => {
   const location = useLocation();
   const { tenantId } = useTenantContext();
 
-  const [open, setOpen] = useState(true);
+  const disclosure = useDisclosure(localStorage.getItem('sidebar:open') === 'true');
+
+  useEffect(() => {
+    localStorage.setItem('sidebar:open', String(disclosure.open));
+  }, [disclosure.open]);
 
   const navGroups: NavGroup[] = [
     {
@@ -154,32 +162,35 @@ const Sidebar = () => {
 
   return (
     <Stack
-      position="relative"
       justifyContent="space-between"
       role="presentation"
-      width={open ? 256 : 58}
+      width={disclosure.open ? 256 : 58}
       bgcolor="primary.main"
+      height="100%"
       sx={{
         transition: '0.3s ease',
       }}
     >
-      <List>
-        <Stack spacing={2}>
+      <List sx={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
+        <Show when={disclosure.open}>
+          <Box px={1} mb={2}>
+            <TenantSelector />
+          </Box>
+        </Show>
+        <Stack spacing={1}>
           {navGroups.map((group, groupIndex) => (
-            <Stack key={groupIndex} spacing={1} pt={2}>
-              {open && (
+            <Stack key={groupIndex} spacing={1}>
+              <Show when={disclosure.open}>
                 <ListSubheader
                   sx={{
                     bgcolor: 'transparent',
                     color: 'text.disabled',
                     typography: 'body2',
-                    textTransform: 'uppercase',
                   }}
                 >
                   {group.label}
                 </ListSubheader>
-              )}
-
+              </Show>
               {group.items.map(({ disabled, icon, label, to }, itemIndex) => {
                 const active =
                   disabled || to === '#'
@@ -208,14 +219,14 @@ const Sidebar = () => {
                         },
                         display: 'flex',
                         alignItems: 'center',
-                        mx: open ? 1 : 0.5,
-                        px: open ? 3 : 0,
+                        mx: disclosure.open ? 1 : 0.5,
+                        px: disclosure.open ? 3 : 0,
                         gap: 1,
                         height: '100%',
                         borderRadius: 2,
                         bgcolor: active ? 'primary.light' : 'transparent',
                         color: 'primary.alpha',
-                        justifyContent: open ? 'flex-start' : 'center',
+                        justifyContent: disclosure.open ? 'flex-start' : 'center',
                       }}
                     >
                       <ListItemIcon
@@ -226,7 +237,7 @@ const Sidebar = () => {
                       >
                         <Icon component={icon} fontSize="small" />
                       </ListItemIcon>
-                      {open && (
+                      <Show when={disclosure.open}>
                         <ListItemText
                           slotProps={{
                             primary: {
@@ -236,7 +247,7 @@ const Sidebar = () => {
                         >
                           {label}
                         </ListItemText>
-                      )}
+                      </Show>
                     </ListItemButton>
                   </ListItem>
                 );
@@ -246,7 +257,7 @@ const Sidebar = () => {
         </Stack>
       </List>
 
-      <Toggler open={open} setOpen={setOpen} />
+      <Toggler open={disclosure.open} setOpen={disclosure.setOpen} />
     </Stack>
   );
 };
