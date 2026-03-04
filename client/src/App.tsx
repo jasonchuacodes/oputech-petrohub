@@ -6,11 +6,14 @@ import { AppToaster } from './components/ui';
 import { InactivityWarningContainer } from './components/ui/InactivityWarning/InactivityWarningContainer';
 import { AuthProvider } from './context/auth/AuthContext';
 import { InactivityProvider } from './context/inactivity';
+import { useManifest } from './hooks/useManifest';
 import theme from './theme';
 
 const queryClient = new QueryClient();
 
 export const AppLayout = () => {
+  useManifest();
+
   return (
     <>
       <CssBaseline />

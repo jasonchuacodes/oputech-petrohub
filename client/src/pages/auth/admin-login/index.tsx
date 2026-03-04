@@ -56,19 +56,17 @@ export const LoginAdmin = () => {
 
   return (
     <Stack flex={1} height="100vh" bgcolor="background.paper" direction="row">
-      <Stack
-        display={{ xs: 'none', md: 'flex' }}
-        bgcolor="primary.light"
-        flex={1}
-        maxWidth="50%"
-      />
-      <Form
-        onSubmit={handleSubmit(onSubmit)}
-        sx={{ flex: 1, alignItems: 'stretch' }}
-      >
+      <Stack display={{ xs: 'none', md: 'flex' }} bgcolor="primary.light" flex={1} maxWidth="50%" />
+      <Form onSubmit={handleSubmit(onSubmit)} sx={{ flex: 1, alignItems: 'stretch' }}>
         <Stack flex={1} alignItems="center" justifyContent="center" gap={4}>
           <Stack alignItems="center" justifyContent="center" spacing={2}>
-            <Box bgcolor="divider" borderRadius={99} height={120} width={120}></Box>
+            <Box
+              component="img"
+              src="/icons/petromate_logo_192.png"
+              alt="Petromate"
+              height={96}
+              width={96}
+            />
             <Stack alignItems="center" spacing={0.5}>
               <Typography fontWeight="bold" variant="h2">
                 Welcome back

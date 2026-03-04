@@ -67,10 +67,16 @@ export const Login = () => {
         }}
       >
         <Stack alignItems="center" justifyContent="center" spacing={2}>
-          <Box bgcolor="divider" borderRadius={99} height={120} width={120}></Box>
+          <Box
+            component="img"
+            src="/icons/petromate_logo_192.png"
+            alt="Petromate"
+            height={96}
+            width={96}
+          />
           <Stack alignItems="center" spacing={0.5}>
             <Typography fontWeight="bold" variant="h2">
-              Welcome back
+              Welcome Back
             </Typography>
             <Typography variant="body2" color="text.secondary">
               Please enter your details
