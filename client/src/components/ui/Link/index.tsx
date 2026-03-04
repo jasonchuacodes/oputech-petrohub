@@ -1,11 +1,10 @@
-import { Typography, type SxProps, type TypographyProps } from '@mui/material';
+import { Typography, type TypographyProps } from '@mui/material';
 import type React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 type Props = {
   to: string;
   children: React.ReactNode;
-  sx?: SxProps;
 } & TypographyProps;
 
 export const Link = ({ to, children, sx, ...props }: Props) => {
