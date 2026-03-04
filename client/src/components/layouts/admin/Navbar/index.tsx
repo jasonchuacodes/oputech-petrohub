@@ -24,6 +24,7 @@ const Navbar = () => {
       borderColor="divider"
     >
       <Button
+        disabled={!tenantId}
         onClick={() =>
           navigate(
             pathFor({

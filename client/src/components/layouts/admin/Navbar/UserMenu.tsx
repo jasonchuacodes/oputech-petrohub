@@ -51,6 +51,7 @@ const UserMenu = () => {
         }}
       >
         <MenuItem
+          disabled={!tenantId}
           onClick={() => {
             setAnchorElSettingsMenu(null);
             navigate(

@@ -12,6 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import { InputWithFormat, Input } from '~/components/form';
 import { Button, DatePicker, Form } from '~/components/ui';
 import { useAuthContext } from '~/context/auth/useAuthContext';
+import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { UpdateUserSchema, type UpdateUserPayload } from '~/schema/updateUserSchema';
 import { useGetUserQuery, useUpdateUserMutation } from '~/services/user/user.queries';
 import { parseBackendError } from '~/utils/parseBackendError';
@@ -26,11 +27,11 @@ const initialValues = {
 
 export const AccountSettings = () => {
   const { auth } = useAuthContext();
+  const { tenantId } = useTenantContext();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const userId = auth?.id;
-  const tenantId = auth?.tenants[0].id;
 
   const {
     control,
