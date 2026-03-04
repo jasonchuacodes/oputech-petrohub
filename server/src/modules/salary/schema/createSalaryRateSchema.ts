@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { RateType } from '@prisma';
+import { RateType } from '~/db/prisma';
 
 export const CreateSalaryRateSchema = z.object({
   userId: z.string().uuid(),

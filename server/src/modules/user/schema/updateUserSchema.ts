@@ -1,6 +1,5 @@
 import z from 'zod';
-
-import { Role } from '@prisma';
+import { Role } from '~/db/prisma';
 
 export const UpdateUserSchema = z
   .object({
