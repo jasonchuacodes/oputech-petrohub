@@ -13,7 +13,7 @@ const useGetUserQuery = ({ tenantId, userId }: { tenantId?: string; userId?: str
 };
 
 // Mutations
-const useCreateUserMutation = ({ tenantId }: { tenantId?: string }) => {
+const useCreateUserMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -49,7 +49,7 @@ const useDeleteUserMutation = () => {
 
   return useMutation({
     mutationFn: ({ userId }: { userId: string; tenantId: string }) => deleteUser(userId),
-    onSuccess: (_data, variables) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tenantUsers'] });
     },
   });

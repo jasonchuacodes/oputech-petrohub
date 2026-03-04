@@ -36,13 +36,11 @@ export const CreateUserModal = ({ open, setOpen }: Props) => {
   } = useForm<CreateUserInput>({
     resolver: zodResolver(CreateUserSchema),
     defaultValues: {
-      role: UserRole.USER
-    }
+      role: UserRole.USER,
+    },
   });
 
-  const { mutate: createUser } = useCreateUserMutation({
-    tenantId,
-  });
+  const { mutate: createUser } = useCreateUserMutation();
 
   const handleCancel = () => {
     setOpen(false);
@@ -110,13 +108,7 @@ export const CreateUserModal = ({ open, setOpen }: Props) => {
           copiable
           randomizer
         />
-        <FormSelect
-          control={control}
-          name="role"
-          label="Role"
-          required
-          options={roleOptions}
-        />
+        <FormSelect control={control} name="role" label="Role" required options={roleOptions} />
       </Stack>
     </CustomModal>
   );

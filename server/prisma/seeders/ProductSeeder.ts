@@ -1,4 +1,4 @@
-import { PrismaClient } from '../../src/db/prisma';
+import { PrismaClient, ProductType } from '../../src/db/prisma';
 
 export class ProductSeeder {
   constructor(private prisma: PrismaClient) {}
@@ -6,7 +6,12 @@ export class ProductSeeder {
   async seed(tenantId: string): Promise<void> {
     console.log('Seeding products...');
 
-    const products = [{ name: 'XCS' }, { name: 'XTRA 1' }, { name: 'XTRA 2' }, { name: 'ADO' }];
+    const products = [
+      { name: 'XCS', type: ProductType.PREMIUM },
+      { name: 'XTRA 1', type: ProductType.GASOLINE },
+      { name: 'XTRA 2', type: ProductType.GASOLINE },
+      { name: 'ADO', type: ProductType.DIESEL },
+    ];
 
     const basePrices = {
       XCS: '55.50',
@@ -18,9 +23,10 @@ export class ProductSeeder {
     for (const productData of products) {
       const product = await this.prisma.product.upsert({
         where: {
-          tenantId_name: {
+          tenantId_name_type: {
             tenantId,
             name: productData.name,
+            type: productData.type,
           },
         },
         update: {},
@@ -41,7 +47,7 @@ export class ProductSeeder {
       await this.prisma.productReading.create({
         data: {
           productId: product.id,
-          reading: 100.000,
+          reading: 100.0,
         },
       });
 

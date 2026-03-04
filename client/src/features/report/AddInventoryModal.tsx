@@ -27,7 +27,9 @@ export const AddInventoryModal = ({ open, onClose, reportId }: AddInventoryModal
   const { auth } = useAuthContext();
   const tenantId = auth?.tenantId;
 
-  const { data: products = [] } = useGetProductsQuery(tenantId, ProductCategory.STOCK_INVENTORY);
+  const { data: products = [] } = useGetProductsQuery(tenantId, {
+    category: ProductCategory.STOCK_INVENTORY,
+  });
   const { mutateAsync: createInventory, isPending } = useCreateInventoryMutation();
 
   const {

@@ -134,10 +134,12 @@ export class ReportSeeder {
        */
       const morningReport = await this.prisma.report.upsert({
         where: {
-          tenantId_shiftDate_shiftId: {
+          tenantId_shiftDate_shiftId_periodStart: {
             tenantId,
             shiftDate,
             shiftId: shifts.morningShift.id,
+            // TODO: add period start for unique
+            periodStart: '',
           },
         },
         update: {},
@@ -164,6 +166,8 @@ export class ReportSeeder {
           disposals: {
             create: morningDisposalsData,
           },
+          periodEnd: '',
+          periodStart: '',
         },
       });
 
@@ -257,10 +261,11 @@ export class ReportSeeder {
        */
       const afternoonReport = await this.prisma.report.upsert({
         where: {
-          tenantId_shiftDate_shiftId: {
+          tenantId_shiftDate_shiftId_periodStart: {
             tenantId,
             shiftDate,
             shiftId: shifts.afternoonShift.id,
+            periodStart: '',
           },
         },
         update: {},
@@ -287,6 +292,8 @@ export class ReportSeeder {
           disposals: {
             create: afternoonDisposalsData,
           },
+          periodEnd: '',
+          periodStart: '',
         },
       });
 

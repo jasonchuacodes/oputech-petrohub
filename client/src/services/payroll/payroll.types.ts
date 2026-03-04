@@ -1,25 +1,34 @@
-// TODO: convert to const
-export enum PayrollPeriodType {
-  WEEKLY = 'WEEKLY',
-}
+import type { ValueOf } from '~/utils/valueOf';
 
-export enum PayrollRunStatus {
-  PENDING = 'PENDING', // Not all payslips paid yet
-  PAID = 'PAID', // All payslips are paid (derived)
-  CANCELLED = 'CANCELLED', // Admin cancelled this run
-}
+export const PayrollPeriodType = {
+  WEEKLY: 'WEEKLY',
+} as const;
 
-export enum PaymentStatus {
-  UNPAID = 'UNPAID',
-  PAID = 'PAID',
-  FAILED = 'FAILED',
-}
+export type PayrollPeriodType = ValueOf<typeof PayrollPeriodType>;
 
-export enum SalaryRateType {
-  HOURLY = 'HOURLY',
-  DAILY = 'DAILY',
-  MONTHLY = 'MONTHLY',
-}
+export const PayrollRunStatus = {
+  PENDING: 'PENDING',
+  PAID: 'PAID',
+  CANCELLED: 'CANCELLED',
+} as const;
+
+export type PayrollRunStatus = ValueOf<typeof PayrollRunStatus>;
+
+export const PaymentStatus = {
+  UNPAID: 'UNPAID',
+  PAID: 'PAID',
+  FAILED: 'FAILED',
+} as const;
+
+export type PaymentStatus = ValueOf<typeof PaymentStatus>;
+
+export const SalaryRateType = {
+  HOURLY: 'HOURLY',
+  DAILY: 'DAILY',
+  MONTHLY: 'MONTHLY',
+} as const;
+
+export type SalaryRateType = ValueOf<typeof SalaryRateType>;
 
 export interface PayrollRun {
   id: string;

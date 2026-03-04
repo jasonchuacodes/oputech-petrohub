@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { createSalaryRate, getCurrentSalaryRate, getSalaryRates } from './salary.api';
+import { createSalaryRate, getCurrentSalaryRate } from './salary.api';
 import type { CreateSalaryRateInput } from './salary.types';
 
 export const salaryKeys = {
