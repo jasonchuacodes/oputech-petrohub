@@ -73,13 +73,13 @@ export const requireAuth = async (req: AuthenticatedRequest, res: Response, next
     res.cookie('accessToken', newAccessToken, {
       httpOnly: true,
       secure: isProduction,
-      sameSite: isProduction ? 'none' : 'lax',
+      sameSite: 'lax',
       maxAge: ACCESS_TOKEN_MAX_AGE,
     });
     res.cookie('refreshToken', newRefreshToken, {
       httpOnly: true,
       secure: isProduction,
-      sameSite: isProduction ? 'none' : 'lax',
+      sameSite: 'lax',
       maxAge: REFRESH_TOKEN_MAX_AGE,
     });
 

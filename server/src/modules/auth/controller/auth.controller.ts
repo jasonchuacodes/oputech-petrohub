@@ -85,13 +85,13 @@ const loginUser = async (req: Request, res: Response, next: NextFunction) => {
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
       secure: isProduction,
-      sameSite: isProduction ? 'none' : 'lax',
+      sameSite: 'lax',
       maxAge: 15 * 60 * 1000,
     });
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: isProduction,
-      sameSite: isProduction ? 'none' : 'lax',
+      sameSite: 'lax',
       maxAge: REFRESH_TOKEN_EXPIRY_IN_DAYS * 24 * 60 * 60 * 1000,
     });
     res.status(200).json({
@@ -115,13 +115,13 @@ const logoutUser = async (req: AuthenticatedRequest, res: Response, next: NextFu
     res.clearCookie('accessToken', {
       httpOnly: true,
       secure: isProduction,
-      sameSite: isProduction ? 'none' : 'strict',
+      sameSite: 'lax',
     });
 
     res.clearCookie('refreshToken', {
       httpOnly: true,
       secure: isProduction,
-      sameSite: isProduction ? 'none' : 'strict',
+      sameSite: 'lax',
     });
 
     res.status(200).json({ message: 'Successfully logged out' });
