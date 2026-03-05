@@ -89,11 +89,7 @@ export const PasswordField = <T extends FieldValues>({
           fullWidth
         />
         {(copiable || randomizer) && (
-          <ButtonGroup
-            variant="outlined"
-            size="small"
-            sx={{ alignSelf: 'flex-end', mb: 0.5, height: '2.3rem' }}
-          >
+          <ButtonGroup>
             {copiable && (
               <Button disabled={!fieldValue} size="small" onClick={handleCopy}>
                 {showCheckIcon ? (

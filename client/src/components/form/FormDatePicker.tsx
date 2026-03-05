@@ -14,6 +14,8 @@ type FormDatePickerProps<T extends FieldValues> = {
   label?: string;
   required?: boolean;
   placeholder?: string;
+  disableFuture?: boolean;
+  disablePast?: boolean;
 };
 
 export const FormDatePicker = <T extends FieldValues>({
@@ -22,6 +24,8 @@ export const FormDatePicker = <T extends FieldValues>({
   label,
   required = false,
   placeholder,
+  disableFuture = false,
+  disablePast = false,
 }: FormDatePickerProps<T>) => {
   const dateDisclosure = useDisclosure(false);
 
@@ -46,11 +50,13 @@ export const FormDatePicker = <T extends FieldValues>({
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <ThemeProvider theme={theme}>
               <MuiDatePicker
+                disableFuture={disableFuture}
+                disablePast={disablePast}
                 value={value ? dayjs(value) : null}
                 onOpen={() => dateDisclosure.setOpen(true)}
                 onClose={() => dateDisclosure.setOpen(false)}
                 onChange={(newValue) => {
-                  onChange(newValue ? newValue.toISOString() : null);
+                  onChange(newValue ? newValue.toDate() : null);
                 }}
                 open={dateDisclosure.open}
                 slotProps={{

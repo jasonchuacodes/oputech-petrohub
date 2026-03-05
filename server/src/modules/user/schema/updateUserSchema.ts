@@ -1,5 +1,5 @@
 import z from 'zod';
-import { Role } from '~/db/prisma';
+import { Role, EmploymentStatus } from '~/db/prisma';
 
 export const UpdateUserSchema = z
   .object({
@@ -41,6 +41,8 @@ export const UpdateUserSchema = z
       .optional()
       .nullable(),
     shiftId: z.string().uuid().optional().nullable(),
+    hireDate: z.string().optional().nullable(),
+    status: z.nativeEnum(EmploymentStatus).optional().nullable(),
   });
 
 export type UpdateUserInput = z.infer<typeof UpdateUserSchema>;

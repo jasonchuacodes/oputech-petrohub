@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "TenantsOnUsers" ALTER COLUMN "hireDate" SET DEFAULT CURRENT_TIMESTAMP;

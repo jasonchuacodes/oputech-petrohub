@@ -46,8 +46,11 @@ export const UserDetailPage = () => {
 
   const initialValues: UpdateUserPayload = {
     name: '',
+    birthday: null,
     address: null,
     position: null,
+    hireDate: null,
+    status: null,
     contact: null,
     pagibig: null,
     philhealth: null,
@@ -75,8 +78,11 @@ export const UserDetailPage = () => {
 
     reset({
       name: user?.name ?? '',
+      birthday: user?.birthday ? new Date(user.birthday) : null,
       address: user?.address ?? null,
       position: user?.position ?? null,
+      hireDate: user?.hireDate ? new Date(user.hireDate) : null,
+      status: user?.status ?? null,
       contact: user?.contact ?? null,
       pagibig: user?.pagibig ?? null,
       philhealth: user?.philhealth ?? null,
@@ -95,8 +101,11 @@ export const UserDetailPage = () => {
     try {
       const userPayload = {
         name: data.name,
+        birthday: data.birthday || null,
         address: data.address,
         position: data.position,
+        hireDate: data.hireDate || null,
+        status: data.status,
         contact: data.contact,
         pagibig: data.pagibig,
         philhealth: data.philhealth,
@@ -161,7 +170,7 @@ export const UserDetailPage = () => {
 
           <BasicDetail control={control} user={user} />
           <Show when={isEmployee}>
-            <EmploymentDetail control={control} shifts={shifts || []} />
+            <EmploymentDetail control={control} shifts={shifts || []} user={user} />
           </Show>
           <GovernmentDetails control={control} />
           <ResetPassword />

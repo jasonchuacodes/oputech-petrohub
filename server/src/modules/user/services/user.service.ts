@@ -44,8 +44,13 @@ const getUsersByTenantId = (tenantId: string) =>
       id: true,
       name: true,
       email: true,
-      position: true,
       createdAt: true,
+      tenants: {
+        where: { tenantId },
+        select: {
+          position: true,
+        },
+      },
     },
   });
 
@@ -66,8 +71,16 @@ const getUserById = async (id: string, tenantId?: string) => {
   }
 
   let shiftSchedule = null;
+  let tenantUser: {
+    shift: { id: string; name: string; shiftStart: Date; shiftEnd: Date } | null;
+    employeeId: number;
+    position: string | null;
+    hireDate: Date | null;
+    status: string;
+  } | null = null;
+
   if (tenantId) {
-    const tenantUser = await prisma.tenantsOnUsers.findUnique({
+    tenantUser = await prisma.tenantsOnUsers.findUnique({
       where: {
         userId_tenantId: {
           userId: id,
@@ -75,7 +88,18 @@ const getUserById = async (id: string, tenantId?: string) => {
         },
       },
       select: {
-        shift: true,
+        shift: {
+          select: {
+            id: true,
+            name: true,
+            shiftStart: true,
+            shiftEnd: true,
+          },
+        },
+        employeeId: true,
+        position: true,
+        hireDate: true,
+        status: true,
       },
     });
 
@@ -89,7 +113,14 @@ const getUserById = async (id: string, tenantId?: string) => {
     }
   }
 
-  return { ...user, shiftSchedule };
+  return {
+    ...user,
+    shiftSchedule,
+    employeeId: tenantUser?.employeeId ?? null,
+    position: tenantUser?.position ?? null,
+    hireDate: tenantUser?.hireDate ?? null,
+    status: tenantUser?.status ?? null,
+  };
 };
 
 const updateUser = async (id: string, data: UpdateUserPayload, tenantId?: string) => {
@@ -101,8 +132,11 @@ const updateUser = async (id: string, data: UpdateUserPayload, tenantId?: string
     throw new NotFoundError('User not found');
   }
 
-  const { shiftId, ...userData } = data as UpdateUserPayload & {
+  const { shiftId, position, hireDate, status, ...userData } = data as UpdateUserPayload & {
     shiftId?: string | null;
+    position?: string | null;
+    hireDate?: string | null;
+    status?: string | null;
   };
 
   const updatedUser = await prisma.user.update({
@@ -110,18 +144,24 @@ const updateUser = async (id: string, data: UpdateUserPayload, tenantId?: string
     data: userData,
   });
 
-  if (tenantId && shiftId !== undefined) {
-    await prisma.tenantsOnUsers.update({
-      where: {
-        userId_tenantId: {
-          userId: id,
-          tenantId,
+  if (tenantId) {
+    const tenantData: Record<string, unknown> = {};
+    if (shiftId !== undefined) tenantData.shiftId = shiftId || null;
+    if (position !== undefined) tenantData.position = position || null;
+    if (hireDate !== undefined) tenantData.hireDate = hireDate ? new Date(hireDate) : null;
+    if (status !== undefined) tenantData.status = status || undefined;
+
+    if (Object.keys(tenantData).length > 0) {
+      await prisma.tenantsOnUsers.update({
+        where: {
+          userId_tenantId: {
+            userId: id,
+            tenantId,
+          },
         },
-      },
-      data: {
-        shiftId: shiftId || null,
-      },
-    });
+        data: tenantData,
+      });
+    }
   }
 
   return updatedUser;

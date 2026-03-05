@@ -1,6 +1,6 @@
 import z from 'zod';
 
-import { UserRole } from '../services/user/user.types';
+import { UserRole, EmploymentStatus } from '../services/user/user.types';
 import { RateType } from '../services/salary/salary.types';
 
 export const UpdateUserSchema = z
@@ -43,6 +43,8 @@ export const UpdateUserSchema = z
       .optional()
       .nullable(),
     shiftId: z.string().uuid().optional().nullable(),
+    hireDate: z.date().optional().nullable(),
+    status: z.nativeEnum(EmploymentStatus).optional().nullable(),
     rate: z.coerce.number().nonnegative().optional().nullable(),
     rateType: z.nativeEnum(RateType).optional().nullable(),
     effectiveFrom: z.string().optional().nullable(),

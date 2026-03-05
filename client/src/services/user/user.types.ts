@@ -10,6 +10,15 @@ export const UserRole = {
 
 export type UserRole = ValueOf<typeof UserRole>;
 
+export const EmploymentStatus = {
+  REGULAR: 'REGULAR',
+  PROBATIONARY: 'PROBATIONARY',
+  TERMINATED: 'TERMINATED',
+  RESIGNED: 'RESIGNED',
+} as const;
+
+export type EmploymentStatus = ValueOf<typeof EmploymentStatus>;
+
 export type SalaryRate = {
   id: string;
   rate: number;
@@ -36,7 +45,11 @@ export type User = {
   birthday?: Date;
   contact?: string;
   address?: string;
+
+  employeeId?: number;
   position?: string;
+  hireDate?: Date;
+  status?: EmploymentStatus;
   sss?: string;
   tin?: string;
   philhealth?: string;

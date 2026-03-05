@@ -139,7 +139,6 @@ const getTimesheets = async ({
           id: true,
           name: true,
           role: true,
-          position: true,
           salaryRates: {
             where: {
               tenantId,

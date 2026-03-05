@@ -93,7 +93,6 @@ const getTenantUsers = async (tenantId: string, filters?: GetTenantUsersFilters)
               name: true,
               username: true,
               role: true,
-              position: true,
             },
           },
           shift: true,
@@ -118,7 +117,7 @@ const getTenantUsers = async (tenantId: string, filters?: GetTenantUsersFilters)
           color: u.shift.color,
         };
       }
-      return { ...u.user, shiftSchedule };
+      return { ...u.user, position: u.position, shiftSchedule };
     })
     .sort((a, b) => a.name.localeCompare(b.name));
 };

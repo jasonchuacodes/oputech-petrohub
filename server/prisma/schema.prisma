@@ -54,6 +54,13 @@ enum ReportStatus {
   SUBMITTED
 }
 
+enum EmploymentStatus {
+  REGULAR
+  PROBATIONARY
+  TERMINATED
+  RESIGNED
+}
+
 enum ProductCategory {
   FUEL
   STOCK_INVENTORY
@@ -77,7 +84,6 @@ model User {
   birthday   DateTime?
   contact    String?
   address    String?
-  position   String?
   sss        String?
   tin        String?
   philhealth String?
@@ -141,7 +147,13 @@ model TenantsOnUsers {
   shift   Shift?  @relation(fields: [shiftId], references: [id], onDelete: SetNull)
   shiftId String?
 
+  employeeId Int              @default(autoincrement())
+  position   String?
+  hireDate   DateTime?        @default(now())
+  status     EmploymentStatus @default(PROBATIONARY)
+
   @@id([userId, tenantId])
+  @@unique([tenantId, employeeId])
   @@index([shiftId])
 }
 
