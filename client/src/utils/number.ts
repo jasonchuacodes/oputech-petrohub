@@ -1,6 +1,7 @@
 export const formatNumber = (
   value: number | string,
-  decimals: number = 2
+  decimals: number = 2,
+  digits?: number
 ): string => {
   const num = Number(value);
 
@@ -9,6 +10,7 @@ export const formatNumber = (
   return num.toLocaleString('en-US', {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
+    ...(digits != null && { minimumIntegerDigits: digits }),
   });
 };
 

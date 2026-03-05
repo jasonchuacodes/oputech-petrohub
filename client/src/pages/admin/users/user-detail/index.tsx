@@ -131,6 +131,7 @@ export const UserDetailPage = () => {
         });
       }
 
+      reset(data);
       toast.success('User updated successfully');
     } catch (err) {
       const parsedError = parseBackendError(err);

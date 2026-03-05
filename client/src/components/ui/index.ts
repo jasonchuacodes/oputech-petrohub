@@ -11,7 +11,6 @@ export * from './DataTable';
 export * from './DatePicker';
 export * from './DateRangePicker';
 export * from './DateTimePicker';
-export * from './DateTimeDisplay';
 export * from './WeekPicker';
 export * from './InfoBox';
 export * from './Form';

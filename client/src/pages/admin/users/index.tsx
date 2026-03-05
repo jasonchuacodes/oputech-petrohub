@@ -18,6 +18,7 @@ import { useDisclosure } from '~/hooks/useDisclosure';
 import { AdminRoutes } from '~/routes';
 import { useGetTenantUsersQuery } from '~/services/tenant/tenant.queries';
 import { pathFor } from '~/utils/pathFor';
+import { formatNumber } from '~/utils/number';
 import { toTitleCase } from '~/utils/textUtils';
 
 import { CreateUserModal } from './CreateUserModal';
@@ -82,6 +83,16 @@ export const UsersPage = () => {
             onValueChange: setSearchTerm,
           }}
           columns={[
+            {
+              id: 'id',
+              heading: 'ID',
+              cell: (user) => (
+                <Typography variant="body2" color="text.secondary">
+                  {user.employeeId != null ? formatNumber(user.employeeId, 0, 3) : '-'}
+                </Typography>
+              ),
+              orderable: true,
+            },
             {
               id: 'name',
               heading: 'Name',

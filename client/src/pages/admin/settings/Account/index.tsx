@@ -1,16 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Avatar, Container, Stack, Typography } from '@mui/material';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { useQueryClient } from '@tanstack/react-query';
-import dayjs from 'dayjs';
 import { useEffect } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
-import { InputWithFormat, Input } from '~/components/form';
-import { Button, DatePicker, Form } from '~/components/ui';
+import { InputWithFormat, Input, FormDatePicker } from '~/components/form';
+import { Button, Form } from '~/components/ui';
 import { useAuthContext } from '~/context/auth/useAuthContext';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { UpdateUserSchema, type UpdateUserPayload } from '~/schema/updateUserSchema';
@@ -110,19 +107,7 @@ export const AccountSettings = () => {
               pattern="9999-999-9999"
               placeholder="0912-345-6789"
             />
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <Controller
-                control={control}
-                name="birthday"
-                render={({ field: { value, onChange } }) => (
-                  <DatePicker
-                    label="Birthday"
-                    value={value ? dayjs(value) : null}
-                    onChange={(date) => onChange(date ? date.toDate() : null)}
-                  />
-                )}
-              />
-            </LocalizationProvider>
+            <FormDatePicker control={control} name="birthday" label="Birthday" disableFuture />
             <Input
               control={control}
               name="address"
