@@ -33,7 +33,7 @@ export const UpdateUserSchema = z
     pagibig: z
       .string()
       .trim()
-      .regex(/^\d{13}$/, { message: 'PAGIBIG number must be 13 digits' })
+      .regex(/^\d{12}$/, { message: 'PAGIBIG number must be 12 digits' })
       .optional()
       .nullable(),
     philhealth: z

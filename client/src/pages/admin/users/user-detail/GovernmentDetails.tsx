@@ -39,8 +39,8 @@ export const GovernmentDetails = ({ control }: GovernmentDetailsProps) => {
         control={control}
         name="pagibig"
         label="PAG-IBIG"
-        pattern="99-9999999999-9"
-        placeholder="00-0000000000-0"
+        pattern="99-9999999999"
+        placeholder="00-0000000000"
       />
 
       <InputWithFormat

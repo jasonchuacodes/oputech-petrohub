@@ -157,8 +157,8 @@ export const TenantSettingsPage = () => {
                 control={control}
                 name="pagibig"
                 label="PAGIBIG"
-                pattern="99-9999999999-9"
-                placeholder="12-3456789012-3"
+                pattern="99-9999999999"
+                placeholder="12-3456789012"
               />
               <InputWithFormat
                 control={control}

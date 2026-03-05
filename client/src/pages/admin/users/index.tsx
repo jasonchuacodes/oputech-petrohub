@@ -91,7 +91,6 @@ export const UsersPage = () => {
                   {user.employeeId != null ? formatNumber(user.employeeId, 0, 3) : '-'}
                 </Typography>
               ),
-              orderable: true,
             },
             {
               id: 'name',
