@@ -49,11 +49,11 @@ export const UserStatusEnum = {
 
 export type UserStatus = ValueOf<typeof UserStatusEnum>;
 
-export type AttendanceUser = User & {
+export type AttendanceUser = Omit<User, 'status'> & {
   status: UserStatus;
 };
 
-export type DailyTimesheetUser = User & {
+export type DailyTimesheetUser = Omit<User, 'status'> & {
   status: UserStatus;
   checkIn: string | null;
   checkOut: string | null;
