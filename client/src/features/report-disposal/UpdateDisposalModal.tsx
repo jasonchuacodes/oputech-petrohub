@@ -93,9 +93,10 @@ export const UpdateDisposalModal = ({
           <NumberInput
             label="After Reading"
             control={control}
-            placeholder="0.00"
+            placeholder="0.000"
             name="afterReading"
             min={0}
+            step={0.001}
           />
           <Stack flex={1} justifyContent="space-between" spacing={0.5}>
             <Typography variant="body2" color="textSecondary">

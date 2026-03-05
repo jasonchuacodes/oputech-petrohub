@@ -2,6 +2,7 @@
   "name": "Petromate",
   "short_name": "Petromate",
   "start_url": "/login",
+  "scope": "/",
   "display": "standalone",
   "theme_color": "#0F3B34",
   "background_color": "#F4F4F4",

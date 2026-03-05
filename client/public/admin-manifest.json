@@ -2,6 +2,7 @@
   "name": "Petromate Admin",
   "short_name": "Petromate Admin",
   "start_url": "/admin/login",
+  "scope": "/",
   "display": "standalone",
   "theme_color": "#0F3B34",
   "background_color": "#F4F4F4",
