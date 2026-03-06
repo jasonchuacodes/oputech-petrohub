@@ -56,7 +56,7 @@ export const FormDatePicker = <T extends FieldValues>({
                 onOpen={() => dateDisclosure.setOpen(true)}
                 onClose={() => dateDisclosure.setOpen(false)}
                 onChange={(newValue) => {
-                  onChange(newValue ? newValue.toDate() : null);
+                  onChange(newValue?.isValid() ? newValue.toDate() : null);
                 }}
                 open={dateDisclosure.open}
                 slotProps={{
