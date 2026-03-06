@@ -169,14 +169,26 @@ const Sidebar = () => {
       height="100%"
       sx={{
         transition: '0.3s ease',
+        overflow: 'hidden',
       }}
     >
-      <List sx={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
+      <Stack
+        direction="row"
+        alignItems="stretch"
+        sx={{ mx: disclosure.open ? 1 : 0.5 }}
+        gap={0.5}
+        borderBottom={1}
+        borderColor="primary.light"
+        py={1.5}
+      >
         <Show when={disclosure.open}>
-          <Box px={1} mb={2}>
+          <Box flex={1}>
             <TenantSelector />
           </Box>
         </Show>
+        <Toggler open={disclosure.open} setOpen={disclosure.setOpen} />
+      </Stack>
+      <List sx={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
         <Stack spacing={1}>
           {navGroups.map((group, groupIndex) => (
             <Stack key={groupIndex} spacing={1}>
@@ -256,8 +268,6 @@ const Sidebar = () => {
           ))}
         </Stack>
       </List>
-
-      <Toggler open={disclosure.open} setOpen={disclosure.setOpen} />
     </Stack>
   );
 };

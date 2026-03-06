@@ -6,6 +6,7 @@ import {
   SettingsOutlined,
 } from '@mui/icons-material';
 import {
+  alpha,
   Divider,
   IconButton,
   ListItemIcon,
@@ -22,6 +23,7 @@ import { Button, SkeletonList } from '~/components/ui';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { AdminRoutes } from '~/routes';
 import { useGetTenantsQuery } from '~/services/tenant/tenant.queries';
+import theme from '~/theme';
 import { pathFor } from '~/utils/pathFor';
 
 const TenantSelector = () => {
@@ -95,11 +97,17 @@ const TenantSelector = () => {
             px: 2,
             gap: 1,
             alignItems: 'center',
-            bgcolor: 'primary.main',
+            bgcolor: alpha(theme.palette.primary.light, 0.2),
             borderColor: 'primary.light',
           }}
         >
-          <Typography color="common.white">{activeTenant?.name}</Typography>
+          <Typography
+            color="common.white"
+            noWrap
+            sx={{ maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis' }}
+          >
+            {activeTenant?.name}
+          </Typography>
           <ChevronRight
             fontSize="small"
             sx={{ color: 'common.white', transform: 'rotate(90deg)' }}
