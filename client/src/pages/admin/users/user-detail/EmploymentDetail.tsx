@@ -11,6 +11,7 @@ import type { User } from '~/services/user/user.types';
 import { RateType } from '~/services/salary/salary.types';
 import type { UpdateUserPayload } from '~/schema/updateUserSchema';
 import theme from '~/theme';
+import { formatNumber } from '~/utils/number';
 import { pathFor } from '~/utils/pathFor';
 import { toTitleCase } from '~/utils/textUtils';
 
@@ -52,7 +53,7 @@ export const EmploymentDetail = ({ control, shifts, user }: EmploymentDetailProp
                   alignItems: 'center',
                 }}
               >
-                <Typography variant="body2">EMP-{user.employeeId}</Typography>
+                <Typography variant="body2">{formatNumber(user?.employeeId, 0, 3)}</Typography>
               </Box>
             </Stack>
           )}

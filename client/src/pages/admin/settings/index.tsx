@@ -17,34 +17,28 @@ export const AdminSettingsPage = () => {
 
   return (
     <PageLayout>
-      <Stack spacing={3} pt={3} px={3}>
+      <Stack p={3} spacing={3} flex={1} overflow="hidden">
         <PageHeader
           title="Account Settings"
           description=" Manage your company profile and preferences."
         />
-        <Box
-          sx={{
-            borderBottom: '1px solid',
-            borderColor: 'divider',
-            position: 'sticky',
-            top: 0,
-            zIndex: 1,
-          }}
-        >
-          <Tabs value={value} onChange={handleChange}>
-            <Tab label="Account" />
-            <Tab label="Security" />
-          </Tabs>
-        </Box>
-      </Stack>
+        <Stack overflow="hidden" bgcolor="background.surface" borderRadius={2}>
+          <Box sx={{ borderBottom: '1px solid', borderColor: 'divider' }}>
+            <Tabs value={value} onChange={handleChange}>
+              <Tab label="Account" />
+              <Tab label="Security" />
+            </Tabs>
+          </Box>
 
-      <Stack flex={1} overflow="auto" width="100%" height="100%">
-        <SettingsTabPanel index={0} value={value}>
-          <AccountSettings />
-        </SettingsTabPanel>
-        <SettingsTabPanel index={1} value={value}>
-          <SecuritySettings />
-        </SettingsTabPanel>
+          <Stack flex={1} overflow="auto">
+            <SettingsTabPanel index={0} value={value}>
+              <AccountSettings />
+            </SettingsTabPanel>
+            <SettingsTabPanel index={1} value={value}>
+              <SecuritySettings />
+            </SettingsTabPanel>
+          </Stack>
+        </Stack>
       </Stack>
     </PageLayout>
   );

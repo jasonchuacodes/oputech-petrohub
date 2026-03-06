@@ -84,7 +84,7 @@ export const AccountSettings = () => {
 
   return (
     <Form onSubmit={handleSubmit(onSubmit)} sx={{ width: '100%' }}>
-      <Container maxWidth="sm" disableGutters sx={{ flex: 1, overflow: 'auto', margin: 0 }}>
+      <Container maxWidth="sm" disableGutters sx={{ margin: 0 }}>
         <Stack justifyContent="center" alignItems="start" spacing={2} p={3}>
           {/* TODO: avatar uploader */}
           <Avatar alt="profile-picture" sx={{ width: 64, height: 64 }}>

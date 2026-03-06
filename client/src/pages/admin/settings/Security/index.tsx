@@ -51,7 +51,7 @@ export const SecuritySettings = () => {
 
   return (
     <Form onSubmit={onSubmit} sx={{ display: 'flex', width: '100%' }}>
-      <Container maxWidth="sm" disableGutters sx={{ flex: 1, overflow: 'auto', margin: 0 }}>
+      <Container maxWidth="sm" disableGutters sx={{ margin: 0 }}>
         <Stack justifyContent="center" alignItems="center" spacing={2} p={3}>
           <Stack spacing={1} width="100%">
             <PasswordField
