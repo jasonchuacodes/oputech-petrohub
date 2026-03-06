@@ -33,7 +33,7 @@ export const EmploymentDetail = ({ control, shifts, user }: EmploymentDetailProp
       </Typography>
 
       <Stack spacing={2}>
-        <Stack direction="row" spacing={2}>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
           {user?.employeeId != null && (
             <Stack spacing={0.5} width="100%">
               <Typography variant="body2" fontWeight="medium">
@@ -64,7 +64,7 @@ export const EmploymentDetail = ({ control, shifts, user }: EmploymentDetailProp
           />
         </Stack>
 
-        <Stack direction="row" spacing={2}>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
           <FormDatePicker control={control} name="hireDate" label="Hire Date" />
           <FormSelect control={control} name="status" label="Employment Status">
             {Object.values(EmploymentStatus).map((status) => (
@@ -75,19 +75,17 @@ export const EmploymentDetail = ({ control, shifts, user }: EmploymentDetailProp
           </FormSelect>
         </Stack>
 
-        <Stack spacing={2} direction="row">
+        <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }}>
           <NumberInput
             startAdornment="₱"
             control={control}
-            width="50%"
-            fullWidth={false}
             name="rate"
             label="Salary Rate"
             placeholder="0.00"
             min={0}
           />
 
-          <FormSelect control={control} name="rateType" label="Rate Type" width="50%">
+          <FormSelect sx={{ flex: 1 }} control={control} name="rateType" label="Rate Type">
             {Object.values(RateType).map((rateType) => (
               <MenuItem key={rateType} value={rateType}>
                 <Typography variant="body2">{toTitleCase(rateType)}</Typography>
@@ -95,10 +93,10 @@ export const EmploymentDetail = ({ control, shifts, user }: EmploymentDetailProp
             ))}
           </FormSelect>
         </Stack>
-        
-        <Stack direction="row" spacing={2}>
+
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
           <ShiftSelect control={control} label="Shift Schedule" name="shiftId" shifts={shifts} />
-          <Box width="100%" />
+          <Box sx={{ display: { xs: 'none', sm: 'block' }, width: '100%' }} />
         </Stack>
 
         {shifts.length === 0 && (
