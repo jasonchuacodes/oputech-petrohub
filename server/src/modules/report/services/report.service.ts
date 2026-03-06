@@ -211,6 +211,7 @@ const getReports = async ({
       shift: true,
       income: { select: { amount: true } },
       expenses: { select: { amount: true } },
+      inventories: { include: { product: true } },
       employees: {
         include: {
           user: {

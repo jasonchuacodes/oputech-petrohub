@@ -6,8 +6,10 @@ import {
   Breadcrumb,
   CardContainer,
   LoadingSpinner,
+  NoData,
   PageContainer,
   PageLayout,
+  Show,
 } from '~/components/ui';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { PageHeader } from '~/components/layouts';
@@ -73,7 +75,7 @@ export const ReportDetailPage = () => {
                 </Typography>
               </CardContainer>
             )}
-            <Stack direction="row" spacing={2}>
+            <Stack direction={{ sm: 'column', md: 'row' }} spacing={2}>
               <Stack flex={1} spacing={2}>
                 <CardContainer height="fit-content" p={2} spacing={2} borderRadius={2}>
                   <Stack direction="row" justifyContent="space-between">
@@ -84,6 +86,24 @@ export const ReportDetailPage = () => {
                       {formatCurrency(Number(report?.netTotal))}
                     </Typography>
                   </Stack>
+
+                  <Stack direction="row" alignItems="center" justifyContent="space-between">
+                    <Typography variant="body2" color="text.secondary">
+                      Lubricants
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {formatCurrency(Number(report?.totalInventorySales))}
+                    </Typography>
+                  </Stack>
+                  <Stack direction="row" alignItems="center" justifyContent="space-between">
+                    <Typography variant="body2" color="text.secondary">
+                      Fuel Sales
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {formatCurrency(Number(report?.totalSales))}
+                    </Typography>
+                  </Stack>
+                  <Divider />
 
                   <Stack pl={2} spacing={1}>
                     <Stack direction="row" alignItems="center" justifyContent="space-between">
@@ -103,29 +123,12 @@ export const ReportDetailPage = () => {
                         {formatCurrency(Number(report?.totalExpenses))}
                       </Typography>
                     </Stack>
-                    <Stack direction="row" alignItems="center" justifyContent="space-between">
-                      <Typography variant="body2" color="text.secondary">
-                        Lubricants
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {formatCurrency(Number(report?.totalInventorySales))}
-                      </Typography>
-                    </Stack>
 
                     <Divider />
 
                     <Stack direction="row" alignItems="center" justifyContent="space-between">
-                      <Typography variant="body2" color="text.primary">
-                        Total Sales
-                      </Typography>
-                      <Typography variant="body2" color="text.primary">
-                        {formatCurrency(Number(report?.totalSales))}
-                      </Typography>
-                    </Stack>
-
-                    <Stack direction="row" alignItems="center" justifyContent="space-between">
                       <Typography variant="body2" color="text.secondary">
-                        Disposals Sales
+                        Disposals
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
                         {formatCurrency(Number(report?.totalDisposalSales))}
@@ -133,7 +136,6 @@ export const ReportDetailPage = () => {
                     </Stack>
 
                     <Divider />
-
                     <Stack direction="row" alignItems="center" justifyContent="space-between">
                       <Typography variant="body2" color="text.primary">
                         {(report?.shortages ?? 0) >= 0 ? 'Shortages ' : 'Over'}
@@ -268,14 +270,14 @@ export const ReportDetailPage = () => {
                       Total
                     </Typography>
                     <Typography variant="body2" color="text.primary">
-                      {formatCurrency(Number(report?.totalExpenses))}
+                      {formatCurrency(Number(report?.totalInventorySales))}
                     </Typography>
                   </Stack>
                 </CardContainer>
               </Stack>
 
               {/* Right Section */}
-              <Stack minWidth="40%" spacing={2}>
+              <Stack sx={{ minWidth: { md: '40%' } }} spacing={2}>
                 <CardContainer height="fit-content" spacing={2}>
                   <Stack direction="row" alignItems="center" justifyContent="space-between">
                     <Typography variant="body2" sx={{ fontWeight: 600 }}>
@@ -285,16 +287,20 @@ export const ReportDetailPage = () => {
                       <MoreHorizOutlined fontSize="inherit" />
                     </IconButton>
                   </Stack>
-                  <Stack direction="row" spacing={3} px={2}>
-                    {report?.employees.map(({ user }) => (
-                      <Stack alignItems="center">
-                        <Avatar sx={{ height: 40, width: 40 }}></Avatar>
-                        <Typography variant="body2" color="text.primary">
-                          {user?.name.split(' ')[0]}
-                        </Typography>
-                      </Stack>
-                    ))}
-                  </Stack>
+                  {report?.employees.length === 0 ? (
+                    <NoData text="No employees on duty" description="" />
+                  ) : (
+                    <Stack direction="row" spacing={3} px={2} flexWrap="wrap">
+                      {report?.employees.map(({ user }) => (
+                        <Stack alignItems="center">
+                          <Avatar sx={{ height: 40, width: 40 }}></Avatar>
+                          <Typography variant="body2" color="text.primary">
+                            {user?.name.split(' ')[0]}
+                          </Typography>
+                        </Stack>
+                      ))}
+                    </Stack>
+                  )}
                 </CardContainer>
 
                 {/* Disposals */}
@@ -315,19 +321,26 @@ export const ReportDetailPage = () => {
                       {formatCurrency(report?.totalDisposalSales || 0)}
                     </Typography>
                   </Stack>
-                  <Divider />
 
                   {/* Summary */}
-                  {report?.disposals.map((disposal) => (
-                    <Stack key={disposal.id} direction="row" justifyContent="space-between" pl={2}>
-                      <Typography variant="body2" color="text.secondary">
-                        {disposal.product.name}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {formatCurrency(Number(disposal.totalSales))}
-                      </Typography>
-                    </Stack>
-                  ))}
+                  <Show when={!!report?.disposals?.length}>
+                    <Divider />
+                    {report?.disposals.map((disposal) => (
+                      <Stack
+                        key={disposal.id}
+                        direction="row"
+                        justifyContent="space-between"
+                        pl={2}
+                      >
+                        <Typography variant="body2" color="text.secondary">
+                          {disposal.product.name}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {formatCurrency(Number(disposal.totalSales))}
+                        </Typography>
+                      </Stack>
+                    ))}
+                  </Show>
 
                   {/* Disposal Card */}
 

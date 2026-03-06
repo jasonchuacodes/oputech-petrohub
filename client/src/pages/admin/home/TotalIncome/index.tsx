@@ -20,7 +20,7 @@ export const TotalIncome = () => {
 
   return (
     <AnalyticsCard
-      title="Total Income"
+      title="Total Fuel Sales"
       value={data?.value ?? 0}
       changePercentage={data?.changePercentage ?? 0}
       datapoints={data?.datapoints ?? []}

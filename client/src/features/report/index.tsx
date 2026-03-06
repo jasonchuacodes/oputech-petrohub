@@ -1,4 +1,12 @@
-import { Stack, Typography, CircularProgress, Box, Divider, darken } from '@mui/material';
+import {
+  Stack,
+  Typography,
+  CircularProgress,
+  Box,
+  Divider,
+  darken,
+  lighten,
+} from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { CheckCircleOutline, DeleteOutline } from '@mui/icons-material';
@@ -159,6 +167,24 @@ export const Report = () => {
                 <MoreDetailsMenu onDelete={deleteDisclosure.onOpen} />
               </Show>
             </Stack>
+            <Stack direction="row" alignItems="center" justifyContent="space-between">
+              <Typography variant="body2" color="primary.alpha">
+                Lubricants
+              </Typography>
+              <Typography variant="body2" color="primary.alpha">
+                {formatCurrency(report?.totalInventorySales)}
+              </Typography>
+            </Stack>
+            <Stack direction="row" alignItems="center" justifyContent="space-between">
+              <Typography variant="body2" color="primary.alpha">
+                Fuel Sales
+              </Typography>
+              <Typography variant="body2" color="primary.alpha">
+                {formatCurrency(report?.totalSales)}
+              </Typography>
+            </Stack>
+
+            <Divider sx={{ borderColor: 'primary.light' }} />
 
             <Stack pl={2} spacing={1}>
               <Stack direction="row" alignItems="center" justifyContent="space-between">
@@ -178,24 +204,8 @@ export const Report = () => {
                   {formatCurrency(report?.totalExpenses)}
                 </Typography>
               </Stack>
-              <Stack direction="row" alignItems="center" justifyContent="space-between">
-                <Typography variant="body2" color="primary.alpha">
-                  Lubricants
-                </Typography>
-                <Typography variant="body2" color="primary.alpha">
-                  {formatCurrency(report?.totalInventorySales)}
-                </Typography>
-              </Stack>
 
               <Divider sx={{ borderColor: 'primary.light' }} />
-              <Stack direction="row" alignItems="center" justifyContent="space-between">
-                <Typography variant="body2" color="primary.alpha">
-                  Total Sales
-                </Typography>
-                <Typography variant="body2" color="primary.alpha">
-                  {formatCurrency(report?.totalSales)}
-                </Typography>
-              </Stack>
 
               <Stack direction="row" alignItems="center" justifyContent="space-between">
                 <Typography variant="body2" color="primary.alpha">
@@ -212,7 +222,7 @@ export const Report = () => {
                 </Typography>
                 <Typography
                   variant="body2"
-                  color={report.shortages > 0 ? 'warning' : 'primary.alpha'}
+                  color={report.shortages > 0 ? lighten(theme.palette.error.main, 0.1) : 'warning'}
                 >
                   {report.shortages > 0
                     ? `(${formatNumber(Math.abs(report.shortages))})`

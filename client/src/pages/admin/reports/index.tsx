@@ -121,7 +121,7 @@ export const ReportsPage = () => {
               heading: 'Net Total',
               cell: (report) => (
                 <Typography variant="body2" color="text.secondary">
-                  {formatNumber(report.totalIncome - report.totalExpenses)}
+                  {formatNumber(report.netTotal)}
                 </Typography>
               ),
               width: 120,
@@ -132,6 +132,16 @@ export const ReportsPage = () => {
               cell: (report) => (
                 <Typography variant="body2" color="text.secondary">
                   {formatNumber(Number(report.totalIncome))}
+                </Typography>
+              ),
+              width: 120,
+            },
+            {
+              id: 'totalInventorySales',
+              heading: 'Total Inventory Sales',
+              cell: (report) => (
+                <Typography variant="body2" color="text.secondary">
+                  {formatNumber(Number(report.totalInventorySales))}
                 </Typography>
               ),
               width: 120,
