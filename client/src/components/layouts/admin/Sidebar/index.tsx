@@ -21,12 +21,11 @@ import {
   ListSubheader,
   Stack,
 } from '@mui/material';
-import { type ComponentType, useEffect } from 'react';
+import { type ComponentType, type Dispatch, type SetStateAction, useEffect } from 'react';
 import { matchPath, useLocation, useNavigate } from 'react-router-dom';
 
 import { Show } from '~/components/ui';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
-import { useDisclosure } from '~/hooks/useDisclosure';
 import { AdminRoutes } from '~/routes';
 import { pathFor } from '~/utils/pathFor';
 
@@ -45,16 +44,29 @@ type NavGroup = {
   items: NavItem[];
 };
 
-const Sidebar = () => {
+type SidebarProps = {
+  open: boolean;
+  setOpen: Dispatch<SetStateAction<boolean>>;
+  isMobile: boolean;
+};
+
+const Sidebar = ({ open, setOpen, isMobile }: SidebarProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { tenantId } = useTenantContext();
 
-  const disclosure = useDisclosure(localStorage.getItem('sidebar:open') !== 'false');
-
   useEffect(() => {
-    localStorage.setItem('sidebar:open', String(disclosure.open));
-  }, [disclosure.open]);
+    if (!isMobile) {
+      localStorage.setItem('sidebar:open', String(open));
+    }
+  }, [open, isMobile]);
+
+  // Auto-close on navigation when on mobile
+  useEffect(() => {
+    if (isMobile) {
+      setOpen(false);
+    }
+  }, [location.pathname, isMobile]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const navGroups: NavGroup[] = [
     {
@@ -161,38 +173,57 @@ const Sidebar = () => {
   };
 
   return (
+    <>
+      {isMobile && open && (
+        <Box
+          onClick={() => setOpen(false)}
+          sx={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 1199,
+            bgcolor: 'rgba(0,0,0,0.4)',
+          }}
+        />
+      )}
     <Stack
       justifyContent="space-between"
       role="presentation"
-      width={disclosure.open ? 256 : 58}
+      width={isMobile ? 256 : open ? 256 : 58}
       bgcolor="primary.main"
-      height="100%"
+      height={isMobile ? '100vh' : '100%'}
       sx={{
         transition: '0.3s ease',
         overflow: 'hidden',
+        ...(isMobile && {
+          position: 'fixed',
+          left: 0,
+          top: 0,
+          zIndex: 1200,
+          transform: open ? 'translateX(0)' : 'translateX(-100%)',
+        }),
       }}
     >
       <Stack
         direction="row"
         alignItems="stretch"
-        sx={{ mx: disclosure.open ? 1 : 0.5 }}
+        sx={{ mx: open ? 1 : 0.5 }}
         gap={0.5}
         borderBottom={1}
         borderColor="primary.light"
         py={1.5}
       >
-        <Show when={disclosure.open}>
+        <Show when={open}>
           <Box flex={1}>
             <TenantSelector />
           </Box>
         </Show>
-        <Toggler open={disclosure.open} setOpen={disclosure.setOpen} />
+        <Toggler open={open} setOpen={setOpen} />
       </Stack>
       <List sx={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
         <Stack spacing={1}>
           {navGroups.map((group, groupIndex) => (
             <Stack key={groupIndex} spacing={1}>
-              <Show when={disclosure.open}>
+              <Show when={open}>
                 <ListSubheader
                   sx={{
                     bgcolor: 'transparent',
@@ -231,14 +262,14 @@ const Sidebar = () => {
                         },
                         display: 'flex',
                         alignItems: 'center',
-                        mx: disclosure.open ? 1 : 0.5,
-                        px: disclosure.open ? 3 : 0,
+                        mx: open ? 1 : 0.5,
+                        px: open ? 3 : 0,
                         gap: 1,
                         height: '100%',
                         borderRadius: 2,
                         bgcolor: active ? 'primary.light' : 'transparent',
                         color: 'primary.alpha',
-                        justifyContent: disclosure.open ? 'flex-start' : 'center',
+                        justifyContent: open ? 'flex-start' : 'center',
                       }}
                     >
                       <ListItemIcon
@@ -249,7 +280,7 @@ const Sidebar = () => {
                       >
                         <Icon component={icon} fontSize="small" />
                       </ListItemIcon>
-                      <Show when={disclosure.open}>
+                      <Show when={open}>
                         <ListItemText
                           slotProps={{
                             primary: {
@@ -269,6 +300,7 @@ const Sidebar = () => {
         </Stack>
       </List>
     </Stack>
+    </>
   );
 };
 

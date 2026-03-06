@@ -1,4 +1,5 @@
-import { Avatar, Divider, Stack, Typography } from '@mui/material';
+import { MenuOutlined } from '@mui/icons-material';
+import { Avatar, Divider, IconButton, Stack, Typography } from '@mui/material';
 
 import { Button } from '~/components/ui';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
@@ -9,7 +10,11 @@ import { NotificationMenu } from './NotificationMenu';
 import NavbarUserMenu from './UserMenu';
 import { useNavigate } from 'react-router-dom';
 
-const Navbar = () => {
+type NavbarProps = {
+  onMenuOpen?: () => void;
+};
+
+const Navbar = ({ onMenuOpen }: NavbarProps) => {
   const navigate = useNavigate();
   const { tenantId } = useTenantContext();
 
@@ -23,6 +28,13 @@ const Navbar = () => {
       borderBottom={1}
       borderColor="divider"
     >
+      <IconButton
+        onClick={onMenuOpen}
+        sx={{ display: { xs: 'flex', sm: 'none' }, mr: 0.5 }}
+        size="small"
+      >
+        <MenuOutlined />
+      </IconButton>
       <Button
         disabled={!tenantId}
         onClick={() =>
