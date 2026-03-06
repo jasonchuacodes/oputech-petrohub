@@ -40,6 +40,12 @@ interface GetTotalExpenseAnalyticsParams {
   endDate?: Date;
 }
 
+interface GetTotalInventorySalesAnalyticsParams {
+  tenantId: string;
+  startDate?: Date;
+  endDate?: Date;
+}
+
 interface GetDisposalAnalyticsByTypeParams {
   tenantId: string;
   startDate?: Date;
@@ -220,6 +226,87 @@ export const getTotalExpenseAnalytics = async ({
   return {
     value: currentTotal.toNumber(),
     changePercentage: Math.round(changePercentage * 100) / 100, // Round to 2 decimals
+    datapoints,
+  };
+};
+
+export const getTotalInventorySalesAnalytics = async ({
+  tenantId,
+  startDate,
+  endDate,
+}: GetTotalInventorySalesAnalyticsParams): Promise<AnalyticsData> => {
+  const now = new Date();
+  const periodStart = startDate || startOfMonth(now);
+  const periodEnd = endDate || endOfMonth(now);
+
+  const periodDuration = differenceInDays(periodEnd, periodStart) + 1;
+  const previousPeriodEnd = subDays(periodStart, 1);
+  const previousPeriodStart = subDays(previousPeriodEnd, periodDuration - 1);
+
+  const currentAggregations = await prisma.reportInventorySalesAggregation.findMany({
+    where: {
+      tenantId,
+      hourBucket: {
+        gte: periodStart,
+        lte: periodEnd,
+      },
+    },
+    orderBy: { hourBucket: 'asc' },
+  });
+
+  const previousAggregations = await prisma.reportInventorySalesAggregation.findMany({
+    where: {
+      tenantId,
+      hourBucket: {
+        gte: previousPeriodStart,
+        lte: previousPeriodEnd,
+      },
+    },
+  });
+
+  const currentTotal = currentAggregations.reduce(
+    (sum: Decimal, agg) => sum.add(agg.totalAmount),
+    new Decimal(0),
+  );
+
+  const previousTotal = previousAggregations.reduce(
+    (sum: Decimal, agg) => sum.add(agg.totalAmount),
+    new Decimal(0),
+  );
+
+  let changePercentage = 0;
+  if (previousTotal.gt(0)) {
+    const change = currentTotal.sub(previousTotal);
+    changePercentage = change.div(previousTotal).mul(100).toNumber();
+  } else if (currentTotal.gt(0)) {
+    changePercentage = 100;
+  }
+
+  const dailyMap = new Map<string, Decimal>();
+
+  for (const agg of currentAggregations) {
+    const dayKey = startOfDay(agg.hourBucket).toISOString();
+    const existing = dailyMap.get(dayKey);
+    if (existing) {
+      dailyMap.set(dayKey, existing.add(agg.totalAmount));
+    } else {
+      dailyMap.set(dayKey, new Decimal(agg.totalAmount));
+    }
+  }
+
+  const allDays = eachDayOfInterval({ start: periodStart, end: periodEnd });
+  const datapoints: AnalyticsDatapoint[] = allDays.map((day: Date) => {
+    const dayKey = startOfDay(day).toISOString();
+    const value = dailyMap.get(dayKey) || new Decimal(0);
+    return {
+      value: value.toNumber(),
+      timestamp: dayKey,
+    };
+  });
+
+  return {
+    value: currentTotal.toNumber(),
+    changePercentage: Math.round(changePercentage * 100) / 100,
     datapoints,
   };
 };

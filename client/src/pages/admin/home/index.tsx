@@ -16,6 +16,7 @@ import { ReportCard } from './ReportCard';
 import { TotalDisposals } from './TotalDisposals';
 import { TotalExpenses } from './TotalExpenses';
 import { TotalIncome } from './TotalIncome';
+import { TotalInventorySales } from './TotalInventorySales';
 import { TimesheetCard } from './TimesheetCard';
 
 const AnalyticsSection = () => {
@@ -39,14 +40,19 @@ const AnalyticsSection = () => {
 
   return (
     <Grid container spacing={2} alignItems="stretch">
-      <Grid size={{ xs: 12, md: 6, lg: 6 }} display="flex">
+      <Grid size={{ xs: 12, md: 6, lg: 4 }} display="flex">
         <Stack width="100%">
           <TotalIncome />
         </Stack>
       </Grid>
-      <Grid size={{ xs: 12, md: 6, lg: 6 }} display="flex">
+      <Grid size={{ xs: 12, md: 6, lg: 4 }} display="flex">
         <Stack width="100%">
           <TotalExpenses />
+        </Stack>
+      </Grid>
+      <Grid size={{ xs: 12, md: 6, lg: 4 }} display="flex">
+        <Stack width="100%">
+          <TotalInventorySales />
         </Stack>
       </Grid>
 

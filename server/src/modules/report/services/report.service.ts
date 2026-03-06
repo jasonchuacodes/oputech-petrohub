@@ -8,6 +8,7 @@ import { processInventoryDeductions } from './inventory.service';
 import { aggregateReportIncome } from '~/modules/analytics/services/income-aggregation.service';
 import { aggregateReportExpense } from '~/modules/analytics/services/expense-aggregation.service';
 import { aggregateReportDisposal } from '~/modules/analytics/services/disposal-aggregation.service';
+import { aggregateReportInventorySales } from '~/modules/analytics/services/inventory-sales-aggregation.service';
 
 interface CreateReportPayload {
   tenantId: string;
@@ -362,6 +363,7 @@ const submitReport = async (reportId: string, userId: string) => {
   await aggregateReportIncome(reportId);
   await aggregateReportExpense(reportId);
   await aggregateReportDisposal(reportId);
+  await aggregateReportInventorySales(reportId);
 
   return await prisma.$transaction(async (tx) => {
     // Get disposals to extract afterReading values

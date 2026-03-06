@@ -1,6 +1,6 @@
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 
-import { getTotalIncomeAnalyticsData, getTotalExpenseAnalyticsData, getDisposalAnalyticsData } from './analytics.api';
+import { getTotalIncomeAnalyticsData, getTotalExpenseAnalyticsData, getDisposalAnalyticsData, getTotalInventorySalesAnalyticsData } from './analytics.api';
 import type { AnalyticsFilters, AnalyticsData, DisposalAnalyticsDataByType } from './analytics.types';
 
 export const useGetTotalIncomeAnalyticsDataQuery = (
@@ -19,6 +19,16 @@ export const useGetTotalExpenseAnalyticsDataQuery = (
   return useQuery({
     queryKey: ['analytics', 'expense-chart', filters.tenantId, filters.startDate, filters.endDate],
     queryFn: () => getTotalExpenseAnalyticsData(filters),
+    enabled: !!filters.tenantId,
+  });
+};
+
+export const useGetTotalInventorySalesAnalyticsDataQuery = (
+  filters: AnalyticsFilters,
+): UseQueryResult<AnalyticsData> => {
+  return useQuery({
+    queryKey: ['analytics', 'inventory-sales-chart', filters.tenantId, filters.startDate, filters.endDate],
+    queryFn: () => getTotalInventorySalesAnalyticsData(filters),
     enabled: !!filters.tenantId,
   });
 };

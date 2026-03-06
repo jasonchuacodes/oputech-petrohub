@@ -33,6 +33,22 @@ export const getTotalExpenseAnalyticsData = async (
   return response.data.data;
 };
 
+export const getTotalInventorySalesAnalyticsData = async (
+  filters: AnalyticsFilters,
+): Promise<AnalyticsData> => {
+  const response = await axios.get(
+    '/analytics/inventory-sales',
+    {
+      params: {
+        tenantId: filters.tenantId,
+        startDate: filters.startDate,
+        endDate: filters.endDate,
+      },
+    }
+  );
+  return response.data.data;
+};
+
 export const getDisposalAnalyticsData = async (
   filters: AnalyticsFilters,
 ): Promise<DisposalAnalyticsDataByType[]> => {
