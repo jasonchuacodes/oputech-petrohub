@@ -37,7 +37,7 @@ export const ShiftSelectionModal = ({ open, onClose, tenantId }: ShiftSelectionM
   const navigate = useNavigate();
   const today = dayjsLocal().startOf('day').toISOString();
 
-  const { data: shiftPeriods, isLoading: isLoadingPeriods } = useShiftPeriodsQuery(today);
+  const { data: shiftPeriods, isLoading: isLoadingPeriods } = useShiftPeriodsQuery(today, tenantId);
   const { data: reports, isLoading: isLoadingReports } = useGetReportsQuery({
     tenantId,
     filters: { shiftDate: today },

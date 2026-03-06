@@ -74,11 +74,11 @@ const useDeleteShiftMutation = () => {
   });
 };
 
-const useShiftPeriodsQuery = (shiftDate: string | null) => {
+const useShiftPeriodsQuery = (shiftDate: string | null, tenantId: string | undefined) => {
   return useQuery({
-    queryKey: ['shift-periods', shiftDate],
-    queryFn: () => getShiftPeriods(shiftDate!),
-    enabled: !!shiftDate,
+    queryKey: ['shift-periods', shiftDate, tenantId],
+    queryFn: () => getShiftPeriods(shiftDate!, tenantId!),
+    enabled: !!shiftDate && !!tenantId,
   });
 };
 

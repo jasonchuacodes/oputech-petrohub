@@ -24,8 +24,8 @@ const deleteShift = (shiftId: string, tenantId: string) => {
   return axios.delete(`/shifts/${shiftId}`, { params: { tenantId } });
 };
 
-const getShiftPeriods = async (shiftDate: string): Promise<ShiftPeriod[]> => {
-  const res = await axios.get('/shifts/periods', { params: { shiftDate } });
+const getShiftPeriods = async (shiftDate: string, tenantId: string): Promise<ShiftPeriod[]> => {
+  const res = await axios.get('/shifts/periods', { params: { shiftDate, tenantId } });
   return res.data.data;
 };
 
