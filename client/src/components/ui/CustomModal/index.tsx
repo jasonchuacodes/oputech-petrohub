@@ -50,7 +50,13 @@ export const CustomModal = ({
   ...modalProps
 }: Props) => {
   return (
-    <Modal onClose={onClose} disableAutoFocus disableEnforceFocus {...modalProps}>
+    <Modal
+      onClose={(_, reason) => { if (reason !== 'backdropClick') onClose(); }}
+      disableAutoFocus
+      disableEnforceFocus
+      {...modalProps}
+      disablePortal
+    >
       <Box>
         <Card
           sx={{
