@@ -100,7 +100,7 @@ const Navbar = () => {
   };
 
   const DrawerList = (
-    <Stack width={240} position="relative" height="100%" pb={1}>
+    <Stack width={240} position="relative" height="100%" sx={{ paddingBottom: 'max(8px, env(safe-area-inset-bottom))' }}>
       <Stack direction="row" justifyContent="space-between" alignItems="center" height={56} px={1}>
         <Button onClick={() => handleNavigate(pathFor({ pathname: UserRoutes.Home }))}>
           <Avatar sx={{ width: 28, height: 28, bgcolor: 'primary.main' }} variant="rounded">
