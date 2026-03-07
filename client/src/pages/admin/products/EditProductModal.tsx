@@ -157,6 +157,7 @@ export const EditProductModal = ({ open, onClose }: EditProductModalProps) => {
             placeholder="0.00"
             name="reading"
             min={1}
+            step={0.001}
           />
           <NumberInput
             label="Product Price"
