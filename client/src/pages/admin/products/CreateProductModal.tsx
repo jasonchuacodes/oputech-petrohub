@@ -104,6 +104,7 @@ export const CreateProductModal = ({ open, onClose }: CreateProductModalProps) =
             placeholder="0.00"
             name="reading"
             min={1}
+            step={0.001}
           />
           <NumberInput
             required
