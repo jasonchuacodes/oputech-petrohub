@@ -51,7 +51,9 @@ export const CustomModal = ({
 }: Props) => {
   return (
     <Modal
-      onClose={(_, reason) => { if (reason !== 'backdropClick') onClose(); }}
+      onClose={(_, reason) => {
+        if (reason !== 'backdropClick') onClose();
+      }}
       disableAutoFocus
       disableEnforceFocus
       {...modalProps}
@@ -119,6 +121,7 @@ export const CustomModal = ({
                     fontSize: 'h5.fontSize',
                     color: 'text.primary',
                     fontWeight: 'bold',
+                    textAlign: 'start',
                   }}
                 >
                   {title}
@@ -126,10 +129,10 @@ export const CustomModal = ({
                 {subheader && (
                   <Typography
                     variant="body2"
-                    component="span"
                     sx={{
                       fontSize: 'body2.fontSize',
                       color: 'text.secondary',
+                      textAlign: 'start',
                     }}
                   >
                     {subheader}

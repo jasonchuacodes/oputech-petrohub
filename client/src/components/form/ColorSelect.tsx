@@ -40,7 +40,7 @@ export const ColorSelect = <T extends FieldValues>({
       name={name}
       control={control}
       render={({ field: { onChange, value }, fieldState: { error } }) => (
-        <Stack spacing={0.5} width="100%" maxWidth="sm">
+        <Stack alignItems='start' spacing={0.5} width="100%" maxWidth="sm">
           {label && (
             <Typography variant="body2" fontWeight="medium" color="text.primary">
               {label}

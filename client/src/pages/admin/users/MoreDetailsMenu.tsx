@@ -18,7 +18,7 @@ export const MoreDetailsMenu = () => {
   const navigate = useNavigate();
   const { auth } = useAuthContext();
   const { tenantId } = useTenantContext();
-  const { userId } = useUserContext();
+  const { userId, user } = useUserContext();
 
   const [anchorElSettingsMenu, setAnchorElSettingsMenu] = useState<null | HTMLElement>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -109,6 +109,7 @@ export const MoreDetailsMenu = () => {
       </Menu>
 
       <DeleteConfirmModal
+        user={user}
         open={isDeleteModalOpen}
         loading={isDeletePending}
         onClose={() => setIsDeleteModalOpen(false)}

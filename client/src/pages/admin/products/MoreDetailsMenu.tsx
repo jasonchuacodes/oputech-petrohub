@@ -64,8 +64,9 @@ export const MoreDetailsMenu = () => {
         </MenuItem>
       </Menu>
 
-      <EditProductModal open={editDisclosure.open} onClose={editDisclosure.onClose} />
-      <DeleteConfirmModal open={deleteDisclosure.open} onClose={deleteDisclosure.onClose} />
+        <EditProductModal open={editDisclosure.open} onClose={editDisclosure.onClose} />
+        <DeleteConfirmModal open={deleteDisclosure.open} onClose={deleteDisclosure.onClose} />
+
     </>
   );
 };

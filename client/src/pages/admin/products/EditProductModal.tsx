@@ -84,9 +84,6 @@ export const EditProductModal = ({ open, onClose }: EditProductModalProps) => {
   };
 
   return (
-    // TODO: disable submit button if form is invalid
-    // invalid state is when the form is invalid and there are no changes (dirtyFields is empty)
-    // this is to prevent submitting the form when there are no changes
     <CustomModal
       onSubmit={handleSubmit(onSubmit)}
       onClose={handleClose}
@@ -97,7 +94,7 @@ export const EditProductModal = ({ open, onClose }: EditProductModalProps) => {
       maxWidth={560}
       loading={isPending}
       icon={EditOutlined}
-      disabled={!formState.isValid}
+      disabled={!formState.isValid || !formState.isDirty}
     >
       <Stack spacing={2}>
         {product.scheduledPrice && (
@@ -122,9 +119,9 @@ export const EditProductModal = ({ open, onClose }: EditProductModalProps) => {
             </Stack>
           </InfoBox>
         )}
-        <Stack flex={1} justifyContent="space-between" spacing={0.5}>
-          <Typography variant="body2" color="textSecondary">
-            Type
+        <Stack spacing={0.5} alignItems='start'>
+          <Typography variant="body2" color="text.primary" fontWeight={500}>
+            Product Type
           </Typography>
           <Box
             sx={{
@@ -136,6 +133,7 @@ export const EditProductModal = ({ open, onClose }: EditProductModalProps) => {
               py: 0.5,
               height: 40,
               display: 'flex',
+              width:'100%',
               alignItems: 'center',
             }}
           >
