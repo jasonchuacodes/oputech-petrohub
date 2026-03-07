@@ -89,7 +89,7 @@ const UserMenu = ({ onNavigate }: { onNavigate: (to: string) => void }) => {
         <MenuItem dense onClick={handleNavigateToSettings}>
           <Typography variant="body1">Settings</Typography>
         </MenuItem>
-        <MenuItem dense onClick={() => null}>
+        <MenuItem dense disabled onClick={() => null}>
           <Typography variant="body1">Help</Typography>
         </MenuItem>
         <Divider />

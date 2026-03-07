@@ -75,7 +75,7 @@ export const ReportDetailPage = () => {
                 </Typography>
               </CardContainer>
             )}
-            <Stack direction={{ sm: 'column', md: 'row' }} spacing={2}>
+            <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
               <Stack flex={1} spacing={2}>
                 <CardContainer height="fit-content" p={2} spacing={2} borderRadius={2}>
                   <Stack direction="row" justifyContent="space-between">
