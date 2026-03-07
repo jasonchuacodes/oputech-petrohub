@@ -6,7 +6,6 @@ import { useAuthContext } from '~/context/auth/useAuthContext';
 import { UserRoutes } from '~/routes';
 import theme from '~/theme';
 import { pathFor } from '~/utils/pathFor';
-import { toTitleCase } from '~/utils/textUtils';
 
 const UserMenu = ({ onNavigate }: { onNavigate: (to: string) => void }) => {
   const { auth, logout } = useAuthContext();
@@ -27,7 +26,7 @@ const UserMenu = ({ onNavigate }: { onNavigate: (to: string) => void }) => {
   };
 
   return (
-    <Box p={1} borderTop="1px solid" borderColor="divider">
+    <Box p={0.5} borderTop="1px solid" borderColor="divider">
       <Button
         onClick={(e) => setAnchorElSettingsMenu(e.currentTarget)}
         fullWidth
@@ -35,12 +34,13 @@ const UserMenu = ({ onNavigate }: { onNavigate: (to: string) => void }) => {
           height: 'fit-content',
           justifyContent: 'flex-start',
           gap: 1,
-          p: 1,
+          px: 1.5,
+          py: 1,
           minWidth: 0,
           bgcolor: isOpenMenu ? alpha(theme.palette.primary.light, 0.1) : '',
         }}
       >
-        <Avatar alt="profile-picture" variant="rounded" sx={{ width: 36, height: 36 }}>
+        <Avatar alt="profile-picture" variant="rounded" sx={{ width: 28, height: 28 }}>
           <Typography variant="body1">{userInitials}</Typography>
         </Avatar>
         <Stack justifyContent="start" alignItems="start" overflow="hidden" minWidth={0} flex={1}>
@@ -56,9 +56,6 @@ const UserMenu = ({ onNavigate }: { onNavigate: (to: string) => void }) => {
             }}
           >
             {auth?.name}
-          </Typography>
-          <Typography variant="body2" color="text.secondary" lineHeight={1}>
-            {toTitleCase(auth?.role)}
           </Typography>
         </Stack>
       </Button>
