@@ -79,6 +79,7 @@ export const CustomModal = ({
               {icon && (
                 <Box
                   sx={{
+                    flexShrink: 0,
                     position: 'relative',
                     display: 'flex',
                     alignItems: 'center',
@@ -114,7 +115,7 @@ export const CustomModal = ({
                   />
                 </Box>
               )}
-              <Box sx={{ flex: 1 }}>
+              <Box sx={{ flex: 1, overflow: 'hidden' }}>
                 <Typography
                   variant="h6"
                   sx={{
@@ -122,6 +123,7 @@ export const CustomModal = ({
                     color: 'text.primary',
                     fontWeight: 'bold',
                     textAlign: 'start',
+                    textWrap: 'wrap',
                   }}
                 >
                   {title}
@@ -133,13 +135,14 @@ export const CustomModal = ({
                       fontSize: 'body2.fontSize',
                       color: 'text.secondary',
                       textAlign: 'start',
+                      textWrap: 'wrap',
                     }}
                   >
                     {subheader}
                   </Typography>
                 )}
               </Box>
-              <IconButton aria-label="close" onClick={onClose}>
+              <IconButton aria-label="close" onClick={onClose} sx={{ flexShrink: 0 }}>
                 <Close />
               </IconButton>
             </Stack>

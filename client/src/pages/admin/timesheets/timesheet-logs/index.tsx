@@ -24,6 +24,7 @@ export const TimesheetLogs = () => {
 
   const { data: user, isLoading: isLoadingUser } = useGetUserQuery({
     userId,
+    tenantId,
   });
 
   const { data: timesheetLogs, isLoading } = useGetUserTimesheetsQuery({
