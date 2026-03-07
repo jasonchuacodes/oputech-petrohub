@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Outlet } from 'react-router-dom';
 
 import { AppToaster } from './components/ui';
+import { PWAUpdatePrompt } from './components/ui/PWAUpdatePrompt';
 import { InactivityWarningContainer } from './components/ui/InactivityWarning/InactivityWarningContainer';
 import { AuthProvider } from './context/auth/AuthContext';
 import { InactivityProvider } from './context/inactivity';
@@ -30,6 +31,7 @@ export const App = () => {
         <AuthProvider>
           <InactivityProvider>
             <AppToaster />
+            <PWAUpdatePrompt />
             <AppLayout />
           </InactivityProvider>
         </AuthProvider>

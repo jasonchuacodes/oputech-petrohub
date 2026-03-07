@@ -9,7 +9,7 @@ export default defineConfig({
     react(),
     VitePWA({
       manifest: false,
-      registerType: 'autoUpdate',
+      registerType: 'prompt',
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
         runtimeCaching: [
