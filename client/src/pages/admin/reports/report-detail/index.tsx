@@ -18,10 +18,7 @@ import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { useDisclosure } from '~/hooks/useDisclosure';
 import { PageHeader } from '~/components/layouts';
 import { AdminRoutes } from '~/routes';
-import {
-  useDeleteReportMutation,
-  useGetReportByIdQuery,
-} from '~/services/report/report.queries';
+import { useDeleteReportMutation, useGetReportByIdQuery } from '~/services/report/report.queries';
 import { formatDate, formatTime } from '~/utils/date';
 import { formatCurrency, formatNumber } from '~/utils/number';
 import { parseBackendError } from '~/utils/parseBackendError';
@@ -390,10 +387,10 @@ export const ReportDetailPage = () => {
                             alignItems="center"
                           >
                             <Typography variant="body2" color="text.secondary">
-                              Before Reading
+                              After Reading
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                              {disposal.beforeReading}
+                              {disposal.afterReading}
                             </Typography>
                           </Stack>
                           <Stack
@@ -403,12 +400,13 @@ export const ReportDetailPage = () => {
                             alignItems="center"
                           >
                             <Typography variant="body2" color="text.secondary">
-                              After Reading
+                              Before Reading
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                              {disposal.afterReading}
+                              {disposal.beforeReading}
                             </Typography>
                           </Stack>
+
                           <Divider />
                           <Stack
                             direction="row"
