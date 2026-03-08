@@ -221,7 +221,7 @@ const useUpdateDisposalMutation = () => {
     }: {
       reportId: string;
       disposalId: string;
-      data: { afterReading: number };
+      data: { afterReading: number; calibrate?: number };
     }) => updateDisposal(reportId, disposalId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['report'] });

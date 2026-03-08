@@ -37,21 +37,23 @@ export const UpdateDisposalModal = ({
   } = useForm<UpdateDisposalInput>({
     defaultValues: {
       afterReading: Number(disposal.afterReading),
+      calibrate: Number(disposal.calibrate),
     },
     resolver: zodResolver(UpdateDisposalSchema),
   });
 
   const afterReading = watch('afterReading');
+  const calibrate = watch('calibrate') ?? 0;
 
   const { netDisposal, totalSales } = useMemo(() => {
-    const net = afterReading - disposal.beforeReading;
+    const net = afterReading - disposal.beforeReading - calibrate;
     const total = net * disposal.priceSnapshot;
 
     return {
       netDisposal: net,
       totalSales: total,
     };
-  }, [afterReading, disposal.beforeReading, disposal.priceSnapshot]);
+  }, [afterReading, calibrate, disposal.beforeReading, disposal.priceSnapshot]);
 
   const onSubmit = async (data: UpdateDisposalInput) => {
     try {
@@ -60,6 +62,7 @@ export const UpdateDisposalModal = ({
         disposalId: disposal.id,
         data: {
           afterReading: data.afterReading,
+          calibrate: data.calibrate,
         },
       });
       toast.success('Disposal updated successfully');
@@ -81,7 +84,7 @@ export const UpdateDisposalModal = ({
       onClose={handleClose}
       onSubmit={handleSubmit(onSubmit)}
       title={`${disposal.product.name} Disposal`}
-      subheader='Update fuel product disposal reading.'
+      subheader="Update fuel product disposal reading."
       submitText="Update"
       loading={isPending}
       maxWidth={560}
@@ -95,6 +98,14 @@ export const UpdateDisposalModal = ({
             control={control}
             placeholder="0.000"
             name="afterReading"
+            min={0}
+            step={0.001}
+          />
+          <NumberInput
+            label="Calibrate"
+            control={control}
+            placeholder="0.000"
+            name="calibrate"
             min={0}
             step={0.001}
           />
@@ -115,9 +126,7 @@ export const UpdateDisposalModal = ({
                 alignItems: 'center',
               }}
             >
-              <Typography variant="body1">
-                {disposal.beforeReading}
-              </Typography>
+              <Typography variant="body1">{disposal.beforeReading}</Typography>
             </Box>
           </Stack>
         </Stack>

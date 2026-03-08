@@ -133,6 +133,14 @@ export const ReportDisposal = () => {
                     {formatNumber(Number(disposal.beforeReading), 3)}
                   </Typography>
                 </Stack>
+                <Stack direction="row" justifyContent="space-between" alignItems="center">
+                  <Typography variant="body2" color="text.secondary">
+                    Calibrate
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {formatNumber(Number(disposal.calibrate), 3)}
+                  </Typography>
+                </Stack>
 
                 <Divider />
                 <Stack

@@ -46,6 +46,7 @@ export type ReportDisposal = {
   };
   beforeReading: number;
   afterReading: number;
+  calibrate: number;
   netDisposal: number;
   priceSnapshot: number;
   totalSales: number;

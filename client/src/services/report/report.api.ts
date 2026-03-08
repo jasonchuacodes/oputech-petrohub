@@ -88,7 +88,7 @@ const removeEmployee = async (reportId: string, userId: string): Promise<void> =
 const updateDisposal = async (
   reportId: string,
   disposalId: string,
-  data: { afterReading: number },
+  data: { afterReading: number; calibrate?: number },
 ): Promise<ReportDisposal> => {
   const res = await axios.put(`/reports/${reportId}/disposals/${disposalId}`, data);
   return res.data.data.disposal;

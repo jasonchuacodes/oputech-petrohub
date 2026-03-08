@@ -406,6 +406,19 @@ export const ReportDetailPage = () => {
                               {disposal.beforeReading}
                             </Typography>
                           </Stack>
+                          <Stack
+                            direction="row"
+                            spacing={1}
+                            justifyContent="space-between"
+                            alignItems="center"
+                          >
+                            <Typography variant="body2" color="text.secondary">
+                              Calibrate
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              {disposal.calibrate}
+                            </Typography>
+                          </Stack>
 
                           <Divider />
                           <Stack
