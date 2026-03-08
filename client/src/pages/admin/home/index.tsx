@@ -135,7 +135,7 @@ export const HomePage = () => {
               Operations
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Get a comprehensive overview of your company’s performance.
+              View daily reports and timesheets.
             </Typography>
           </Stack>
           <Grid container spacing={2} alignItems="stretch">
