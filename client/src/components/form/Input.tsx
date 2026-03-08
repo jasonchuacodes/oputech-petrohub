@@ -76,10 +76,9 @@ export const Input = <T extends FieldValues>({
         '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
           borderWidth: '2px',
         },
-        minHeight: {
-          xs: 44,
-          sm: 40,
-        },
+        ...(multiline
+          ? { minHeight: { xs: 44, sm: 40 } }
+          : { height: { xs: 44, sm: 40 } }),
         bgcolor: 'background.paper',
         borderRadius: 2,
       },

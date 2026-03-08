@@ -77,10 +77,7 @@ export const DataTable = <T,>({
     });
   }, [collection.items, sortConfig, columns]);
 
-  const hasSummaryRow = useMemo(
-    () => columns.some(col => col.summary !== undefined),
-    [columns]
-  );
+  const hasSummaryRow = useMemo(() => columns.some((col) => col.summary !== undefined), [columns]);
 
   const empty = !loading && collection.items.length === 0;
 
@@ -209,8 +206,7 @@ export const DataTable = <T,>({
                       component={column.id === columns[0].id ? 'th' : undefined}
                       scope={column.id === columns[0].id ? 'row' : undefined}
                       sx={{
-                        borderBottom:
-                          itemIndex === sortedItems.length - 1 ? 'none' : '1px solid',
+                        borderBottom: itemIndex === sortedItems.length - 1 ? 'none' : '1px solid',
                         borderColor: itemIndex === sortedItems.length - 1 ? undefined : 'divider',
                         whiteSpace: 'nowrap',
                       }}

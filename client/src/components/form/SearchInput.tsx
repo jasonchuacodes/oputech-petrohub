@@ -32,6 +32,7 @@ export const SearchInput = ({
         bgcolor: 'background.paper',
         borderRadius: 2,
         maxWidth: 400,
+        height: { xs: 44, sm: 40 },
         ...slotProps?.root?.sx,
       },
       ...slotProps?.root,

@@ -1,5 +1,14 @@
 import { EditOutlined, CloseOutlined } from '@mui/icons-material';
-import { alpha, Box, Checkbox, FormControlLabel, IconButton, Stack, Tooltip, Typography } from '@mui/material';
+import {
+  alpha,
+  Box,
+  Checkbox,
+  FormControlLabel,
+  IconButton,
+  Stack,
+  Tooltip,
+  Typography,
+} from '@mui/material';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { dayjsLocal, formatDate } from '~/utils/date';
@@ -10,7 +19,10 @@ import { CustomModal, DateTimePicker, InfoBox, Show } from '~/components/ui';
 import { Input, ColorSelect, NumberInput } from '~/components/form';
 import { useProductContext } from '~/context/product';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
-import { useUpdateProductMutation, useCancelScheduledPriceMutation } from '~/services/product/product.queries';
+import {
+  useUpdateProductMutation,
+  useCancelScheduledPriceMutation,
+} from '~/services/product/product.queries';
 import { UpdateProductSchema, type UpdateProductInput } from '~/schema/updateProductSchema';
 import theme from '~/theme';
 import { formatCurrency } from '~/utils/number';
@@ -26,7 +38,8 @@ export const EditProductModal = ({ open, onClose }: EditProductModalProps) => {
   const { product } = useProductContext();
   const { tenantId } = useTenantContext();
   const { mutateAsync: updateProduct, isPending } = useUpdateProductMutation();
-  const { mutateAsync: cancelScheduledPrice, isPending: isCancelling } = useCancelScheduledPriceMutation();
+  const { mutateAsync: cancelScheduledPrice, isPending: isCancelling } =
+    useCancelScheduledPriceMutation();
 
   const { control, handleSubmit, reset, formState, watch, setValue } = useForm<UpdateProductInput>({
     defaultValues: {
@@ -107,7 +120,15 @@ export const EditProductModal = ({ open, onClose }: EditProductModalProps) => {
               pl={1}
               spacing={2}
             >
-              <Typography variant="body2">
+              <Typography
+                variant="body2"
+                sx={{
+                  flex: 1,
+                  minWidth: 0,
+                  overflowWrap: 'break-word',
+                  textWrap: 'wrap',
+                }}
+              >
                 Price set to change to{' '}
                 <Typography variant="inherit" component="span" color="warning.main">
                   {formatCurrency(product.scheduledPrice.price)}
@@ -117,7 +138,7 @@ export const EditProductModal = ({ open, onClose }: EditProductModalProps) => {
                   {formatDate(product.scheduledPrice.effectiveFrom, 'MMMM DD, YYYY hh:mm A')}
                 </Typography>
               </Typography>
-              <Tooltip title="Cancel scheduled price change">
+              <Tooltip title="Cancel scheduled price change" sx={{ flexShrink: 0 }}>
                 <IconButton
                   size="small"
                   disabled={isCancelling}
@@ -136,7 +157,7 @@ export const EditProductModal = ({ open, onClose }: EditProductModalProps) => {
             </Stack>
           </InfoBox>
         )}
-        <Stack spacing={0.5} alignItems='start'>
+        <Stack spacing={0.5} alignItems="start">
           <Typography variant="body2" color="text.primary" fontWeight={500}>
             Product Type
           </Typography>
@@ -150,7 +171,7 @@ export const EditProductModal = ({ open, onClose }: EditProductModalProps) => {
               py: 0.5,
               height: 40,
               display: 'flex',
-              width:'100%',
+              width: '100%',
               alignItems: 'center',
             }}
           >
@@ -212,7 +233,7 @@ export const EditProductModal = ({ open, onClose }: EditProductModalProps) => {
             )}
           />
         </Show>
-        
+
         <ColorSelect label="Color" control={control} name="color" />
         <Input
           label="Description (optional)"
