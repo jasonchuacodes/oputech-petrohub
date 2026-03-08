@@ -5,10 +5,13 @@ import { ConflictError, ForbiddenError, NotFoundError } from '~/errors';
 
 import { computeReportTotals } from '../utils/compute';
 import { processInventoryDeductions } from './inventory.service';
-import { aggregateReportIncome } from '~/modules/analytics/services/income-aggregation.service';
-import { aggregateReportExpense } from '~/modules/analytics/services/expense-aggregation.service';
-import { aggregateReportDisposal } from '~/modules/analytics/services/disposal-aggregation.service';
-import { aggregateReportInventorySales } from '~/modules/analytics/services/inventory-sales-aggregation.service';
+import { aggregateReportIncome, deaggregateReportIncome } from '~/modules/analytics/services/income-aggregation.service';
+import { aggregateReportExpense, deaggregateReportExpense } from '~/modules/analytics/services/expense-aggregation.service';
+import {
+  aggregateReportDisposal,
+  deaggregateReportDisposal,
+} from '~/modules/analytics/services/disposal-aggregation.service';
+import { aggregateReportInventorySales, deaggregateReportInventorySales } from '~/modules/analytics/services/inventory-sales-aggregation.service';
 
 interface CreateReportPayload {
   tenantId: string;
@@ -431,6 +434,13 @@ const deleteReport = async (reportId: string, userRole: Role): Promise<void> => 
     throw new ConflictError(
       'Only DRAFT reports can be deleted. VALIDATED and SUBMITTED reports are permanent records.',
     );
+  }
+
+  if (report.status !== ReportStatus.DRAFT) {
+    await deaggregateReportIncome(reportId);
+    await deaggregateReportExpense(reportId);
+    await deaggregateReportDisposal(reportId);
+    await deaggregateReportInventorySales(reportId);
   }
 
   await prisma.report.delete({
