@@ -1,10 +1,13 @@
-import { HomeOutlined, MoreHorizOutlined } from '@mui/icons-material';
+import { DeleteOutline, HomeOutlined, MoreHorizOutlined } from '@mui/icons-material';
 import { Avatar, Box, Divider, IconButton, Stack, Typography } from '@mui/material';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 import {
   Breadcrumb,
+  Button,
   CardContainer,
+  CustomModal,
   LoadingSpinner,
   NoData,
   PageContainer,
@@ -12,18 +15,39 @@ import {
   Show,
 } from '~/components/ui';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
+import { useDisclosure } from '~/hooks/useDisclosure';
 import { PageHeader } from '~/components/layouts';
 import { AdminRoutes } from '~/routes';
-import { useGetReportByIdQuery } from '~/services/report/report.queries';
+import {
+  useDeleteReportMutation,
+  useGetReportByIdQuery,
+} from '~/services/report/report.queries';
 import { formatDate, formatTime } from '~/utils/date';
 import { formatCurrency, formatNumber } from '~/utils/number';
+import { parseBackendError } from '~/utils/parseBackendError';
 import { pathFor } from '~/utils/pathFor';
 
 export const ReportDetailPage = () => {
   const { tenantId } = useTenantContext();
   const { reportId } = useParams<{ reportId: string }>();
+  const navigate = useNavigate();
 
   const { data: report, isLoading } = useGetReportByIdQuery({ tenantId, reportId: reportId! });
+  const { mutateAsync: deleteReport, isPending: isDeleting } = useDeleteReportMutation();
+  const deleteDisclosure = useDisclosure();
+
+  const handleDelete = async () => {
+    try {
+      await deleteReport(reportId!);
+      toast.success('Report deleted successfully');
+      navigate(pathFor({ pathname: AdminRoutes.TenantReports, params: { tenantId } }));
+    } catch (err) {
+      const message = parseBackendError(err);
+      toast.error(message);
+    } finally {
+      deleteDisclosure.onClose();
+    }
+  };
 
   return (
     <PageLayout>
@@ -53,6 +77,16 @@ export const ReportDetailPage = () => {
         <PageHeader
           title="Report Details"
           description="View the detailed financial report of the shift here."
+          action={
+            <Button
+              variant="outlined"
+              color="error"
+              startIcon={<DeleteOutline />}
+              onClick={deleteDisclosure.onOpen}
+            >
+              Delete
+            </Button>
+          }
         />
 
         {isLoading ? (
@@ -425,6 +459,36 @@ export const ReportDetailPage = () => {
             </Stack>
           </Stack>
         )}
+        <CustomModal
+          open={deleteDisclosure.open}
+          onClose={deleteDisclosure.onClose}
+          onSubmit={handleDelete}
+          title="Delete Report?"
+          subheader="Are you sure you want to delete this report?"
+          type="danger"
+          icon={DeleteOutline}
+          submitText="Delete"
+          cancelText="Cancel"
+          loading={isDeleting}
+        >
+          <Stack spacing={2}>
+            <Typography variant="body2">
+              This action cannot be undone. Deleting this report will:
+            </Typography>
+            <Box component="ul" sx={{ pl: 2, mt: 0 }}>
+              <li>
+                <Typography variant="body2" color="text.secondary">
+                  Remove all report data
+                </Typography>
+              </li>
+              <li>
+                <Typography variant="body2" color="text.secondary">
+                  Allow someone else to create a report for this shift
+                </Typography>
+              </li>
+            </Box>
+          </Stack>
+        </CustomModal>
       </PageContainer>
     </PageLayout>
   );

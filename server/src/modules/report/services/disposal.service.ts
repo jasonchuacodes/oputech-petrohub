@@ -49,6 +49,22 @@ const updateDisposal = async ({
   const netDisposal = afterReading.sub(disposal.beforeReading);
   const totalSales = netDisposal.mul(disposal.priceSnapshot);
 
+  // TODO: lets add one more property here called 'calibrate:Number' this will signify calibration in Liters for a specific product.
+  // calibrate value will be subtracted from the netDisposal amount. 
+  // example: 
+  // afterReading - 100
+
+  /**
+   * TODO: lets add one more property here called 'calibrate:Number' this will signify calibration in Liters for a specific product.
+   * calibrate value will be subtracted from the netDisposal amount. 
+   * example: 
+   * afterReading:150
+   * before reading:100
+   * calibrate:10
+   * 
+   * netReading: 150-100 = 50 - 10 = 40
+   * 
+   */
   const updatedDisposal = await prisma.reportDisposal.update({
     where: { id: disposalId },
     data: {

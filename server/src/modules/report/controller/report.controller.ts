@@ -292,7 +292,7 @@ const deleteReportInventory = async (req: Request, res: Response, next: NextFunc
 const deleteReport = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const { reportId } = req.params;
-    await reportService.deleteReport(reportId);
+    await reportService.deleteReport(reportId, req.user!.role);
 
     res.status(200).json({
       message: 'Report deleted successfully',

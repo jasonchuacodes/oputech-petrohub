@@ -1,15 +1,9 @@
-import {
-  Stack,
-  Typography,
-  CircularProgress,
-  Box,
-  Divider,
-  darken,
-  lighten,
-} from '@mui/material';
+import { Stack, Typography, CircularProgress, Box, Divider, darken, lighten } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { CheckCircleOutline, DeleteOutline } from '@mui/icons-material';
+
+import { useState } from 'react';
 
 import { CardContainer, NoData, CustomModal, Button, Show } from '~/components/ui';
 import { useAuthContext } from '~/context/auth/useAuthContext';
@@ -40,23 +34,25 @@ export const Report = () => {
   const { auth } = useAuthContext();
   const { reportId } = useParams<{ reportId: string }>();
   const navigate = useNavigate();
-
   const tenantId = auth?.tenantId || null;
+
+  const [validateWarning, setValidateWarning] = useState<'disposal' | 'employees'>('disposal');
+
+  const validateDisclosure = useDisclosure();
+  const deleteDisclosure = useDisclosure();
 
   const { data: report, isLoading } = useGetReportByIdQuery({
     tenantId: tenantId!,
     reportId: reportId!,
   });
-
-  const disclosure = useDisclosure();
-  const deleteDisclosure = useDisclosure();
-
   const { mutateAsync: validateReport, isPending: isValidating } = useValidateReportMutation();
   const { mutateAsync: submitReport, isPending: isSubmitting } = useSubmitReportMutation();
   const { mutateAsync: deleteReport, isPending: isDeleting } = useDeleteReportMutation();
 
   const hasDisposalsChanged = (): boolean => {
+    if (sessionStorage.getItem(`disposalsConfirmed:${reportId}`)) return true;
     if (!report?.disposals || report.disposals.length === 0) return true;
+
     return report.disposals.some(
       (disposal) => Number(disposal.beforeReading) !== Number(disposal.afterReading),
     );
@@ -66,26 +62,34 @@ export const Report = () => {
     return report?.employees && report.employees.length > 0;
   };
 
-  const handleValidateClick = () => {
-    const disposalsChanged = hasDisposalsChanged();
-    const employeesAssigned = hasEmployeesAssigned();
-
-    if (disposalsChanged && employeesAssigned) {
-      handleValidate();
-    } else {
-      disclosure.onOpen();
-    }
-  };
-
   const handleValidate = async () => {
     try {
       await validateReport(reportId!);
       toast.success('Report validated successfully');
-      disclosure.onClose();
+      validateDisclosure.onClose();
     } catch (err) {
       const message = parseBackendError(err);
       toast.error(message);
     }
+  };
+
+  const handleValidateClick = () => {
+    const disposalsChanged = hasDisposalsChanged();
+    const employeesAssigned = hasEmployeesAssigned();
+
+    if (!disposalsChanged) {
+      setValidateWarning('disposal');
+      validateDisclosure.onOpen();
+      return;
+    }
+
+    if (!employeesAssigned) {
+      setValidateWarning('employees');
+      validateDisclosure.onOpen();
+      return;
+    }
+
+    handleValidate();
   };
 
   const handleSubmit = async () => {
@@ -300,7 +304,7 @@ export const Report = () => {
                   disabled={isValidating}
                   fullWidth
                 >
-                  {isValidating ? 'Validating...' : 'Validate Report'}
+                  <Typography>{isValidating ? 'Validating...' : 'Validate Report'}</Typography>
                 </Button>
               )
             }
@@ -320,21 +324,27 @@ export const Report = () => {
       </Stack>
 
       <CustomModal
-        open={disclosure.open}
-        onClose={disclosure.onClose}
-        onSubmit={handleValidate}
-        title="Validate Report?"
+        open={validateDisclosure.open}
+        onClose={validateDisclosure.onClose}
+        onSubmit={
+          validateWarning === 'disposal'
+            ? () => {
+                validateDisclosure.onClose();
+                navigate(
+                  pathFor({ pathname: UserRoutes.ReportDisposal, params: { reportId: reportId! } }),
+                );
+              }
+            : () => validateDisclosure.onClose()
+        }
+        title={validateWarning === 'disposal' ? 'Update Disposals' : 'Validate Report?'}
         subheader={
-          !hasDisposalsChanged() && !hasEmployeesAssigned()
-            ? 'Disposals have not been updated and no employees are assigned. Are you sure you want to validate this report?'
-            : !hasDisposalsChanged()
-              ? 'Disposals have not been updated. Are you sure you want to validate this report?'
-              : 'No employees are assigned. Are you sure you want to validate this report?'
+          validateWarning === 'disposal'
+            ? 'Disposal readings have not been updated. Please update them before validating.'
+            : 'No employees are assigned. Please assign employees before validating.'
         }
         icon={CheckCircleOutline}
-        submitText="Validate"
+        submitText={validateWarning === 'disposal' ? 'Go to Disposals' : 'Assign Employees'}
         cancelText="Cancel"
-        loading={isValidating}
       />
 
       <CustomModal

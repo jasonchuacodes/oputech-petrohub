@@ -1,9 +1,12 @@
-import { CircleOutlined, EditOutlined } from '@mui/icons-material';
+import { CheckCircleOutline, CircleOutlined, EditOutlined } from '@mui/icons-material';
 import { Box, CircularProgress, Divider, IconButton, Stack, Typography } from '@mui/material';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 
-import { CardContainer, NoData, Show } from '~/components/ui';
+import { CardContainer, NoData, Show, Button } from '~/components/ui';
+import { UserRoutes } from '~/routes';
+import { pathFor } from '~/utils/pathFor';
 import { useAuthContext } from '~/context/auth/useAuthContext';
 import { useDisclosure } from '~/hooks/useDisclosure';
 import { useGetReportByIdQuery } from '~/services/report/report.queries';
@@ -17,6 +20,7 @@ import { UpdateDisposalModal } from './UpdateDisposalModal';
 export const ReportDisposal = () => {
   const { auth } = useAuthContext();
   const { reportId } = useParams<{ reportId: string }>();
+  const navigate = useNavigate();
   const [selectedDisposal, setSelectedDisposal] = useState<ReportDisposalType | null>(null);
   const { open, onOpen, onClose } = useDisclosure();
 
@@ -55,16 +59,35 @@ export const ReportDisposal = () => {
 
   return (
     <Stack p={2} spacing={1}>
-      <Stack spacing={0.5}>
-        <Stack direction="row" alignItems="center" spacing={1} flexWrap="wrap">
-          <Typography variant="body1" color="text.primary" fontWeight={500}>
-            {formatDate(new Date(), 'MMMM DD, YYYY')}
+      <Stack direction="row" justifyContent="space-between" alignItems="center">
+        <Stack spacing={0.5}>
+          <Stack direction="row" alignItems="center" justifyContent="space-between" flexWrap="wrap">
+            <Typography variant="body1" color="text.primary" fontWeight={500}>
+              {formatDate(new Date(), 'MMMM DD, YYYY')}
+            </Typography>
+          </Stack>
+          <Typography variant="body1" color="text.secondary">
+            {report.shift.name} Shift ({formatTime(report.periodStart)} -{' '}
+            {formatTime(report.periodEnd)})
           </Typography>
         </Stack>
-        <Typography variant="body1" color="text.secondary">
-          {report.shift.name} Shift ({formatTime(report.periodStart)} -{' '}
-          {formatTime(report.periodEnd)})
-        </Typography>
+
+        <Show when={!isReadOnly}>
+          <Button
+            variant="contained"
+            size="small"
+            onClick={() => {
+              sessionStorage.setItem(`disposalsConfirmed:${reportId}`, 'true');
+              toast.success('Readings confirmed');
+              navigate(
+                pathFor({ pathname: UserRoutes.ReportDetail, params: { reportId: reportId! } }),
+              );
+            }}
+            startIcon={<CheckCircleOutline />}
+          >
+            Confirm Readings
+          </Button>
+        </Show>
       </Stack>
 
       {disposals.length === 0 ? (

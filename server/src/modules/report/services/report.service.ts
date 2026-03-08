@@ -417,7 +417,7 @@ const submitReport = async (reportId: string, userId: string) => {
   });
 };
 
-const deleteReport = async (reportId: string): Promise<void> => {
+const deleteReport = async (reportId: string, userRole: Role): Promise<void> => {
   const report = await prisma.report.findUnique({
     where: { id: reportId },
     select: { status: true, shift: { select: { name: true } } },
@@ -427,7 +427,7 @@ const deleteReport = async (reportId: string): Promise<void> => {
     throw new NotFoundError('Report not found');
   }
 
-  if (report.status !== ReportStatus.DRAFT) {
+  if (userRole !== Role.ADMIN && report.status !== ReportStatus.DRAFT) {
     throw new ConflictError(
       'Only DRAFT reports can be deleted. VALIDATED and SUBMITTED reports are permanent records.',
     );

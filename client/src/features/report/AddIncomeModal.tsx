@@ -67,13 +67,6 @@ export const AddIncomeModal = ({ open, onClose, reportId }: AddIncomeModalProps)
       disabled={!isValid}
     >
       <Stack spacing={2}>
-        <Input
-          label="Description"
-          control={control}
-          name="description"
-          placeholder="e.g., Cash sales"
-          autoFocus
-        />
         <NumberInput
           label="Amount"
           startAdornment="₱"
@@ -81,6 +74,13 @@ export const AddIncomeModal = ({ open, onClose, reportId }: AddIncomeModalProps)
           placeholder="0.00"
           name="amount"
           min={0}
+          autoFocus
+        />
+        <Input
+          label="Description"
+          control={control}
+          name="description"
+          placeholder="e.g., Cash sales"
         />
       </Stack>
     </CustomModal>
