@@ -101,7 +101,6 @@ export const AccountSettings = () => {
           </Typography>
         </Stack>
 
-        {/* TODO: avatar uploader */}
         <Avatar alt="profile-picture" sx={{ width: 64, height: 64 }}>
           <Typography fontSize="inherit">U</Typography>
         </Avatar>
