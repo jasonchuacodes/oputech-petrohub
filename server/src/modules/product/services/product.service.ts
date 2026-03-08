@@ -168,6 +168,9 @@ const cascadePriceUpdate = async (
         });
       }
     } else {
+      await tx.productPrice.deleteMany({
+        where: { productId: product.id, effectiveFrom: { gt: now } },
+      });
       await tx.productPrice.create({
         data: { productId: product.id, price, effectiveFrom },
       });

@@ -1,5 +1,5 @@
-import { EditOutlined } from '@mui/icons-material';
-import { alpha, Box, Checkbox, FormControlLabel, Stack, Typography } from '@mui/material';
+import { EditOutlined, CloseOutlined } from '@mui/icons-material';
+import { alpha, Box, Checkbox, FormControlLabel, IconButton, Stack, Tooltip, Typography } from '@mui/material';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { dayjsLocal, formatDate } from '~/utils/date';
@@ -10,7 +10,7 @@ import { CustomModal, DateTimePicker, InfoBox, Show } from '~/components/ui';
 import { Input, ColorSelect, NumberInput } from '~/components/form';
 import { useProductContext } from '~/context/product';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
-import { useUpdateProductMutation } from '~/services/product/product.queries';
+import { useUpdateProductMutation, useCancelScheduledPriceMutation } from '~/services/product/product.queries';
 import { UpdateProductSchema, type UpdateProductInput } from '~/schema/updateProductSchema';
 import theme from '~/theme';
 import { formatCurrency } from '~/utils/number';
@@ -26,6 +26,7 @@ export const EditProductModal = ({ open, onClose }: EditProductModalProps) => {
   const { product } = useProductContext();
   const { tenantId } = useTenantContext();
   const { mutateAsync: updateProduct, isPending } = useUpdateProductMutation();
+  const { mutateAsync: cancelScheduledPrice, isPending: isCancelling } = useCancelScheduledPriceMutation();
 
   const { control, handleSubmit, reset, formState, watch, setValue } = useForm<UpdateProductInput>({
     defaultValues: {
@@ -116,6 +117,22 @@ export const EditProductModal = ({ open, onClose }: EditProductModalProps) => {
                   {formatDate(product.scheduledPrice.effectiveFrom, 'MMMM DD, YYYY hh:mm A')}
                 </Typography>
               </Typography>
+              <Tooltip title="Cancel scheduled price change">
+                <IconButton
+                  size="small"
+                  disabled={isCancelling}
+                  onClick={async () => {
+                    try {
+                      await cancelScheduledPrice({ productId: product.id, tenantId: tenantId! });
+                      toast.success('Scheduled price change cancelled');
+                    } catch {
+                      toast.error('Failed to cancel scheduled price change');
+                    }
+                  }}
+                >
+                  <CloseOutlined fontSize="small" />
+                </IconButton>
+              </Tooltip>
             </Stack>
           </InfoBox>
         )}

@@ -37,4 +37,11 @@ export const deactivateProduct = async (productId: string, tenantId: string): Pr
   });
 };
 
+export const cancelScheduledPrice = async (productId: string, tenantId: string): Promise<Product> => {
+  const res = await axios.delete<{ data: Product }>(`/products/${productId}/scheduled-price`, {
+    params: { tenantId },
+  });
+  return res.data.data;
+};
+
 export { getProductsByTenantId, getProductById, createProduct, updateProduct };

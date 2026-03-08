@@ -6,6 +6,7 @@ import {
   updateProduct,
   getProductsByType,
   deactivateProduct,
+  cancelScheduledPrice,
 } from './product.api';
 import type { CreateProductPayload, GetProductsFilters, UpdateProductPayload } from './product.types';
 
@@ -74,6 +75,17 @@ const useDeactivateProductMutation = () => {
   });
 };
 
+const useCancelScheduledPriceMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ productId, tenantId }: { productId: string; tenantId: string }) =>
+      cancelScheduledPrice(productId, tenantId),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['products', variables.tenantId] });
+    },
+  });
+};
+
 export {
   useGetProductsQuery,
   useGetProductQuery,
@@ -81,4 +93,5 @@ export {
   useUpdateProductMutation,
   useGetProductsByTypeQuery,
   useDeactivateProductMutation,
+  useCancelScheduledPriceMutation,
 };
