@@ -8,6 +8,7 @@ interface UpdateDisposalPayload {
   reportId: string;
   disposalId: string;
   afterReading: Decimal;
+  calibrate: Decimal;
   userId: string;
 }
 
@@ -15,6 +16,7 @@ const updateDisposal = async ({
   reportId,
   disposalId,
   afterReading,
+  calibrate,
   userId,
 }: UpdateDisposalPayload) => {
   const report = await prisma.report.findUnique({
@@ -45,30 +47,14 @@ const updateDisposal = async ({
     throw new ConflictError('Disposal does not belong to this report');
   }
 
-  // Calculate netDisposal and totalSales using Decimal methods
-  const netDisposal = afterReading.sub(disposal.beforeReading);
+  const netDisposal = afterReading.sub(disposal.beforeReading).sub(calibrate);
   const totalSales = netDisposal.mul(disposal.priceSnapshot);
 
-  // TODO: lets add one more property here called 'calibrate:Number' this will signify calibration in Liters for a specific product.
-  // calibrate value will be subtracted from the netDisposal amount. 
-  // example: 
-  // afterReading - 100
-
-  /**
-   * TODO: lets add one more property here called 'calibrate:Number' this will signify calibration in Liters for a specific product.
-   * calibrate value will be subtracted from the netDisposal amount. 
-   * example: 
-   * afterReading:150
-   * before reading:100
-   * calibrate:10
-   * 
-   * netReading: 150-100 = 50 - 10 = 40
-   * 
-   */
   const updatedDisposal = await prisma.reportDisposal.update({
     where: { id: disposalId },
     data: {
       afterReading,
+      calibrate,
       netDisposal,
       totalSales,
     },

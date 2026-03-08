@@ -399,6 +399,7 @@ model ReportDisposal {
 
   beforeReading Decimal @db.Decimal(12, 3)
   afterReading  Decimal @db.Decimal(12, 3)
+  calibrate     Decimal @default(0) @db.Decimal(12, 3)
   netDisposal   Decimal @db.Decimal(12, 3)
   priceSnapshot Decimal @db.Decimal(10, 2)
   totalSales    Decimal @db.Decimal(10, 2)
