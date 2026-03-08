@@ -335,6 +335,31 @@ const deactivateProduct = async (productId: string, tenantId: string) => {
   });
 };
 
+const cancelScheduledPrice = async (productId: string, tenantId: string) => {
+  const product = await prisma.product.findFirst({
+    where: { id: productId, tenantId },
+    select: { id: true, type: true },
+  });
+
+  if (!product) throw new NotFoundError('Product not found');
+
+  const now = new Date();
+
+  const productsOfType = await prisma.product.findMany({
+    where: { tenantId, type: product.type, active: true },
+    select: { id: true },
+  });
+
+  await prisma.productPrice.deleteMany({
+    where: {
+      productId: { in: productsOfType.map((p) => p.id) },
+      effectiveFrom: { gt: now },
+    },
+  });
+
+  return getProductById(productId, tenantId);
+};
+
 export {
   createProduct,
   getProductsByTenantId,
@@ -342,4 +367,5 @@ export {
   updateProduct,
   getProductsByType,
   deactivateProduct,
+  cancelScheduledPrice,
 };

@@ -82,6 +82,17 @@ const deactivateProduct = async (req: Request, res: Response, next: NextFunction
   }
 };
 
+const cancelScheduledPrice = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { productId } = req.params;
+    const { tenantId } = req.query;
+    const product = await productService.cancelScheduledPrice(productId, tenantId as string);
+    res.status(200).json({ data: product });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export {
   createProduct,
   getProductsByTenantId,
@@ -89,4 +100,5 @@ export {
   getProductsByType,
   updateProduct,
   deactivateProduct,
+  cancelScheduledPrice,
 };
