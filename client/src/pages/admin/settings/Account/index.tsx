@@ -125,7 +125,6 @@ export const AccountSettings = () => {
         bgcolor="background.paper"
         direction="row"
         spacing={1}
-        justifyContent="end"
         sx={{
           position: 'sticky',
           bottom: 0,

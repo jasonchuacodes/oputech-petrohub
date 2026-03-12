@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Container, List, Stack, Typography } from '@mui/material';
+import { Container, Stack, Typography } from '@mui/material';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
@@ -53,15 +53,18 @@ export const SecuritySettings = () => {
     <Form onSubmit={onSubmit} sx={{ display: 'flex', width: '100%' }}>
       <Container maxWidth="sm" disableGutters sx={{ margin: 0 }}>
         <Stack justifyContent="center" alignItems="center" spacing={2} p={3}>
+          <PasswordField
+            required
+            control={control}
+            name="oldPassword"
+            label="Old Password"
+            placeholder="Enter your old password"
+            randomizer={false}
+          />
+          <InfoBox variant="info" title="Password requirements:">
+            <Typography fontSize="small">New password should be at least 6 characters.</Typography>
+          </InfoBox>
           <Stack spacing={1} width="100%">
-            <PasswordField
-              required
-              control={control}
-              name="oldPassword"
-              label="Old Password"
-              placeholder="Enter your old password"
-              randomizer={false}
-            />
             <PasswordField
               required
               control={control}
@@ -70,21 +73,6 @@ export const SecuritySettings = () => {
               placeholder="Enter your new password"
               randomizer={false}
             />
-            <InfoBox variant="info" title="Password requirements:">
-              <List sx={{ listStyleType: 'disc', pl: 2, m: 0 }}>
-                {[
-                  'At least 8 characters',
-                  'One uppercase letter (A-Z)',
-                  'One lowercase letter (a-z)',
-                  'One number (0-9)',
-                  'One special character (e.g. !@#$%^&*)',
-                ].map((item) => (
-                  <Typography key={item} component="li" fontSize="small" sx={{ pl: 1 }}>
-                    {item}
-                  </Typography>
-                ))}
-              </List>
-            </InfoBox>
             <PasswordField
               required
               control={control}
@@ -104,7 +92,6 @@ export const SecuritySettings = () => {
         bgcolor="background.paper"
         direction="row"
         spacing={1}
-        justifyContent="end"
         sx={{
           position: 'sticky',
           bottom: 0,

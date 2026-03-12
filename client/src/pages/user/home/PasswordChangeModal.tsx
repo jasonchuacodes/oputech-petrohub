@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { List, Stack, Typography } from '@mui/material';
+import { Stack, Typography } from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
@@ -12,6 +12,7 @@ import {
   type ForceUpdatePasswordInput,
 } from '~/schema/forceUpdatePassword';
 import { parseBackendError } from '~/utils/parseBackendError';
+import { LockOutline } from '@mui/icons-material';
 
 type PasswordChangeModalProps = {
   open: boolean;
@@ -63,8 +64,10 @@ export const PasswordChangeModal = ({ open, onClose }: PasswordChangeModalProps)
       onSubmit={onSubmit}
       disabled={!isValid || isUpdatePasswordPending}
       title="Change Password"
+      subheader="Nominate a new password for your account."
       submitText="Change Password"
       cancelText="Skip"
+      icon={LockOutline}
     >
       <Form onSubmit={onSubmit}>
         <Stack justifyContent="center" alignItems="center" spacing={2} pb={2}>
@@ -77,21 +80,6 @@ export const PasswordChangeModal = ({ open, onClose }: PasswordChangeModalProps)
               placeholder="Enter your new password"
               randomizer={false}
             />
-            <InfoBox variant="info" title="Password requirements:">
-              <List sx={{ listStyleType: 'disc', pl: 2, m: 0 }}>
-                {[
-                  'At least 8 characters',
-                  'One uppercase letter (A-Z)',
-                  'One lowercase letter (a-z)',
-                  'One number (0-9)',
-                  'One special character (e.g. !@#$%^&*)',
-                ].map((item) => (
-                  <Typography key={item} component="li" fontSize="small" sx={{ pl: 1 }}>
-                    {item}
-                  </Typography>
-                ))}
-              </List>
-            </InfoBox>
             <PasswordField
               required
               control={control}
@@ -101,6 +89,9 @@ export const PasswordChangeModal = ({ open, onClose }: PasswordChangeModalProps)
               randomizer={false}
             />
           </Stack>
+          <InfoBox variant="info" title="Password requirements:">
+            <Typography fontSize="small">New password should be at least 6 characters.</Typography>
+          </InfoBox>
         </Stack>
       </Form>
     </CustomModal>
