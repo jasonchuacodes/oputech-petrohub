@@ -5,8 +5,6 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 
 import { CardContainer, NoData, Show, Button } from '~/components/ui';
-import { UserRoutes } from '~/routes';
-import { pathFor } from '~/utils/pathFor';
 import { useAuthContext } from '~/context/auth/useAuthContext';
 import { useDisclosure } from '~/hooks/useDisclosure';
 import { useGetReportByIdQuery } from '~/services/report/report.queries';
@@ -79,9 +77,7 @@ export const ReportDisposal = () => {
             onClick={() => {
               sessionStorage.setItem(`disposalsConfirmed:${reportId}`, 'true');
               toast.success('Readings confirmed');
-              navigate(
-                pathFor({ pathname: UserRoutes.ReportDetail, params: { reportId: reportId! } }),
-              );
+              navigate(-1);
             }}
             startIcon={<CheckCircleOutline />}
           >
