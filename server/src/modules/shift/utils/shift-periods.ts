@@ -1,6 +1,6 @@
 import { prisma } from '~/db';
 import { ProductCategory } from '~/db/prisma';
-import { formatTime } from '~/utils/date';
+import { applyTimeToDate, formatTime } from '~/utils/date';
 
 export interface ShiftPeriod {
   shiftId: string;
@@ -22,23 +22,8 @@ export const getShiftPeriodsWithPriceChanges = async (
   const shiftPeriods: ShiftPeriod[] = [];
 
   for (const shift of shifts) {
-    const shiftStart = new Date(
-      shiftDate.getFullYear(),
-      shiftDate.getMonth(),
-      shiftDate.getDate(),
-      shift.shiftStart.getHours(),
-      shift.shiftStart.getMinutes(),
-      0,
-    );
-
-    const shiftEnd = new Date(
-      shiftDate.getFullYear(),
-      shiftDate.getMonth(),
-      shiftDate.getDate(),
-      shift.shiftEnd.getHours(),
-      shift.shiftEnd.getMinutes(),
-      0,
-    );
+    const shiftStart = applyTimeToDate(shift.shiftStart, shiftDate);
+    const shiftEnd = applyTimeToDate(shift.shiftEnd, shiftDate);
 
     if (shiftEnd <= shiftStart) {
       shiftEnd.setDate(shiftEnd.getDate() + 1);
