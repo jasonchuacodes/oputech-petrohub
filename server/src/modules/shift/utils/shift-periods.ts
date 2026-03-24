@@ -34,7 +34,7 @@ export const getShiftPeriodsWithPriceChanges = async (
         product: { tenantId, category: ProductCategory.FUEL },
         effectiveFrom: {
           gt: shiftStart,
-          lte: shiftEnd,
+          lt: shiftEnd,
         },
       },
       select: { effectiveFrom: true },
@@ -42,7 +42,15 @@ export const getShiftPeriodsWithPriceChanges = async (
       distinct: ['effectiveFrom'],
     });
 
-    const uniqueChangeTimes = priceChanges.map((pc) => pc.effectiveFrom);
+    const uniqueChangeTimes = [
+      ...new Map(
+        priceChanges.map((pc) => {
+          const t = new Date(pc.effectiveFrom);
+          t.setSeconds(0, 0);
+          return [t.getTime(), t];
+        }),
+      ).values(),
+    ];
 
     if (uniqueChangeTimes.length === 0) {
       shiftPeriods.push({
@@ -56,6 +64,7 @@ export const getShiftPeriodsWithPriceChanges = async (
       let currentStart = shiftStart;
 
       for (const changeTime of uniqueChangeTimes) {
+        if (changeTime <= currentStart) continue;
         shiftPeriods.push({
           shiftId: shift.id,
           shiftName: shift.name,
@@ -66,13 +75,15 @@ export const getShiftPeriodsWithPriceChanges = async (
         currentStart = changeTime;
       }
 
-      shiftPeriods.push({
-        shiftId: shift.id,
-        shiftName: shift.name,
-        periodStart: currentStart.toISOString(),
-        periodEnd: shiftEnd.toISOString(),
-        label: `${shift.name} (${formatTime(currentStart)} - ${formatTime(shiftEnd)})`,
-      });
+      if (currentStart < shiftEnd) {
+        shiftPeriods.push({
+          shiftId: shift.id,
+          shiftName: shift.name,
+          periodStart: currentStart.toISOString(),
+          periodEnd: shiftEnd.toISOString(),
+          label: `${shift.name} (${formatTime(currentStart)} - ${formatTime(shiftEnd)})`,
+        });
+      }
     }
   }
 
