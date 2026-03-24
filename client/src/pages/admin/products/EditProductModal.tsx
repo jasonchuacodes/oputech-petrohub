@@ -226,7 +226,6 @@ export const EditProductModal = ({ open, onClose }: EditProductModalProps) => {
             control={control}
             render={({ field }) => (
               <DateTimePicker
-                disablePast
                 value={dayjsLocal(field.value)}
                 onChange={(date) => field.onChange(date?.toISOString() ?? '')}
               />

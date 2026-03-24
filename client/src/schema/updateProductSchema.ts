@@ -23,10 +23,10 @@ const refineFn = (data: { future?: boolean; effectiveFrom?: string }, ctx: z.Ref
     }
 
     const date = new Date(data.effectiveFrom);
-    if (isNaN(date.getTime()) || date < new Date()) {
+    if (isNaN(date.getTime())) {
       ctx.addIssue({
         path: ['effectiveFrom'],
-        message: 'Effective date must be in the future',
+        message: 'Effective date is invalid',
         code: z.ZodIssueCode.custom,
       });
     }

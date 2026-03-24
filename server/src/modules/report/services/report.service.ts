@@ -101,7 +101,7 @@ const createReport = async ({
     include: {
       productPrices: {
         where: {
-          effectiveFrom: { lte: periodEnd },
+          effectiveFrom: { lte: periodStart },
         },
         orderBy: { effectiveFrom: 'desc' },
         take: 1,
