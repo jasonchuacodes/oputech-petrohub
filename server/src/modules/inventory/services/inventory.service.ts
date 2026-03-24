@@ -187,12 +187,13 @@ const updateInventory = async (
 
     // 2. Handle product price
     if (updates.price !== undefined) {
-      const now = new Date();
+      const effectiveFrom = updates.effectiveFrom ? new Date(updates.effectiveFrom) : new Date();
+      effectiveFrom.setSeconds(0, 0);
       await tx.productPrice.create({
         data: {
           productId,
           price: updates.price,
-          effectiveFrom: updates.effectiveFrom ? new Date(updates.effectiveFrom) : now,
+          effectiveFrom,
         },
       });
     }

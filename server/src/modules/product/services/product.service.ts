@@ -254,6 +254,7 @@ const updateProduct = async (productId: string, tenantId: string, data: UpdatePr
 
     if (updates.productPrice !== undefined) {
       const effectiveFrom = updates.effectiveFrom ? new Date(updates.effectiveFrom) : new Date();
+      effectiveFrom.setSeconds(0, 0);
 
       if (product.type) {
         await cascadePriceUpdate(tx, tenantId, product.type, updates.productPrice, effectiveFrom);
