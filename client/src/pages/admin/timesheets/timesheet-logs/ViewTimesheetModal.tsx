@@ -32,11 +32,11 @@ export const ViewTimesheetModal = ({ open, onClose }: ViewTimesheetModalProps) =
       icon={CalendarMonthOutlined}
       hideActions
     >
-      <Stack spacing={3}>
+      <Stack spacing={3} sx={{ textAlign: 'start' }}>
         {/* Summary Section */}
         <Stack spacing={1.5}>
-          <Stack direction="row" justifyContent="space-between" alignItems="center">
-            <Typography variant="body2" color="text.secondary">
+          <Stack direction="row" alignItems="center">
+            <Typography variant="body2" color="text.secondary" width="50%">
               Date
             </Typography>
             <Typography variant="body2" fontWeight="medium">
@@ -44,8 +44,8 @@ export const ViewTimesheetModal = ({ open, onClose }: ViewTimesheetModalProps) =
             </Typography>
           </Stack>
 
-          <Stack direction="row" justifyContent="space-between" alignItems="center">
-            <Typography variant="body2" color="text.secondary">
+          <Stack direction="row" alignItems="center">
+            <Typography variant="body2" color="text.secondary" width="50%">
               First Check In
             </Typography>
             <Typography variant="body2" fontWeight="medium">
@@ -53,8 +53,8 @@ export const ViewTimesheetModal = ({ open, onClose }: ViewTimesheetModalProps) =
             </Typography>
           </Stack>
 
-          <Stack direction="row" justifyContent="space-between" alignItems="center">
-            <Typography variant="body2" color="text.secondary">
+          <Stack direction="row" alignItems="center">
+            <Typography variant="body2" color="text.secondary" width="50%">
               Last Check Out
             </Typography>
             <Typography variant="body2" fontWeight="medium">
@@ -62,8 +62,8 @@ export const ViewTimesheetModal = ({ open, onClose }: ViewTimesheetModalProps) =
             </Typography>
           </Stack>
 
-          <Stack direction="row" justifyContent="space-between" alignItems="center">
-            <Typography variant="body2" color="text.secondary">
+          <Stack direction="row" alignItems="center">
+            <Typography variant="body2" color="text.secondary" width="50%">
               Total Hours
             </Typography>
             <Typography variant="body2" fontWeight="medium">
@@ -77,22 +77,23 @@ export const ViewTimesheetModal = ({ open, onClose }: ViewTimesheetModalProps) =
         {/* Entries Section */}
         <Stack spacing={1.5}>
           <Typography variant="body2" color="text.secondary" fontWeight="medium">
-            Timesheet Entries
+            Timesheet Entries:
           </Typography>
           <Stack spacing={1.5}>
             {entries.map(({ id, timestamp, action }) => (
               <Stack key={id} direction="row" alignItems="center" spacing={2} paddingLeft={2}>
-                <Typography variant="body2" sx={{ minWidth: 80 }}>
-                  {formatTime(timestamp)}
-                </Typography>
-                <Divider sx={{ flexGrow: 1 }} />
+                <Stack direction="row" width="50%" alignItems="center">
+                  <Typography variant="body2" sx={{ minWidth: 80 }}>
+                    {formatTime(timestamp)}
+                  </Typography>
+                  <Divider sx={{ flexGrow: 1 }} />
+                </Stack>
                 <Typography
-                  variant="body2"
+                  variant="caption"
                   fontWeight="medium"
                   color={
                     action === TimesheetEntryActionEnum.CHECK_IN ? 'success.main' : 'error.main'
                   }
-                  sx={{ minWidth: 100, textAlign: 'right' }}
                 >
                   {TimesheetEntryActionMap[action]}
                 </Typography>

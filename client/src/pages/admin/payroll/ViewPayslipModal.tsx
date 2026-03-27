@@ -27,7 +27,7 @@ export const ViewPayslipModal = ({ open, onClose, payslip }: ViewPayslipModalPro
       icon={ReceiptLongOutlined}
       hideActions={true}
     >
-      <Stack spacing={3}>
+      <Stack spacing={3} sx={{ textAlign: 'start' }}>
         {/* Employee Details */}
         <Stack spacing={1}>
           <Typography variant="subtitle2" color="text.primary">
