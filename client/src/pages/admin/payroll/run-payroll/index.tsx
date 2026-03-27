@@ -16,7 +16,7 @@ import { PayslipProvider } from '~/context/payroll/PayslipContext';
 import { AdminRoutes } from '~/routes';
 import { formatCurrency, formatNumber } from '~/utils/number';
 import { pathFor } from '~/utils/pathFor';
-import { getLastCompletedWeek, type WeekPeriod } from '~/utils/date';
+import { getInitialDateRange, getLastCompletedWeek, type WeekPeriod } from '~/utils/date';
 import { useGetAllTimesheetsQuery } from '~/services/timesheet/timesheet.queries';
 import { useRunPayrollMutation } from '~/services/payroll/payroll.queries';
 import {
@@ -31,7 +31,15 @@ import { MoreDetailsMenu } from './MoreDetailsMenu';
 export const RunPayrollPage = () => {
   const { tenantId } = useParams();
   const navigate = useNavigate();
-  const [selectedWeek, setSelectedWeek] = useState<WeekPeriod>(() => getLastCompletedWeek());
+  const defaultWeek = getLastCompletedWeek();
+  const initialRange = getInitialDateRange('payrollWeek', {
+    start: defaultWeek.start,
+    end: defaultWeek.end,
+  });
+  const [selectedWeek, setSelectedWeek] = useState<WeekPeriod>({
+    start: initialRange.startDate,
+    end: initialRange.endDate,
+  });
 
   const runPayrollMutation = useRunPayrollMutation();
 
@@ -59,6 +67,16 @@ export const RunPayrollPage = () => {
       localStorage.setItem(storageKey, JSON.stringify(overrides));
     }
   }, [overrides, storageKey]);
+
+  useEffect(() => {
+    sessionStorage.setItem(
+      'payrollWeek',
+      JSON.stringify({
+        start: selectedWeek.start.utc().toISOString(),
+        end: selectedWeek.end.utc().toISOString(),
+      }),
+    );
+  }, [selectedWeek]);
 
   const handleUpdateCompensation = (timesheetId: string, amount: number, notes?: string) => {
     setOverrides((prev) => ({ ...prev, [timesheetId]: { amount, notes } }));
