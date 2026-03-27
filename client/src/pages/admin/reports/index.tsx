@@ -99,6 +99,11 @@ export const ReportsPage = () => {
               ),
               orderable: true,
               width: 100,
+              summary: () => (
+                <Typography variant="body2" color="text.primary">
+                  Totals
+                </Typography>
+              ),
             },
             {
               id: 'shift',
@@ -124,6 +129,11 @@ export const ReportsPage = () => {
                   {formatNumber(report.netTotal)}
                 </Typography>
               ),
+              summary: (reports) => (
+                <Typography variant="body2" color="text.primary">
+                  {formatNumber(reports.reduce((sum, r) => sum + r.netTotal, 0))}
+                </Typography>
+              ),
               width: 120,
             },
             {
@@ -132,6 +142,11 @@ export const ReportsPage = () => {
               cell: (report) => (
                 <Typography variant="body2" color="text.secondary">
                   {formatNumber(Number(report.totalIncome))}
+                </Typography>
+              ),
+              summary: (reports) => (
+                <Typography variant="body2" color="text.secondary">
+                  {formatNumber(reports.reduce((sum, r) => sum + Number(r.totalIncome), 0))}
                 </Typography>
               ),
               width: 120,
@@ -144,6 +159,11 @@ export const ReportsPage = () => {
                   {formatNumber(Number(report.totalInventorySales))}
                 </Typography>
               ),
+              summary: (reports) => (
+                <Typography variant="body2" color="text.secondary">
+                  {formatNumber(reports.reduce((sum, r) => sum + Number(r.totalInventorySales), 0))}
+                </Typography>
+              ),
               width: 120,
             },
             {
@@ -152,6 +172,11 @@ export const ReportsPage = () => {
               cell: (report) => (
                 <Typography variant="body2" color="text.secondary">
                   {formatNumber(Number(report.totalExpenses))}
+                </Typography>
+              ),
+              summary: (reports) => (
+                <Typography variant="body2" color="text.secondary">
+                  {formatNumber(reports.reduce((sum, r) => sum + Number(r.totalExpenses), 0))}
                 </Typography>
               ),
               width: 120,
