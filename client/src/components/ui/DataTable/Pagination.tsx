@@ -30,6 +30,7 @@ export function Pagination() {
   const { pagination } = useDataTableContext();
 
   if (!pagination.enabled) return null;
+  if (pagination.count <= 0 || pagination.totalPages <= 1) return null;
 
   const start =
     pagination.count <= 0

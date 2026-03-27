@@ -38,10 +38,12 @@ export const ShiftSelectionModal = ({ open, onClose, tenantId }: ShiftSelectionM
   const today = dayjsLocal().startOf('day').toISOString();
 
   const { data: shiftPeriods, isLoading: isLoadingPeriods } = useShiftPeriodsQuery(today, tenantId);
-  const { data: reports, isLoading: isLoadingReports } = useGetReportsQuery({
+  const { data: reportsData, isLoading: isLoadingReports } = useGetReportsQuery({
     tenantId,
     filters: { shiftDate: today },
   });
+  const reports = reportsData?.reports;
+
   const createReportMutation = useCreateReportMutation();
 
   const { blockingReport, periodOptions, defaultPeriodKey, allSubmitted } = useMemo(() => {
@@ -168,7 +170,7 @@ export const ShiftSelectionModal = ({ open, onClose, tenantId }: ShiftSelectionM
             There is a pending report for{' '}
             <Typography variant="inherit" component="span" color="warning.main">
               {blockingReport.period.shiftName} Shift
-            </Typography> 
+            </Typography>
           </Typography>
         ) : allSubmitted ? (
           <Typography variant="body2">

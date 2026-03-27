@@ -3,7 +3,6 @@ import { TenantSeeder } from './seeders/TenantSeeder';
 import { ProductSeeder } from './seeders/ProductSeeder';
 import { UserSeeder } from './seeders/UserSeeder';
 import { ShiftSeeder } from './seeders/ShiftSeeder';
-import { ReportSeeder } from './seeders/ReportSeeder';
 
 const prisma = new PrismaClient();
 
@@ -21,20 +20,12 @@ const main = async () => {
   await productSeeder.seed(tenant.id);
 
   const userSeeder = new UserSeeder(prisma);
-  const { adminUser, morningShiftUsers, afternoonShiftUsers } =
+  const { morningShiftUsers, afternoonShiftUsers } =
     await userSeeder.seed(tenant.id);
 
   const shiftSeeder = new ShiftSeeder(prisma);
-  const { morningShift, afternoonShift } = await shiftSeeder.seed(
+  await shiftSeeder.seed(
     tenant.id,
-    { morningShiftUsers, afternoonShiftUsers }
-  );
-
-  const reportSeeder = new ReportSeeder(prisma);
-  await reportSeeder.seed(
-    tenant.id,
-    adminUser.id,
-    { morningShift, afternoonShift },
     { morningShiftUsers, afternoonShiftUsers }
   );
 

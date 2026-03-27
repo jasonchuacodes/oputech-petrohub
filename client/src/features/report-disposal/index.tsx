@@ -57,33 +57,16 @@ export const ReportDisposal = () => {
 
   return (
     <Stack p={2} spacing={1}>
-      <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <Stack spacing={0.5}>
-          <Stack direction="row" alignItems="center" justifyContent="space-between" flexWrap="wrap">
-            <Typography variant="body1" color="text.primary" fontWeight={500}>
-              {formatDate(new Date(), 'MMMM DD, YYYY')}
-            </Typography>
-          </Stack>
-          <Typography variant="body1" color="text.secondary">
-            {report.shift.name} Shift ({formatTime(report.periodStart)} -{' '}
-            {formatTime(report.periodEnd)})
+      <Stack spacing={0.5}>
+        <Stack direction="row" alignItems="center" justifyContent="space-between" flexWrap="wrap">
+          <Typography variant="body1" color="text.primary" fontWeight={500}>
+            {formatDate(new Date(), 'MMMM DD, YYYY')}
           </Typography>
         </Stack>
-
-        <Show when={!isReadOnly}>
-          <Button
-            variant="contained"
-            size="small"
-            onClick={() => {
-              sessionStorage.setItem(`disposalsConfirmed:${reportId}`, 'true');
-              toast.success('Readings confirmed');
-              navigate(-1);
-            }}
-            startIcon={<CheckCircleOutline />}
-          >
-            Confirm Readings
-          </Button>
-        </Show>
+        <Typography variant="body1" color="text.secondary">
+          {report.shift.name} Shift ({formatTime(report.periodStart)} -{' '}
+          {formatTime(report.periodEnd)})
+        </Typography>
       </Stack>
 
       {disposals.length === 0 ? (
@@ -180,6 +163,22 @@ export const ReportDisposal = () => {
           </CardContainer>
         ))
       )}
+
+      <Show when={!isReadOnly}>
+        <Button
+          variant="contained"
+          size="small"
+          onClick={() => {
+            sessionStorage.setItem(`disposalsConfirmed:${reportId}`, 'true');
+            toast.success('Readings confirmed');
+            navigate(-1);
+          }}
+          startIcon={<CheckCircleOutline />}
+        >
+          Confirm Readings
+        </Button>
+      </Show>
+
       <Show when={!!selectedDisposal}>
         <UpdateDisposalModal
           open={open}
