@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Divider, List, Stack, Typography } from '@mui/material';
+import { Divider, Stack, Typography } from '@mui/material';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
@@ -71,19 +71,9 @@ export const SecuritySettings = () => {
               randomizer={false}
             />
             <InfoBox variant="info" title="Password requirements:">
-              <List sx={{ listStyleType: 'disc', pl: 2, m: 0 }}>
-                {[
-                  'At least 8 characters',
-                  'One uppercase letter (A-Z)',
-                  'One lowercase letter (a-z)',
-                  'One number (0-9)',
-                  'One special character (e.g. !@#$%^&*)',
-                ].map((item) => (
-                  <Typography key={item} component="li" fontSize="small" sx={{ pl: 1 }}>
-                    {item}
-                  </Typography>
-                ))}
-              </List>
+              <Typography fontSize="small">
+                New password should be at least 6 characters.
+              </Typography>
             </InfoBox>
             <PasswordField
               required
