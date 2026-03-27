@@ -23,6 +23,8 @@ export const GetReportsSchema = z
       .optional()
       .transform((val) => (val ? getStartOfDay(new Date(val)) : undefined)),
     creatorId: z.string().uuid().optional(),
+    page: z.coerce.number().int().positive().default(1),
+    pageSize: z.coerce.number().int().positive().max(100).default(10),
   })
   .refine((data) => !(data.shiftDate && (data.startDate || data.endDate)), {
     message: 'Cannot use shiftDate with startDate/endDate range',

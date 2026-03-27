@@ -26,13 +26,15 @@ export const ReportCard = () => {
     params: { tenantId },
   });
 
-  const { data: reports = [], isLoading } = useGetReportsQuery({
+  const { data, isLoading } = useGetReportsQuery({
     tenantId,
     filters: {
       status: ReportStatus.SUBMITTED,
       shiftDate: dayjs().startOf('day').toISOString(),
     },
   });
+
+  const reports = data?.reports ?? [];
 
   return (
     <Widget title="Daily Report" to={navigateTo}>

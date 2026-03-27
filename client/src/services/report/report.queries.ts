@@ -23,6 +23,7 @@ import {
 const useGetReportsQuery = ({
   tenantId,
   filters,
+  page,
 }: {
   tenantId?: string;
   filters?: {
@@ -32,10 +33,11 @@ const useGetReportsQuery = ({
     endDate?: string;
     creatorId?: string;
   };
+  page?: number;
 }) => {
   return useQuery({
-    queryKey: ['reports', tenantId, filters],
-    queryFn: () => getReports(tenantId!, filters),
+    queryKey: ['reports', tenantId, filters, page],
+    queryFn: () => getReports(tenantId!, { ...filters, page, pageSize: 10 }),
     enabled: !!tenantId,
   });
 };

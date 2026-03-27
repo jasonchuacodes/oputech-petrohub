@@ -23,8 +23,11 @@ import { LoadingSpinner } from '../LoadingSpinner';
 import { NoData } from '../NoData';
 import { Paper } from '../Paper';
 import { Show } from '../Show';
+import { DataTableContext } from './context';
 import { useDateRange } from './hooks/useDateRange';
+import { usePagination } from './hooks/usePagination';
 import { useSearch } from './hooks/useSearch';
+import { Pagination } from './Pagination';
 import type { DataTableCollection, DataTableProps, SortConfig } from './types';
 import { compareValues, getSortableValue } from './utils';
 
@@ -38,8 +41,10 @@ export const DataTable = <T,>({
   search,
   dateRange,
   onExport,
+  pagination,
 }: DataTableProps<T>) => {
   const [sortConfig, setSortConfig] = useState<SortConfig>(null);
+  const paginationState = usePagination(pagination);
 
   const searchState = useSearch(search);
   const [value, setValue] = useState(searchState.value);
@@ -82,6 +87,7 @@ export const DataTable = <T,>({
   const empty = !loading && collection.items.length === 0;
 
   return (
+    <DataTableContext.Provider value={{ pagination: paginationState }}>
     <TableContainer component={Paper} sx={{ borderRadius: 2, overflowX: 'auto', maxWidth: '100%' }}>
       {(searchState.enabled || dateRangeState.enabled || onExport) && (
         <Stack direction="row" spacing={1} p={2} justifyContent="space-between" alignItems="center">
@@ -250,7 +256,9 @@ export const DataTable = <T,>({
           </Show>
         </TableBody>
       </Table>
+      <Pagination />
     </TableContainer>
+    </DataTableContext.Provider>
   );
 };
 

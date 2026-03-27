@@ -16,15 +16,17 @@ const getReports = async (
     startDate?: string;
     endDate?: string;
     creatorId?: string;
+    page?: number;
+    pageSize?: number;
   },
-): Promise<Report[]> => {
+): Promise<{ reports: Report[]; total: number }> => {
   const res = await axios.get('/reports', {
     params: {
       tenantId,
       ...filters,
     },
   });
-  return res.data.data.reports;
+  return res.data.data;
 };
 
 const getReportById = async (tenantId: string, reportId: string): Promise<Report> => {

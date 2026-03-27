@@ -3,6 +3,7 @@ import { prisma } from '~/db';
 import { Prisma, ProductCategory, ReportStatus, Role } from '~/db/prisma';
 import { ConflictError, ForbiddenError, NotFoundError } from '~/errors';
 
+import { getPaginationArgs } from '~/utils';
 import { computeReportTotals } from '../utils/compute';
 import { processInventoryDeductions } from './inventory.service';
 import { aggregateReportIncome, deaggregateReportIncome } from '~/modules/analytics/services/income-aggregation.service';
@@ -23,13 +24,14 @@ interface CreateReportPayload {
 
 interface GetReportsFilters {
   tenantId: string;
-  userId: string;
   userRole: Role;
   status?: ReportStatus;
   shiftDate?: Date;
   startDate?: Date;
   endDate?: Date;
   creatorId?: string;
+  page: number;
+  pageSize: number;
 }
 
 const createReport = async ({
@@ -181,13 +183,14 @@ const createReport = async ({
 
 const getReports = async ({
   tenantId,
-  userId,
   userRole,
   status,
   shiftDate,
   startDate,
   endDate,
   creatorId,
+  page,
+  pageSize,
 }: GetReportsFilters) => {
   const where: Prisma.ReportWhereInput = {
     tenantId,
@@ -208,34 +211,38 @@ const getReports = async ({
     where.status = ReportStatus.SUBMITTED;
   }
 
-  const reports = await prisma.report.findMany({
-    where,
-    include: {
-      creator: { select: { id: true, name: true } },
-      shift: true,
-      income: { select: { amount: true } },
-      expenses: { select: { amount: true } },
-      inventories: { include: { product: true } },
-      employees: {
-        include: {
-          user: {
-            select: { id: true, name: true, username: true },
-          },
+  const include = {
+    creator: { select: { id: true, name: true } },
+    shift: true,
+    income: { select: { amount: true } },
+    expenses: { select: { amount: true } },
+    inventories: { include: { product: true } },
+    employees: {
+      include: {
+        user: {
+          select: { id: true, name: true, username: true },
         },
       },
-      _count: {
-        select: { expenses: true },
-      },
     },
-    orderBy: {
-      submittedAt: 'desc',
+    _count: {
+      select: { expenses: true },
     },
-  });
+  } as const;
 
-  return reports.map((report) => ({
-    ...report,
-    ...computeReportTotals(report),
-  }));
+  const [reports, total] = await Promise.all([
+    prisma.report.findMany({
+      where,
+      include,
+      orderBy: { submittedAt: 'desc' },
+      ...getPaginationArgs({ page, pageSize }),
+    }),
+    prisma.report.count({ where }),
+  ]);
+
+  return {
+    reports: reports.map((report) => ({ ...report, ...computeReportTotals(report) })),
+    total,
+  };
 };
 
 const getReportById = async (reportId: string) => {

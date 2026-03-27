@@ -30,13 +30,15 @@ export const ReportsPage = () => {
 
   const [startDate, setStartDate] = useState<Dayjs | null>(initialRange.startDate);
   const [endDate, setEndDate] = useState<Dayjs | null>(initialRange.endDate);
+  const [page, setPage] = useState(1);
 
-  const { data: reports, isLoading } = useGetReportsQuery({
+  const { data, isLoading } = useGetReportsQuery({
     tenantId,
     filters: {
       startDate: startDate?.toISOString(),
       endDate: endDate?.toISOString(),
     },
+    page,
   });
 
   const handleSelectDateRange = ({ start, end }: DateRange) => {
@@ -49,6 +51,7 @@ export const ReportsPage = () => {
     if (hasChanged) {
       setStartDate(newStart);
       setEndDate(newEnd);
+      setPage(1);
     }
   };
 
@@ -84,10 +87,17 @@ export const ReportsPage = () => {
         <DataTable
           id="reports-table"
           collection={DataTable.collection({
-            items: reports || [],
+            items: data?.reports ?? [],
             itemToValue: (report) => report.id,
             itemToString: (report) => report.shiftDate,
           })}
+          pagination={{
+            enabled: true,
+            page,
+            count: data?.total ?? 0,
+            pageSize: 10,
+            onPageChange: setPage,
+          }}
           columns={[
             {
               id: 'shiftDate',
@@ -99,11 +109,6 @@ export const ReportsPage = () => {
               ),
               orderable: true,
               width: 100,
-              summary: () => (
-                <Typography variant="body2" color="text.primary">
-                  Totals
-                </Typography>
-              ),
             },
             {
               id: 'shift',
@@ -145,7 +150,7 @@ export const ReportsPage = () => {
                 </Typography>
               ),
               summary: (reports) => (
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" color="text.primary">
                   {formatNumber(reports.reduce((sum, r) => sum + Number(r.totalIncome), 0))}
                 </Typography>
               ),
@@ -160,7 +165,7 @@ export const ReportsPage = () => {
                 </Typography>
               ),
               summary: (reports) => (
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" color="text.primary">
                   {formatNumber(reports.reduce((sum, r) => sum + Number(r.totalInventorySales), 0))}
                 </Typography>
               ),
@@ -175,7 +180,7 @@ export const ReportsPage = () => {
                 </Typography>
               ),
               summary: (reports) => (
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" color="text.primary ">
                   {formatNumber(reports.reduce((sum, r) => sum + Number(r.totalExpenses), 0))}
                 </Typography>
               ),

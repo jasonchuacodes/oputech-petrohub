@@ -55,17 +55,18 @@ const getReports = async (req: AuthenticatedRequest, res: Response, next: NextFu
       startDate: req.query.startDate as string | undefined,
       endDate: req.query.endDate as string | undefined,
       creatorId: req.query.creatorId as string | undefined,
+      page: req.query.page as string | undefined,
+      pageSize: req.query.pageSize as string | undefined,
     });
 
-    const reports = await reportService.getReports({
+    const { reports, total } = await reportService.getReports({
       ...filters,
-      userId: req.user!.id,
       userRole: req.user!.role,
     });
 
     res.status(200).json({
       message: 'Reports retrieved successfully',
-      data: { reports },
+      data: { reports, total },
     });
   } catch (err) {
     next(err);

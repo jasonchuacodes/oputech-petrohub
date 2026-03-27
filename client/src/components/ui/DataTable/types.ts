@@ -39,6 +39,14 @@ export type DataTableDateRangeProps = {
   onRangeChange?: (range: DateRange) => void;
 };
 
+export type DataTablePaginationProps = {
+  enabled: boolean;
+  page?: number;
+  count: number;
+  pageSize?: number;
+  onPageChange?: (page: number) => void;
+};
+
 export type DataTableProps<T> = {
   id: string;
   collection: DataTableCollection<T>;
@@ -49,6 +57,7 @@ export type DataTableProps<T> = {
   search?: DataTableSearchProps;
   dateRange?: DataTableDateRangeProps;
   onExport?: () => void;
+  pagination?: DataTablePaginationProps;
 };
 
 export type SortConfig = {
