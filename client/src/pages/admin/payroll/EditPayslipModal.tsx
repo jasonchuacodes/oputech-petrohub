@@ -84,7 +84,7 @@ export const EditPayslipModal = ({
       submitText="Update"
       disabled={!isValid}
     >
-      <Stack spacing={3}>
+      <Stack spacing={3} textAlign='start'>
         {/* Employee Details */}
         <Stack spacing={1}>
           <Typography variant="subtitle2" color="text.primary">

@@ -28,6 +28,7 @@ export const ViewTimesheetModal = ({ open, onClose }: ViewTimesheetModalProps) =
       onClose={onClose}
       open={open}
       title="Timesheet Details"
+      subheader="View timesheet entries and details"
       maxWidth={500}
       icon={CalendarMonthOutlined}
       hideActions

@@ -18,6 +18,7 @@ import { formatCurrency, formatNumber } from '~/utils/number';
 import { pathFor } from '~/utils/pathFor';
 import { getInitialDateRange, getLastCompletedWeek, type WeekPeriod } from '~/utils/date';
 import { useGetAllTimesheetsQuery } from '~/services/timesheet/timesheet.queries';
+import type { Timesheet } from '~/services/timesheet/timesheet.types';
 import { useRunPayrollMutation } from '~/services/payroll/payroll.queries';
 import {
   PaymentStatus,
@@ -78,8 +79,8 @@ export const RunPayrollPage = () => {
     );
   }, [selectedWeek]);
 
-  const handleUpdateCompensation = (timesheetId: string, amount: number, notes?: string) => {
-    setOverrides((prev) => ({ ...prev, [timesheetId]: { amount, notes } }));
+  const handleUpdateCompensation = (userId: string, amount: number, notes?: string) => {
+    setOverrides((prev) => ({ ...prev, [userId]: { amount, notes } }));
   };
 
   const { data: timesheets = [], isLoading } = useGetAllTimesheetsQuery({
@@ -89,41 +90,55 @@ export const RunPayrollPage = () => {
     processed: false,
   });
 
-  const payslipData: Payslip[] = useMemo(
-    () =>
-      timesheets.map((timesheet) => {
-        const salaryRate = timesheet.user.salaryRates?.[0]?.rate ?? 0;
-        const rateType = timesheet.user.salaryRates?.[0]?.rateType ?? SalaryRateType.DAILY;
+  const payslipData: Payslip[] = useMemo(() => {
+    const grouped = new Map<
+      string,
+      { timesheets: Timesheet[]; salaryRate: number; rateType: SalaryRateType }
+    >();
 
+    for (const ts of timesheets) {
+      const uid = ts.user.id;
+      if (!grouped.has(uid)) {
+        grouped.set(uid, {
+          timesheets: [],
+          salaryRate: ts.user.salaryRates?.[0]?.rate ?? 0,
+          rateType: ts.user.salaryRates?.[0]?.rateType ?? SalaryRateType.DAILY,
+        });
+      }
+      grouped.get(uid)!.timesheets.push(ts);
+    }
+
+    return Array.from(grouped.entries()).map(
+      ([userId, { timesheets: userTimesheets, salaryRate, rateType }]) => {
         const HOURS_PER_DAY = 8;
         const hourlyRate =
           rateType === SalaryRateType.HOURLY ? salaryRate : salaryRate / HOURS_PER_DAY;
+        const totalHours = userTimesheets.reduce((sum, ts) => sum + ts.totalHours, 0);
+        const calculatedGross = totalHours * hourlyRate;
 
-        const calculatedGrossPay = timesheet.totalHours * hourlyRate;
-
-        const override = overrides[timesheet.id];
-        const grossPay = override?.amount ?? calculatedGrossPay;
+        const override = overrides[userId];
+        const grossPay = override?.amount ?? calculatedGross;
 
         return {
-          id: timesheet.id,
-          tenantId: timesheet.tenantId,
-          userId: timesheet.user.id,
+          id: userId,
+          tenantId: userTimesheets[0].tenantId,
+          userId,
           periodType: PayrollPeriodType.WEEKLY,
           periodStart: selectedWeek.start.toISOString(),
           periodEnd: selectedWeek.end.toISOString(),
-          totalHours: timesheet.totalHours,
+          totalHours,
           rateSnapshot: salaryRate.toString(),
           rateTypeSnapshot: rateType,
           totalCompensation: grossPay.toString(),
-          user: timesheet.user,
+          user: userTimesheets[0].user,
           notes: override?.notes,
           paymentStatus: PaymentStatus.UNPAID,
           createdBy: '',
           createdAt: new Date().toISOString(),
         };
-      }),
-    [timesheets, overrides, selectedWeek],
-  );
+      },
+    );
+  }, [timesheets, overrides, selectedWeek]);
 
   return (
     <PageLayout>
@@ -338,53 +353,18 @@ export const RunPayrollPage = () => {
           variant="contained"
           onClick={async () => {
             try {
-              // Group timesheets by userId and prepare payslip data
-              const timesheetsByUser = timesheets.reduce(
-                (acc, timesheet) => {
-                  const userId = timesheet.user.id;
-                  if (!acc[userId]) {
-                    acc[userId] = [];
-                  }
-                  acc[userId].push(timesheet);
-                  return acc;
-                },
-                {} as Record<string, typeof timesheets>,
-              );
-
-              // Build payslips array for the runPayroll mutation
-              const HOURS_PER_DAY = 8;
-              const payslips = Object.entries(timesheetsByUser).map(([userId, userTimesheets]) => {
-                const totalHours = userTimesheets.reduce((sum, ts) => sum + ts.totalHours, 0);
-                const salaryRate = userTimesheets[0]?.user.salaryRates?.[0]?.rate ?? 0;
-                const rateType =
-                  userTimesheets[0]?.user.salaryRates?.[0]?.rateType ?? SalaryRateType.DAILY;
-
-                // Convert daily rate to hourly (assuming 8 hours per day)
-                const hourlyRate =
-                  rateType === SalaryRateType.HOURLY ? salaryRate : salaryRate / HOURS_PER_DAY;
-
-                // Calculate total compensation with overrides
-                const timesheetIds = userTimesheets.map((ts) => ts.id);
-                const totalCompensation = timesheetIds.reduce((sum, tsId) => {
-                  const override = overrides[tsId];
-                  if (override) {
-                    return sum + override.amount;
-                  }
-                  const timesheet = userTimesheets.find((t) => t.id === tsId);
-                  return sum + (timesheet?.totalHours ?? 0) * hourlyRate;
-                }, 0);
-
-                // Get notes from any override (use first one if multiple)
-                const notes = timesheetIds.map((id) => overrides[id]?.notes).filter(Boolean)[0];
-
+              const payslips = payslipData.map((p) => {
+                const timesheetIds = timesheets
+                  .filter((ts) => ts.user.id === p.userId)
+                  .map((ts) => ts.id);
                 return {
-                  userId,
+                  userId: p.userId,
                   timesheetIds,
-                  totalHours,
-                  rateSnapshot: salaryRate.toString(),
-                  rateTypeSnapshot: rateType as SalaryRateType,
-                  totalCompensation: totalCompensation.toString(),
-                  notes,
+                  totalHours: p.totalHours,
+                  rateSnapshot: p.rateSnapshot,
+                  rateTypeSnapshot: p.rateTypeSnapshot as SalaryRateType,
+                  totalCompensation: p.totalCompensation,
+                  notes: p.notes ?? undefined,
                 };
               });
 
