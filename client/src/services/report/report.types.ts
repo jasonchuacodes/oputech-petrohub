@@ -84,6 +84,7 @@ export type Report = {
   periodStart: string;
   periodEnd: string;
   status: ReportStatus;
+  remarks: string | null;
   totalIncome: number;
   totalExpenses: number;
   totalDisposalSales: number;

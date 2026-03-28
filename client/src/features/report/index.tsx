@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import { CheckCircleOutline, DeleteOutline } from '@mui/icons-material';
 
 import { useState } from 'react';
-
+import { useForm, useWatch } from 'react-hook-form';
 import { CardContainer, NoData, CustomModal, Button, Show } from '~/components/ui';
 import { useAuthContext } from '~/context/auth/useAuthContext';
 import { useDisclosure } from '~/hooks/useDisclosure';
@@ -12,6 +12,7 @@ import {
   useGetReportByIdQuery,
   useValidateReportMutation,
   useSubmitReportMutation,
+  useUpdateRemarksMutation,
   useDeleteReportMutation,
 } from '~/services/report/report.queries';
 import { UserRoutes } from '~/routes';
@@ -23,6 +24,7 @@ import { parseBackendError } from '~/utils/parseBackendError';
 import { pathFor } from '~/utils/pathFor';
 import { toTitleCase } from '~/utils/textUtils';
 
+import { Input } from '~/components/form/Input';
 import { Shortcuts } from './Shortcuts';
 import { EmployeesOnDuty } from './EmployeesOnDuty';
 import { Income } from './Income';
@@ -32,22 +34,29 @@ import { MoreDetailsMenu } from './MoreDetailsMenu';
 
 export const Report = () => {
   const { auth } = useAuthContext();
-  const { reportId } = useParams<{ reportId: string }>();
-  const navigate = useNavigate();
   const tenantId = auth?.tenantId || null;
 
-  const [validateWarning, setValidateWarning] = useState<'disposal' | 'employees'>('disposal');
-
+  const { reportId } = useParams<{ reportId: string }>();
+  const navigate = useNavigate();
   const validateDisclosure = useDisclosure();
   const deleteDisclosure = useDisclosure();
+
+  const [validateWarning, setValidateWarning] = useState<'disposal' | 'employees'>('disposal');
 
   const { data: report, isLoading } = useGetReportByIdQuery({
     tenantId: tenantId!,
     reportId: reportId!,
   });
   const { mutateAsync: validateReport, isPending: isValidating } = useValidateReportMutation();
+  const { mutate: saveRemarks } = useUpdateRemarksMutation();
   const { mutateAsync: submitReport, isPending: isSubmitting } = useSubmitReportMutation();
   const { mutateAsync: deleteReport, isPending: isDeleting } = useDeleteReportMutation();
+
+  const { control: remarksControl } = useForm<{ remarks: string }>({
+    values: { remarks: report?.remarks ?? '' },
+    resetOptions: { keepDirtyValues: true },
+  });
+  const remarksValue = useWatch({ control: remarksControl, name: 'remarks' });
 
   const hasDisposalsChanged = (): boolean => {
     if (sessionStorage.getItem(`disposalsConfirmed:${reportId}`)) return true;
@@ -94,7 +103,7 @@ export const Report = () => {
 
   const handleSubmit = async () => {
     try {
-      await submitReport(reportId!);
+      await submitReport({ reportId: reportId!, remarks: remarksValue.trim() || null });
       toast.success('Report submitted successfully');
     } catch (err) {
       const message = parseBackendError(err);
@@ -210,30 +219,29 @@ export const Report = () => {
               </Stack>
 
               <Divider sx={{ borderColor: 'primary.light' }} />
-
             </Stack>
-              <Stack direction="row" alignItems="center" justifyContent="space-between">
-                <Typography variant="body2" color="primary.alpha">
-                  Disposals Sales
-                </Typography>
-                <Typography variant="body2" color="primary.alpha">
-                  {formatCurrency(report?.totalDisposalSales)}
-                </Typography>
-              </Stack>
-              <Divider sx={{ borderColor: 'primary.light' }} />
-              <Stack direction="row" alignItems="center" justifyContent="space-between">
-                <Typography variant="body2" color="primary.alpha">
-                  {report.shortages >= 0 ? 'Shortages ' : 'Over'}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  color={report.shortages > 0 ? lighten(theme.palette.error.main, 0.1) : 'warning'}
-                >
-                  {report.shortages > 0
-                    ? `(${formatNumber(Math.abs(report.shortages))})`
-                    : formatNumber(Math.abs(report.shortages))}
-                </Typography>
-              </Stack>
+            <Stack direction="row" alignItems="center" justifyContent="space-between">
+              <Typography variant="body2" color="primary.alpha">
+                Disposals Sales
+              </Typography>
+              <Typography variant="body2" color="primary.alpha">
+                {formatCurrency(report?.totalDisposalSales)}
+              </Typography>
+            </Stack>
+            <Divider sx={{ borderColor: 'primary.light' }} />
+            <Stack direction="row" alignItems="center" justifyContent="space-between">
+              <Typography variant="body2" color="primary.alpha">
+                {report.shortages >= 0 ? 'Shortages ' : 'Over'}
+              </Typography>
+              <Typography
+                variant="body2"
+                color={report.shortages > 0 ? lighten(theme.palette.error.main, 0.1) : 'warning'}
+              >
+                {report.shortages > 0
+                  ? `(${formatNumber(Math.abs(report.shortages))})`
+                  : formatNumber(Math.abs(report.shortages))}
+              </Typography>
+            </Stack>
           </Stack>
 
           <Divider sx={{ borderColor: 'primary.light' }} />
@@ -290,6 +298,36 @@ export const Report = () => {
           isReadOnly={isReadOnly}
         />
       </Show>
+
+      <Stack spacing={0.5}>
+        <Typography variant="body1" fontWeight={600} color="text.primary">
+          Remarks
+        </Typography>
+
+        {isReadOnly ? (
+          <CardContainer height="fit-content">
+            <Typography
+              variant="body2"
+              color={remarksValue ? 'text.primary' : 'text.disabled'}
+              sx={{ whiteSpace: 'pre-wrap' }}
+            >
+              {remarksValue || 'No remarks added.'}
+            </Typography>
+          </CardContainer>
+        ) : (
+          <Input
+            name="remarks"
+            control={remarksControl}
+            placeholder="Add notes about this report..."
+            multiline
+            rows={3}
+            fullWidth
+            onBlur={() =>
+              saveRemarks({ reportId: reportId!, remarks: remarksValue.trim() || null })
+            }
+          />
+        )}
+      </Stack>
 
       <Stack spacing={1}>
         <Show when={isOwner}>

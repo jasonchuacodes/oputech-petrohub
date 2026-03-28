@@ -14,6 +14,7 @@ import {
   updateDisposal,
   validateReport,
   submitReport,
+  updateRemarks,
   createInventory,
   updateInventory,
   deleteInventory,
@@ -246,10 +247,18 @@ const useSubmitReportMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (reportId: string) => submitReport(reportId),
+    mutationFn: ({ reportId, remarks }: { reportId: string; remarks?: string | null }) =>
+      submitReport(reportId, { remarks }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['report'] });
     },
+  });
+};
+
+const useUpdateRemarksMutation = () => {
+  return useMutation({
+    mutationFn: ({ reportId, remarks }: { reportId: string; remarks: string | null }) =>
+      updateRemarks(reportId, remarks),
   });
 };
 
@@ -282,5 +291,6 @@ export {
   useUpdateDisposalMutation,
   useValidateReportMutation,
   useSubmitReportMutation,
+  useUpdateRemarksMutation,
   useDeleteReportMutation,
 };

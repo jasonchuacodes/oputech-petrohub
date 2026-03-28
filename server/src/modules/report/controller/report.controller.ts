@@ -18,6 +18,7 @@ import { GetReportByShiftSchema } from '../schema/getReportByShiftSchema';
 import { UpdateDisposalSchema } from '../schema/updateDisposalSchema';
 import { CreateReportInventorySchema } from '../schema/createReportInventorySchema';
 import { UpdateReportInventorySchema } from '../schema/updateReportInventorySchema';
+import { UpdateRemarksSchema } from '../schema/updateRemarksSchema';
 
 const validateCreateReport = createSchemaValidator(CreateReportSchema);
 const validateGetReports = createSchemaValidator(GetReportsSchema);
@@ -28,6 +29,7 @@ const validateAssignEmployee = createSchemaValidator(AssignEmployeeSchema);
 const validateUpdateDisposal = createSchemaValidator(UpdateDisposalSchema);
 const validateCreateReportInventory = createSchemaValidator(CreateReportInventorySchema);
 const validateUpdateReportInventory = createSchemaValidator(UpdateReportInventorySchema);
+const validateUpdateRemarks = createSchemaValidator(UpdateRemarksSchema);
 
 const createReport = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
@@ -123,7 +125,8 @@ const validateReport = async (req: AuthenticatedRequest, res: Response, next: Ne
 const submitReport = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const { reportId } = req.params;
-    const report = await reportService.submitReport(reportId, req.user!.id);
+    const { remarks } = req.body;
+    const report = await reportService.submitReport(reportId, req.user!.id, remarks ?? null);
 
     res.status(200).json({
       message: 'Report submitted successfully',
@@ -290,6 +293,17 @@ const deleteReportInventory = async (req: Request, res: Response, next: NextFunc
   }
 };
 
+const updateRemarks = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const { reportId } = req.params;
+    const { remarks } = await validateUpdateRemarks(req.body);
+    const result = await reportService.updateRemarks(reportId, req.user!.id, remarks ?? null);
+    res.status(200).json({ message: 'Remarks updated', data: result });
+  } catch (err) {
+    next(err);
+  }
+};
+
 const deleteReport = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const { reportId } = req.params;
@@ -310,6 +324,7 @@ export {
   getReportByShift,
   validateReport,
   submitReport,
+  updateRemarks,
   createExpense,
   deleteExpense,
   createIncome,

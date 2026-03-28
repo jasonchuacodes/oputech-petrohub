@@ -374,7 +374,7 @@ const validateReport = async (reportId: string, userId: string) => {
   };
 };
 
-const submitReport = async (reportId: string, userId: string) => {
+const submitReport = async (reportId: string, userId: string, remarks?: string | null) => {
   const report = await getReportById(reportId);
 
   if (report.creatorId !== userId) {
@@ -419,6 +419,7 @@ const submitReport = async (reportId: string, userId: string) => {
       data: {
         status: ReportStatus.SUBMITTED,
         submittedAt: new Date(),
+        remarks,
       },
       include: {
         creator: { select: { id: true, name: true } },
@@ -472,6 +473,24 @@ const deleteReport = async (reportId: string, userRole: Role): Promise<void> => 
   });
 };
 
+const updateRemarks = async (reportId: string, userId: string, remarks: string | null) => {
+  const report = await prisma.report.findUnique({
+    where: { id: reportId },
+    select: { creatorId: true, status: true },
+  });
+
+  if (!report) throw new NotFoundError('Report not found');
+  if (report.creatorId !== userId) throw new ForbiddenError('Only creator can update remarks');
+  if (report.status === ReportStatus.SUBMITTED)
+    throw new ConflictError('Cannot edit a submitted report');
+
+  return prisma.report.update({
+    where: { id: reportId },
+    data: { remarks },
+    select: { id: true, remarks: true },
+  });
+};
+
 export {
   createReport,
   getReports,
@@ -479,5 +498,6 @@ export {
   getReportByShift,
   validateReport,
   submitReport,
+  updateRemarks,
   deleteReport,
 };

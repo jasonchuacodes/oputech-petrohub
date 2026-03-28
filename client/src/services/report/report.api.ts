@@ -101,8 +101,8 @@ const validateReport = async (reportId: string): Promise<Report> => {
   return res.data.data.report;
 };
 
-const submitReport = async (reportId: string): Promise<Report> => {
-  const res = await axios.patch(`/reports/${reportId}/submit`);
+const submitReport = async (reportId: string, data?: { remarks?: string | null }): Promise<Report> => {
+  const res = await axios.patch(`/reports/${reportId}/submit`, data);
   return res.data.data.report;
 };
 
@@ -127,6 +127,10 @@ const deleteInventory = async (reportId: string, productId: string): Promise<voi
   await axios.delete(`/reports/${reportId}/inventory/${productId}`);
 };
 
+const updateRemarks = async (reportId: string, remarks: string | null): Promise<void> => {
+  await axios.patch(`/reports/${reportId}/remarks`, { remarks });
+};
+
 const deleteReport = async (reportId: string): Promise<void> => {
   await axios.delete(`/reports/${reportId}`);
 };
@@ -145,6 +149,7 @@ export {
   updateDisposal,
   validateReport,
   submitReport,
+  updateRemarks,
   createInventory,
   updateInventory,
   deleteInventory,

@@ -1,4 +1,4 @@
-import { CheckCircleOutline, CircleOutlined, EditOutlined } from '@mui/icons-material';
+import { CircleOutlined, EditOutlined } from '@mui/icons-material';
 import { Box, CircularProgress, Divider, IconButton, Stack, Typography } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
@@ -173,7 +173,6 @@ export const ReportDisposal = () => {
             toast.success('Readings confirmed');
             navigate(-1);
           }}
-          startIcon={<CheckCircleOutline />}
         >
           Confirm Readings
         </Button>

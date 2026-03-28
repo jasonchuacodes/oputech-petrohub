@@ -7,6 +7,7 @@ import {
   getReportById,
   validateReport,
   submitReport,
+  updateRemarks,
   createExpense,
   deleteExpense,
   createIncome,
@@ -31,6 +32,7 @@ router.delete('/:reportId', requireAuth, asyncHandler(deleteReport));
 
 router.patch('/:reportId/validate', requireAuth, asyncHandler(validateReport));
 router.patch('/:reportId/submit', requireAuth, asyncHandler(submitReport));
+router.patch('/:reportId/remarks', requireAuth, asyncHandler(updateRemarks));
 
 router.post('/:reportId/expenses', requireAuth, asyncHandler(createExpense));
 router.delete('/:reportId/expenses/:expenseId', requireAuth, asyncHandler(deleteExpense));

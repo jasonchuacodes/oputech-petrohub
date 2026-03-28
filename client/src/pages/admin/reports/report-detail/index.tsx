@@ -108,7 +108,7 @@ export const ReportDetailPage = () => {
             )}
             <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
               <Stack flex={1} spacing={2}>
-                <CardContainer height="fit-content" p={2} spacing={2} borderRadius={2}>
+                <CardContainer height="fit-content" p={2} spacing={1} borderRadius={2}>
                   <Stack direction="row" justifyContent="space-between">
                     <Typography variant="body1" fontWeight={500} color="text.primary">
                       Net Sales
@@ -156,30 +156,29 @@ export const ReportDetailPage = () => {
                     </Stack>
 
                     <Divider />
+                  </Stack>
+                  <Stack direction="row" alignItems="center" justifyContent="space-between">
+                    <Typography variant="body2" color="text.secondary">
+                      Disposals
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {formatCurrency(Number(report?.totalDisposalSales))}
+                    </Typography>
+                  </Stack>
 
-                    <Stack direction="row" alignItems="center" justifyContent="space-between">
-                      <Typography variant="body2" color="text.secondary">
-                        Disposals
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {formatCurrency(Number(report?.totalDisposalSales))}
-                      </Typography>
-                    </Stack>
-
-                    <Divider />
-                    <Stack direction="row" alignItems="center" justifyContent="space-between">
-                      <Typography variant="body2" color="text.primary">
-                        {(report?.shortages ?? 0) >= 0 ? 'Shortages ' : 'Over'}
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        color={(report?.shortages ?? 0) > 0 ? 'warning' : 'text.primary'}
-                      >
-                        {(report?.shortages ?? 0) > 0
-                          ? `(${formatNumber(Math.abs(report?.shortages ?? 0))})`
-                          : formatNumber(Math.abs(report?.shortages ?? 0))}
-                      </Typography>
-                    </Stack>
+                  <Divider />
+                  <Stack direction="row" alignItems="center" justifyContent="space-between">
+                    <Typography variant="body2" color="text.primary">
+                      {(report?.shortages ?? 0) >= 0 ? 'Shortages ' : 'Over'}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      color={(report?.shortages ?? 0) > 0 ? 'error.main' : 'warning.main'}
+                    >
+                      {(report?.shortages ?? 0) > 0
+                        ? `(${formatNumber(Math.abs(report?.shortages ?? 0))})`
+                        : formatNumber(Math.abs(report?.shortages ?? 0))}
+                    </Typography>
                   </Stack>
                 </CardContainer>
 
@@ -305,6 +304,21 @@ export const ReportDetailPage = () => {
                     </Typography>
                   </Stack>
                 </CardContainer>
+
+                <Show when={!!report?.remarks}>
+                  <CardContainer height="fit-content" spacing={1}>
+                    <Typography variant="body2" fontWeight={600}>
+                      Remarks
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ whiteSpace: 'pre-wrap' }}
+                    >
+                      {report?.remarks}
+                    </Typography>
+                  </CardContainer>
+                </Show>
               </Stack>
 
               {/* Right Section */}

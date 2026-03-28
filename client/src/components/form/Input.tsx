@@ -1,5 +1,5 @@
 import { Box, OutlinedInput, Stack, Typography, type OutlinedInputProps } from '@mui/material';
-import type { HTMLInputTypeAttribute, ReactNode } from 'react';
+import type { FocusEventHandler, HTMLInputTypeAttribute, ReactNode } from 'react';
 import { Controller, type Control, type FieldValues, type Path } from 'react-hook-form';
 
 type InputProps<T extends FieldValues> = {
@@ -23,6 +23,7 @@ type InputProps<T extends FieldValues> = {
   rows?: number;
   error?: boolean;
   autoFocus?: boolean;
+  onBlur?: FocusEventHandler<HTMLInputElement | HTMLTextAreaElement>;
   min?: string | number;
   max?: string | number;
   step?: string | number;
@@ -45,6 +46,7 @@ export const Input = <T extends FieldValues>({
   rows,
   error: errorProp,
   autoFocus,
+  onBlur,
   min,
   max,
   step,
@@ -76,9 +78,7 @@ export const Input = <T extends FieldValues>({
         '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
           borderWidth: '2px',
         },
-        ...(multiline
-          ? { minHeight: { xs: 44, sm: 40 } }
-          : { height: { xs: 44, sm: 40 } }),
+        ...(multiline ? { minHeight: { xs: 44, sm: 40 } } : { height: { xs: 44, sm: 40 } }),
         bgcolor: 'background.paper',
         borderRadius: 2,
       },
@@ -90,7 +90,12 @@ export const Input = <T extends FieldValues>({
       name={name}
       control={control}
       render={({ field, fieldState: { error } }) => (
-        <Stack alignItems='start' spacing={0.5} width={fullWidth ? '100%' : 'auto'} maxWidth="sm">
+        <Stack
+          alignItems="start"
+          spacing={0.5}
+          width={fullWidth ? '100%' : 'auto'}
+          maxWidth={fullWidth ? 'auto' : 'sm'}
+        >
           {label && (
             <Typography variant="body2" fontWeight="medium" color="text.primary">
               {label}
@@ -105,6 +110,10 @@ export const Input = <T extends FieldValues>({
 
           <OutlinedInput
             {...field}
+            onBlur={(e) => {
+              field.onBlur();
+              onBlur?.(e);
+            }}
             value={field.value ?? ''}
             type={type}
             size={size}

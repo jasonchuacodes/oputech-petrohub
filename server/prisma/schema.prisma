@@ -341,6 +341,7 @@ model Report {
 
   shiftDate DateTime
   status    ReportStatus @default(DRAFT)
+  remarks   String?
 
   periodStart DateTime
   periodEnd   DateTime
