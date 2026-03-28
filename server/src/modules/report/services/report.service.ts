@@ -6,13 +6,22 @@ import { ConflictError, ForbiddenError, NotFoundError } from '~/errors';
 import { getPaginationArgs } from '~/utils';
 import { computeReportTotals } from '../utils/compute';
 import { processInventoryDeductions } from './inventory.service';
-import { aggregateReportIncome, deaggregateReportIncome } from '~/modules/analytics/services/income-aggregation.service';
-import { aggregateReportExpense, deaggregateReportExpense } from '~/modules/analytics/services/expense-aggregation.service';
+import {
+  aggregateReportIncome,
+  deaggregateReportIncome,
+} from '~/modules/analytics/services/income-aggregation.service';
+import {
+  aggregateReportExpense,
+  deaggregateReportExpense,
+} from '~/modules/analytics/services/expense-aggregation.service';
 import {
   aggregateReportDisposal,
   deaggregateReportDisposal,
 } from '~/modules/analytics/services/disposal-aggregation.service';
-import { aggregateReportInventorySales, deaggregateReportInventorySales } from '~/modules/analytics/services/inventory-sales-aggregation.service';
+import {
+  aggregateReportInventorySales,
+  deaggregateReportInventorySales,
+} from '~/modules/analytics/services/inventory-sales-aggregation.service';
 
 interface CreateReportPayload {
   tenantId: string;
@@ -217,6 +226,14 @@ const getReports = async ({
     income: { select: { amount: true } },
     expenses: { select: { amount: true } },
     inventories: { include: { product: true } },
+    disposals: {
+      include: { product: true },
+      orderBy: {
+        product: {
+          name: 'asc',
+        },
+      },
+    },
     employees: {
       include: {
         user: {

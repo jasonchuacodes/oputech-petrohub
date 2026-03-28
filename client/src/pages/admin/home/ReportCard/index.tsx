@@ -44,7 +44,10 @@ export const ReportCard = () => {
             when={reports.length > 0}
             fallback={
               <Box pt={10}>
-                <NoData text="No reports available" description="No reports have been submitted yet today. Please check again later." />
+                <NoData
+                  text="No reports available"
+                  description="No reports have been submitted yet today. Please check again later."
+                />
               </Box>
             }
           >
@@ -103,7 +106,7 @@ export const ReportCard = () => {
                         overflow: 'hidden',
                       }}
                     >
-                      <CardContainer height="fit-content" p={2} spacing={2} borderRadius={0}>
+                      <CardContainer height="fit-content" p={3} spacing={1} borderRadius={0}>
                         <Stack direction="row" justifyContent="space-between">
                           <Typography variant="body1" fontWeight={500} color="text.primary">
                             Net Sales
@@ -113,16 +116,33 @@ export const ReportCard = () => {
                           </Typography>
                         </Stack>
 
+                        <Stack direction="row" justifyContent="space-between">
+                          <Typography variant="body2" color="text.secondary">
+                            Lubricants
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            {formatCurrency(Number(report.totalInventorySales))}
+                          </Typography>
+                        </Stack>
+                        <Stack direction="row" justifyContent="space-between">
+                          <Typography variant="body2" color="text.secondary">
+                            Fuel Sales
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            {formatCurrency(Number(report.totalIncome))}
+                          </Typography>
+                        </Stack>
+                        <Divider sx={{ borderColor: 'divider' }} />
+
                         <Stack pl={2} spacing={1}>
                           <Stack direction="row" justifyContent="space-between">
                             <Typography variant="body2" color="text.secondary">
                               Sales
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                              {formatCurrency(Number(report.totalIncome))}
+                              {formatCurrency(Number(report.totalSales))}
                             </Typography>
                           </Stack>
-
                           <Stack direction="row" justifyContent="space-between">
                             <Typography variant="body2" color="text.secondary">
                               Expenses
@@ -132,50 +152,31 @@ export const ReportCard = () => {
                             </Typography>
                           </Stack>
 
-                          <Stack direction="row" justifyContent="space-between">
-                            <Typography variant="body2" color="text.secondary">
-                              Lubricants
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                              {formatCurrency(Number(report.totalInventorySales))}
-                            </Typography>
-                          </Stack>
-
                           <Divider />
+                        </Stack>
+                        <Stack direction="row" justifyContent="space-between">
+                          <Typography variant="body2" color="text.secondary">
+                            Disposals Sales
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            {formatCurrency(Number(report.totalDisposalSales))}
+                          </Typography>
+                        </Stack>
 
-                          <Stack direction="row" justifyContent="space-between">
-                            <Typography variant="body2" color="text.primary">
-                              Total Sales
-                            </Typography>
-                            <Typography variant="body2" color="text.primary">
-                              {formatCurrency(Number(report.totalSales))}
-                            </Typography>
-                          </Stack>
+                        <Divider />
 
-                          <Stack direction="row" justifyContent="space-between">
-                            <Typography variant="body2" color="text.secondary">
-                              Disposals Sales
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                              {formatCurrency(Number(report.totalDisposalSales))}
-                            </Typography>
-                          </Stack>
-
-                          <Divider />
-
-                          <Stack direction="row" justifyContent="space-between">
-                            <Typography variant="body2" color="text.primary">
-                              {(report.shortages ?? 0) >= 0 ? 'Shortages' : 'Over'}
-                            </Typography>
-                            <Typography
-                              variant="body2"
-                              color={(report.shortages ?? 0) > 0 ? 'warning.main' : 'text.primary'}
-                            >
-                              {(report.shortages ?? 0) > 0
-                                ? `(${formatNumber(Math.abs(report.shortages ?? 0))})`
-                                : formatNumber(Math.abs(report.shortages ?? 0))}
-                            </Typography>
-                          </Stack>
+                        <Stack direction="row" justifyContent="space-between">
+                          <Typography variant="body2" color="text.primary">
+                            {(report.shortages ?? 0) >= 0 ? 'Shortages' : 'Over'}
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            color={(report.shortages ?? 0) > 0 ? 'error.main' : 'warning.main'}
+                          >
+                            {(report.shortages ?? 0) > 0
+                              ? `(${formatNumber(Math.abs(report.shortages ?? 0))})`
+                              : formatNumber(Math.abs(report.shortages ?? 0))}
+                          </Typography>
                         </Stack>
                       </CardContainer>
                     </AccordionDetails>
