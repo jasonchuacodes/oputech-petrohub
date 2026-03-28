@@ -157,7 +157,7 @@ export const Report = () => {
           bgcolor="primary.main"
           height="fit-content"
         >
-          <Stack p={3} spacing={2}>
+          <Stack p={3} spacing={1}>
             <Stack justifyContent="space-between" direction="row" alignItems="start">
               <Stack>
                 <Typography variant="body1" fontWeight={500} color="primary.alpha">
@@ -211,6 +211,7 @@ export const Report = () => {
 
               <Divider sx={{ borderColor: 'primary.light' }} />
 
+            </Stack>
               <Stack direction="row" alignItems="center" justifyContent="space-between">
                 <Typography variant="body2" color="primary.alpha">
                   Disposals Sales
@@ -233,7 +234,6 @@ export const Report = () => {
                     : formatNumber(Math.abs(report.shortages))}
                 </Typography>
               </Stack>
-            </Stack>
           </Stack>
 
           <Divider sx={{ borderColor: 'primary.light' }} />

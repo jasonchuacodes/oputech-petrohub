@@ -34,7 +34,7 @@ export const computeReportTotals = (report: {
 
   const shortagesDecimal = totalDisposalSalesDecimal.sub(totalSalesDecimal);
 
-  const netTotalDecimal = totalIncomeDecimal.add(totalInventorySalesDecimal).sub(totalExpensesDecimal);
+  const netTotalDecimal = totalIncomeDecimal.add(totalInventorySalesDecimal);
 
   return {
     totalIncome: totalIncomeDecimal.toNumber(),
