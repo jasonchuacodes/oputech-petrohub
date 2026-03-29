@@ -9,7 +9,7 @@ interface Props {
 export const PageHeader = ({ title, description, action }: Props) => {
   return (
     <Stack
-      direction={{ xs: 'column', sm: 'row' }}
+      direction={{ xs: 'row', sm: 'row' }}
       justifyContent="space-between"
       alignItems={{ xs: 'flex-start', sm: 'center' }}
       mb={3}

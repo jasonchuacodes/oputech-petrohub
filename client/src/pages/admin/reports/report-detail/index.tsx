@@ -1,12 +1,13 @@
 import { DeleteOutline, HomeOutlined, MoreHorizOutlined } from '@mui/icons-material';
-import { Avatar, Box, Divider, IconButton, Stack, Typography } from '@mui/material';
+import { Avatar, Box, Divider, IconButton, Menu, MenuItem, Stack, Typography } from '@mui/material';
+import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
 import {
   Breadcrumb,
-  Button,
   CardContainer,
+  Chip,
   CustomModal,
   LoadingSpinner,
   NoData,
@@ -19,10 +20,17 @@ import { useDisclosure } from '~/hooks/useDisclosure';
 import { PageHeader } from '~/components/layouts';
 import { AdminRoutes } from '~/routes';
 import { useDeleteReportMutation, useGetReportByIdQuery } from '~/services/report/report.queries';
+import { ReportStatus } from '~/services/report/report.types';
 import { formatDate, formatTime } from '~/utils/date';
 import { formatCurrency, formatNumber } from '~/utils/number';
 import { parseBackendError } from '~/utils/parseBackendError';
 import { pathFor } from '~/utils/pathFor';
+
+const REPORT_STATUS_CONFIG = {
+  [ReportStatus.SUBMITTED]: { label: 'SUBMITTED', color: 'success' },
+  [ReportStatus.DRAFT]: { label: 'DRAFT', color: 'default' },
+  [ReportStatus.VALIDATED]: { label: 'VALIDATED', color: 'warning' },
+};
 
 export const ReportDetailPage = () => {
   const { tenantId } = useTenantContext();
@@ -32,6 +40,11 @@ export const ReportDetailPage = () => {
   const { data: report, isLoading } = useGetReportByIdQuery({ tenantId, reportId: reportId! });
   const { mutateAsync: deleteReport, isPending: isDeleting } = useDeleteReportMutation();
   const deleteDisclosure = useDisclosure();
+
+  const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
+  const isMenuOpen = Boolean(menuAnchorEl);
+  const openMenu = (e: React.MouseEvent<HTMLElement>) => setMenuAnchorEl(e.currentTarget);
+  const closeMenu = () => setMenuAnchorEl(null);
 
   const handleDelete = async () => {
     try {
@@ -74,16 +87,6 @@ export const ReportDetailPage = () => {
         <PageHeader
           title="Report Details"
           description="View the detailed financial report of the shift here."
-          action={
-            <Button
-              variant="outlined"
-              color="error"
-              startIcon={<DeleteOutline />}
-              onClick={deleteDisclosure.onOpen}
-            >
-              Delete
-            </Button>
-          }
         />
 
         {isLoading ? (
@@ -93,17 +96,58 @@ export const ReportDetailPage = () => {
         ) : (
           <Stack spacing={2}>
             {report && (
-              <CardContainer height="fit-content" spacing={2}>
-                <Typography variant="h5" sx={{ fontWeight: 600 }}>
-                  {formatDate(report.shiftDate, 'MMMM DD, YYYY')}
-                </Typography>
-
+              <CardContainer height="fit-content" spacing={1}>
+                <Stack direction="row" alignItems="flex-start" justifyContent="space-between">
+                  <Stack spacing={1} direction="row">
+                    <Typography variant="h5" sx={{ fontWeight: 600 }}>
+                      {formatDate(report.shiftDate, 'MMMM DD, YYYY')}
+                    </Typography>
+                  </Stack>
+                  <IconButton onClick={openMenu} size="small">
+                    <MoreHorizOutlined fontSize="inherit" sx={{ color: 'text.secondary' }} />
+                  </IconButton>
+                </Stack>
                 <Typography variant="body2" color="text.secondary">
-                  <Typography variant="body2" color="text.secondary">
+                  Period:{' '}
+                  <Typography component="span" variant="body2" color="primary.main">
                     {report.shift.name} Shift ({formatTime(report.periodStart)} -{' '}
                     {formatTime(report.periodEnd)})
                   </Typography>
                 </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Status:{' '}
+                  {report.status && (
+                    <Chip
+                      label={REPORT_STATUS_CONFIG[report.status]?.label.toUpperCase()}
+                      color={REPORT_STATUS_CONFIG[report.status]?.color}
+                    />
+                  )}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Created by:{' '}
+                  <Typography component="span" variant="body2" color="warning.main">
+                    {report.creator.name}
+                  </Typography>
+                </Typography>
+                <Menu
+                  anchorEl={menuAnchorEl}
+                  open={isMenuOpen}
+                  onClose={closeMenu}
+                  anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                  transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                  slotProps={{ paper: { elevation: 4, sx: { mt: 0.5, minWidth: 140 } } }}
+                >
+                  <MenuItem
+                    onClick={() => {
+                      closeMenu();
+                      deleteDisclosure.onOpen();
+                    }}
+                  >
+                    <Typography variant="body2" color="error">
+                      Delete
+                    </Typography>
+                  </MenuItem>
+                </Menu>
               </CardContainer>
             )}
             <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>

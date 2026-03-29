@@ -33,7 +33,6 @@ interface CreateReportPayload {
 
 interface GetReportsFilters {
   tenantId: string;
-  userRole: Role;
   status?: ReportStatus;
   shiftDate?: Date;
   startDate?: Date;
@@ -192,7 +191,6 @@ const createReport = async ({
 
 const getReports = async ({
   tenantId,
-  userRole,
   status,
   shiftDate,
   startDate,
@@ -215,10 +213,6 @@ const getReports = async ({
     ...(status && { status }),
     ...(creatorId && { creatorId }),
   };
-
-  if (userRole === Role.ADMIN) {
-    where.status = ReportStatus.SUBMITTED;
-  }
 
   const include = {
     creator: { select: { id: true, name: true } },

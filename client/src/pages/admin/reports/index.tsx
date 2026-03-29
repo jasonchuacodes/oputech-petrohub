@@ -19,6 +19,7 @@ import { pathFor } from '~/utils/pathFor';
 import { formatDate, formatTime, getInitialDateRange } from '~/utils/date';
 import { formatNumber } from '~/utils/number';
 import { useGetReportsQuery } from '~/services/report/report.queries';
+import { ReportStatus } from '~/services/report/report.types';
 
 const REPORTS_KEY = 'reports';
 
@@ -103,10 +104,16 @@ export const ReportsPage = () => {
               orderable: true,
               width: 100,
             },
+
             {
               id: 'shift',
               heading: 'Shift',
-              cell: (report) => <Chip label={report.shift.name} color={report.shift.color} />,
+              cell: (report) => (
+                <Chip
+                  label={`${report.shift.name} ${report.status !== ReportStatus.SUBMITTED ? `(${report.status.toLowerCase()})` : ''}`}
+                  color={report.status !== ReportStatus.SUBMITTED ? 'default' : report.shift.color}
+                />
+              ),
               width: 100,
             },
             {

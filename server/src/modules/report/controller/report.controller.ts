@@ -61,10 +61,7 @@ const getReports = async (req: AuthenticatedRequest, res: Response, next: NextFu
       pageSize: req.query.pageSize as string | undefined,
     });
 
-    const { reports, total } = await reportService.getReports({
-      ...filters,
-      userRole: req.user!.role,
-    });
+    const { reports, total } = await reportService.getReports(filters);
 
     res.status(200).json({
       message: 'Reports retrieved successfully',
