@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Typography } from '@mui/material';
+import { Stack, Typography } from '@mui/material';
 import { HomeOutlined, AddOutlined } from '@mui/icons-material';
 
 import { PageHeader } from '~/components/layouts';
@@ -9,19 +9,28 @@ import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { useDisclosure } from '~/hooks/useDisclosure';
 import { AdminRoutes } from '~/routes';
 import { useGetInventoriesQuery } from '~/services/inventory/inventory.queries';
+import { type Inventory } from '~/services/inventory/inventory.types';
 import { formatDate } from '~/utils/date';
 import { getStockStatus, getStockStatusConfig } from '~/pages/admin/inventory/utils';
 import { formatCurrency } from '~/utils/number';
 import { pathFor } from '~/utils/pathFor';
 
 import { CreateInventoryModal } from './CreateInventoryModal';
+import { EditInventoryModal } from './EditInventoryModal';
 import { MoreDetailsMenu } from './MoreDetailsMenu';
 
 export const InventoryPage = () => {
   const { tenantId } = useTenantContext();
   const disclosure = useDisclosure();
+  const editDisclosure = useDisclosure();
 
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedInventory, setSelectedInventory] = useState<Inventory | null>(null);
+
+  const handleEditInventory = (item: Inventory) => {
+    setSelectedInventory(item);
+    editDisclosure.onOpen();
+  };
 
   const { data: inventories, isLoading } = useGetInventoriesQuery({
     tenantId,
@@ -78,9 +87,18 @@ export const InventoryPage = () => {
               id: 'name',
               heading: 'Product Name',
               cell: (item) => (
-                <Typography variant="body2" color="text.primary">
-                  {item.productName}
-                </Typography>
+                <Stack
+                  onClick={() => handleEditInventory(item)}
+                  sx={{
+                    cursor: 'pointer',
+                    width: 'fit-content',
+                    '&:hover .inventory-name': { fontWeight: 600, textDecoration: 'underline' },
+                  }}
+                >
+                  <Typography variant="body2" color="text.primary" className="inventory-name">
+                    {item.productName}
+                  </Typography>
+                </Stack>
               ),
               orderable: true,
               width: 200,
@@ -150,6 +168,12 @@ export const InventoryPage = () => {
       </PageContainer>
 
       <CreateInventoryModal open={disclosure.open} onClose={disclosure.onClose} />
+
+      {selectedInventory && (
+        <InventoryProvider inventory={selectedInventory}>
+          <EditInventoryModal open={editDisclosure.open} onClose={editDisclosure.onClose} />
+        </InventoryProvider>
+      )}
     </PageLayout>
   );
 };

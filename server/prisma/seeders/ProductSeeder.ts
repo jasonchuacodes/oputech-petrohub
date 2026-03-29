@@ -7,10 +7,10 @@ export class ProductSeeder {
     console.log('Seeding products...');
 
     const products = [
-      { name: 'XCS', type: ProductType.PREMIUM },
-      { name: 'XTRA 1', type: ProductType.GASOLINE },
-      { name: 'XTRA 2', type: ProductType.GASOLINE },
-      { name: 'ADO', type: ProductType.DIESEL },
+      { name: 'XCS', type: ProductType.PREMIUM, color: 'primary' },
+      { name: 'XTRA 1', type: ProductType.GASOLINE, color: 'success' },
+      { name: 'XTRA 2', type: ProductType.GASOLINE, color: 'warning' },
+      { name: 'ADO', type: ProductType.DIESEL, color: 'error' },
     ];
 
     const basePrices = {
@@ -29,27 +29,44 @@ export class ProductSeeder {
             type: productData.type,
           },
         },
-        update: {},
+        update: {
+          type: productData.type,
+          color: productData.color,
+        },
         create: {
           tenantId,
           name: productData.name,
+          type: productData.type,
+          color: productData.color,
         },
       });
 
-      await this.prisma.productPrice.create({
-        data: {
-          productId: product.id,
-          price: basePrices[productData.name as keyof typeof basePrices],
-          effectiveFrom: new Date('2026-01-01T00:00:00Z'),
-        },
+      const existingPrice = await this.prisma.productPrice.findFirst({
+        where: { productId: product.id },
       });
 
-      await this.prisma.productReading.create({
-        data: {
-          productId: product.id,
-          reading: 100.0,
-        },
+      if (!existingPrice) {
+        await this.prisma.productPrice.create({
+          data: {
+            productId: product.id,
+            price: basePrices[productData.name as keyof typeof basePrices],
+            effectiveFrom: new Date('2026-01-01T00:00:00Z'),
+          },
+        });
+      }
+
+      const existingReading = await this.prisma.productReading.findFirst({
+        where: { productId: product.id },
       });
+
+      if (!existingReading) {
+        await this.prisma.productReading.create({
+          data: {
+            productId: product.id,
+            reading: 100.0,
+          },
+        });
+      }
 
       console.log(
         `Product (${productData.name}) - ₱${

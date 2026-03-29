@@ -9,18 +9,26 @@ import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { useDisclosure } from '~/hooks/useDisclosure';
 import { AdminRoutes } from '~/routes';
 import { useGetProductsQuery } from '~/services/product/product.queries';
-import { ProductCategory } from '~/services/product/product.types';
+import { ProductCategory, type Product } from '~/services/product/product.types';
 import { formatDate } from '~/utils/date';
 import { formatCurrency } from '~/utils/number';
 import { pathFor } from '~/utils/pathFor';
 
 import { CreateProductModal } from './CreateProductModal';
+import { EditProductModal } from './EditProductModal';
 import { MoreDetailsMenu } from './MoreDetailsMenu';
 
 export const ProductsPage = () => {
   const { tenantId } = useTenantContext();
   const disclosure = useDisclosure();
+  const editDisclosure = useDisclosure();
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
+  const handleEditProduct = (product: Product) => {
+    setSelectedProduct(product);
+    editDisclosure.onOpen();
+  };
   const { data: products, isLoading } = useGetProductsQuery(tenantId, {
     category: ProductCategory.FUEL,
     searchTerm: searchTerm || undefined,
@@ -76,13 +84,23 @@ export const ProductsPage = () => {
               id: 'name',
               heading: 'Product Name',
               cell: (product) => (
-                <Stack direction="row" alignItems="center" spacing={0.5}>
+                <Stack
+                  direction="row"
+                  alignItems="center"
+                  spacing={0.5}
+                  onClick={() => handleEditProduct(product)}
+                  sx={{
+                    cursor: 'pointer',
+                    width: 'fit-content',
+                    '&:hover .product-name': { fontWeight: 600, textDecoration: 'underline' },
+                  }}
+                >
                   <CircleOutlined
                     fontSize="small"
                     color={product.color === 'grey' ? undefined : product.color}
                     sx={product.color === 'grey' ? { color: '#9E9E9E' } : undefined}
                   />
-                  <Typography variant="body2" color="text.primary">
+                  <Typography variant="body2" color="text.primary" className="product-name">
                     {product.name}
                   </Typography>
                 </Stack>
@@ -165,6 +183,12 @@ export const ProductsPage = () => {
       </PageContainer>
 
       <CreateProductModal open={disclosure.open} onClose={disclosure.onClose} />
+
+      {selectedProduct && (
+        <ProductProvider product={selectedProduct}>
+          <EditProductModal open={editDisclosure.open} onClose={editDisclosure.onClose} />
+        </ProductProvider>
+      )}
     </PageLayout>
   );
 };
