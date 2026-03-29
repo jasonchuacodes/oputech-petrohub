@@ -92,6 +92,13 @@ export const ReportsPage = () => {
             itemToValue: (report) => report.id,
             itemToString: (report) => report.shiftDate,
           })}
+          pagination={{
+            enabled: true,
+            page,
+            count: data?.total ?? 0,
+            pageSize: 100,
+            onPageChange: setPage,
+          }}
           columns={[
             {
               id: 'shiftDate',

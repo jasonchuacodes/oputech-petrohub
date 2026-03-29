@@ -38,7 +38,7 @@ const useGetReportsQuery = ({
 }) => {
   return useQuery({
     queryKey: ['reports', tenantId, filters, page],
-    queryFn: () => getReports(tenantId!, { ...filters, page, pageSize: 10 }),
+    queryFn: () => getReports(tenantId!, { ...filters, page, pageSize: 100 }),
     enabled: !!tenantId,
   });
 };
