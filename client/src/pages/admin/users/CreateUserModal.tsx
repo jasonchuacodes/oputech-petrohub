@@ -1,5 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { PeopleOutlined } from '@mui/icons-material';
 import { Stack } from '@mui/material';
+import { useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
@@ -11,7 +13,6 @@ import { CreateUserSchema, type CreateUserInput } from '~/schema/createUserSchem
 import { useCreateUserMutation } from '~/services/user/user.queries';
 import { parseBackendError } from '~/utils/parseBackendError';
 import { toTitleCase } from '~/utils/textUtils';
-import { PeopleOutlined } from '@mui/icons-material';
 
 const roleOptions = Object.values(UserRole).map((value) => {
   return {
@@ -40,6 +41,7 @@ export const CreateUserModal = ({ open, setOpen }: Props) => {
     },
   });
 
+  const queryClient = useQueryClient();
   const { mutate: createUser } = useCreateUserMutation();
 
   const handleCancel = () => {
@@ -57,8 +59,9 @@ export const CreateUserModal = ({ open, setOpen }: Props) => {
       },
       {
         onSuccess: () => {
-          toast.success('User created successfully!');
+          queryClient.invalidateQueries({ queryKey: ['tenantUsers'] });
 
+          toast.success('User created successfully!');
           setOpen(false);
           reset();
         },

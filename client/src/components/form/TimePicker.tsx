@@ -30,7 +30,7 @@ export const TimePicker = ({ control, name, label,  disabled }: TimePickerProps)
 
         return (
           <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <Stack maxWidth="sm">
+            <Stack flex={1} minWidth={0}>
               <Typography
                 gutterBottom
                 variant="body2"
