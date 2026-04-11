@@ -112,9 +112,10 @@ export const TimesheetLogs = () => {
             id: 'checkIn',
             heading: 'Check In',
             cell: (timesheet) => {
-              const firstCheckIn = timesheet.entries.find(
-                (e) => e.action === TimesheetEntryActionEnum.CHECK_IN,
-              );
+              const firstCheckIn = [...timesheet.entries]
+                .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+                .find((e) => e.action === TimesheetEntryActionEnum.CHECK_IN);
+
               return (
                 <Tooltip title="First In">
                   <Typography variant="body2" color="text.secondary">
@@ -129,8 +130,9 @@ export const TimesheetLogs = () => {
             heading: 'Check Out',
             cell: (timesheet) => {
               const lastCheckOut = [...timesheet.entries]
-                .reverse()
+                .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
                 .find((e) => e.action === TimesheetEntryActionEnum.CHECK_OUT);
+                
               return (
                 <Tooltip title="Last Out">
                   <Typography variant="body2" color="text.secondary">
