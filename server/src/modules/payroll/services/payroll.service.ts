@@ -77,7 +77,7 @@ const runPayroll = async (data: {
             totalHours: payslipData.totalHours,
             rateSnapshot: new Decimal(payslipData.rateSnapshot),
             rateTypeSnapshot: payslipData.rateTypeSnapshot,
-            totalCompensation: new Decimal(payslipData.totalCompensation),
+            totalCompensation: new Decimal(payslipData.totalCompensation).toDecimalPlaces(2),
             payrollRunId: payrollRun.id,
             notes: payslipData.notes,
             paymentStatus: PaymentStatus.UNPAID,
@@ -96,7 +96,9 @@ const runPayroll = async (data: {
             if (timesheet) {
               // Calculate compensation for this specific timesheet
               const hoursSnapshot = timesheet.totalHours;
-              const compensationSnapshot = new Decimal(payslipData.rateSnapshot).mul(hoursSnapshot);
+              const compensationSnapshot = new Decimal(payslipData.rateSnapshot)
+                .mul(hoursSnapshot)
+                .toDecimalPlaces(2);
 
               await tx.payslipTimesheet.create({
                 data: {
@@ -107,7 +109,7 @@ const runPayroll = async (data: {
                 },
               });
             }
-          })
+          }),
         );
 
         // Mark timesheets as processed
@@ -121,7 +123,7 @@ const runPayroll = async (data: {
         });
 
         return payslip;
-      })
+      }),
     );
 
     // Return PayrollRun with payslips
@@ -144,11 +146,7 @@ const runPayroll = async (data: {
   });
 };
 
-const getPayrollRuns = async (data: {
-  tenantId: string;
-  periodStart?: Date;
-  periodEnd?: Date;
-}) => {
+const getPayrollRuns = async (data: { tenantId: string; periodStart?: Date; periodEnd?: Date }) => {
   return prisma.payrollRun.findMany({
     where: {
       tenantId: data.tenantId,
@@ -343,7 +341,7 @@ const generatePayslip = async (data: {
             },
           });
         }
-      })
+      }),
     );
 
     // Mark timesheets as processed
