@@ -170,7 +170,7 @@ const cascadePriceUpdate = async (
       }
     } else {
       await tx.productPrice.deleteMany({
-        where: { productId: product.id, effectiveFrom: { gt: now } },
+        where: { productId: product.id, effectiveFrom: { gte: effectiveFrom } },
       });
       await tx.productPrice.create({
         data: { productId: product.id, price, effectiveFrom },
@@ -183,11 +183,6 @@ const updateProduct = async (productId: string, tenantId: string, data: UpdatePr
   const product = await prisma.product.findFirst({
     where: { id: productId, tenantId },
     include: {
-      productPrices: {
-        where: { effectiveFrom: { lte: new Date() } },
-        orderBy: { effectiveFrom: 'desc' },
-        take: 1,
-      },
       productReadings: {
         orderBy: { createdAt: 'desc' },
         take: 1,
@@ -199,7 +194,6 @@ const updateProduct = async (productId: string, tenantId: string, data: UpdatePr
     throw new NotFoundError('Product not found');
   }
 
-  const currentPrice = product.productPrices[0]?.price;
   const currentReading = product.productReadings[0]?.reading;
 
   const updates: Partial<UpdateProductPayload> = {};
@@ -214,16 +208,6 @@ const updateProduct = async (productId: string, tenantId: string, data: UpdatePr
 
   if (data.color !== undefined && data.color !== product.color) {
     updates.color = data.color;
-  }
-
-  if (data.productPrice !== undefined) {
-    const priceChanged = !currentPrice || Number(currentPrice) !== data.productPrice;
-    if (priceChanged) {
-      updates.productPrice = data.productPrice;
-      if (data.effectiveFrom) {
-        updates.effectiveFrom = data.effectiveFrom;
-      }
-    }
   }
 
   if (data.productReading !== undefined) {
@@ -251,15 +235,6 @@ const updateProduct = async (productId: string, tenantId: string, data: UpdatePr
           ...(updates.color !== undefined && { color: updates.color }),
         },
       });
-    }
-
-    if (updates.productPrice !== undefined) {
-      const effectiveFrom = updates.effectiveFrom ? new Date(updates.effectiveFrom) : new Date();
-      effectiveFrom.setSeconds(0, 0);
-
-      if (product.type) {
-        await cascadePriceUpdate(tx, tenantId, product.type, updates.productPrice, effectiveFrom);
-      }
     }
 
     if (updates.productReading !== undefined) {
@@ -385,7 +360,6 @@ const cancelScheduledPrice = async (productId: string, tenantId: string) => {
 
   return getProductById(productId, tenantId);
 };
-
 
 export {
   createProduct,

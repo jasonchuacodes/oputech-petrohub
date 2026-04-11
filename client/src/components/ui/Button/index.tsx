@@ -26,8 +26,8 @@ export const Button = ({ children, sx, ...props }: PropsWithChildren<ButtonProps
       },
 
       ...(props.variant === 'outlined' && {
-        color: 'text.primary',
-        borderColor: 'divider',
+        color: props.color ?? 'text.primary',
+        borderColor: props.color ?? 'divider',
         bgcolor: 'background.paper',
       }),
 

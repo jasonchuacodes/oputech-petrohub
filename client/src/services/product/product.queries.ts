@@ -9,7 +9,12 @@ import {
   cancelScheduledPrice,
   updateProductTypePrice,
 } from './product.api';
-import type { CreateProductPayload, GetProductsFilters, ProductType, UpdateProductPayload } from './product.types';
+import type {
+  CreateProductPayload,
+  GetProductsFilters,
+  ProductType,
+  UpdateProductPayload,
+} from './product.types';
 
 const useGetProductsQuery = (tenantId?: string, filters?: GetProductsFilters) => {
   return useQuery({
@@ -53,6 +58,7 @@ const useUpdateProductMutation = () => {
     }) => updateProduct(productId, data, tenantId),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['products', variables.tenantId] });
+      queryClient.invalidateQueries({ queryKey: ['products', 'by-type', variables.tenantId] });
     },
   });
 };
@@ -83,6 +89,7 @@ const useCancelScheduledPriceMutation = () => {
       cancelScheduledPrice(productId, tenantId),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['products', variables.tenantId] });
+      queryClient.invalidateQueries({ queryKey: ['products', 'by-type', variables.tenantId] });
     },
   });
 };
@@ -100,6 +107,7 @@ const useUpdateProductTypePriceMutation = () => {
       data: { productPrice: number; effectiveFrom?: string };
     }) => updateProductTypePrice(tenantId, productType, data),
     onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['products', variables.tenantId] });
       queryClient.invalidateQueries({ queryKey: ['products', 'by-type', variables.tenantId] });
     },
   });

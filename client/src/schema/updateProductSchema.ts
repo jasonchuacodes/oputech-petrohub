@@ -3,35 +3,9 @@ import z from 'zod';
 const updateProductSchema = z.object({
   name: z.string().min(1, 'Name is required').max(50),
   description: z.string().max(255).optional(),
-  price: z.coerce.number().min(0.01),
   reading: z.coerce.number().min(0.001),
-  effectiveFrom: z.string().optional(),
-  future: z.boolean().optional(),
   color: z.enum(['grey', 'error', 'warning', 'success', 'info', 'primary']).optional(),
 });
 
-// TODO: refine this further. if future is true, effectiveFrom must be a valid date in the future - and the price should be different from the current price
-const refineFn = (data: { future?: boolean; effectiveFrom?: string }, ctx: z.RefinementCtx) => {
-  if (data.future) {
-    if (!data.effectiveFrom) {
-      ctx.addIssue({
-        path: ['effectiveFrom'],
-        message: 'Effective date is required',
-        code: z.ZodIssueCode.custom,
-      });
-      return;
-    }
-
-    const date = new Date(data.effectiveFrom);
-    if (isNaN(date.getTime())) {
-      ctx.addIssue({
-        path: ['effectiveFrom'],
-        message: 'Effective date is invalid',
-        code: z.ZodIssueCode.custom,
-      });
-    }
-  }
-};
-
-export const UpdateProductSchema = updateProductSchema.superRefine(refineFn);
+export const UpdateProductSchema = updateProductSchema;
 export type UpdateProductInput = z.infer<typeof UpdateProductSchema>;
