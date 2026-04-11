@@ -60,7 +60,7 @@ const getInventoriesByTenantId = async (
       },
       inventory: true,
     },
-    orderBy: { createdAt: 'desc' },
+    orderBy: { name: 'asc' },
   });
 
   return products.map((product) => ({
