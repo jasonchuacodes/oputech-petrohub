@@ -59,7 +59,7 @@ const getTodayTimesheet = (userId: string) => {
     orderBy: { createdAt: 'desc' },
     include: {
       entries: {
-        orderBy: { timestamp: 'asc' },
+        orderBy: { timestamp: 'desc' },
       },
     },
   });
