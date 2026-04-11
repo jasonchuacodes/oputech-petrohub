@@ -1,6 +1,6 @@
 import { AddOutlined, ReceiptLongOutlined, RemoveOutlined } from '@mui/icons-material';
 import { Box, Divider, IconButton, Stack, Typography } from '@mui/material';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -16,7 +16,7 @@ const EditPayslipSchema = z.object({
     z.object({
       name: z.string(),
       amount: z.number(),
-    })
+    }),
   ),
   notes: z.string().optional(),
 });
@@ -42,6 +42,7 @@ export const EditPayslipModal = ({
     control,
     handleSubmit,
     watch,
+    reset,
     formState: { isValid },
   } = useForm<EditPayslipForm>({
     resolver: zodResolver(EditPayslipSchema),
@@ -66,6 +67,16 @@ export const EditPayslipModal = ({
     return (grossPay || 0) - totalDeductions;
   }, [grossPay, deductions]);
 
+  useEffect(() => {
+    if (open && payslip) {
+      reset({
+        grossPay: parseFloat(payslip.totalCompensation),
+        deductions: [],
+        notes: '',
+      });
+    }
+  }, [open, payslip, reset]);
+
   const onSubmit = (data: EditPayslipForm) => {
     onSave(timesheetId, data.grossPay, data.notes);
     onClose();
@@ -84,7 +95,7 @@ export const EditPayslipModal = ({
       submitText="Update"
       disabled={!isValid}
     >
-      <Stack spacing={3} textAlign='start'>
+      <Stack spacing={3} textAlign="start">
         {/* Employee Details */}
         <Stack spacing={1}>
           <Typography variant="subtitle2" color="text.primary">

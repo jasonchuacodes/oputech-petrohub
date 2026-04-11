@@ -116,7 +116,6 @@ export const RunPayrollPage = () => {
         const totalHours = userTimesheets.reduce((sum, ts) => sum + ts.totalHours, 0);
         const calculatedGross = parseFloat((totalHours * hourlyRate).toFixed(2));
 
-        console.log("Hourly rate: ", hourlyRate)
         const override = overrides[userId];
         const grossPay = override?.amount ?? calculatedGross;
 
