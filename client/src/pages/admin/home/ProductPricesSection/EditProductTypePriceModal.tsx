@@ -30,7 +30,7 @@ import theme from '~/theme';
 import { formatCurrency } from '~/utils/number';
 import { formatDate, dayjsLocal } from '~/utils/date';
 
-import { getProductTypeDisplayName } from '../products/utils';
+import { getProductTypeDisplayName } from '../../products/utils';
 
 type EditProductTypePriceModalProps = {
   open: boolean;

@@ -7,7 +7,7 @@ import theme from '~/theme';
 import { formatCurrency } from '~/utils/number';
 import { formatDate } from '~/utils/date';
 
-import { getProductTypeDisplayName } from '../../products/utils';
+import { getProductTypeDisplayName } from '../../../products/utils';
 
 type ProductPriceProps = {
   product: Product;
