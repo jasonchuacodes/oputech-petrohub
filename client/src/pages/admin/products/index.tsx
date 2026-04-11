@@ -123,7 +123,7 @@ export const ProductsPage = () => {
               heading: 'Current Price',
               cell: (product) => (
                 <Typography variant="body2" color="text.secondary">
-                  {formatCurrency(product.productPrice.price, undefined, 2)}
+                  {formatCurrency(product.productPrice?.price, undefined, 2)}
                 </Typography>
               ),
               width: 160,
@@ -161,7 +161,7 @@ export const ProductsPage = () => {
               heading: 'Last Updated',
               cell: (product) => (
                 <Typography variant="body2" color="text.secondary">
-                  {formatDate(product.productPrice.effectiveFrom, 'YYYY-MM-DD hh:mm')}
+                  {formatDate(product.productPrice?.effectiveFrom, 'YYYY-MM-DD hh:mm')}
                 </Typography>
               ),
             },

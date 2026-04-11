@@ -9,12 +9,14 @@ import {
   getProductsByType,
   deactivateProduct,
   cancelScheduledPrice,
+  updateProductTypePrice,
 } from '../controller/product.controller';
 
 const router = express.Router();
 
 router.post('/', requireAuth, asyncHandler(createProduct));
 router.get('/types', asyncHandler(getProductsByType));
+router.put('/types/:productType/price', requireAuth, asyncHandler(updateProductTypePrice));
 router.get('/', requireAuth, asyncHandler(getProductsByTenantId));
 router.get('/:productId', requireAuth, asyncHandler(getProductById));
 router.put('/:productId', requireAuth, asyncHandler(updateProduct));

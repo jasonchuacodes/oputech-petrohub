@@ -52,7 +52,8 @@ export const getInitialDateRange = (
   };
 };
 
-export const formatDate = (date: string | Date, format?: string): string => {
+export const formatDate = (date: string | Date | undefined, format?: string): string => {
+  if (date === undefined) return '-';
   return dayjs(date).tz(APP_TZ).format(format ?? 'MMMM D, YYYY');
 };
 

@@ -1,5 +1,5 @@
-import { LocalGasStation } from '@mui/icons-material';
-import { alpha, Stack, Typography, type Theme } from '@mui/material';
+import { LocalGasStation, EditOutlined } from '@mui/icons-material';
+import { alpha, IconButton, Stack, Tooltip, Typography, type Theme } from '@mui/material';
 
 import { Show } from '~/components/ui';
 import { type Product, type ProductColor } from '~/services/product/product.types';
@@ -11,6 +11,7 @@ import { getProductTypeDisplayName } from '../../products/utils';
 
 type ProductPriceProps = {
   product: Product;
+  onEdit?: (product: Product) => void;
 };
 
 const productColorMap = (theme: Theme): Record<ProductColor, string> => ({
@@ -22,7 +23,7 @@ const productColorMap = (theme: Theme): Record<ProductColor, string> => ({
   info: theme.palette.info.main,
 });
 
-export const ProductPrice = ({ product }: ProductPriceProps) => {
+export const ProductPrice = ({ product, onEdit }: ProductPriceProps) => {
   const baseColor = productColorMap(theme)[product.color];
   const bgColor = alpha(baseColor, 0.05);
 
@@ -40,9 +41,16 @@ export const ProductPrice = ({ product }: ProductPriceProps) => {
         <Stack borderRadius={8} p={1.5} bgcolor={bgColor}>
           <LocalGasStation color={product.color === 'grey' ? undefined : product.color} />
         </Stack>
-        <Typography variant="body1" fontWeight={600}>
+        <Typography variant="body1" fontWeight={600} flex={1}>
           {getProductTypeDisplayName(product.type)}
         </Typography>
+        {onEdit && (
+          <Tooltip title="Edit price">
+            <IconButton size="small" onClick={() => onEdit(product)}>
+              <EditOutlined fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        )}
       </Stack>
 
       <Show
@@ -50,17 +58,17 @@ export const ProductPrice = ({ product }: ProductPriceProps) => {
         fallback={
           <Stack spacing={0.5}>
             <Typography variant="h6" fontWeight={600} color="text.primary">
-              {formatCurrency(product.productPrice.price)}
+              {formatCurrency(product.productPrice?.price)}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Last updated on {formatDate(product.productPrice.effectiveFrom, 'MMM DD, YYYY')}
+              Last updated on {formatDate(product.productPrice?.effectiveFrom, 'MMM DD, YYYY')}
             </Typography>
           </Stack>
         }
       >
         <Stack spacing={0.5}>
           <Typography variant="h6" fontWeight={600} color="text.primary">
-            {formatCurrency(product.productPrice.price)}
+            {formatCurrency(product.productPrice?.price)}
           </Typography>
         </Stack>
 

@@ -15,9 +15,10 @@ export const formatNumber = (
 };
 
 export const formatCurrency = (
-  value: number,
+  value: number | undefined,
   symbol: string = '₱',
   decimals: number = 2
 ): string => {
+  if (value === undefined) return '-';
   return `${symbol}${formatNumber(value, decimals)}`;
 };

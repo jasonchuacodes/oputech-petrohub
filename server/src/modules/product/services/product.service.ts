@@ -5,6 +5,7 @@ import { Decimal } from '@prisma/client/runtime/library';
 
 import type { CreateProductPayload } from '../schema/createProductSchema';
 import type { UpdateProductPayload } from '../schema/updateProductSchema';
+import type { UpdateProductTypePricePayload } from '../schema/updateProductTypePriceSchema';
 
 type Tx = Prisma.TransactionClient;
 
@@ -274,6 +275,27 @@ const updateProduct = async (productId: string, tenantId: string, data: UpdatePr
   });
 };
 
+const updateProductTypePrice = async (
+  tenantId: string,
+  productType: ProductType,
+  data: UpdateProductTypePricePayload,
+) => {
+  const effectiveFrom = data.effectiveFrom ? new Date(data.effectiveFrom) : new Date();
+  effectiveFrom.setSeconds(0, 0);
+
+  await prisma.$transaction(async (tx) => {
+    await cascadePriceUpdate(tx, tenantId, productType, data.productPrice, effectiveFrom);
+  });
+
+  const product = await prisma.product.findFirst({
+    where: { tenantId, type: productType, active: true },
+  });
+
+  if (!product) throw new NotFoundError('No products found for this type');
+
+  return getProductById(product.id, tenantId);
+};
+
 const getProductsByType = async (tenantId: string) => {
   const now = new Date();
 
@@ -364,11 +386,13 @@ const cancelScheduledPrice = async (productId: string, tenantId: string) => {
   return getProductById(productId, tenantId);
 };
 
+
 export {
   createProduct,
   getProductsByTenantId,
   getProductById,
   updateProduct,
+  updateProductTypePrice,
   getProductsByType,
   deactivateProduct,
   cancelScheduledPrice,

@@ -1,16 +1,18 @@
 import type { Request, Response, NextFunction } from 'express';
 
-import { ProductCategory } from '~/db/prisma';
+import { ProductCategory, ProductType } from '~/db/prisma';
 import { createSchemaValidator } from '~/utils';
 
 import * as productService from '../services/product.service';
 import { CreateProductSchema } from '../schema/createProductSchema';
 import { UpdateProductSchema } from '../schema/updateProductSchema';
 import { GetProductsSchema } from '../schema/getProductsSchema';
+import { UpdateProductTypePriceSchema } from '../schema/updateProductTypePriceSchema';
 
 const validateCreateProduct = createSchemaValidator(CreateProductSchema);
 const validateUpdateProduct = createSchemaValidator(UpdateProductSchema);
 const validateGetProducts = createSchemaValidator(GetProductsSchema);
+const validateUpdateProductTypePrice = createSchemaValidator(UpdateProductTypePriceSchema);
 
 const createProduct = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -93,6 +95,24 @@ const cancelScheduledPrice = async (req: Request, res: Response, next: NextFunct
   }
 };
 
+const updateProductTypePrice = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { productType } = req.params;
+    const data = await validateUpdateProductTypePrice({
+      tenantId: req.query.tenantId as string,
+      ...req.body,
+    });
+    const product = await productService.updateProductTypePrice(
+      data.tenantId,
+      productType as ProductType,
+      data,
+    );
+    res.status(200).json({ message: 'Product type price updated successfully', data: product });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export {
   createProduct,
   getProductsByTenantId,
@@ -101,4 +121,5 @@ export {
   updateProduct,
   deactivateProduct,
   cancelScheduledPrice,
+  updateProductTypePrice,
 };

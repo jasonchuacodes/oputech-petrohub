@@ -1,5 +1,5 @@
 import axios from '~/lib/axiosInstance';
-import type { Product, CreateProductPayload, UpdateProductPayload, GetProductsFilters } from './product.types';
+import type { Product, CreateProductPayload, UpdateProductPayload, GetProductsFilters, ProductType } from './product.types';
 
 const getProductsByTenantId = async (
   tenantId: string,
@@ -41,6 +41,19 @@ export const cancelScheduledPrice = async (productId: string, tenantId: string):
   const res = await axios.delete<{ data: Product }>(`/products/${productId}/scheduled-price`, {
     params: { tenantId },
   });
+  return res.data.data;
+};
+
+export const updateProductTypePrice = async (
+  tenantId: string,
+  productType: ProductType,
+  data: { productPrice: number; effectiveFrom?: string },
+): Promise<Product> => {
+  const res = await axios.put<{ data: Product }>(
+    `/products/types/${productType}/price`,
+    data,
+    { params: { tenantId } },
+  );
   return res.data.data;
 };
 

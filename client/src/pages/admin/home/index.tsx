@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Divider, Grid, Stack, Typography } from '@mui/material';
 
 import { PageHeader } from '~/components/layouts';
@@ -6,10 +7,11 @@ import { useAuthContext } from '~/context/auth/useAuthContext';
 import { DashboardProvider, useDashboardContext } from '~/context/dashboard';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { useGetProductsByTypeQuery } from '~/services/product/product.queries';
-import type { ProductType } from '~/services/product/product.types';
+import type { Product, ProductType } from '~/services/product/product.types';
 import { useGetDisposalAnalyticsDataQuery } from '~/services/analytics/analytics.queries';
 import { getDateRangeFromPreset } from '~/utils/date-ranges';
 
+import { EditProductTypePriceModal } from './EditProductTypePriceModal';
 import { PresetFilterMenu } from './PresetFilterMenu';
 import { ProductPrice } from './ProductPrice';
 import { ReportCard } from './ReportCard';
@@ -84,6 +86,8 @@ export const HomePage = () => {
   const { data: productsData, isLoading: isLoadingProducts } = useGetProductsByTypeQuery(tenantId);
   const products = productsData ?? [];
 
+  const [editProduct, setEditProduct] = useState<Product | null>(null);
+
   return (
     <PageLayout>
       <PageContainer maxWidth="xl" spacing={5}>
@@ -121,15 +125,23 @@ export const HomePage = () => {
               </Typography>
             </Stack>
             <Grid container spacing={2} alignItems="stretch">
-                {products &&
-                  products.map((product) => (
-                    <Grid key={product.id} size={{ xs: 12, md: 6, lg: 4 }} display="flex">
-                      <ProductPrice product={product} />
-                    </Grid>
-                  ))}
+              {products &&
+                products.map((product) => (
+                  <Grid key={product.id} size={{ xs: 12, md: 6, lg: 4 }} display="flex">
+                    <ProductPrice product={product} onEdit={setEditProduct} />
+                  </Grid>
+                ))}
             </Grid>
           </Stack>
         </Show>
+
+        {editProduct && (
+          <EditProductTypePriceModal
+            open={!!editProduct}
+            onClose={() => setEditProduct(null)}
+            product={editProduct}
+          />
+        )}
 
         {/* Operations */}
         <Stack spacing={2}>

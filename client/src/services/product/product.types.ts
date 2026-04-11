@@ -40,7 +40,7 @@ export type Product = {
   type: ProductType | null;
   active: boolean;
   productReading: ProductReading;
-  productPrice: ProductPrice;
+  productPrice: ProductPrice | null;
   scheduledPrice: ProductPrice | null;
   createdAt: Date;
   updatedAt: Date;
