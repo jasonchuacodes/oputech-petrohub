@@ -111,15 +111,14 @@ export const EditInventoryModal = ({ open, onClose }: EditInventoryModalProps) =
             min={1}
           />
         </Stack>
-        <Input
+        <NumberInput
           label="Price"
           control={control}
           name="price"
           startAdornment="₱"
-          type="number"
           placeholder="0.00"
-          step="0.01"
-          min="0.01"
+          step={0.01}
+          min={0.01}
         />
         <Input
           label="Description (optional)"

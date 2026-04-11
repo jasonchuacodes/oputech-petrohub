@@ -344,6 +344,7 @@ export const EditProductModal = ({ open, onClose }: EditProductModalProps) => {
             control={priceControl}
             placeholder="0.00"
             name="productPrice"
+            startAdornment="₱"
             min={0.01}
           />
 

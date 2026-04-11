@@ -115,7 +115,7 @@ export const AddInventoryModal = ({ open, onClose, reportId }: AddInventoryModal
           <Stack flex={1} justifyContent="space-between" spacing={0.5} width="50%">
             <Typography variant="body2" color="textSecondary">
               Price{' '}
-              {selectedProduct && (
+              {selectedProduct?.productPrice && (
                 <Typography variant="body2" component="span" color="warning.main">
                   @ {formatNumber(selectedProduct.productPrice.price)}
                 </Typography>
@@ -147,7 +147,7 @@ export const AddInventoryModal = ({ open, onClose, reportId }: AddInventoryModal
                 </Typography>
               </Box>
               <Typography variant="body1" color="text.secondary">
-                {selectedProduct ? formatNumber(selectedProduct.productPrice.price * quantity) : 0}
+                {selectedProduct?.productPrice ? formatNumber(selectedProduct.productPrice.price * quantity) : 0}
               </Typography>
             </Box>
           </Stack>

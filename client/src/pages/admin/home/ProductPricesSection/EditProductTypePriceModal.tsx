@@ -188,6 +188,7 @@ export const EditProductTypePriceModal = ({
           control={control}
           placeholder="0.00"
           name="productPrice"
+          startAdornment="₱"
           min={0.01}
         />
 
