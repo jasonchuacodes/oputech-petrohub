@@ -34,7 +34,7 @@ export const BasicDetail = ({ control, user }: BasicDetailProps) => {
           placeholder="0000-000-0000"
         />
         <FormDatePicker control={control} name="birthday" label="Birthday" disableFuture />
-        <Input control={control} name="address" label="Address" placeholder="Manila, Philippines" />
+        <Input fullWidth control={control} name="address" label="Address" placeholder="Manila, Philippines" />
       </Stack>
     </Stack>
   );

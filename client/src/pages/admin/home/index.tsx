@@ -139,10 +139,10 @@ export const HomePage = () => {
             </Typography>
           </Stack>
           <Grid container spacing={2} alignItems="stretch">
-            <Grid size={{ xs: 12, md: 12, lg: 8 }} display="flex">
+            <Grid size={{ xs: 12, md: 12, lg: 6 }} display="flex">
               <ReportCard />
             </Grid>
-            <Grid size={{ xs: 12, md: 12, lg: 4 }}>
+            <Grid size={{ xs: 12, md: 12, lg: 6 }}>
               <TimesheetCard />
             </Grid>
           </Grid>

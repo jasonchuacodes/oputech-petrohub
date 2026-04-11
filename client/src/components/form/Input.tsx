@@ -94,7 +94,7 @@ export const Input = <T extends FieldValues>({
           alignItems="start"
           spacing={0.5}
           width={fullWidth ? '100%' : 'auto'}
-          maxWidth={fullWidth ? 'auto' : 'sm'}
+          maxWidth='sm'
         >
           {label && (
             <Typography variant="body2" fontWeight="medium" color="text.primary">

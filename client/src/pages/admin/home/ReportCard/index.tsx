@@ -129,7 +129,7 @@ export const ReportCard = () => {
                             Fuel Sales
                           </Typography>
                           <Typography variant="body2" color="text.secondary">
-                            {formatCurrency(Number(report.totalIncome))}
+                            {formatCurrency(Number(report.totalSales))}
                           </Typography>
                         </Stack>
                         <Divider sx={{ borderColor: 'divider' }} />
@@ -140,9 +140,10 @@ export const ReportCard = () => {
                               Sales
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                              {formatCurrency(Number(report.totalSales))}
+                              {formatCurrency(Number(report.totalIncome))}
                             </Typography>
                           </Stack>
+
                           <Stack direction="row" justifyContent="space-between">
                             <Typography variant="body2" color="text.secondary">
                               Expenses
