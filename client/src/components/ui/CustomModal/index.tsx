@@ -181,7 +181,7 @@ export const CustomModal = ({
               <Button
                 disabled={disabled}
                 loading={loading}
-                type="submit"
+                type="button"
                 variant="contained"
                 onClick={onSubmit}
                 color={type === 'danger' ? 'error' : 'primary'}
