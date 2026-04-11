@@ -1,4 +1,4 @@
-import { Box, Divider, Grid, Stack, Typography } from '@mui/material';
+import { Divider, Grid, Stack, Typography } from '@mui/material';
 
 import { PageHeader } from '~/components/layouts';
 import { PageContainer, PageLayout, Show } from '~/components/ui';
@@ -39,37 +39,41 @@ const AnalyticsSection = () => {
   };
 
   return (
-    <Grid container spacing={2} alignItems="stretch">
-      <Grid size={{ xs: 12, md: 6, lg: 4 }} display="flex">
-        <Stack width="100%">
-          <TotalIncome />
-        </Stack>
+    <Stack spacing={2}>
+      <Grid container spacing={2} alignItems="stretch">
+        <Grid size={{ xs: 12, md: 6, lg: 4 }} display="flex">
+          <Stack width="100%">
+            <TotalIncome />
+          </Stack>
+        </Grid>
+        <Grid size={{ xs: 12, md: 6, lg: 4 }} display="flex">
+          <Stack width="100%">
+            <TotalExpenses />
+          </Stack>
+        </Grid>
+        <Grid size={{ xs: 12, md: 6, lg: 4 }} display="flex">
+          <Stack width="100%">
+            <TotalInventorySales />
+          </Stack>
+        </Grid>
       </Grid>
-      <Grid size={{ xs: 12, md: 6, lg: 4 }} display="flex">
-        <Stack width="100%">
-          <TotalExpenses />
-        </Stack>
+      <Grid container spacing={2} alignItems="stretch">
+        {disposalData &&
+          disposalData.map((disposal) => (
+            <Grid key={disposal.productType} size={{ xs: 12, md: 6, lg: 4 }} display="flex">
+              <TotalDisposals
+                title={
+                  productTypeDisplayNames[disposal.productType] ||
+                  `${disposal.productType} Disposals`
+                }
+                value={disposal.value}
+                changePercentage={disposal.changePercentage}
+                isLoading={isLoadingDisposals}
+              />
+            </Grid>
+          ))}
       </Grid>
-      <Grid size={{ xs: 12, md: 6, lg: 4 }} display="flex">
-        <Stack width="100%">
-          <TotalInventorySales />
-        </Stack>
-      </Grid>
-
-      {disposalData &&
-        disposalData.map((disposal) => (
-          <Box key={disposal.productType} sx={{ minWidth: 240, flex: 1 }}>
-            <TotalDisposals
-              title={
-                productTypeDisplayNames[disposal.productType] || `${disposal.productType} Disposals`
-              }
-              value={disposal.value}
-              changePercentage={disposal.changePercentage}
-              isLoading={isLoadingDisposals}
-            />
-          </Box>
-        ))}
-    </Grid>
+    </Stack>
   );
 };
 
@@ -116,15 +120,14 @@ export const HomePage = () => {
                 View current fuel product prices
               </Typography>
             </Stack>
-
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-              {products &&
-                products.map((product) => (
-                  <Box key={product.id} sx={{ minWidth: 240, flex: 1 }}>
-                    <ProductPrice product={product} />
-                  </Box>
-                ))}
-            </Box>
+            <Grid container spacing={2} alignItems="stretch">
+                {products &&
+                  products.map((product) => (
+                    <Grid key={product.id} size={{ xs: 12, md: 6, lg: 4 }} display="flex">
+                      <ProductPrice product={product} />
+                    </Grid>
+                  ))}
+            </Grid>
           </Stack>
         </Show>
 
