@@ -379,14 +379,12 @@ const submitReport = async (reportId: string, userId: string, remarks?: string |
     throw new ConflictError('Only validated reports can be submitted');
   }
 
-  // Aggregate income and expenses before finalizing
-  // TODO: do we not transfer this in the transaction?
-  await aggregateReportIncome(reportId);
-  await aggregateReportExpense(reportId);
-  await aggregateReportDisposal(reportId);
-  await aggregateReportInventorySales(reportId);
-
   return await prisma.$transaction(async (tx) => {
+    await aggregateReportIncome(reportId, tx);
+    await aggregateReportExpense(reportId, tx);
+    await aggregateReportDisposal(reportId, tx);
+    await aggregateReportInventorySales(reportId, tx);
+
     // Get disposals to extract afterReading values
     const disposals = await tx.reportDisposal.findMany({
       where: { reportId },
@@ -455,16 +453,17 @@ const deleteReport = async (reportId: string, userRole: Role): Promise<void> => 
     );
   }
 
-  if (report.status !== ReportStatus.DRAFT) {
-    await deaggregateReportIncome(reportId);
-    await deaggregateReportExpense(reportId);
-    await deaggregateReportDisposal(reportId);
-    await deaggregateReportInventorySales(reportId);
+  if (report.status === ReportStatus.SUBMITTED) {
+    await prisma.$transaction(async (tx) => {
+      await deaggregateReportIncome(reportId, tx);
+      await deaggregateReportExpense(reportId, tx);
+      await deaggregateReportDisposal(reportId, tx);
+      await deaggregateReportInventorySales(reportId, tx);
+      await tx.report.delete({ where: { id: reportId } });
+    });
+  } else {
+    await prisma.report.delete({ where: { id: reportId } });
   }
-
-  await prisma.report.delete({
-    where: { id: reportId },
-  });
 };
 
 const updateRemarks = async (reportId: string, userId: string, remarks: string | null) => {

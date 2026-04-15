@@ -4,8 +4,14 @@ import { Decimal } from '@prisma/client/runtime/library';
 import { prisma } from '~/db';
 import { NotFoundError } from '~/errors';
 
-export const deaggregateReportExpense = async (reportId: string): Promise<void> => {
-  const report = await prisma.report.findUnique({
+type TransactionClient = any;
+
+export const deaggregateReportExpense = async (
+  reportId: string,
+  tx?: TransactionClient
+): Promise<void> => {
+  const client = tx ?? prisma;
+  const report = await client.report.findUnique({
     where: { id: reportId },
     include: { expenses: true }
   });
@@ -39,7 +45,7 @@ export const deaggregateReportExpense = async (reportId: string): Promise<void> 
       }
     };
 
-    await prisma.reportExpenseAggregation.update({
+    await client.reportExpenseAggregation.update({
       where: whereUnique,
       data: {
         totalAmount: { decrement: data.amount },
@@ -47,20 +53,24 @@ export const deaggregateReportExpense = async (reportId: string): Promise<void> 
       },
     });
 
-    const updated = await prisma.reportExpenseAggregation.findUnique({
+    const updated = await client.reportExpenseAggregation.findUnique({
       where: whereUnique,
     });
 
     if (updated && updated.expenseCount <= 0) {
-      await prisma.reportExpenseAggregation.delete({
+      await client.reportExpenseAggregation.delete({
         where: whereUnique,
       });
     }
   }
 };
 
-export const aggregateReportExpense = async (reportId: string): Promise<void> => {
-  const report = await prisma.report.findUnique({
+export const aggregateReportExpense = async (
+  reportId: string,
+  tx?: TransactionClient
+): Promise<void> => {
+  const client = tx ?? prisma;
+  const report = await client.report.findUnique({
     where: { id: reportId },
     include: { expenses: true }
   });
@@ -89,7 +99,7 @@ export const aggregateReportExpense = async (reportId: string): Promise<void> =>
   for (const [hourKey, data] of hourlyGroups) {
     const hourBucket = new Date(hourKey);
 
-    await prisma.reportExpenseAggregation.upsert({
+    await client.reportExpenseAggregation.upsert({
       where: {
         tenantId_hourBucket: {
           tenantId: report.tenantId,

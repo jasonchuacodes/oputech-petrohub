@@ -4,8 +4,14 @@ import { Decimal } from '@prisma/client/runtime/library';
 import { prisma } from '~/db';
 import { NotFoundError } from '~/errors';
 
-export const deaggregateReportInventorySales = async (reportId: string): Promise<void> => {
-  const report = await prisma.report.findUnique({
+type TransactionClient = any;
+
+export const deaggregateReportInventorySales = async (
+  reportId: string,
+  tx?: TransactionClient
+): Promise<void> => {
+  const client = tx ?? prisma;
+  const report = await client.report.findUnique({
     where: { id: reportId },
     include: { inventories: true },
   });
@@ -39,7 +45,7 @@ export const deaggregateReportInventorySales = async (reportId: string): Promise
       },
     };
 
-    await prisma.reportInventorySalesAggregation.update({
+    await client.reportInventorySalesAggregation.update({
       where: whereUnique,
       data: {
         totalAmount: { decrement: data.amount },
@@ -47,20 +53,24 @@ export const deaggregateReportInventorySales = async (reportId: string): Promise
       },
     });
 
-    const updated = await prisma.reportInventorySalesAggregation.findUnique({
+    const updated = await client.reportInventorySalesAggregation.findUnique({
       where: whereUnique,
     });
 
     if (updated && updated.inventorySalesCount <= 0) {
-      await prisma.reportInventorySalesAggregation.delete({
+      await client.reportInventorySalesAggregation.delete({
         where: whereUnique,
       });
     }
   }
 };
 
-export const aggregateReportInventorySales = async (reportId: string): Promise<void> => {
-  const report = await prisma.report.findUnique({
+export const aggregateReportInventorySales = async (
+  reportId: string,
+  tx?: TransactionClient
+): Promise<void> => {
+  const client = tx ?? prisma;
+  const report = await client.report.findUnique({
     where: { id: reportId },
     include: { inventories: true },
   });
@@ -89,7 +99,7 @@ export const aggregateReportInventorySales = async (reportId: string): Promise<v
   for (const [hourKey, data] of hourlyGroups) {
     const hourBucket = new Date(hourKey);
 
-    await prisma.reportInventorySalesAggregation.upsert({
+    await client.reportInventorySalesAggregation.upsert({
       where: {
         tenantId_hourBucket: {
           tenantId: report.tenantId,

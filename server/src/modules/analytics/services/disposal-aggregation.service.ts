@@ -4,8 +4,14 @@ import { prisma } from '~/db';
 import { ProductType } from '~/db/prisma';
 import { NotFoundError } from '~/errors';
 
-export const deaggregateReportDisposal = async (reportId: string): Promise<void> => {
-  const report = await prisma.report.findUnique({
+type TransactionClient = any;
+
+export const deaggregateReportDisposal = async (
+  reportId: string,
+  tx?: TransactionClient
+): Promise<void> => {
+  const client = tx ?? prisma;
+  const report = await client.report.findUnique({
     where: { id: reportId },
     include: {
       disposals: {
@@ -50,7 +56,7 @@ export const deaggregateReportDisposal = async (reportId: string): Promise<void>
       }
     };
 
-    await prisma.reportDisposalAggregation.update({
+    await client.reportDisposalAggregation.update({
       where: whereUnique,
       data: {
         totalDisposal: { decrement: data.disposal },
@@ -58,20 +64,24 @@ export const deaggregateReportDisposal = async (reportId: string): Promise<void>
       },
     });
 
-    const updated = await prisma.reportDisposalAggregation.findUnique({
+    const updated = await client.reportDisposalAggregation.findUnique({
       where: whereUnique,
     });
 
     if (updated && updated.disposalCount <= 0) {
-      await prisma.reportDisposalAggregation.delete({
+      await client.reportDisposalAggregation.delete({
         where: whereUnique,
       });
     }
   }
 };
 
-export const aggregateReportDisposal = async (reportId: string): Promise<void> => {
-  const report = await prisma.report.findUnique({
+export const aggregateReportDisposal = async (
+  reportId: string,
+  tx?: TransactionClient
+): Promise<void> => {
+  const client = tx ?? prisma;
+  const report = await client.report.findUnique({
     where: { id: reportId },
     include: {
       disposals: {
@@ -111,7 +121,7 @@ export const aggregateReportDisposal = async (reportId: string): Promise<void> =
     const [hourKey, productType] = compositeKey.split('_');
     const hourBucket = new Date(hourKey);
 
-    await prisma.reportDisposalAggregation.upsert({
+    await client.reportDisposalAggregation.upsert({
       where: {
         tenantId_hourBucket_productType: {
           tenantId: report.tenantId,
