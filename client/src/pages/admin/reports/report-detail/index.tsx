@@ -1,5 +1,11 @@
-import { DeleteOutline, HomeOutlined, MoreHorizOutlined } from '@mui/icons-material';
+import {
+  CircleOutlined,
+  DeleteOutline,
+  HomeOutlined,
+  MoreHorizOutlined,
+} from '@mui/icons-material';
 import { Avatar, Box, Divider, IconButton, Menu, MenuItem, Stack, Typography } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -19,6 +25,7 @@ import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { useDisclosure } from '~/hooks/useDisclosure';
 import { PageHeader } from '~/components/layouts';
 import { AdminRoutes } from '~/routes';
+import { getProductTypeDisplayName } from '~/pages/admin/products/utils';
 import { useDeleteReportMutation, useGetReportByIdQuery } from '~/services/report/report.queries';
 import { ReportStatus } from '~/services/report/report.types';
 import { formatDate, formatTime } from '~/utils/date';
@@ -402,33 +409,47 @@ export const ReportDetailPage = () => {
                       <MoreHorizOutlined fontSize="inherit" />
                     </IconButton>
                   </Stack>
-                  <Stack direction="row" justifyContent="space-between">
-                    <Typography variant="body2" color="text.secondary">
-                      Calculated Sales
-                    </Typography>
-                    <Typography variant="body1" color="text.primary">
-                      {formatCurrency(report?.totalDisposalSales || 0)}
-                    </Typography>
-                  </Stack>
 
                   {/* Summary */}
                   <Show when={!!report?.disposals?.length}>
-                    <Divider />
-                    {report?.disposals.map((disposal) => (
-                      <Stack
-                        key={disposal.id}
-                        direction="row"
-                        justifyContent="space-between"
-                        pl={2}
-                      >
+                    <Stack
+                      bgcolor={(theme) => alpha(theme.palette.primary.main, 0.08)}
+                      borderRadius={2}
+                      p={1.5}
+                      spacing={1}
+                    >
+                      <Typography variant="body2" fontWeight={500}>
+                        Summary
+                      </Typography>
+                      <Stack direction="row" justifyContent="space-between">
                         <Typography variant="body2" color="text.secondary">
-                          {disposal.product.name}
+                          Calculated Sales
                         </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {formatCurrency(Number(disposal.totalSales))}
+                        <Typography variant="body2" color="text.primary">
+                          {formatCurrency(report?.totalDisposalSales || 0)}
                         </Typography>
                       </Stack>
-                    ))}
+                      <Divider />
+
+                      {Object.entries(
+                        report?.disposals.reduce<Record<string, number>>((acc, d) => {
+                          const key = d.product.type ?? 'OTHER';
+                          acc[key] = (acc[key] ?? 0) + Number(d.netDisposal);
+                          return acc;
+                        }, {}) ?? {},
+                      ).map(([type, net]) => (
+                        <Stack key={type} direction="row" justifyContent="space-between">
+                          <Typography variant="body2" color="text.secondary">
+                            {getProductTypeDisplayName(
+                              type as Parameters<typeof getProductTypeDisplayName>[0],
+                            )}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            {formatNumber(net, 3)} L
+                          </Typography>
+                        </Stack>
+                      ))}
+                    </Stack>
                   </Show>
 
                   {/* Disposal Card */}
@@ -437,7 +458,19 @@ export const ReportDetailPage = () => {
                     <CardContainer key={disposal.id} bgcolor="background.default">
                       <Stack direction="row" justifyContent="space-between" alignItems="start">
                         <Stack spacing={1} width="100%">
-                          <Typography variant="h6">{disposal.product.name}</Typography>
+                          <Stack direction="row" alignItems="center" spacing={0.5}>
+                            <CircleOutlined
+                              color={
+                                disposal.product.color === 'grey'
+                                  ? undefined
+                                  : disposal.product.color
+                              }
+                              sx={
+                                disposal.product.color === 'grey' ? { color: '#9E9E9E' } : undefined
+                              }
+                            />
+                            <Typography variant="h6">{disposal.product.name}</Typography>
+                          </Stack>
                           <Stack
                             direction="row"
                             spacing={1}
@@ -448,7 +481,7 @@ export const ReportDetailPage = () => {
                               After Reading
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                              {disposal.afterReading}
+                              {formatNumber(disposal.afterReading, 3)}
                             </Typography>
                           </Stack>
                           <Stack
@@ -461,7 +494,7 @@ export const ReportDetailPage = () => {
                               Before Reading
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                              {disposal.beforeReading}
+                              {formatNumber(disposal.beforeReading, 3)}
                             </Typography>
                           </Stack>
                           <Stack
