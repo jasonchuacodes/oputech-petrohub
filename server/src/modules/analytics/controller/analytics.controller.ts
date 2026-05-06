@@ -1,17 +1,23 @@
-import { Request, Response, NextFunction } from 'express';
+import type { Response, NextFunction } from 'express';
 import { getTotalIncomeAnalytics, getTotalExpenseAnalytics, getDisposalAnalyticsByType, getTotalInventorySalesAnalytics } from '../services/analytics.service';
 import { getIncomeAnalyticsSchema } from '../schema/getIncomeAnalyticsSchema';
 import { getExpenseAnalyticsSchema } from '../schema/getExpenseAnalyticsSchema';
 import { getDisposalAnalyticsSchema } from '../schema/getDisposalAnalyticsSchema';
 import { getInventorySalesAnalyticsSchema } from '../schema/getInventorySalesAnalyticsSchema';
+import { rebuildAggregationsSchema } from '../schema/rebuildAggregationsSchema';
 import { createSchemaValidator } from '~/utils/schema-validator';
+import { rebuildAggregationsForTenant } from '../services/rebuild-aggregations.service';
+import { Role } from '~/db/prisma';
+import { UnauthorizedError } from '~/errors';
+import { AuthenticatedRequest } from '~/middlewares';
 
 const validateIncomeAnalytics = createSchemaValidator(getIncomeAnalyticsSchema);
 const validateExpenseAnalytics = createSchemaValidator(getExpenseAnalyticsSchema);
 const validateDisposalAnalytics = createSchemaValidator(getDisposalAnalyticsSchema);
 const validateInventorySalesAnalytics = createSchemaValidator(getInventorySalesAnalyticsSchema);
+const validateRebuildAggregations = createSchemaValidator(rebuildAggregationsSchema);
 
-export const getIncomeAnalytics = async (req: Request, res: Response, next: NextFunction) => {
+export const getIncomeAnalytics = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const { tenantId, startDate, endDate } = await validateIncomeAnalytics(req.query);
 
@@ -30,7 +36,7 @@ export const getIncomeAnalytics = async (req: Request, res: Response, next: Next
   }
 };
 
-export const getExpenseAnalytics = async (req: Request, res: Response, next: NextFunction) => {
+export const getExpenseAnalytics = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const { tenantId, startDate, endDate } = await validateExpenseAnalytics(req.query);
 
@@ -49,7 +55,7 @@ export const getExpenseAnalytics = async (req: Request, res: Response, next: Nex
   }
 };
 
-export const getInventorySalesAnalytics = async (req: Request, res: Response, next: NextFunction) => {
+export const getInventorySalesAnalytics = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const { tenantId, startDate, endDate } = await validateInventorySalesAnalytics(req.query);
 
@@ -68,7 +74,7 @@ export const getInventorySalesAnalytics = async (req: Request, res: Response, ne
   }
 };
 
-export const getDisposalAnalytics = async (req: Request, res: Response, next: NextFunction) => {
+export const getDisposalAnalytics = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const { tenantId, startDate, endDate } = await validateDisposalAnalytics(req.query);
 
@@ -81,6 +87,27 @@ export const getDisposalAnalytics = async (req: Request, res: Response, next: Ne
     res.status(200).json({
       message: 'Disposal analytics retrieved successfully',
       data,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const rebuildAggregations = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    if (req.user!.role !== Role.ADMIN) {
+      throw new UnauthorizedError('Only administrators can rebuild aggregations');
+    }
+
+    const { tenantId } = await validateRebuildAggregations(req.body);
+
+    const result = await rebuildAggregationsForTenant(tenantId);
+
+    res.status(200).json({
+      message: result.status === 'skipped'
+        ? 'Aggregations are already in sync. No rebuild needed.'
+        : 'Aggregations rebuilt successfully.',
+      data: result,
     });
   } catch (err) {
     next(err);

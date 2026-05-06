@@ -1,6 +1,14 @@
 import axios from '~/lib/axiosInstance';
 import type { AnalyticsFilters, AnalyticsData, DisposalAnalyticsDataByType } from './analytics.types';
 
+export type RebuildResult = {
+  status: 'skipped' | 'rebuilt';
+  tenantId: string;
+  submittedReports: number;
+  before: { income: number; expense: number; disposal: number; inventorySales: number };
+  after: { income: number; expense: number; disposal: number; inventorySales: number };
+};
+
 export const getTotalIncomeAnalyticsData = async (
   filters: AnalyticsFilters,
 ): Promise<AnalyticsData> => {
@@ -62,5 +70,10 @@ export const getDisposalAnalyticsData = async (
       },
     }
   );
+  return response.data.data;
+};
+
+export const rebuildAggregations = async (tenantId: string): Promise<RebuildResult> => {
+  const response = await axios.post('/analytics/rebuild', { tenantId });
   return response.data.data;
 };

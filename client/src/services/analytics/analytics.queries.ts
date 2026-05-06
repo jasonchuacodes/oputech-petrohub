@@ -1,6 +1,6 @@
-import { useQuery, type UseQueryResult } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 
-import { getTotalIncomeAnalyticsData, getTotalExpenseAnalyticsData, getDisposalAnalyticsData, getTotalInventorySalesAnalyticsData } from './analytics.api';
+import { getTotalIncomeAnalyticsData, getTotalExpenseAnalyticsData, getDisposalAnalyticsData, getTotalInventorySalesAnalyticsData, rebuildAggregations } from './analytics.api';
 import type { AnalyticsFilters, AnalyticsData, DisposalAnalyticsDataByType } from './analytics.types';
 
 export const useGetTotalIncomeAnalyticsDataQuery = (
@@ -40,5 +40,16 @@ export const useGetDisposalAnalyticsDataQuery = (
     queryKey: ['analytics', 'disposal-chart', filters.tenantId, filters.startDate, filters.endDate],
     queryFn: () => getDisposalAnalyticsData(filters),
     enabled: !!filters.tenantId,
+  });
+};
+
+export const useRebuildAggregationsMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (tenantId: string) => rebuildAggregations(tenantId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['analytics'] });
+    },
   });
 };
