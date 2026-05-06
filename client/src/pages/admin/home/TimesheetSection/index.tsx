@@ -73,7 +73,10 @@ export const TimesheetSection = () => {
             minWidth: 'min-content',
           }}
         >
-          <Typography variant="body2" sx={{ width: 240, color: 'text.secondary' }}>
+          <Typography
+            variant="body2"
+            sx={{ minWidth: 240, flex: 1, color: 'text.secondary' }}
+          >
             Full Name
           </Typography>
           <Typography variant="body2" sx={{ width: 100, color: 'text.secondary' }}>
@@ -82,7 +85,7 @@ export const TimesheetSection = () => {
           <Typography variant="body2" sx={{ width: 100, color: 'text.secondary' }}>
             Check Out
           </Typography>
-          <Typography variant="body2" sx={{ flex: 1, color: 'text.secondary' }}>
+          <Typography variant="body2" sx={{ width: 100, color: 'text.secondary' }}>
             Status
           </Typography>
         </Stack>
@@ -113,19 +116,28 @@ export const TimesheetSection = () => {
                   },
                 }}
               >
-                <Stack direction="row" alignItems="center" spacing={1} sx={{ width: 240 }}>
+                <Stack
+                  direction="row"
+                  alignItems="center"
+                  spacing={1}
+                  sx={{ minWidth: 240, flex: 1 }}
+                >
                   <Box component="span">{renderStatus(user.status)}</Box>
                   <Typography variant="body2" sx={{ whiteSpace: 'nowrap' }}>
                     {user.name}
                   </Typography>
                 </Stack>
                 <Box sx={{ width: 100, whiteSpace: 'nowrap' }}>
-                  <Typography variant="body2" color='text.secondary'>{formatTime(user.checkIn) || '—'}</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {formatTime(user.checkIn) || '—'}
+                  </Typography>
                 </Box>
                 <Box sx={{ width: 100, whiteSpace: 'nowrap' }}>
-                  <Typography variant="body2" color='text.secondary'>{formatTime(user.checkOut) || '—'}</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {formatTime(user.checkOut) || '—'}
+                  </Typography>
                 </Box>
-                <Box sx={{ flex: 1, whiteSpace: 'nowrap' }}>{getStatusChip(user)}</Box>
+                <Box sx={{ width: 100, whiteSpace: 'nowrap' }}>{getStatusChip(user)}</Box>
               </Stack>
             ))}
           </Stack>
