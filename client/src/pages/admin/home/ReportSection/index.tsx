@@ -18,7 +18,7 @@ import { ReportStatus } from '~/services/report/report.types';
 import { formatCurrency, formatNumber } from '~/utils/number';
 import { pathFor } from '~/utils/pathFor';
 
-export const ReportCard = () => {
+export const ReportSection = () => {
   const { tenantId } = useTenantContext();
 
   const navigateTo = pathFor({

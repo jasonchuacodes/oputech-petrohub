@@ -8,8 +8,8 @@ import { DashboardProvider } from '~/context/dashboard';
 import { AnalyticsSection } from './AnalyticsSection';
 import { PresetFilterMenu } from './PresetFilterMenu';
 import { ProductPricesSection } from './ProductPricesSection';
-import { ReportCard } from './ReportCard';
-import { TimesheetCard } from './TimesheetCard';
+import { ReportSection } from './ReportSection';
+import { TimesheetSection } from './TimesheetSection';
 
 export const HomePage = () => {
   const { auth } = useAuthContext();
@@ -54,10 +54,10 @@ export const HomePage = () => {
           </Stack>
           <Grid container spacing={2} alignItems="stretch">
             <Grid size={{ xs: 12, md: 12, lg: 6 }} display="flex">
-              <ReportCard />
+              <ReportSection />
             </Grid>
             <Grid size={{ xs: 12, md: 12, lg: 6 }}>
-              <TimesheetCard />
+              <TimesheetSection />
             </Grid>
           </Grid>
         </Stack>

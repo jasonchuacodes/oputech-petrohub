@@ -115,7 +115,7 @@ export const AddUserButton = ({ colorConfig }: AddUserButtonProps) => {
             All users are already assigned to a shift schedule.
           </Typography>
         ) : (
-          <Stack spacing={2}>
+          <Stack spacing={0.5}>
             <Typography variant="body2" color="text.secondary" mb={1}>
               Select users to assign to this shift:
             </Typography>
@@ -123,7 +123,7 @@ export const AddUserButton = ({ colorConfig }: AddUserButtonProps) => {
               {availableUsers.map((user) => (
                 <FormControlLabel
                   key={user.id}
-                  label={user.name}
+                  label={<Typography variant="body2" color='text.primary'>{user.name}</Typography>}
                   control={
                     <Checkbox
                       size="small"

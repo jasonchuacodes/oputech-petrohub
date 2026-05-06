@@ -6,6 +6,7 @@ import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { useGetDailyTimesheetsQuery } from '~/services/timesheet/timesheet.queries';
 import { UserStatusEnum } from '~/services/timesheet/timesheet.types';
 import { AdminRoutes } from '~/routes';
+import { formatTime } from '~/utils/date';
 import { pathFor } from '~/utils/pathFor';
 
 const STATUS_COLOR_MAP = {
@@ -13,7 +14,7 @@ const STATUS_COLOR_MAP = {
   late: { label: 'Late', color: 'error' as const },
 };
 
-export const TimesheetCard = () => {
+export const TimesheetSection = () => {
   const { tenantId } = useTenantContext();
   const { data: users = [] } = useGetDailyTimesheetsQuery({ tenantId });
 
@@ -56,7 +57,7 @@ export const TimesheetCard = () => {
 
   return (
     <Widget title="Attendance" to={navigateTo}>
-      <Stack spacing={0}>
+      <Stack spacing={0} sx={{ overflowX: 'auto' }}>
         {/* Header */}
         <Stack
           direction="row"
@@ -68,12 +69,20 @@ export const TimesheetCard = () => {
             borderBottom: 1,
             borderColor: 'divider',
             bgcolor: 'background.surface',
+            flexShrink: 0,
+            minWidth: 'min-content',
           }}
         >
-          <Typography variant="body2" sx={{ flex: 1, color: 'text.secondary' }}>
+          <Typography variant="body2" sx={{ width: 200, color: 'text.secondary' }}>
             Full Name
           </Typography>
           <Typography variant="body2" sx={{ width: 100, color: 'text.secondary' }}>
+            Check In
+          </Typography>
+          <Typography variant="body2" sx={{ width: 100, color: 'text.secondary' }}>
+            Check Out
+          </Typography>
+          <Typography variant="body2" sx={{ flex: 1, color: 'text.secondary' }}>
             Status
           </Typography>
         </Stack>
@@ -97,18 +106,26 @@ export const TimesheetCard = () => {
                   py: 1.5,
                   borderBottom: 1,
                   borderColor: 'divider',
+                  flexShrink: 0,
+                  minWidth: 'min-content',
                   '&:last-child': {
                     borderBottom: 0,
                   },
                 }}
               >
-                <Stack direction="row" alignItems="center" spacing={1} sx={{ flex: 1 }}>
+                <Stack direction="row" alignItems="center" spacing={1} sx={{ width: 200 }}>
                   <Box component="span">{renderStatus(user.status)}</Box>
                   <Typography variant="body2" sx={{ whiteSpace: 'nowrap' }}>
                     {user.name}
                   </Typography>
                 </Stack>
-                <Box sx={{ width: 100, whiteSpace: 'nowrap' }}>{getStatusChip(user)}</Box>
+                <Box sx={{ width: 100, whiteSpace: 'nowrap' }}>
+                  <Typography variant="body2" color='text.secondary'>{formatTime(user.checkIn) || '—'}</Typography>
+                </Box>
+                <Box sx={{ width: 100, whiteSpace: 'nowrap' }}>
+                  <Typography variant="body2" color='text.secondary'>{formatTime(user.checkOut) || '—'}</Typography>
+                </Box>
+                <Box sx={{ flex: 1, whiteSpace: 'nowrap' }}>{getStatusChip(user)}</Box>
               </Stack>
             ))}
           </Stack>
