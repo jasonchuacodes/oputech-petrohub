@@ -1,4 +1,5 @@
 import { prisma } from '~/db/index';
+import { Role } from '~/db/prisma';
 import { ForbiddenError, NotFoundError } from '~/errors';
 
 import { CreateTenantPayload } from '../schema/createTenantSchema';
@@ -69,6 +70,7 @@ const getTenantById = async (userId: string, tenantId: string) => {
 
 interface GetTenantUsersFilters {
   searchTerm?: string;
+  role?: Role;
 }
 
 const getTenantUsers = async (tenantId: string, filters?: GetTenantUsersFilters) => {
@@ -76,13 +78,13 @@ const getTenantUsers = async (tenantId: string, filters?: GetTenantUsersFilters)
     where: { id: tenantId },
     include: {
       users: {
-        where: filters?.searchTerm
+        where: filters?.searchTerm || filters?.role
           ? {
               user: {
-                name: {
-                  contains: filters.searchTerm,
-                  mode: 'insensitive',
-                },
+                ...(filters.searchTerm && {
+                  name: { contains: filters.searchTerm, mode: 'insensitive' },
+                }),
+                ...(filters.role && { role: filters.role }),
               },
             }
           : undefined,

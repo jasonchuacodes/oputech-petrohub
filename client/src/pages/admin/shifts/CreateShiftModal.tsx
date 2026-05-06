@@ -54,7 +54,7 @@ export const CreateShiftModal = ({ open, onClose }: CreateShiftModalProps) => {
       subheader="Create a new shift schedule for employees."
       submitText="Create Shift"
       loading={isPending}
-      maxWidth={560}
+      maxWidth={480}
       icon={CalendarMonthOutlined}
     >
       <Stack spacing={2}>

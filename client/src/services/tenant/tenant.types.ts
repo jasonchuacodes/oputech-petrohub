@@ -1,3 +1,5 @@
+import type { UserRole } from "../user/user.types";
+
 export type Tenant = {
   id: string;
   name: string;
@@ -16,4 +18,5 @@ export type Tenant = {
 
 export interface GetTenantUsersFilters {
   searchTerm?: string;
+  role?: UserRole;
 }

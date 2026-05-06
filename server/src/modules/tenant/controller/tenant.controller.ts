@@ -104,12 +104,13 @@ const getTenants = async (req: AuthenticatedRequest, res: Response, next: NextFu
 
 const getTenantUsers = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { tenantId, searchTerm } = await validateGetTenantUsers({
+    const { tenantId, searchTerm, role } = await validateGetTenantUsers({
       tenantId: req.params.tenantId,
       searchTerm: req.query.searchTerm as string | undefined,
+      role: req.query.role as string | undefined,
     });
 
-    const users = await tenantService.getTenantUsers(tenantId, { searchTerm });
+    const users = await tenantService.getTenantUsers(tenantId, { searchTerm, role });
 
     res.status(200).json({
       message: 'Successfully retrieved tenant users',

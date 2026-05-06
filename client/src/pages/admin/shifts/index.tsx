@@ -1,4 +1,4 @@
-import { Box, Divider, Stack, Typography } from '@mui/material';
+import { Box, Stack, Typography } from '@mui/material';
 import { Schedule, HomeOutlined, AddOutlined, GroupOutlined } from '@mui/icons-material';
 
 import { PageHeader } from '~/components/layouts';
@@ -10,6 +10,7 @@ import {
   NoData,
   PageContainer,
   PageLayout,
+  Show,
 } from '~/components/ui';
 import { ShiftProvider } from '~/context/shift';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
@@ -19,17 +20,22 @@ import { useGetShiftsQuery } from '~/services/shift/shift.queries';
 import { useGetTenantUsersQuery } from '~/services/tenant/tenant.queries';
 import { pathFor } from '~/utils/pathFor';
 
+import { AddUserButton } from './AddUserToShiftModal';
 import { CreateShiftModal } from './CreateShiftModal';
 import { MoreDetailsMenu } from './MoreDetailsMenu';
 import { ShiftUserCard } from './ShiftUserCard';
 import { getShiftColorConfig } from './shiftColorMap';
+import { UserRole } from '../../../services/user/user.types';
 
 export const ShiftsPage = () => {
   const { tenantId } = useTenantContext();
   const disclosure = useDisclosure();
 
   const { data: shifts, isLoading } = useGetShiftsQuery(tenantId);
-  const { data: users = [] } = useGetTenantUsersQuery({ tenantId });
+  const { data: users = [] } = useGetTenantUsersQuery({
+    tenantId,
+    filters: { role: UserRole.USER },
+  });
 
   return (
     <PageLayout>
@@ -69,42 +75,55 @@ export const ShiftsPage = () => {
             <LoadingSpinner />
           </Box>
         ) : shifts && shifts.length > 0 ? (
-          <Box sx={{ display: 'flex', gap: 2, alignItems: 'start' }}>
+          <Stack
+            direction="row"
+            spacing={2}
+            alignItems="start"
+            height="100%"
+            sx={{
+              maxHeight: {
+                xs: '65%',
+                md: '80%',
+              },
+              overflowY: 'auto',
+            }}
+          >
             {/* Unassigned column */}
-            <Box sx={{ flex: 1, maxWidth: 400 }}>
-              <CardContainer spacing={2} sx={{ bgcolor: 'grey.50' }}>
-                <Stack spacing={0.5}>
-                  <Stack spacing={0.5} direction="row" alignItems="center">
-                    <GroupOutlined fontSize="small" sx={{ color: 'text.secondary' }} />
-                    <Typography variant="body1" fontWeight="500" color="text.secondary">
-                      Unassigned
+            <Stack flex={1} minWidth={240} maxWidth={400} height="100%">
+              <CardContainer
+                spacing={2}
+                sx={{
+                  bgcolor: 'background.surface',
+                  border: '1px solid',
+                  borderColor: 'divider',
+                }}
+              >
+                <Stack spacing={1} direction="row">
+                  <GroupOutlined fontSize="small" sx={{ color: 'text.secondary' }} />
+                  <Stack spacing={0.5}>
+                    <Typography variant="body2" fontWeight="500" color="text.primary">
+                      Unassigned{' '}
+                      <Typography component="span" variant="caption" color="text.secondary">
+                        ({users.filter((u) => !u.shiftSchedule).length})
+                      </Typography>
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Drag users to assign
                     </Typography>
                   </Stack>
-                  <Typography variant="caption" color="text.secondary">
-                    {`(${users.filter((u) => !u.shiftSchedule).length} unassigned)`}
-                  </Typography>
                 </Stack>
-
-                <Divider />
-
-                <Stack spacing={1}>
+                <Show when={users.filter((u) => !u.shiftSchedule).length === 0}>
+                  <NoData text="" description="All users are assigned to a shift" />
+                </Show>
+                <Stack spacing={0.5}>
                   {users
                     .filter((u) => !u.shiftSchedule)
                     .map((user) => (
-                      <ShiftUserCard key={user.id} user={user} />
+                      <ShiftUserCard key={user.id} user={user} onDrag={() => null} />
                     ))}
                 </Stack>
-
-                <Button
-                  startIcon={<AddOutlined fontSize="small" />}
-                  variant="outlined"
-                  size="small"
-                  fullWidth
-                >
-                  Add User
-                </Button>
               </CardContainer>
-            </Box>
+            </Stack>
 
             {/* Shift columns */}
             {shifts.map((shift) => {
@@ -112,68 +131,79 @@ export const ShiftsPage = () => {
               const colorConfig = getShiftColorConfig(shift.color);
 
               return (
-                <Box key={shift.id} sx={{ flex: 1, maxWidth: 400 }}>
+                <Stack key={shift.id} flex={1} minWidth={240} maxWidth={400} height="100%">
                   <ShiftProvider shift={shift}>
                     <CardContainer
                       spacing={2}
                       sx={{
+                        justifyContent: 'space-between',
                         bgcolor: colorConfig.background,
                         border: '1px solid',
                         borderColor: colorConfig.light,
                       }}
                     >
-                      <Stack direction="row" justifyContent="space-between" alignItems="start">
-                        <Stack spacing={1}>
-                          <Typography variant="body1" fontWeight="500">
-                            {shift.name}
-                          </Typography>
-                          <Stack direction="row" spacing={1} alignItems="center">
-                            <Schedule fontSize="small" color="action" />
-                            <Typography variant="caption" color="text.secondary">
-                              {new Date(shift.shiftStart).toLocaleTimeString('en-US', {
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })}{' '}
-                              —{' '}
-                              {new Date(shift.shiftEnd).toLocaleTimeString('en-US', {
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })}
+                      <Stack spacing={1.5}>
+                        <Stack direction="row" justifyContent="space-between" alignItems="start">
+                          <Stack spacing={1}>
+                            <Typography variant="body1" fontWeight="500">
+                              {shift.name}
                             </Typography>
+                            <Stack direction="row" spacing={1} alignItems="center">
+                              <Schedule fontSize="small" color="action" />
+                              <Typography variant="caption" color="text.secondary">
+                                {new Date(shift.shiftStart).toLocaleTimeString('en-US', {
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                })}{' '}
+                                —{' '}
+                                {new Date(shift.shiftEnd).toLocaleTimeString('en-US', {
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                })}
+                              </Typography>
+                            </Stack>
                           </Stack>
+                          <MoreDetailsMenu />
                         </Stack>
 
-                        <MoreDetailsMenu />
+                        {/* TODO: implement drag and drop functionality
+                        <Stack
+                          border="2px dashed"
+                          borderColor={colorConfig.light}
+                          borderRadius={2}
+                          bgcolor={colorConfig.background}
+                          p={2}
+                          alignItems="center"
+                          justifyContent="center"
+                          spacing={0.5}
+                        >
+                          <InboxOutlined sx={{ color: colorConfig.main }} />
+                          <Typography variant="body2" fontWeight={500} color={colorConfig.main}>
+                            Drop users here
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            or click to add
+                          </Typography>
+                        </Stack>
+                        */}
+
+                        <Stack spacing={0.5}>
+                          {shiftUsers.map((user) => (
+                            <ShiftUserCard key={user.id} user={user} />
+                          ))}
+                        </Stack>
+                        <Show when={shiftUsers.length === 0}>
+                          <NoData text="" description="No users assigned to this shift" />
+                        </Show>
                       </Stack>
 
-                      <Stack spacing={0.5}>
-                        {shiftUsers.map((user) => (
-                          <ShiftUserCard key={user.id} user={user} />
-                        ))}
-                      </Stack>
-
-                      <Button
-                        startIcon={<AddOutlined fontSize="small" />}
-                        variant="contained"
-                        size="small"
-                        fullWidth
-                        sx={{
-                          bgcolor: colorConfig.surface,
-                          color: colorConfig.main,
-                          border: '1px solid',
-                          borderColor: colorConfig.light,
-                        }}
-                      >
-                        <Typography variant="body2" fontWeight={500}>
-                          Add User
-                        </Typography>
-                      </Button>
+                      <AddUserButton colorConfig={colorConfig} />
                     </CardContainer>
                   </ShiftProvider>
-                </Box>
+                </Stack>
               );
             })}
-          </Box>
+          </Stack>
         ) : (
           <Box pt={10}>
             <NoData text="No Shift schedule found." />

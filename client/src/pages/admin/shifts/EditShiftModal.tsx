@@ -68,7 +68,7 @@ export const EditShiftModal = ({ open, onClose }: EditShiftModalProps) => {
       title="Update Shift"
       subheader="Edit an existing shift schedule."
       submitText="Update"
-      maxWidth={560}
+      maxWidth={480}
       loading={isPending}
       icon={EditOutlined}
     >
