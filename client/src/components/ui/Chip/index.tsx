@@ -14,7 +14,7 @@ export const Chip = ({ label, color = 'primary', sx }: ChipProps) => {
       label={label}
       sx={{
         borderRadius: 4,
-        bgcolor: isHexColor ? color : `${color}.alpha`,
+        bgcolor: isHexColor ? color : `${color}.surface`,
         fontSize: 12,
         height: 24,
         fontWeight: 'normal',
