@@ -189,7 +189,7 @@ const Sidebar = ({ open, setOpen, isMobile }: SidebarProps) => {
       justifyContent="space-between"
       role="presentation"
       width={isMobile ? 256 : open ? 256 : 58}
-      bgcolor="primary.main"
+      bgcolor="#0F3B34"
       height={isMobile ? '100vh' : '100%'}
       sx={{
         transition: '0.3s ease',
@@ -258,7 +258,7 @@ const Sidebar = ({ open, setOpen, isMobile }: SidebarProps) => {
                       onClick={() => handleNavigate(to)}
                       sx={{
                         '&:hover': {
-                          bgcolor: 'primary.light',
+                          bgcolor: '#1A4F47',
                         },
                         display: 'flex',
                         alignItems: 'center',
@@ -267,7 +267,7 @@ const Sidebar = ({ open, setOpen, isMobile }: SidebarProps) => {
                         gap: 1,
                         height: '100%',
                         borderRadius: 2,
-                        bgcolor: active ? 'primary.light' : 'transparent',
+                        bgcolor: active ? '#1A4F47' : 'transparent',
                         color: 'primary.alpha',
                         justifyContent: open ? 'flex-start' : 'center',
                       }}
