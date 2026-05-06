@@ -4,18 +4,13 @@ import { getIncomeAnalyticsSchema } from '../schema/getIncomeAnalyticsSchema';
 import { getExpenseAnalyticsSchema } from '../schema/getExpenseAnalyticsSchema';
 import { getDisposalAnalyticsSchema } from '../schema/getDisposalAnalyticsSchema';
 import { getInventorySalesAnalyticsSchema } from '../schema/getInventorySalesAnalyticsSchema';
-import { rebuildAggregationsSchema } from '../schema/rebuildAggregationsSchema';
 import { createSchemaValidator } from '~/utils/schema-validator';
-import { rebuildAggregationsForTenant } from '../services/rebuild-aggregations.service';
-import { Role } from '~/db/prisma';
-import { UnauthorizedError } from '~/errors';
 import { AuthenticatedRequest } from '~/middlewares';
 
 const validateIncomeAnalytics = createSchemaValidator(getIncomeAnalyticsSchema);
 const validateExpenseAnalytics = createSchemaValidator(getExpenseAnalyticsSchema);
 const validateDisposalAnalytics = createSchemaValidator(getDisposalAnalyticsSchema);
 const validateInventorySalesAnalytics = createSchemaValidator(getInventorySalesAnalyticsSchema);
-const validateRebuildAggregations = createSchemaValidator(rebuildAggregationsSchema);
 
 export const getIncomeAnalytics = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
@@ -93,23 +88,3 @@ export const getDisposalAnalytics = async (req: AuthenticatedRequest, res: Respo
   }
 };
 
-export const rebuildAggregations = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-  try {
-    if (req.user!.role !== Role.ADMIN) {
-      throw new UnauthorizedError('Only administrators can rebuild aggregations');
-    }
-
-    const { tenantId } = await validateRebuildAggregations(req.body);
-
-    const result = await rebuildAggregationsForTenant(tenantId);
-
-    res.status(200).json({
-      message: result.status === 'skipped'
-        ? 'Aggregations are already in sync. No rebuild needed.'
-        : 'Aggregations rebuilt successfully.',
-      data: result,
-    });
-  } catch (err) {
-    next(err);
-  }
-};
