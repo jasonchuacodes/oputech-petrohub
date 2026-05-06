@@ -115,7 +115,7 @@ export const ShiftsPage = () => {
                 <Show when={users.filter((u) => !u.shiftSchedule).length === 0}>
                   <NoData text="" description="All users are assigned to a shift" />
                 </Show>
-                <Stack spacing={0.5}>
+                <Stack spacing={0.5} flex={1} minHeight={0} overflow='auto'>
                   {users
                     .filter((u) => !u.shiftSchedule)
                     .map((user) => (
@@ -187,7 +187,7 @@ export const ShiftsPage = () => {
                         </Stack>
                         */}
 
-                        <Stack spacing={0.5}>
+                        <Stack spacing={0.5} flex={1} minHeight={0} overflow='auto'>
                           {shiftUsers.map((user) => (
                             <ShiftUserCard key={user.id} user={user} />
                           ))}
