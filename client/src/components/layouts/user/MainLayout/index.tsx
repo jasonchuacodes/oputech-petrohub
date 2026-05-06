@@ -5,9 +5,9 @@ import Navbar from '../Navbar';
 
 export const UserMainLayout = ({ ...props }: StackProps) => {
   return (
-    <Stack direction="column" height="100vh" width="100%" bgcolor="background" {...props}>
+    <Stack height="100dvh" width="100%" bgcolor="background">
       <Navbar />
-      <Box flex={1} overflow="auto">
+      <Box flex={1} minHeight={0} overflow="auto" {...props}>
         <Outlet />
       </Box>
     </Stack>

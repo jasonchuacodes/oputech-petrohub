@@ -82,14 +82,14 @@ export const ShiftsPage = () => {
             height="100%"
             sx={{
               maxHeight: {
-                xs: '65%',
+                sm: '100%',
                 md: '80%',
               },
               overflowY: 'auto',
             }}
           >
             {/* Unassigned column */}
-            <Stack flex={1} minWidth={240} maxWidth={400} height="100%">
+            <Stack flex={1} minWidth={280} maxWidth={400} height="100%">
               <CardContainer
                 spacing={2}
                 sx={{
@@ -131,7 +131,7 @@ export const ShiftsPage = () => {
               const colorConfig = getShiftColorConfig(shift.color);
 
               return (
-                <Stack key={shift.id} flex={1} minWidth={240} maxWidth={400} height="100%">
+                <Stack key={shift.id} flex={1} minWidth={280} maxWidth={400} height="100%">
                   <ShiftProvider shift={shift}>
                     <CardContainer
                       spacing={2}
