@@ -73,7 +73,7 @@ export const TimesheetSection = () => {
             minWidth: 'min-content',
           }}
         >
-          <Typography variant="body2" sx={{ width: 200, color: 'text.secondary' }}>
+          <Typography variant="body2" sx={{ width: 240, color: 'text.secondary' }}>
             Full Name
           </Typography>
           <Typography variant="body2" sx={{ width: 100, color: 'text.secondary' }}>
@@ -113,7 +113,7 @@ export const TimesheetSection = () => {
                   },
                 }}
               >
-                <Stack direction="row" alignItems="center" spacing={1} sx={{ width: 200 }}>
+                <Stack direction="row" alignItems="center" spacing={1} sx={{ width: 240 }}>
                   <Box component="span">{renderStatus(user.status)}</Box>
                   <Typography variant="body2" sx={{ whiteSpace: 'nowrap' }}>
                     {user.name}
