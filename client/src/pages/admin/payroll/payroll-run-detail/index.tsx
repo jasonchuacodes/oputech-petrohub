@@ -1,11 +1,12 @@
 import { HomeOutlined } from '@mui/icons-material';
 import { Stack, Typography, Alert } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useState } from 'react';
 import dayjs from 'dayjs';
 import toast from 'react-hot-toast';
 
 import { PageHeader } from '~/components/layouts';
-import { Breadcrumb, Button, Chip, DataTable, PageContainer, PageLayout } from '~/components/ui';
+import { Breadcrumb, Chip, DataTable, PageContainer, PageLayout } from '~/components/ui';
 import { PayslipProvider } from '~/context/payroll/PayslipContext';
 import { AdminRoutes } from '~/routes';
 import { formatCurrency } from '~/utils/number';
@@ -16,21 +17,21 @@ import {
   useMarkPayslipAsPaidMutation,
   useCancelPayrollRunMutation,
 } from '~/services/payroll/payroll.queries';
-import { PayrollRunStatus, PaymentStatus } from '~/services/payroll/payroll.types';
+import { PayrollRunStatus, PaymentStatus, type Payslip } from '~/services/payroll/payroll.types';
 import { toTitleCase } from '~/utils/textUtils';
 import { parseBackendError } from '~/utils/parseBackendError';
-import { useDisclosure } from '~/hooks/useDisclosure';
 
 import { SummaryCard } from './SummaryCard';
 import { getStatusColor, getStatusLabel, getPaymentStatusColor } from '../utils';
 import { PayslipActions } from './PayslipActions';
-import { CancelPayrollRunModal } from './CancelPayrollRunModal';
+import { MoreDetailsMenu } from './MoreDetailsMenu';
+import { ViewPayslipModal } from '../ViewPayslipModal';
 
 export const PayrollRunDetailPage = () => {
   const { tenantId, payrollRunId } = useParams();
   const navigate = useNavigate();
 
-  const cancelDisclosure = useDisclosure();
+  const [payslip, setPayslip] = useState<Payslip | null>(null);
 
   const { data: payrollRun, isLoading } = useGetPayrollRunByIdQuery(payrollRunId);
   const markAsPaidMutation = useMarkPayslipAsPaidMutation();
@@ -38,11 +39,12 @@ export const PayrollRunDetailPage = () => {
 
   const handleMarkAsPaid = async (payslipId: string) => {
     try {
-      await markAsPaidMutation.mutateAsync({
+      const updated = await markAsPaidMutation.mutateAsync({
         payslipId,
         paidAt: new Date().toISOString(),
         paymentMethod: 'bank_transfer',
       });
+      setPayslip(updated);
     } catch (error) {
       console.error('Failed to mark payslip as paid:', error);
     }
@@ -54,7 +56,6 @@ export const PayrollRunDetailPage = () => {
     try {
       await cancelRunMutation.mutateAsync(payrollRunId);
       toast.success('Payroll run cancelled successfully');
-      cancelDisclosure.onClose();
       navigate(pathFor({ pathname: AdminRoutes.TenantPayroll, params: { tenantId } }));
     } catch (error) {
       const errorMessage = parseBackendError(error);
@@ -101,15 +102,18 @@ export const PayrollRunDetailPage = () => {
               description="View the full details and breakdown of this payroll run."
               action={
                 payrollRun.status === PayrollRunStatus.PENDING && (
-                  <Button variant="outlined" color="error" onClick={cancelDisclosure.onOpen}>
-                    Cancel Payroll Run
-                  </Button>
+                  <MoreDetailsMenu
+                    onConfirm={handleCancelRun}
+                    loading={cancelRunMutation.isPending}
+                    periodStart={payrollRun.periodStart}
+                    periodEnd={payrollRun.periodEnd}
+                  />
                 )
               }
             />
 
             {/* Summary Section */}
-            <Stack direction="row" spacing={2}>
+            <Stack direction={{ xs: 'column', md: 'row' }} spacing={0.5}>
               <SummaryCard label="Period">
                 <Typography variant="h6" color="text.primary" fontWeight={600}>
                   {formatRange(dayjs(payrollRun.periodStart), dayjs(payrollRun.periodEnd))}
@@ -158,7 +162,16 @@ export const PayrollRunDetailPage = () => {
                   id: 'name',
                   heading: 'Name',
                   cell: (item) => (
-                    <Typography variant="body2" color="text.primary">
+                    <Typography
+                      variant="body2"
+                      color="primary"
+                      onClick={() => setPayslip(item)}
+                      sx={{
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                        '&:hover': { textDecoration: 'underline' },
+                      }}
+                    >
                       {item.user?.name || 'Unknown'}
                     </Typography>
                   ),
@@ -230,7 +243,9 @@ export const PayrollRunDetailPage = () => {
                       <PayslipActions
                         paymentStatus={item.paymentStatus}
                         onMarkAsPaid={handleMarkAsPaid}
-                        isMarkingAsPaid={markAsPaidMutation.isPending}
+                        loading={markAsPaidMutation.isPending}
+                        onView={setPayslip}
+                        payrollRunStatus={payrollRun?.status}
                       />
                     </PayslipProvider>
                   ),
@@ -242,13 +257,13 @@ export const PayrollRunDetailPage = () => {
           </>
         )}
 
-        <CancelPayrollRunModal
-          open={cancelDisclosure.open}
-          onClose={cancelDisclosure.onClose}
-          onConfirm={handleCancelRun}
-          loading={cancelRunMutation.isPending}
-          periodStart={payrollRun?.periodStart}
-          periodEnd={payrollRun?.periodEnd}
+        <ViewPayslipModal
+          open={!!payslip}
+          onClose={() => setPayslip(null)}
+          payslip={payslip}
+          onMarkPaid={handleMarkAsPaid}
+          loading={markAsPaidMutation.isPending}
+          payrollRunStatus={payrollRun?.status}
         />
       </PageContainer>
     </PageLayout>

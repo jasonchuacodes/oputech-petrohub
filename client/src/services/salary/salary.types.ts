@@ -1,8 +1,8 @@
 import type { ValueOf } from '~/utils/valueOf';
 
 export const RateType = {
-  HOURLY: 'HOURLY',
   DAILY: 'DAILY',
+  HOURLY: 'HOURLY',
 } as const;
 
 export type RateType = ValueOf<typeof RateType>;

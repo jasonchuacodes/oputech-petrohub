@@ -1,4 +1,4 @@
-import { DeleteOutlineOutlined, MoreHorizOutlined } from '@mui/icons-material';
+import { DeleteOutlineOutlined, MoreVertOutlined } from '@mui/icons-material';
 import { Menu, MenuItem, Typography, IconButton, ListItemIcon } from '@mui/material';
 import { useState } from 'react';
 
@@ -21,7 +21,7 @@ export const MoreDetailsMenu = ({ onDelete }: MoreDetailsMenuProps) => {
   return (
     <>
       <IconButton onClick={openMenu} size="small">
-        <MoreHorizOutlined sx={{ color: 'common.white' }} />
+        <MoreVertOutlined sx={{ color: 'common.white' }} />
       </IconButton>
 
       <Menu

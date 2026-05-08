@@ -2,7 +2,7 @@ import { Decimal } from '@prisma/client/runtime/library';
 
 import { prisma } from '~/db';
 import { PaymentStatus, PayrollRunStatus, RateType } from '~/db/prisma';
-import { NotFoundError } from '../../../errors';
+import { BadInputError, NotFoundError } from '../../../errors';
 
 const getUnprocessedTimesheets = async (data: {
   userId: string;
@@ -210,6 +210,16 @@ const markPayslipAsPaid = async (data: {
   paymentNotes?: string;
 }) => {
   return prisma.$transaction(async (tx) => {
+    // Guard: fetch payslip with its run status before updating
+    const existing = await tx.payslip.findUnique({
+      where: { id: data.payslipId },
+      include: { payrollRun: { select: { status: true } } },
+    });
+
+    if (existing?.payrollRun?.status === PayrollRunStatus.CANCELLED) {
+      throw new BadInputError('Cannot mark payslip as paid for a cancelled payroll run');
+    }
+
     const payslip = await tx.payslip.update({
       where: { id: data.payslipId },
       data: {

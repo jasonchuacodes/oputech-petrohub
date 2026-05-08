@@ -1,4 +1,4 @@
-import { MoreHorizOutlined } from '@mui/icons-material';
+import { MoreVertOutlined } from '@mui/icons-material';
 import { Menu, MenuItem, Typography, Divider, Button } from '@mui/material';
 import { useState } from 'react';
 
@@ -15,7 +15,7 @@ export const MoreDetailsMenu = ({ id }: { id: string }) => {
   return (
     <>
       <Button onClick={openMenu} size="small" variant="text" sx={{ height: 24, minWidth: 24 }}>
-        <MoreHorizOutlined fontSize="inherit" />
+        <MoreVertOutlined fontSize="inherit" />
       </Button>
       <Menu
         anchorEl={anchorElSettingsMenu}

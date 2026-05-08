@@ -1,51 +1,47 @@
-import { Divider, Stack } from '@mui/material';
+import { Divider, Stack, Typography } from '@mui/material';
 
 import { Button } from '~/components/ui';
 import { usePayslipContext } from '~/context/payroll/usePayslipContext';
-import { useDisclosure } from '~/hooks/useDisclosure';
-import { PaymentStatus } from '~/services/payroll/payroll.types';
-
-import { ViewPayslipModal } from '../ViewPayslipModal';
+import { PaymentStatus, PayrollRunStatus, type Payslip } from '~/services/payroll/payroll.types';
 
 type PayslipActionsProps = {
   paymentStatus: PaymentStatus;
-  onMarkAsPaid: (payslipId: string) => void;
-  isMarkingAsPaid: boolean;
+  onMarkAsPaid: (id: string) => void;
+  loading: boolean;
+  onView: (payslip: Payslip) => void;
+  payrollRunStatus?: PayrollRunStatus;
 };
 
 export const PayslipActions = ({
   paymentStatus,
   onMarkAsPaid,
-  isMarkingAsPaid,
+  loading,
+  onView,
+  payrollRunStatus,
 }: PayslipActionsProps) => {
-  const { payslip, payslipId } = usePayslipContext();
-  const disclosure = useDisclosure();
+  const { payslipId, payslip } = usePayslipContext();
 
   return (
-    <>
-      <Stack
-        direction="row"
-        spacing={1}
-        ml={-2}
-        alignItems="center"
-        divider={<Divider orientation="vertical" sx={{ height: 20 }} />}
-      >
-        {paymentStatus === PaymentStatus.UNPAID && (
-          <Button
-            variant="text"
-            size="small"
-            onClick={() => onMarkAsPaid(payslipId)}
-            disabled={isMarkingAsPaid}
-          >
-            Mark as Paid
-          </Button>
-        )}
-        <Button variant="text" size="small" onClick={disclosure.onOpen}>
-          View
+    <Stack
+      direction="row"
+      spacing={1}
+      ml={-2}
+      alignItems="center"
+      divider={<Divider orientation="vertical" sx={{ height: 20 }} />}
+    >
+      {paymentStatus === PaymentStatus.UNPAID && payrollRunStatus === PayrollRunStatus.PENDING && (
+        <Button
+          variant="text"
+          size="small"
+          onClick={() => onMarkAsPaid(payslipId)}
+          disabled={loading}
+        >
+          <Typography variant="body2">Mark as Paid</Typography>
         </Button>
-      </Stack>
-
-      <ViewPayslipModal open={disclosure.open} onClose={disclosure.onClose} payslip={payslip} />
-    </>
+      )}
+      <Button variant="text" size="small" onClick={() => onView(payslip)}>
+        <Typography variant="body2">View</Typography>
+      </Button>
+    </Stack>
   );
 };

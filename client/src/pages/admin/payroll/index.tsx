@@ -140,7 +140,6 @@ export const PayrollPage = () => {
             enabled: true,
             defaultStartValue: dayjs().startOf('month'),
             defaultEndValue: dayjs().endOf('month'),
-            label: 'Filter by period',
           }}
         />
       </PageContainer>

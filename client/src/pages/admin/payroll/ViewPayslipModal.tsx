@@ -1,17 +1,27 @@
 import { ReceiptLongOutlined } from '@mui/icons-material';
 import { Box, Divider, Stack, Typography } from '@mui/material';
 
-import { CustomModal, Show } from '~/components/ui';
+import { Button, CustomModal, Show } from '~/components/ui';
 import { formatCurrency, formatNumber } from '~/utils/number';
-import type { Payslip } from '~/services/payroll/payroll.types';
+import { PaymentStatus, PayrollRunStatus, type Payslip } from '~/services/payroll/payroll.types';
 
 type ViewPayslipModalProps = {
   open: boolean;
   onClose: () => void;
   payslip: Payslip | null;
+  onMarkPaid?: (payslipId: string) => void;
+  loading?: boolean;
+  payrollRunStatus?: PayrollRunStatus;
 };
 
-export const ViewPayslipModal = ({ open, onClose, payslip }: ViewPayslipModalProps) => {
+export const ViewPayslipModal = ({
+  open,
+  onClose,
+  payslip,
+  onMarkPaid,
+  loading,
+  payrollRunStatus,
+}: ViewPayslipModalProps) => {
   if (!payslip) return null;
 
   // TODO: Implement deductions
@@ -145,16 +155,35 @@ export const ViewPayslipModal = ({ open, onClose, payslip }: ViewPayslipModalPro
         </Show>
 
         {/* Net Pay */}
-        <Box bgcolor="primary.alpha" borderRadius={2} p={2}>
-          <Stack direction="row" alignItems="center" justifyContent="space-between">
-            <Typography variant="subtitle2" color="success.dark">
-              Net Pay
-            </Typography>
-            <Typography variant="body2" fontWeight={600} color="success.dark">
-              {formatCurrency(parseFloat(payslip.totalCompensation) - totalDeductions)}
-            </Typography>
-          </Stack>
-        </Box>
+        <Stack justifyContent="space-between" spacing={1}>
+          <Box bgcolor="primary.alpha" borderRadius={2} p={2} flex={1} minWidth={0}>
+            <Stack direction="row" alignItems="center" justifyContent="space-between">
+              <Typography variant="subtitle2" color="success.dark">
+                Net Pay
+              </Typography>
+              <Typography variant="body2" fontWeight={600} color="success.dark">
+                {formatCurrency(parseFloat(payslip.totalCompensation) - totalDeductions)}
+              </Typography>
+            </Stack>
+          </Box>
+          <Show
+            when={
+              payrollRunStatus === PayrollRunStatus.PENDING &&
+              payslip.paymentStatus === PaymentStatus.UNPAID
+            }
+          >
+            {onMarkPaid && (
+              <Button
+                size="small"
+                variant="contained"
+                loading={loading}
+                onClick={() => onMarkPaid(payslip.id)}
+              >
+                Mark as Paid
+              </Button>
+            )}
+          </Show>
+        </Stack>
       </Stack>
     </CustomModal>
   );

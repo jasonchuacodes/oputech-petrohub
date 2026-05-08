@@ -2,7 +2,7 @@ import {
   CircleOutlined,
   DeleteOutline,
   HomeOutlined,
-  MoreHorizOutlined,
+  MoreVertOutlined,
 } from '@mui/icons-material';
 import { Avatar, Box, Divider, IconButton, Menu, MenuItem, Stack, Typography } from '@mui/material';
 import { alpha } from '@mui/material/styles';
@@ -111,7 +111,7 @@ export const ReportDetailPage = () => {
                     </Typography>
                   </Stack>
                   <IconButton onClick={openMenu} size="small">
-                    <MoreHorizOutlined fontSize="inherit" sx={{ color: 'text.secondary' }} />
+                    <MoreVertOutlined fontSize="inherit" sx={{ color: 'text.secondary' }} />
                   </IconButton>
                 </Stack>
                 <Typography variant="body2" color="text.secondary">
@@ -240,7 +240,7 @@ export const ReportDetailPage = () => {
                       Income
                     </Typography>
                     <IconButton onClick={() => null} size="small">
-                      <MoreHorizOutlined fontSize="inherit" />
+                      <MoreVertOutlined fontSize="inherit" />
                     </IconButton>
                   </Stack>
 
@@ -275,7 +275,7 @@ export const ReportDetailPage = () => {
                       Expenses
                     </Typography>
                     <IconButton onClick={() => null} size="small">
-                      <MoreHorizOutlined fontSize="inherit" />
+                      <MoreVertOutlined fontSize="inherit" />
                     </IconButton>
                   </Stack>
                   {report?.expenses.map((expense) => (
@@ -306,7 +306,7 @@ export const ReportDetailPage = () => {
                       Lubricants
                     </Typography>
                     <IconButton onClick={() => null} size="small">
-                      <MoreHorizOutlined fontSize="inherit" />
+                      <MoreVertOutlined fontSize="inherit" />
                     </IconButton>
                   </Stack>
 
@@ -380,7 +380,7 @@ export const ReportDetailPage = () => {
                       On Duty
                     </Typography>
                     <IconButton onClick={() => null} size="small">
-                      <MoreHorizOutlined fontSize="inherit" />
+                      <MoreVertOutlined fontSize="inherit" />
                     </IconButton>
                   </Stack>
                   {report?.employees.length === 0 ? (
@@ -406,7 +406,7 @@ export const ReportDetailPage = () => {
                       Disposals
                     </Typography>
                     <IconButton onClick={() => null} size="small">
-                      <MoreHorizOutlined fontSize="inherit" />
+                      <MoreVertOutlined fontSize="inherit" />
                     </IconButton>
                   </Stack>
 

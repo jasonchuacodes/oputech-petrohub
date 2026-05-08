@@ -1,4 +1,4 @@
-import { MoreHorizOutlined } from '@mui/icons-material';
+import { MoreVertOutlined } from '@mui/icons-material';
 import { IconButton, Menu, MenuItem, Typography } from '@mui/material';
 import { useState } from 'react';
 
@@ -46,7 +46,7 @@ export const TimesheetActions = () => {
   return (
     <>
       <IconButton onClick={openMenu} size="small">
-        <MoreHorizOutlined fontSize="inherit" sx={{ color: 'text.secondary' }} />
+        <MoreVertOutlined fontSize="inherit" sx={{ color: 'text.secondary' }} />
       </IconButton>
 
       <Menu

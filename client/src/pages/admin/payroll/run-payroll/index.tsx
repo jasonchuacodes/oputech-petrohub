@@ -28,6 +28,7 @@ import {
 } from '~/services/payroll/payroll.types';
 
 import { MoreDetailsMenu } from './MoreDetailsMenu';
+import { ViewPayslipModal } from '../ViewPayslipModal';
 
 export const RunPayrollPage = () => {
   const { tenantId } = useParams();
@@ -41,6 +42,7 @@ export const RunPayrollPage = () => {
     start: initialRange.startDate,
     end: initialRange.endDate,
   });
+  const [payslip, setPayslip] = useState<Payslip | null>(null);
 
   const runPayrollMutation = useRunPayrollMutation();
 
@@ -191,7 +193,16 @@ export const RunPayrollPage = () => {
                 id: 'name',
                 heading: 'Name',
                 cell: (item) => (
-                  <Typography variant="body2" color="text.primary">
+                  <Typography
+                    variant="body2"
+                    color="primary"
+                    onClick={() => setPayslip(item)}
+                    sx={{
+                      fontWeight: 500,
+                      cursor: 'pointer',
+                      '&:hover': { textDecoration: 'underline' },
+                    }}
+                  >
                     {item.user?.name || 'Unknown'}
                   </Typography>
                 ),
@@ -389,6 +400,7 @@ export const RunPayrollPage = () => {
           {runPayrollMutation.isPending ? 'Running Payroll...' : 'Run Payroll'}
         </Button>
       </Stack>
+      <ViewPayslipModal open={!!payslip} onClose={() => setPayslip(null)} payslip={payslip} />
     </PageLayout>
   );
 };

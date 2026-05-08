@@ -90,7 +90,7 @@ export const UserDetailPage = () => {
       tin: user?.tin ?? null,
       shiftId: user?.shiftSchedule?.shiftId ?? null,
       rate: currentSalaryRate?.rate ?? null,
-      rateType: currentSalaryRate?.rateType ?? RateType.HOURLY,
+      rateType: currentSalaryRate?.rateType ?? RateType.DAILY,
       effectiveFrom: null,
     });
   }, [isLoadingUser, user, currentSalaryRate, reset]);
