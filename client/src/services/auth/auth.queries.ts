@@ -20,6 +20,7 @@ const useGetMe = () => {
     retry: false,
     staleTime: 0,
     gcTime: 0,
+    refetchOnWindowFocus: false,
   });
 };
 
