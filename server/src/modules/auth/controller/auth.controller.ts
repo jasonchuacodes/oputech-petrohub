@@ -51,6 +51,7 @@ const getMe = async (req: AuthenticatedRequest, res: Response, next: NextFunctio
         id: tenant.id,
         name: tenant.name,
       })),
+      lastTenantId: user.lastTenantId ?? null,
     };
 
     res.status(200).json({
@@ -225,6 +226,27 @@ const forgotPassword = async (req: Request, res: Response, next: NextFunction) =
   }
 };
 
+const updateLastTenant = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      throw new NotFoundError('User not found');
+    }
+
+    const { tenantId } = req.body as { tenantId: string };
+    if (!tenantId) {
+      throw new Error('tenantId is required');
+    }
+
+    await userService.updateLastTenant(userId, tenantId);
+
+    res.status(200).json({ message: 'Last tenant updated' });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export {
   getMe,
   loginUser,
@@ -233,4 +255,5 @@ export {
   updatePassword,
   forceUpdatePassword,
   forgotPassword,
+  updateLastTenant,
 };

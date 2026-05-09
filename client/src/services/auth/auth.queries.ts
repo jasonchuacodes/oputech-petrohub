@@ -8,6 +8,7 @@ import {
   logoutUser,
   registerUser,
   updatePassword,
+  updateLastTenant,
 } from './auth.api';
 import type { User } from '../user/user.types';
 
@@ -53,6 +54,11 @@ const useForgotPasswordMutation = () =>
     mutationFn: forgotPassword,
   });
 
+const useUpdateLastTenantMutation = () =>
+  useMutation({
+    mutationFn: (tenantId: string) => updateLastTenant(tenantId),
+  });
+
 export {
   useForgotPasswordMutation,
   useForceUpdatePasswordMutation,
@@ -61,4 +67,5 @@ export {
   useLogoutMutation,
   useRegisterUserMutation,
   useUpdatePasswordMutation,
+  useUpdateLastTenantMutation,
 };

@@ -101,6 +101,7 @@ model User {
   payrollRuns PayrollRun[]
 
   shouldChangePassword Boolean  @default(true)
+  lastTenantId         String?
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 }

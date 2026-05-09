@@ -11,6 +11,7 @@ import {
   logoutUser,
   registerUser,
   updatePassword,
+  updateLastTenant,
 } from '../controller/auth.controller';
 
 const router = express.Router();
@@ -25,5 +26,6 @@ router.post('/logout', logoutUser);
 router.put('/change-password', requireAuth, asyncHandler(updatePassword));
 router.put('/force-change-password', requireAuth, asyncHandler(forceUpdatePassword));
 router.get('/me', requireAuth, asyncHandler(getMe));
+router.patch('/last-tenant', requireAuth, asyncHandler(updateLastTenant));
 
 export default router;

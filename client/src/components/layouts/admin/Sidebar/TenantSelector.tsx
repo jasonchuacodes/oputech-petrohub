@@ -23,12 +23,14 @@ import { Button, SkeletonList } from '~/components/ui';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { AdminRoutes } from '~/routes';
 import { useGetTenantsQuery } from '~/services/tenant/tenant.queries';
+import { useUpdateLastTenantMutation } from '~/services/auth/auth.queries';
 import theme from '~/theme';
 import { pathFor } from '~/utils/pathFor';
 
 const TenantSelector = () => {
   const navigate = useNavigate();
   const { tenantId } = useTenantContext();
+  const { mutate: recordLastTenant } = useUpdateLastTenantMutation();
 
   const [anchorElSettingsMenu, setAnchorElSettingsMenu] = useState<null | HTMLElement>(null);
   const [viewTenants, setViewTenants] = useState(false);
@@ -74,6 +76,7 @@ const TenantSelector = () => {
   };
 
   const handleSelectTenant = (id: string) => {
+    recordLastTenant(id);
     navigate(
       pathFor({
         pathname: AdminRoutes.TenantHome,

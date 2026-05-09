@@ -48,6 +48,10 @@ const forgotPassword = (data: ForgotPasswordInput) => {
   return axios.post('/auth/forgot-password', data);
 };
 
+const updateLastTenant = (tenantId: string) => {
+  return axios.patch('/auth/last-tenant', { tenantId });
+};
+
 export {
   loginUser,
   logoutUser,
@@ -56,4 +60,5 @@ export {
   updatePassword,
   forceUpdatePassword,
   forgotPassword,
+  updateLastTenant,
 };

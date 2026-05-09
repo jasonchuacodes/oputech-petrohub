@@ -220,6 +220,22 @@ const getUserByUsername = async (username: string) => {
   return user;
 };
 
+const updateLastTenant = async (userId: string, tenantId: string): Promise<void> => {
+  const membership = await prisma.tenantsOnUsers.findUnique({
+    where: { userId_tenantId: { userId, tenantId } },
+    select: { userId: true },
+  });
+
+  if (!membership) {
+    throw new ForbiddenError('User does not belong to this tenant');
+  }
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: { lastTenantId: tenantId },
+  });
+};
+
 export {
   createUser,
   getAllUsers,
@@ -229,4 +245,5 @@ export {
   deleteUser,
   resetUserPassword,
   getUserByUsername,
+  updateLastTenant,
 };

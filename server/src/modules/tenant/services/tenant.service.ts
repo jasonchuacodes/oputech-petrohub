@@ -46,6 +46,9 @@ const getTenants = async (userId: string) => {
         },
       },
     },
+    orderBy: {
+      createdAt: 'desc',
+    },
   });
 
   return tenants;

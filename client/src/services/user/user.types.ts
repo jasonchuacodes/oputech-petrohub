@@ -41,6 +41,7 @@ export type User = {
   hasTenant: boolean;
   tenantId?: string;
   tenants: Tenant[];
+  lastTenantId?: string | null;
 
   birthday?: Date;
   contact?: string;

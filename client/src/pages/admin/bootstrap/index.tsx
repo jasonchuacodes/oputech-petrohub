@@ -37,12 +37,19 @@ export const BootstrapPage = () => {
     );
   }
 
-  // TODO: implement tenantSelection page for tenants.length > 1
+  // tenants are sorted by createdAt DESC from the API, so tenants[0] is most recently created
+  const accessibleIds = new Set(tenants.map((t) => t.id));
+
+  const targetTenantId =
+    auth.lastTenantId && accessibleIds.has(auth.lastTenantId)
+      ? auth.lastTenantId
+      : tenants[0].id;
+
   return (
     <Navigate
       to={pathFor({
         pathname: AdminRoutes.TenantHome,
-        params: { tenantId: tenants[0].id },
+        params: { tenantId: targetTenantId },
       })}
       replace
     />
