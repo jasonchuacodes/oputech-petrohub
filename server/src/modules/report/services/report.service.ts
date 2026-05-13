@@ -333,11 +333,11 @@ const getReportByShift = async ({
   };
 };
 
-const validateReport = async (reportId: string, userId: string) => {
+const validateReport = async (reportId: string, userId: string, userRole: Role) => {
   const report = await getReportById(reportId);
 
-  if (report.creatorId !== userId) {
-    throw new ForbiddenError('Only creator can validate report');
+  if (report.creatorId !== userId && userRole !== Role.ADMIN) {
+    throw new ForbiddenError('Only creator or admin can validate report');
   }
 
   if (report.status !== ReportStatus.DRAFT) {
@@ -368,11 +368,16 @@ const validateReport = async (reportId: string, userId: string) => {
   };
 };
 
-const submitReport = async (reportId: string, userId: string, remarks?: string | null) => {
+const submitReport = async (
+  reportId: string,
+  userId: string,
+  userRole: Role,
+  remarks?: string | null,
+) => {
   const report = await getReportById(reportId);
 
-  if (report.creatorId !== userId) {
-    throw new ForbiddenError('Only creator can submit report');
+  if (report.creatorId !== userId && userRole !== Role.ADMIN) {
+    throw new ForbiddenError('Only creator or admin can submit report');
   }
 
   if (report.status !== ReportStatus.VALIDATED) {

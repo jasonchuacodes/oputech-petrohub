@@ -108,7 +108,7 @@ const getReportByShift = async (req: AuthenticatedRequest, res: Response, next: 
 const validateReport = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const { reportId } = req.params;
-    const report = await reportService.validateReport(reportId, req.user!.id);
+    const report = await reportService.validateReport(reportId, req.user!.id, req.user!.role);
 
     res.status(200).json({
       message: 'Report validated successfully',
@@ -123,7 +123,12 @@ const submitReport = async (req: AuthenticatedRequest, res: Response, next: Next
   try {
     const { reportId } = req.params;
     const { remarks } = req.body;
-    const report = await reportService.submitReport(reportId, req.user!.id, remarks ?? null);
+    const report = await reportService.submitReport(
+      reportId,
+      req.user!.id,
+      req.user!.role,
+      remarks ?? null,
+    );
 
     res.status(200).json({
       message: 'Report submitted successfully',

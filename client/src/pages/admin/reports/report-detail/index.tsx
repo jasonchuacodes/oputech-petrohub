@@ -26,7 +26,12 @@ import { useDisclosure } from '~/hooks/useDisclosure';
 import { PageHeader } from '~/components/layouts';
 import { AdminRoutes } from '~/routes';
 import { getProductTypeDisplayName } from '~/pages/admin/products/utils';
-import { useDeleteReportMutation, useGetReportByIdQuery } from '~/services/report/report.queries';
+import {
+  useDeleteReportMutation,
+  useGetReportByIdQuery,
+  useSubmitReportMutation,
+  useValidateReportMutation,
+} from '~/services/report/report.queries';
 import { ReportStatus } from '~/services/report/report.types';
 import { formatDate, formatTime } from '~/utils/date';
 import { formatCurrency, formatNumber } from '~/utils/number';
@@ -46,12 +51,40 @@ export const ReportDetailPage = () => {
 
   const { data: report, isLoading } = useGetReportByIdQuery({ tenantId, reportId: reportId! });
   const { mutateAsync: deleteReport, isPending: isDeleting } = useDeleteReportMutation();
+  const { mutateAsync: validateReport, isPending: isValidating } = useValidateReportMutation();
+  const { mutateAsync: submitReport, isPending: isSubmitting } = useSubmitReportMutation();
   const deleteDisclosure = useDisclosure();
+  const validateDisclosure = useDisclosure();
+  const submitDisclosure = useDisclosure();
 
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
   const isMenuOpen = Boolean(menuAnchorEl);
   const openMenu = (e: React.MouseEvent<HTMLElement>) => setMenuAnchorEl(e.currentTarget);
   const closeMenu = () => setMenuAnchorEl(null);
+
+  const handleValidate = async () => {
+    try {
+      await validateReport(reportId!);
+      toast.success('Report validated successfully');
+    } catch (err) {
+      const message = parseBackendError(err);
+      toast.error(message);
+    } finally {
+      validateDisclosure.onClose();
+    }
+  };
+
+  const handleSubmit = async () => {
+    try {
+      await submitReport({ reportId: reportId! });
+      toast.success('Report submitted successfully');
+    } catch (err) {
+      const message = parseBackendError(err);
+      toast.error(message);
+    } finally {
+      submitDisclosure.onClose();
+    }
+  };
 
   const handleDelete = async () => {
     try {
@@ -144,6 +177,26 @@ export const ReportDetailPage = () => {
                   transformOrigin={{ vertical: 'top', horizontal: 'right' }}
                   slotProps={{ paper: { elevation: 4, sx: { mt: 0.5, minWidth: 140 } } }}
                 >
+                  {report.status === ReportStatus.VALIDATED && (
+                    <MenuItem
+                      onClick={() => {
+                        closeMenu();
+                        submitDisclosure.onOpen();
+                      }}
+                    >
+                      <Typography variant="body2">Submit</Typography>
+                    </MenuItem>
+                  )}
+                  {report.status === ReportStatus.DRAFT && (
+                    <MenuItem
+                      onClick={() => {
+                        closeMenu();
+                        validateDisclosure.onOpen();
+                      }}
+                    >
+                      <Typography variant="body2">Validate</Typography>
+                    </MenuItem>
+                  )}
                   <MenuItem
                     onClick={() => {
                       closeMenu();
@@ -561,6 +614,28 @@ export const ReportDetailPage = () => {
             </Stack>
           </Stack>
         )}
+        <CustomModal
+          open={submitDisclosure.open}
+          onClose={submitDisclosure.onClose}
+          onSubmit={handleSubmit}
+          title="Submit Report?"
+          subheader="Are you sure you want to submit this report?"
+          type="default"
+          submitText="Submit"
+          cancelText="Cancel"
+          loading={isSubmitting}
+        />
+        <CustomModal
+          open={validateDisclosure.open}
+          onClose={validateDisclosure.onClose}
+          onSubmit={handleValidate}
+          title="Validate Report?"
+          subheader="Are you sure you want to validate this report?"
+          type="default"
+          submitText="Validate"
+          cancelText="Cancel"
+          loading={isValidating}
+        />
         <CustomModal
           open={deleteDisclosure.open}
           onClose={deleteDisclosure.onClose}
