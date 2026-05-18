@@ -1,7 +1,7 @@
 import { HomeOutlined } from '@mui/icons-material';
 import { Stack, Typography, Alert } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import dayjs from 'dayjs';
 import toast from 'react-hot-toast';
 
@@ -32,6 +32,7 @@ export const PayrollRunDetailPage = () => {
   const navigate = useNavigate();
 
   const [payslip, setPayslip] = useState<Payslip | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const { data: payrollRun, isLoading } = useGetPayrollRunByIdQuery(payrollRunId);
   const markAsPaidMutation = useMarkPayslipAsPaidMutation();
@@ -68,6 +69,15 @@ export const PayrollRunDetailPage = () => {
     payrollRun?.payslips?.filter((p) => p.paymentStatus === PaymentStatus.PAID).length || 0;
   const totalCompensation =
     payrollRun?.payslips?.reduce((sum, p) => sum + parseFloat(p.totalCompensation), 0) || 0;
+
+  const filteredPayslips: Payslip[] = useMemo(() => {
+    const payslips: Payslip[] = payrollRun?.payslips || [];
+    const trimmed = searchTerm.trim().toLowerCase();
+    if (!trimmed) return payslips;
+    return payslips.filter((p) =>
+      (p.user?.name || p.userId).toLowerCase().includes(trimmed)
+    );
+  }, [payrollRun?.payslips, searchTerm]);
 
   return (
     <PageLayout>
@@ -149,13 +159,15 @@ export const PayrollRunDetailPage = () => {
               id="payslips-table"
               loading={isLoading}
               collection={DataTable.collection({
-                items: payrollRun.payslips || [],
+                items: filteredPayslips,
                 itemToValue: (item) => item.id,
                 itemToString: (item) => item.user?.name || item.userId,
               })}
               search={{
                 enabled: true,
                 placeholder: 'Search employee',
+                defaultValue: '',
+                onValueChange: setSearchTerm,
               }}
               columns={[
                 {

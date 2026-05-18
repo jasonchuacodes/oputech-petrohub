@@ -1,9 +1,4 @@
-import {
-  CircleOutlined,
-  DeleteOutline,
-  HomeOutlined,
-  MoreVertOutlined,
-} from '@mui/icons-material';
+import { CircleOutlined, DeleteOutline, HomeOutlined, MoreVertOutlined } from '@mui/icons-material';
 import { Avatar, Box, Divider, IconButton, Menu, MenuItem, Stack, Typography } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import { useState } from 'react';
@@ -484,6 +479,7 @@ export const ReportDetailPage = () => {
                       </Stack>
                       <Divider />
 
+                      {/* Disposal summary per product type */}
                       {Object.entries(
                         report?.disposals.reduce<Record<string, number>>((acc, d) => {
                           const key = d.product.type ?? 'OTHER';

@@ -1,7 +1,7 @@
 import { Box, Chip, Stack, Typography } from '@mui/material';
 import dayjs from 'dayjs';
 
-import { Widget } from '~/components/ui';
+import { NoData, Show, Widget } from '~/components/ui';
 import { useTenantContext } from '~/context/tenant/useTenantContext';
 import { useGetDailyTimesheetsQuery } from '~/services/timesheet/timesheet.queries';
 import { UserStatusEnum } from '~/services/timesheet/timesheet.types';
@@ -73,10 +73,7 @@ export const TimesheetSection = () => {
             minWidth: 'min-content',
           }}
         >
-          <Typography
-            variant="body2"
-            sx={{ minWidth: 240, flex: 1, color: 'text.secondary' }}
-          >
+          <Typography variant="body2" sx={{ minWidth: 240, flex: 1, color: 'text.secondary' }}>
             Full Name
           </Typography>
           <Typography variant="body2" sx={{ width: 100, color: 'text.secondary' }}>
@@ -91,13 +88,17 @@ export const TimesheetSection = () => {
         </Stack>
 
         {/* Body */}
-        {users.length === 0 ? (
-          <Box sx={{ px: 2, py: 3, textAlign: 'center' }}>
-            <Typography variant="body2" color="text.secondary">
-              No timesheets found
-            </Typography>
-          </Box>
-        ) : (
+        <Show
+          when={users.length > 0}
+          fallback={
+            <Stack p={2} spacing={0.5}>
+              <NoData
+                text="No timesheets available"
+                description="No timesheets found. Please check again later."
+              />
+            </Stack>
+          }
+        >
           <Stack spacing={0}>
             {users.map((user) => (
               <Stack
@@ -141,7 +142,7 @@ export const TimesheetSection = () => {
               </Stack>
             ))}
           </Stack>
-        )}
+        </Show>
       </Stack>
     </Widget>
   );
