@@ -79,7 +79,14 @@ export const ReportSection = () => {
             Today
           </Button>
         </ButtonGroup>
-        <Show when={!isLoading} fallback={<LoadingSpinner />}>
+        <Show
+          when={!isLoading}
+          fallback={
+            <Stack justifyContent="center" alignItems="center">
+              <LoadingSpinner />
+            </Stack>
+          }
+        >
           <Show
             when={reports.length > 0}
             fallback={
