@@ -1,7 +1,7 @@
 import { ChevronRightOutlined, HomeOutlined } from '@mui/icons-material';
 import { Typography } from '@mui/material';
 import type { Dayjs } from 'dayjs';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import {
@@ -32,6 +32,18 @@ export const ReportsPage = () => {
   const [startDate, setStartDate] = useState<Dayjs | null>(initialRange.startDate);
   const [endDate, setEndDate] = useState<Dayjs | null>(initialRange.endDate);
   const [page, setPage] = useState(1);
+
+  useEffect(() => {
+    if (startDate && endDate) {
+      sessionStorage.setItem(
+        REPORTS_KEY,
+        JSON.stringify({
+          start: startDate.toISOString(),
+          end: endDate.toISOString(),
+        }),
+      );
+    }
+  }, [startDate, endDate]);
 
   const { data, isLoading } = useGetReportsQuery({
     tenantId,
