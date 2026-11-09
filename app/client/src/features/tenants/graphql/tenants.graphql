@@ -1,0 +1,11 @@
+query Tenants {
+  tenants {
+    role
+    tenant {
+      id
+      name
+      timezone
+      currency
+    }
+  }
+}

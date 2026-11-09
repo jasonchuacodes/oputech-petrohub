@@ -6,14 +6,14 @@ import { EventEmitterModule } from '@nestjs/event-emitter'
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo'
 import { GraphQLModule } from '@nestjs/graphql'
 import { LoggerModule } from 'nestjs-pino'
-import { Request, Response } from 'express'
+import { GraphqlContext } from './common/graphql/graphql-context'
 import { Environment, validateEnvironment } from './config/environment'
+import { CommonGraphqlModule } from './common/graphql/common-graphql.module'
 import { DatabaseModule } from './database/database.module'
 import { HealthModule } from './health/health.module'
 import { AuthModule } from './modules/auth/auth.module'
-import { MembershipsModule } from './modules/memberships/memberships.module'
 import { MemberActivityModule } from './modules/member-activity/member-activity.module'
-import { TenantsModule } from './modules/tenants/tenants.module'
+import { TenantModule } from './modules/tenants/tenant.module'
 import { UsersModule } from './modules/users/users.module'
 
 @Module({
@@ -37,7 +37,6 @@ import { UsersModule } from './modules/users/users.module'
             paths: [
               'req.headers.cookie',
               'req.headers.authorization',
-              'req.headers.x-csrf-token',
               'res.headers.set-cookie',
             ],
             censor: '[REDACTED]',
@@ -46,6 +45,7 @@ import { UsersModule } from './modules/users/users.module'
       }),
     }),
     DatabaseModule,
+    CommonGraphqlModule,
     EventEmitterModule.forRoot({ wildcard: false, delimiter: '.' }),
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,
@@ -54,14 +54,13 @@ import { UsersModule } from './modules/users/users.module'
         driver: ApolloDriver,
         typePaths: [join(__dirname, 'graphql/**/*.graphql')],
         path: '/graphql',
-        context: ({ req, res }: { req: Request; res: Response }) => ({ req, res }),
+        context: ({ req, res }: GraphqlContext) => ({ req, res }),
         introspection: config.get('NODE_ENV', { infer: true }) !== 'production',
         playground: false,
       }),
     }),
     UsersModule,
-    TenantsModule,
-    MembershipsModule,
+    TenantModule,
     MemberActivityModule,
     AuthModule,
     HealthModule,

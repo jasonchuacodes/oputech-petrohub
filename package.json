@@ -2,11 +2,14 @@
   "name": "oputech-petromate",
   "private": true,
   "scripts": {
-    "build": "pnpm -r build",
-    "dev": "pnpm -r --parallel dev",
+    "build": "pnpm generate:graphql && pnpm -r build",
+    "dev": "pnpm generate:graphql && pnpm -r --parallel dev",
+    "generate:graphql": "graphql-codegen --config codegen.ts",
+    "generate:graphql:watch": "graphql-codegen --config codegen.ts --watch",
     "lint": "pnpm -r lint",
-    "test": "pnpm -r test",
-    "typecheck": "pnpm -r typecheck"
+    "register-superadmin": "pnpm --filter @petromate/server register-superadmin",
+    "test": "pnpm generate:graphql && pnpm -r test",
+    "typecheck": "pnpm generate:graphql && pnpm -r typecheck"
   },
   "packageManager": "pnpm@10.26.2",
   "engines": {
@@ -24,5 +27,12 @@
         "@apollo/server": "5"
       }
     }
+  },
+  "devDependencies": {
+    "@graphql-codegen/cli": "^8.0.0",
+    "@graphql-codegen/typed-document-node": "^8.0.0",
+    "@graphql-codegen/typescript": "^7.0.0",
+    "@graphql-codegen/typescript-operations": "^7.0.0",
+    "@graphql-codegen/typescript-resolvers": "^7.0.0"
   }
 }

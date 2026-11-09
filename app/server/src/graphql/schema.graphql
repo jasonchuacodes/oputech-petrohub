@@ -1,25 +1,37 @@
+scalar ObjectId
+
 type Query {
   viewer: Viewer!
-  myTenants: [ViewerTenant!]!
+  tenants: [ViewerTenant!]!
   activeTenant: TenantSummary
 }
 
 type Viewer {
-  id: ID!
+  id: ObjectId!
   displayName: String!
   username: String!
   status: String!
+  role: UserRole!
+  accountHolderId: ObjectId
+  tenantIds: [ObjectId!]!
+  currentTenantId: ObjectId
+  tenantSelectionVersion: Int!
   shouldChangePassword: Boolean!
 }
 
 type ViewerTenant {
-  membershipId: ID!
-  role: String!
+  role: UserRole!
   tenant: TenantSummary!
 }
 
+enum UserRole {
+  superadmin
+  admin
+  member
+}
+
 type TenantSummary {
-  id: ID!
+  id: ObjectId!
   name: String!
   timezone: String!
   currency: String!

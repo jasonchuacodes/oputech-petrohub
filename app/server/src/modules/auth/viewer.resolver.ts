@@ -1,59 +1,50 @@
 import { Query, Resolver } from '@nestjs/graphql'
 import { UseGuards } from '@nestjs/common'
+import type { Query as GraphqlQuery } from '../../generated/graphql'
 import { CurrentActor } from './decorators/current-actor.decorator'
 import { CurrentTenant } from './decorators/current-tenant.decorator'
 import { AuthenticatedActor, AuthorizedTenant } from './auth.types'
-import { SessionGuard } from './guards/session.guard'
+import { AccessTokenGuard } from './session/guards/access-token.guard'
 import { TenantAccessGuard } from './guards/tenant-access.guard'
-import { MembershipsService } from '../memberships/memberships.service'
-import { TenantsService } from '../tenants/tenants.service'
+import { TenantService } from '../tenants/tenant.service'
 
 @Resolver()
-@UseGuards(SessionGuard)
+@UseGuards(AccessTokenGuard)
 export class ViewerResolver {
   constructor(
-    private readonly memberships: MembershipsService,
-    private readonly tenants: TenantsService,
+    private readonly tenantService: TenantService,
   ) {}
 
   @Query('viewer')
-  viewer(@CurrentActor() actor: AuthenticatedActor) {
+  viewer(@CurrentActor() actor: AuthenticatedActor): GraphqlQuery['viewer'] {
     return actor.user
   }
 
-  @Query('myTenants')
-  async myTenants(@CurrentActor() actor: AuthenticatedActor) {
-    const memberships = await this.memberships.findActiveForUser(actor.userId)
-    return Promise.all(
-      memberships.map(async (membership) => {
-        const tenant = await this.tenants.findActiveById(membership.tenantId)
-        return tenant
-          ? {
-              membershipId: membership.id,
-              role: membership.role,
-              tenant: {
-                id: tenant.id,
-                name: tenant.name,
-                timezone: tenant.timezone,
-                currency: tenant.currency,
-              },
-            }
-          : null
-      }),
-    ).then((entries) => entries.filter((entry) => entry !== null))
+  @Query('tenants')
+  async tenants(@CurrentActor() actor: AuthenticatedActor): Promise<GraphqlQuery['tenants']> {
+    const tenants = await this.tenantService.listForUser(actor)
+    return tenants.map((tenant) => ({
+      role: actor.user.role,
+      tenant: {
+        id: tenant._id,
+        name: tenant.name,
+        timezone: tenant.timezone,
+        currency: tenant.currency,
+      },
+    }))
   }
 
   @Query('activeTenant')
   @UseGuards(TenantAccessGuard)
-  async activeTenant(@CurrentTenant() context: AuthorizedTenant) {
-    const tenant = await this.tenants.findActiveById(context.tenantId)
-    return tenant
-      ? {
-          id: tenant.id,
-          name: tenant.name,
-          timezone: tenant.timezone,
-          currency: tenant.currency,
-        }
-      : null
+  async activeTenant(
+    @CurrentTenant() context: AuthorizedTenant,
+  ): Promise<GraphqlQuery['activeTenant']> {
+    return {
+      id: context.tenant._id,
+      name: context.tenant.name,
+      timezone: context.tenant.timezone,
+      currency: context.tenant.currency,
+    }
   }
+
 }
