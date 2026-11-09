@@ -1,49 +1,33 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { isAxiosError } from 'axios'
-import { setCsrfToken } from '~/lib/api'
-import { changePassword, getSession, login, logout } from './auth.api'
-import type { Session } from './auth.types'
-
-export const sessionQueryKey = ['auth', 'session'] as const
+import { useMutation } from '@tanstack/react-query'
+import { useAuth } from './auth-context'
 
 export function useSessionQuery() {
-  return useQuery({
-    queryKey: sessionQueryKey,
-    queryFn: getSession,
-    retry: (failureCount, error) => !isAxiosError(error) && failureCount < 1,
-    staleTime: 5 * 60 * 1000,
-  })
+  const auth = useAuth()
+  return {
+    isPending: auth.status === 'bootstrapping',
+    isError: auth.status === 'anonymous' || auth.status === 'unavailable',
+    isSuccess: auth.session !== null,
+    data: auth.session ?? undefined,
+  }
 }
 
 export function useLoginMutation() {
-  const queryClient = useQueryClient()
+  const auth = useAuth()
   return useMutation({
-    mutationFn: login,
-    onSuccess: ({ csrfToken, ...session }) => {
-      setCsrfToken(csrfToken)
-      queryClient.setQueryData<Session>(sessionQueryKey, session)
-    },
+    mutationFn: auth.login,
   })
 }
 
 export function useLogoutMutation() {
-  const queryClient = useQueryClient()
+  const auth = useAuth()
   return useMutation({
-    mutationFn: logout,
-    onSettled: async () => {
-      setCsrfToken(null)
-      queryClient.clear()
-    },
+    mutationFn: auth.logout,
   })
 }
 
 export function useChangePasswordMutation() {
-  const queryClient = useQueryClient()
+  const auth = useAuth()
   return useMutation({
-    mutationFn: changePassword,
-    onSuccess: () => {
-      setCsrfToken(null)
-      queryClient.clear()
-    },
+    mutationFn: auth.changePassword,
   })
 }

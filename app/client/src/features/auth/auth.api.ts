@@ -1,25 +1,55 @@
-import { api, getCsrfToken } from '~/lib/api'
-import type { LoginResponse, Session } from './auth.types'
+import axios from 'axios'
+import type { SessionResponse } from './auth.types'
 
-export async function getSession(): Promise<Session> {
-  return (await api.get<Session>('/api/auth/me')).data
+const authHttp = axios.create({
+  baseURL: '',
+  headers: { 'Content-Type': 'application/json' },
+  timeout: 15_000,
+  withCredentials: true,
+})
+
+type ErrorResponse = { code?: string }
+
+export class AuthApiError extends Error {
+  readonly code?: string
+  readonly status: number
+
+  constructor(status: number, code?: string) {
+    super('Authentication request failed')
+    this.name = 'AuthApiError'
+    this.code = code
+    this.status = status
+  }
 }
 
-export async function login(input: { username: string; password: string }): Promise<LoginResponse> {
-  return (await api.post<LoginResponse>('/api/auth/login', input)).data
+async function authRequest<T>(request: () => Promise<{ data: T }>): Promise<T> {
+  try {
+    return (await request()).data
+  } catch (error) {
+    if (!axios.isAxiosError<ErrorResponse>(error)) throw new AuthApiError(0)
+    throw new AuthApiError(error.response?.status ?? 0, error.response?.data?.code)
+  }
 }
 
-export async function logout(): Promise<void> {
-  const csrfToken = await getCsrfToken()
-  await api.post('/api/auth/logout', undefined, { headers: { 'x-csrf-token': csrfToken } })
+export function loginSession(input: { username: string; password: string }) {
+  return authRequest(() => authHttp.post<SessionResponse>('/api/auth/session', input))
 }
 
-export async function changePassword(input: {
-  currentPassword: string
-  newPassword: string
-}): Promise<void> {
-  const csrfToken = await getCsrfToken()
-  await api.post('/api/auth/change-password', input, {
-    headers: { 'x-csrf-token': csrfToken },
-  })
+export function refreshSession() {
+  return authRequest(() => authHttp.post<SessionResponse>('/api/auth/session/refresh', {}))
+}
+
+export function logoutSession() {
+  return authRequest(() => authHttp.delete<void>('/api/auth/session', { data: {} }))
+}
+
+export function changePasswordRequest(
+  accessToken: string,
+  input: { currentPassword: string; newPassword: string },
+) {
+  return authRequest(() =>
+    authHttp.post<void>('/api/auth/change-password', input, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    }),
+  )
 }

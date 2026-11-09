@@ -14,7 +14,7 @@ export function ProtectedRoute() {
     )
   }
 
-  if (session.isError) return <Navigate to="/login" replace />
+  if (session.isError || !session.data) return <Navigate to="/login" replace />
   if (session.data.user.shouldChangePassword && location.pathname !== '/change-password') {
     return <Navigate to="/change-password" replace />
   }

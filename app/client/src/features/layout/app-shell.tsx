@@ -3,7 +3,7 @@ import { NavLink, Outlet } from 'react-router-dom'
 import { Spinner } from '~/components/ui/spinner'
 import { cn } from '~/utils/cn'
 import { setActiveTenant, useActiveTenantId } from '../tenants/active-tenant'
-import { useMyTenantsQuery } from '../tenants/tenant.queries'
+import { useTenantsQuery } from '../tenants/tenants.queries'
 import { navigation, type NavigationItem } from './navigation'
 
 function NavigationLink({ item, compact = false }: { item: NavigationItem; compact?: boolean }) {
@@ -26,7 +26,7 @@ function NavigationLink({ item, compact = false }: { item: NavigationItem; compa
 }
 
 export function AppShell() {
-  const tenants = useMyTenantsQuery()
+  const tenants = useTenantsQuery()
   const activeTenantId = useActiveTenantId()
 
   useEffect(() => {
@@ -59,7 +59,9 @@ export function AppShell() {
 
   const selected =
     tenants.data.find(({ tenant }) => tenant.id === activeTenantId) ?? tenants.data[0]
-  const visibleNavigation = navigation.filter((item) => !item.adminOnly || selected.role === 'ADMIN')
+  const visibleNavigation = navigation.filter(
+    (item) => !item.adminOnly || selected.role === 'superadmin' || selected.role === 'admin',
+  )
 
   return (
     <div className="flex h-dvh overflow-hidden bg-background">

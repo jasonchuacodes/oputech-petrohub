@@ -1,22 +1,31 @@
-export type MembershipRole = 'ADMIN' | 'EMPLOYEE'
+export type { UserRole } from '~/generated/graphql'
+import type { UserRole } from '~/generated/graphql'
 
 export type AuthUser = {
   id: string
   displayName: string
   username: string
   status: string
+  role: UserRole
+  accountHolderId?: string
+  tenantIds: string[]
+  currentTenantId?: string
+  tenantSelectionVersion: number
   shouldChangePassword: boolean
 }
 
-export type AuthMembership = {
-  id: string
+export type TenantAccess = {
   tenantId: string
-  role: MembershipRole
+  role: UserRole
 }
 
 export type Session = {
   user: AuthUser
-  memberships: AuthMembership[]
+  tenantAccess: TenantAccess[]
 }
 
-export type LoginResponse = Session & { csrfToken: string }
+export type SessionResponse = Session & {
+  accessToken: string
+  tokenType: 'access'
+  dateTimeExpiration: string
+}

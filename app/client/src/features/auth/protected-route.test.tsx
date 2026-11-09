@@ -34,10 +34,11 @@ describe('ProtectedRoute', () => {
           id: 'user-1',
           displayName: 'Station Admin',
           username: 'admin',
-          status: 'ACTIVE',
+          status: 'active',
+          role: 'admin',
           shouldChangePassword: true,
         },
-        memberships: [],
+        tenantAccess: [],
       },
     } as unknown as ReturnType<typeof useSessionQuery>)
 
@@ -54,10 +55,11 @@ describe('ProtectedRoute', () => {
           id: 'user-1',
           displayName: 'Station Admin',
           username: 'admin',
-          status: 'ACTIVE',
+          status: 'active',
+          role: 'admin',
           shouldChangePassword: false,
         },
-        memberships: [],
+        tenantAccess: [],
       },
     } as unknown as ReturnType<typeof useSessionQuery>)
 
