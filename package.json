@@ -1,0 +1,28 @@
+{
+  "name": "oputech-petromate",
+  "private": true,
+  "scripts": {
+    "build": "pnpm -r build",
+    "dev": "pnpm -r --parallel dev",
+    "lint": "pnpm -r lint",
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck"
+  },
+  "packageManager": "pnpm@10.26.2",
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@parcel/watcher",
+      "argon2",
+      "esbuild",
+      "mongodb-memory-server"
+    ],
+    "peerDependencyRules": {
+      "allowedVersions": {
+        "@apollo/server": "5"
+      }
+    }
+  }
+}

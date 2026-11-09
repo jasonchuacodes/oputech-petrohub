@@ -1,0 +1,26 @@
+type Query {
+  viewer: Viewer!
+  myTenants: [ViewerTenant!]!
+  activeTenant: TenantSummary
+}
+
+type Viewer {
+  id: ID!
+  displayName: String!
+  username: String!
+  status: String!
+  shouldChangePassword: Boolean!
+}
+
+type ViewerTenant {
+  membershipId: ID!
+  role: String!
+  tenant: TenantSummary!
+}
+
+type TenantSummary {
+  id: ID!
+  name: String!
+  timezone: String!
+  currency: String!
+}

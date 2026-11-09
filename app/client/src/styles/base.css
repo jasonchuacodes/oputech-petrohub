@@ -1,0 +1,25 @@
+@import '@fontsource-variable/manrope';
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import './theme.css';
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    @apply bg-background font-sans;
+  }
+
+  body {
+    @apply m-0 bg-background text-foreground antialiased;
+    padding-right: env(safe-area-inset-right);
+    padding-left: env(safe-area-inset-left);
+  }
+
+  button,
+  [role='button'] {
+    touch-action: manipulation;
+  }
+}

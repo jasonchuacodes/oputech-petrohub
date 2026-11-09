@@ -1,0 +1,67 @@
+:root {
+  --background: #f5f5f5;
+  --foreground: #101010;
+  --text-heading: #303030;
+  --card: #ffffff;
+  --card-foreground: #101010;
+  --popover: #ffffff;
+  --popover-foreground: #101010;
+  --primary: #17434d;
+  --primary-foreground: #ffffff;
+  --secondary: #ffffff;
+  --secondary-foreground: #101010;
+  --muted: #eeeeee;
+  --muted-foreground: rgb(16 16 16 / 70%);
+  --accent: #e9f0f1;
+  --accent-foreground: #17434d;
+  --destructive: #b64e4a;
+  --border: rgb(16 16 16 / 12%);
+  --input: rgb(16 16 16 / 14%);
+  --ring: #17434d;
+}
+
+@theme inline {
+  --font-sans: Manrope, ui-sans-serif, system-ui, sans-serif;
+  --breakpoint-wide: 75rem;
+  --text-page-title: clamp(1.25rem, 1.17rem + 0.32vw, 1.5rem);
+  --text-page-title--line-height: clamp(1.75rem, 1.67rem + 0.32vw, 2rem);
+  --text-card-title: 1rem;
+  --text-card-title--line-height: 1.5rem;
+  --text-control: 0.8125rem;
+  --text-control--line-height: 1.125rem;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-brand: #17434d;
+  --color-brand-hover: #0f343d;
+  --color-brand-light: #e9f0f1;
+  --color-text-primary: #101010;
+  --color-text-heading: var(--text-heading);
+  --color-text-secondary: rgb(16 16 16 / 70%);
+  --color-text-tertiary: rgb(16 16 16 / 50%);
+  --color-status-success: #32765a;
+  --color-status-warning: #b47b31;
+  --color-status-error: #b64e4a;
+  --color-status-info: #47769b;
+  --color-surface-hover: #eeeeee;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-sheet: 20px;
+  --shadow-card: 0 1px 3px rgba(16, 16, 16, 0.055);
+}
