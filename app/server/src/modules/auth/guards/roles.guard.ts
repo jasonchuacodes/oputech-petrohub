@@ -3,17 +3,17 @@ import { Reflector } from '@nestjs/core'
 import { GqlExecutionContext } from '@nestjs/graphql'
 import { Request } from 'express'
 import { forbidden, unauthenticated } from '../../../common/exceptions/errors'
-import { MembershipRole } from '../../memberships/schemas/membership.schema'
+import { UserRole } from '../../users/schemas/user.schema'
 
-const ROLES_KEY = 'membership-roles'
-export const RequireRoles = (...roles: MembershipRole[]) => SetMetadata(ROLES_KEY, roles)
+const ROLES_KEY = 'user-roles'
+export const RequireRoles = (...roles: UserRole[]) => SetMetadata(ROLES_KEY, roles)
 
 @Injectable()
 export class RolesGuard implements CanActivate {
   constructor(private readonly reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
-    const roles = this.reflector.getAllAndOverride<MembershipRole[]>(ROLES_KEY, [
+    const roles = this.reflector.getAllAndOverride<UserRole[]>(ROLES_KEY, [
       context.getHandler(),
       context.getClass(),
     ])

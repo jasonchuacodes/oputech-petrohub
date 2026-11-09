@@ -19,7 +19,7 @@ export class MemberActivityService {
           tenantId: event.tenantId,
           memberId: event.memberId,
           action: `created report: ${event.reportId.toHexString()}`,
-          entityType: ActivityEntityType.Report,
+          entityType: ActivityEntityType.REPORT,
           entityId: event.reportId,
           eventKey,
           createdAt: event.occurredAt,

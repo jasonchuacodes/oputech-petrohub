@@ -1,9 +1,15 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { HydratedDocument } from 'mongoose'
+import { HydratedDocument, Types } from 'mongoose'
 
 export enum UserStatus {
-  Active = 'ACTIVE',
-  Disabled = 'DISABLED',
+  ACTIVE = 'active',
+  DISABLED = 'disabled',
+}
+
+export enum UserRole {
+  SUPERADMIN = 'superadmin',
+  ADMIN = 'admin',
+  MEMBER = 'member',
 }
 
 @Schema({ collection: 'users', timestamps: true, versionKey: 'revision' })
@@ -17,8 +23,47 @@ export class User {
   @Prop({ required: true, select: false })
   passwordHash!: string
 
-  @Prop({ required: true, enum: UserStatus, default: UserStatus.Active })
+  @Prop({ required: true, enum: UserStatus, default: UserStatus.ACTIVE })
   status!: UserStatus
+
+  @Prop({ required: true, enum: UserRole })
+  role!: UserRole
+
+  @Prop({
+    type: Types.ObjectId,
+    required: function (this: User) {
+      return this.role === UserRole.ADMIN || this.role === UserRole.MEMBER
+    },
+    validate: {
+      validator: function (this: User, value?: Types.ObjectId) {
+        return this.role === UserRole.SUPERADMIN ? value === undefined : value !== undefined
+      },
+      message:
+        'accountHolderId is required for admin and member users and forbidden for superadmins',
+    },
+  })
+  accountHolderId?: Types.ObjectId
+
+  @Prop({
+    type: [Types.ObjectId],
+    default: [],
+    validate: {
+      validator: function (this: User, value: Types.ObjectId[]) {
+        if (this.role === UserRole.SUPERADMIN) return value.length === 0
+        if (this.role === UserRole.MEMBER) return value.length === 1
+        return value.length >= 1
+      },
+      message:
+        'superadmins cannot have tenant assignments, members require one tenant, and admins require at least one tenant',
+    },
+  })
+  tenantIds!: Types.ObjectId[]
+
+  @Prop({ type: Types.ObjectId })
+  currentTenantId?: Types.ObjectId
+
+  @Prop({ required: true, default: 0 })
+  tenantSelectionVersion!: number
 
   @Prop({ required: true, default: 1 })
   credentialVersion!: number
@@ -34,3 +79,4 @@ export type UserDocument = HydratedDocument<User>
 export const UserSchema = SchemaFactory.createForClass(User)
 
 UserSchema.index({ username: 1 }, { unique: true })
+UserSchema.index({ accountHolderId: 1, tenantIds: 1, role: 1, status: 1 })
