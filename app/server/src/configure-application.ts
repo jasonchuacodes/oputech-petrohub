@@ -16,8 +16,8 @@ export function configureApplication(app: INestApplication): void {
   app.enableCors({
     origin: config.get('CLIENT_ORIGIN', { infer: true }),
     credentials: true,
-    methods: ['GET', 'POST', 'OPTIONS'],
-    allowedHeaders: ['content-type', 'x-csrf-token', 'x-tenant-id', 'x-request-id'],
+    methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['authorization', 'content-type', 'x-tenant-id', 'x-request-id'],
   })
   app.useGlobalFilters(new HttpExceptionFilter())
   app.useGlobalInterceptors(new NoStoreInterceptor())

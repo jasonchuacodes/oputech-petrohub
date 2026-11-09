@@ -1,58 +1,43 @@
-import { Body, Controller, Get, HttpCode, Post, Res, UseGuards } from '@nestjs/common'
-import { Response } from 'express'
+import { Body, Controller, Headers, HttpCode, Post, UseGuards } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
+import { forbidden } from '../../common/exceptions/errors'
 import { ZodValidationPipe } from '../../common/validation/zod-validation.pipe'
+import { Environment } from '../../config/environment'
 import { CurrentActor } from './decorators/current-actor.decorator'
 import { AuthenticatedActor } from './auth.types'
 import { AuthService } from './auth.service'
 import {
   ChangePasswordInput,
   changePasswordSchema,
-  LoginInput,
-  loginSchema,
+  RegisterInput,
+  registerSchema,
 } from './auth.schemas'
-import { CsrfGuard } from './guards/csrf.guard'
 import { OriginGuard } from './guards/origin.guard'
-import { SessionGuard } from './guards/session.guard'
+import { AccessTokenGuard } from './session/guards/access-token.guard'
 
 @Controller('api/auth')
 export class AuthController {
-  constructor(private readonly auth: AuthService) {}
+  constructor(
+    private readonly auth: AuthService,
+    private readonly config: ConfigService<Environment, true>,
+  ) {}
 
-  @Post('login')
-  @HttpCode(200)
-  @UseGuards(OriginGuard)
-  login(
-    @Body(new ZodValidationPipe(loginSchema)) input: LoginInput,
-    @Res({ passthrough: true }) response: Response,
+  @Post('register')
+  register(
+    @Body(new ZodValidationPipe(registerSchema)) input: RegisterInput,
+    @Headers('x-superadmin-script-secret') secret?: string,
   ) {
-    return this.auth.login(input, response)
-  }
+    const configuredSecret = this.config.get('SUPERADMIN_SCRIPT_SECRET', { infer: true })
+    if (!configuredSecret || !secret || secret !== configuredSecret) {
+      throw forbidden('The super admin registration secret is invalid or missing.')
+    }
 
-  @Post('logout')
-  @HttpCode(200)
-  @UseGuards(OriginGuard, SessionGuard, CsrfGuard)
-  logout(
-    @CurrentActor() actor: AuthenticatedActor,
-    @Res({ passthrough: true }) response: Response,
-  ) {
-    return this.auth.logout(actor, response)
-  }
-
-  @Get('me')
-  @UseGuards(SessionGuard)
-  me(@CurrentActor() actor: AuthenticatedActor) {
-    return this.auth.me(actor)
-  }
-
-  @Get('csrf')
-  @UseGuards(SessionGuard)
-  async csrf(@CurrentActor() actor: AuthenticatedActor) {
-    return { csrfToken: await this.auth.rotateCsrf(actor) }
+    return this.auth.register(input)
   }
 
   @Post('change-password')
   @HttpCode(200)
-  @UseGuards(OriginGuard, SessionGuard, CsrfGuard)
+  @UseGuards(OriginGuard, AccessTokenGuard)
   changePassword(
     @CurrentActor() actor: AuthenticatedActor,
     @Body(new ZodValidationPipe(changePasswordSchema)) input: ChangePasswordInput,

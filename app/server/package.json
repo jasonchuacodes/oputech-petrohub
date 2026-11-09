@@ -11,7 +11,7 @@
     "typecheck": "tsc --noEmit",
     "test": "jest --runInBand",
     "test:watch": "jest --watch",
-    "bootstrap:admin": "tsx scripts/bootstrap-admin.ts",
+    "register-superadmin": "tsx scripts/register-superadmin.ts",
     "db:indexes": "tsx scripts/ensure-indexes.ts"
   },
   "dependencies": {
@@ -23,6 +23,7 @@
     "@nestjs/core": "^11.2.9",
     "@nestjs/event-emitter": "^3.1.0",
     "@nestjs/graphql": "^13.4.5",
+    "@nestjs/jwt": "^11.0.2",
     "@nestjs/mongoose": "^11.0.4",
     "@nestjs/platform-express": "^11.2.9",
     "argon2": "^0.44.0",
@@ -38,9 +39,9 @@
     "zod": "^4.1.12"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.1",
     "@nestjs/cli": "^11.0.24",
     "@nestjs/testing": "^11.2.9",
-    "@eslint/js": "^9.39.1",
     "@types/cookie-parser": "^1.4.10",
     "@types/express": "^5.0.5",
     "@types/jest": "^30.0.0",

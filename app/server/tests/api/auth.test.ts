@@ -2,24 +2,24 @@ import { INestApplication } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import { hash } from 'argon2'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
-import { getConnectionToken } from '@nestjs/mongoose'
+import { getConnectionToken, getModelToken } from '@nestjs/mongoose'
 import { EventEmitter2 } from '@nestjs/event-emitter'
-import { Connection, Types } from 'mongoose'
+import { Connection, Model, Types } from 'mongoose'
 import request from 'supertest'
 import { configureApplication } from '../../src/configure-application'
-import { MembershipRole } from '../../src/modules/memberships/schemas/membership.schema'
-import { MembershipsService } from '../../src/modules/memberships/memberships.service'
 import {
   REPORT_CREATED_EVENT,
   ReportCreatedEvent,
 } from '../../src/modules/reports/events/report-created.event'
-import { TenantsService } from '../../src/modules/tenants/tenants.service'
+import { TenantService } from '../../src/modules/tenants/tenant.service'
+import { User, UserRole } from '../../src/modules/users/schemas/user.schema'
 import { UsersService } from '../../src/modules/users/users.service'
 
 describe('authentication', () => {
   let replicaSet: MongoMemoryReplSet
   let app: INestApplication
   let tenantId: Types.ObjectId
+  let secondTenantId: Types.ObjectId
   let memberId: Types.ObjectId
 
   beforeAll(async () => {
@@ -27,7 +27,9 @@ describe('authentication', () => {
     process.env.NODE_ENV = 'test'
     process.env.MONGODB_URI = replicaSet.getUri('petromate-test')
     process.env.CLIENT_ORIGIN = 'http://localhost:5173'
-    process.env.SESSION_COOKIE_NAME = 'petromate_session'
+    process.env.AUTH_ACCESS_TOKEN_SECRET = 'test-access-secret-at-least-32-characters'
+    process.env.AUTH_REFRESH_TOKEN_SECRET = 'test-refresh-secret-at-least-32-characters'
+    process.env.SUPERADMIN_SCRIPT_SECRET = 'test-superadmin-secret-at-least-32-characters'
     process.env.LOG_LEVEL = 'silent'
 
     const { AppModule } = await import('../../src/app.module')
@@ -36,28 +38,47 @@ describe('authentication', () => {
     await app.init()
 
     const users = app.get(UsersService)
-    const tenants = app.get(TenantsService)
-    const memberships = app.get(MembershipsService)
-    const user = await users.create({
-      displayName: 'Test Admin',
-      username: 'admin',
-      passwordHash: await hash('StrongPassword123'),
+    const tenants = app.get(TenantService)
+    const accountHolder = await users.create({
+      displayName: 'Account Holder',
+      username: 'owner',
+      passwordHash: await hash('OwnerPassword123'),
+      role: UserRole.SUPERADMIN,
       shouldChangePassword: false,
     })
-    const tenant = await tenants.create({
+    const tenant = await tenants.create(accountHolder._id, {
       name: 'Test Station',
       key: 'test-station',
       timezone: 'Asia/Manila',
       currency: 'PHP',
     })
-    const membership = await memberships.create({
-      tenantId: tenant._id,
-      userId: user._id,
-      employeeCode: '0001',
-      role: MembershipRole.Admin,
+    const secondTenant = await tenants.create(accountHolder._id, {
+      name: 'Second Station',
+      key: 'second-station',
+      timezone: 'Asia/Manila',
+      currency: 'PHP',
+    })
+    const user = await users.create({
+      displayName: 'Test Admin',
+      username: 'admin',
+      passwordHash: await hash('StrongPassword123'),
+      role: UserRole.ADMIN,
+      accountHolderId: accountHolder._id,
+      tenantIds: [tenant._id],
+      shouldChangePassword: false,
+    })
+    await users.create({
+      displayName: 'Test Member',
+      username: 'member',
+      passwordHash: await hash('MemberPassword123'),
+      role: UserRole.MEMBER,
+      accountHolderId: accountHolder._id,
+      tenantIds: [tenant._id],
+      shouldChangePassword: false,
     })
     tenantId = tenant._id
-    memberId = membership._id
+    secondTenantId = secondTenant._id
+    memberId = user._id
   }, 60_000)
 
   afterAll(async () => {
@@ -67,78 +88,255 @@ describe('authentication', () => {
 
   it('requires the configured origin for login', async () => {
     await request(app.getHttpServer())
-      .post('/api/auth/login')
+      .post('/api/auth/session')
       .send({ username: 'admin', password: 'StrongPassword123' })
       .expect(403)
   })
 
-  it('creates, authenticates, and revokes an opaque session', async () => {
+  it('registers a superadmin with the configured script secret', async () => {
+    const input = {
+      username: 'Registered-Owner',
+      password: 'InitialPassword123',
+    }
+
+    await request(app.getHttpServer()).post('/api/auth/register').send(input).expect(403)
+
+    await request(app.getHttpServer())
+      .post('/api/auth/register')
+      .set('x-superadmin-script-secret', 'invalid-secret')
+      .send(input)
+      .expect(403)
+
+    const registration = await request(app.getHttpServer())
+      .post('/api/auth/register')
+      .set('x-superadmin-script-secret', process.env.SUPERADMIN_SCRIPT_SECRET!)
+      .send(input)
+      .expect(201)
+
+    expect(registration.body).toMatchObject({
+      displayName: 'registered-owner',
+      username: 'registered-owner',
+      role: UserRole.SUPERADMIN,
+      shouldChangePassword: true,
+    })
+
+    await request(app.getHttpServer())
+      .post('/api/auth/register')
+      .set('x-superadmin-script-secret', process.env.SUPERADMIN_SCRIPT_SECRET!)
+      .send(input)
+      .expect(409)
+
+    await request(app.getHttpServer())
+      .post('/api/auth/session')
+      .set('origin', 'http://localhost:5173')
+      .send({ username: 'registered-owner', password: input.password })
+      .expect(200)
+      .expect(({ body }) => {
+        expect(body.user).toMatchObject({
+          username: 'registered-owner',
+          role: UserRole.SUPERADMIN,
+          shouldChangePassword: true,
+        })
+        expect(body.tenantAccess).toEqual([])
+      })
+  })
+
+  it('enforces tenant assignment by role at the database boundary', async () => {
+    const users = app.get<Model<User>>(getModelToken(User.name))
+    const tenants = app.get(TenantService)
+
+    await expect(
+      users.create({
+        displayName: 'Invalid Admin',
+        username: 'invalid-admin',
+        passwordHash: await hash('InvalidPassword123'),
+        role: UserRole.ADMIN,
+      }),
+    ).rejects.toThrow(/accountHolderId|tenantIds/)
+
+    await expect(
+      users.create({
+        displayName: 'Invalid Owner',
+        username: 'invalid-owner',
+        passwordHash: await hash('InvalidPassword123'),
+        role: UserRole.SUPERADMIN,
+        tenantIds: [tenantId],
+      }),
+    ).rejects.toThrow(/tenantIds/)
+
+    await expect(
+      tenants.create(memberId, {
+        name: 'Invalid Ownership',
+        key: 'invalid-ownership',
+        timezone: 'Asia/Manila',
+        currency: 'PHP',
+      }),
+    ).rejects.toThrow(/active superadmin/)
+  })
+
+  it('creates, refreshes, authenticates, and revokes a session', async () => {
     const login = await request(app.getHttpServer())
-      .post('/api/auth/login')
+      .post('/api/auth/session')
       .set('origin', 'http://localhost:5173')
       .send({ username: 'admin', password: 'StrongPassword123' })
       .expect(200)
 
-    expect(login.body.user).toMatchObject({ username: 'admin', displayName: 'Test Admin' })
+    expect(login.body.user).toMatchObject({
+      username: 'admin',
+      displayName: 'Test Admin',
+      role: 'admin',
+    })
     expect(login.body.user.passwordHash).toBeUndefined()
-    expect(login.body.memberships).toHaveLength(1)
-    expect(login.body.csrfToken).toEqual(expect.any(String))
+    expect(login.body.tenantAccess).toEqual([
+      expect.objectContaining({ tenantId: tenantId.toHexString(), role: 'admin' }),
+    ])
+    expect(login.body).toMatchObject({
+      accessToken: expect.any(String),
+      tokenType: 'access',
+      dateTimeExpiration: expect.any(String),
+    })
     const cookie = (login.headers['set-cookie'] as unknown as string[] | undefined)?.[0]
-    if (!cookie) throw new Error('Login did not set a session cookie')
-    expect(cookie).toContain('petromate_session=')
+    if (!cookie) throw new Error('Login did not set a refresh cookie')
+    expect(cookie).toContain('petromate_refresh=')
     expect(cookie).toContain('HttpOnly')
+    expect(cookie).toContain('Path=/api/auth/session')
 
     await request(app.getHttpServer())
-      .get('/api/auth/me')
-      .set('Cookie', [cookie])
+      .get('/api/auth/session')
+      .set('Authorization', `Bearer ${login.body.accessToken}`)
       .expect(200)
       .expect(({ body }) => expect(body.user.username).toBe('admin'))
 
     await request(app.getHttpServer())
       .post('/graphql')
-      .set('Cookie', [cookie])
-      .send({ query: '{ viewer { username } myTenants { role tenant { name } } }' })
+      .set('Authorization', `Bearer ${login.body.accessToken}`)
+      .send({ query: '{ viewer { username role } tenants { role tenant { name } } }' })
       .expect(200)
       .expect(({ body }) => {
         expect(body.errors).toBeUndefined()
         expect(body.data.viewer.username).toBe('admin')
-        expect(body.data.myTenants[0].tenant.name).toBe('Test Station')
+        expect(body.data.viewer.role).toBe('admin')
+        expect(body.data.tenants[0].role).toBe('admin')
+        expect(body.data.tenants[0].tenant.name).toBe('Test Station')
       })
 
-    const tenantId = login.body.memberships[0].tenantId as string
+    const activeTenantId = login.body.tenantAccess[0].tenantId as string
     await request(app.getHttpServer())
       .post('/graphql')
-      .set('Cookie', [cookie])
-      .set('x-tenant-id', tenantId)
+      .set('Authorization', `Bearer ${login.body.accessToken}`)
+      .set('x-tenant-id', activeTenantId)
       .send({ query: '{ activeTenant { id name } }' })
       .expect(200)
       .expect(({ body }) => {
         expect(body.errors).toBeUndefined()
-        expect(body.data.activeTenant).toMatchObject({ id: tenantId, name: 'Test Station' })
+        expect(body.data.activeTenant).toMatchObject({ id: activeTenantId, name: 'Test Station' })
       })
 
     await request(app.getHttpServer())
       .post('/graphql')
-      .set('Cookie', [cookie])
+      .set('Authorization', `Bearer ${login.body.accessToken}`)
       .set('x-tenant-id', '507f1f77bcf86cd799439011')
       .send({ query: '{ activeTenant { id } }' })
       .expect(200)
       .expect(({ body }) => expect(body.errors).toHaveLength(1))
 
-    await request(app.getHttpServer())
-      .post('/api/auth/logout')
+    const refresh = await request(app.getHttpServer())
+      .post('/api/auth/session/refresh')
       .set('origin', 'http://localhost:5173')
       .set('Cookie', [cookie])
+      .send({})
+      .expect(200)
+    const refreshedCookie = (
+      refresh.headers['set-cookie'] as unknown as string[] | undefined
+    )?.[0]
+    if (!refreshedCookie) throw new Error('Refresh did not rotate the refresh cookie')
+    expect(refresh.body.accessToken).toEqual(expect.any(String))
+
+    await request(app.getHttpServer())
+      .post('/api/auth/session/refresh')
+      .set('origin', 'http://localhost:5173')
+      .set('Cookie', [cookie])
+      .send({})
+      .expect(401)
+
+    await request(app.getHttpServer())
+      .delete('/api/auth/session')
+      .set('origin', 'http://localhost:5173')
+      .set('Cookie', [refreshedCookie])
+      .send({})
+      .expect(204)
+
+    await request(app.getHttpServer())
+      .get('/api/auth/session')
+      .set('Authorization', `Bearer ${refresh.body.accessToken}`)
+      .expect(401)
+
+    await request(app.getHttpServer())
+      .post('/api/auth/session/refresh')
+      .set('Cookie', [refreshedCookie])
+      .send({})
       .expect(403)
 
     await request(app.getHttpServer())
-      .post('/api/auth/logout')
+      .post('/api/auth/session/refresh')
       .set('origin', 'http://localhost:5173')
-      .set('Cookie', [cookie])
-      .set('x-csrf-token', login.body.csrfToken)
-      .expect(200)
+      .set('Cookie', [refreshedCookie])
+      .send({})
+      .expect(401)
+  })
 
-    await request(app.getHttpServer()).get('/api/auth/me').set('Cookie', [cookie]).expect(401)
+  it('gives the superadmin access to every tenant they own', async () => {
+    const login = await request(app.getHttpServer())
+      .post('/api/auth/session')
+      .set('origin', 'http://localhost:5173')
+      .send({ username: 'owner', password: 'OwnerPassword123' })
+      .expect(200)
+    expect(login.body.user.role).toBe('superadmin')
+    expect(login.body.tenantAccess).toEqual([
+      { tenantId: secondTenantId.toHexString(), role: 'superadmin' },
+      { tenantId: tenantId.toHexString(), role: 'superadmin' },
+    ])
+
+    await request(app.getHttpServer())
+      .post('/graphql')
+      .set('Authorization', `Bearer ${login.body.accessToken}`)
+      .send({ query: '{ tenants { role tenant { name } } }' })
+      .expect(200)
+      .expect(({ body }) => {
+        expect(body.errors).toBeUndefined()
+        expect(body.data.tenants).toEqual([
+          { role: 'superadmin', tenant: { name: 'Second Station' } },
+          { role: 'superadmin', tenant: { name: 'Test Station' } },
+        ])
+      })
+
+    for (const ownedTenantId of [tenantId, secondTenantId]) {
+      await request(app.getHttpServer())
+        .post('/graphql')
+        .set('Authorization', `Bearer ${login.body.accessToken}`)
+        .set('x-tenant-id', ownedTenantId.toHexString())
+        .send({ query: '{ activeTenant { id } }' })
+        .expect(200)
+        .expect(({ body }) => expect(body.errors).toBeUndefined())
+    }
+  })
+
+  it('scopes members to their assigned tenant', async () => {
+    const login = await request(app.getHttpServer())
+      .post('/api/auth/session')
+      .set('origin', 'http://localhost:5173')
+      .send({ username: 'member', password: 'MemberPassword123' })
+      .expect(200)
+    expect(login.body.user.role).toBe('member')
+    expect(login.body.tenantAccess).toHaveLength(1)
+
+    await request(app.getHttpServer())
+      .post('/graphql')
+      .set('Authorization', `Bearer ${login.body.accessToken}`)
+      .set('x-tenant-id', secondTenantId.toHexString())
+      .send({ query: '{ activeTenant { id } }' })
+      .expect(200)
+      .expect(({ body }) => expect(body.errors).toHaveLength(1))
   })
 
   it('records report creation activity exactly once', async () => {
@@ -160,31 +358,40 @@ describe('authentication', () => {
 
   it('revokes existing sessions when the password changes', async () => {
     const login = await request(app.getHttpServer())
-      .post('/api/auth/login')
+      .post('/api/auth/session')
       .set('origin', 'http://localhost:5173')
       .send({ username: 'admin', password: 'StrongPassword123' })
       .expect(200)
     const cookie = (login.headers['set-cookie'] as unknown as string[] | undefined)?.[0]
-    if (!cookie) throw new Error('Login did not set a session cookie')
+    if (!cookie) throw new Error('Login did not set a refresh cookie')
 
     await request(app.getHttpServer())
       .post('/api/auth/change-password')
       .set('origin', 'http://localhost:5173')
-      .set('Cookie', [cookie])
-      .set('x-csrf-token', login.body.csrfToken)
+      .set('Authorization', `Bearer ${login.body.accessToken}`)
       .send({ currentPassword: 'StrongPassword123', newPassword: 'NewStrongPassword456' })
       .expect(200)
 
-    await request(app.getHttpServer()).get('/api/auth/me').set('Cookie', [cookie]).expect(401)
+    await request(app.getHttpServer())
+      .get('/api/auth/session')
+      .set('Authorization', `Bearer ${login.body.accessToken}`)
+      .expect(401)
 
     await request(app.getHttpServer())
-      .post('/api/auth/login')
+      .post('/api/auth/session/refresh')
+      .set('origin', 'http://localhost:5173')
+      .set('Cookie', [cookie])
+      .send({})
+      .expect(401)
+
+    await request(app.getHttpServer())
+      .post('/api/auth/session')
       .set('origin', 'http://localhost:5173')
       .send({ username: 'admin', password: 'StrongPassword123' })
       .expect(401)
 
     await request(app.getHttpServer())
-      .post('/api/auth/login')
+      .post('/api/auth/session')
       .set('origin', 'http://localhost:5173')
       .send({ username: 'admin', password: 'NewStrongPassword456' })
       .expect(200)

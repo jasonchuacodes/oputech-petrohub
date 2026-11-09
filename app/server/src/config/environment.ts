@@ -5,9 +5,9 @@ const environmentSchema = z.object({
   PORT: z.coerce.number().int().min(1).max(65_535).default(3000),
   MONGODB_URI: z.string().min(1),
   CLIENT_ORIGIN: z.string().url(),
-  SESSION_COOKIE_NAME: z.string().min(1).default('petromate_session'),
-  SESSION_ABSOLUTE_TTL_HOURS: z.coerce.number().positive().default(720),
-  SESSION_IDLE_TTL_HOURS: z.coerce.number().positive().default(168),
+  AUTH_ACCESS_TOKEN_SECRET: z.string().min(32),
+  AUTH_REFRESH_TOKEN_SECRET: z.string().min(32),
+  SUPERADMIN_SCRIPT_SECRET: z.string().min(32).optional(),
   LOG_LEVEL: z
     .enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'])
     .default('info'),
@@ -20,10 +20,6 @@ export function validateEnvironment(input: Record<string, unknown>): Environment
 
   if (!result.success) {
     throw new Error(`Invalid environment configuration: ${z.prettifyError(result.error)}`)
-  }
-
-  if (result.data.SESSION_IDLE_TTL_HOURS > result.data.SESSION_ABSOLUTE_TTL_HOURS) {
-    throw new Error('SESSION_IDLE_TTL_HOURS cannot exceed SESSION_ABSOLUTE_TTL_HOURS')
   }
 
   return result.data
