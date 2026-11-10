@@ -33,19 +33,13 @@ export const editUserFormSchema = z.object({
   role: roleSchema,
 })
 
-export const resetPasswordFormSchema = z
-  .object({
-    newPassword: z
-      .string()
-      .min(1, 'Password is required.')
-      .min(6, 'Use at least 6 characters.')
-      .max(128, 'Use no more than 128 characters.'),
-    confirmPassword: z.string().min(1, 'Confirm the new password.'),
-  })
-  .refine((values) => values.newPassword === values.confirmPassword, {
-    path: ['confirmPassword'],
-    message: 'Passwords do not match.',
-  })
+export const resetPasswordFormSchema = z.object({
+  newPassword: z
+    .string()
+    .min(1, 'Password is required.')
+    .min(6, 'Use at least 6 characters.')
+    .max(128, 'Use no more than 128 characters.'),
+})
 
 export type AddUserFormValues = z.infer<typeof addUserFormSchema>
 export type EditUserFormValues = z.infer<typeof editUserFormSchema>

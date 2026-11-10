@@ -12,6 +12,7 @@ export function useUpdateMyProfileMutation() {
       auth.updateProfile({
         firstName: profile.firstName ?? undefined,
         lastName: profile.lastName ?? undefined,
+        fullName: profile.fullName,
       })
     },
   })

@@ -33,18 +33,12 @@ describe('user form schemas', () => {
     ).toBe(false)
   })
 
-  it('validates matching reset passwords without trimming them', () => {
+  it('validates reset passwords without trimming them', () => {
     expect(
       resetPasswordFormSchema.parse({
         newPassword: '  secret  ',
-        confirmPassword: '  secret  ',
       }).newPassword,
     ).toBe('  secret  ')
-    expect(
-      resetPasswordFormSchema.safeParse({
-        newPassword: 'secret-one',
-        confirmPassword: 'secret-two',
-      }).success,
-    ).toBe(false)
+    expect(resetPasswordFormSchema.safeParse({ newPassword: 'short' }).success).toBe(false)
   })
 })

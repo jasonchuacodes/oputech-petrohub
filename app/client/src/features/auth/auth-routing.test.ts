@@ -8,6 +8,7 @@ const createSession = (
   tenantAccess: [],
   user: {
     id: 'user-id',
+    fullName: 'operator',
     username: 'operator',
     status: 'active',
     role: 'member',

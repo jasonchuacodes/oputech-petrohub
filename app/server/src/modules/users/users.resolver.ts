@@ -105,7 +105,7 @@ export class UsersResolver {
 
   @ResolveField('fullName')
   fullName(@Parent() user: UserRecord): string {
-    return [user.firstName, user.lastName].filter(Boolean).join(' ') || user.username
+    return this.usersService.getFullName(user)
   }
 
   private toScope(tenant: AuthorizedTenant) {

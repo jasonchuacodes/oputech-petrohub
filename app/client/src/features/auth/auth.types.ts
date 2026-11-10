@@ -5,7 +5,7 @@ export type AuthUser = {
   id: string
   firstName?: string
   lastName?: string
-  displayFullName?: string
+  fullName: string
   username: string
   status: string
   role: UserRole

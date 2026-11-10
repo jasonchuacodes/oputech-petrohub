@@ -20,8 +20,6 @@ export class User {
   @Prop({ trim: true, type: String })
   lastName?: string
 
-  displayFullName?: string
-
   @Prop({ required: true, lowercase: true, trim: true, type: String })
   username!: string
 
@@ -79,11 +77,6 @@ export class User {
 
 export type UserDocument = HydratedDocument<User>
 export const UserSchema = SchemaFactory.createForClass(User)
-
-UserSchema.virtual('displayFullName').get(function (this: User) {
-  const displayFullName = [this.firstName, this.lastName].filter(Boolean).join(' ')
-  return displayFullName || undefined
-})
 
 UserSchema.index({ username: 1 }, { unique: true })
 UserSchema.index({ accountHolderId: 1, tenantIds: 1, role: 1, status: 1 })

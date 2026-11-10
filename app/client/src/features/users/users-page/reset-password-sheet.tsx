@@ -36,7 +36,7 @@ export function ResetPasswordSheet({
     setError,
     formState: { errors, isValid },
   } = useForm<ResetPasswordFormValues>({
-    defaultValues: { newPassword: '', confirmPassword: '' },
+    defaultValues: { newPassword: '' },
     mode: 'onChange',
     resolver: zodResolver(resetPasswordFormSchema),
   })
@@ -138,14 +138,6 @@ export function ResetPasswordSheet({
               error={errors.newPassword?.message}
               disabled={passwordReset.isPending}
               {...register('newPassword')}
-            />
-            <PasswordField
-              id={`confirm-reset-password-${user.id}`}
-              label="Confirm new password"
-              autoComplete="new-password"
-              error={errors.confirmPassword?.message}
-              disabled={passwordReset.isPending}
-              {...register('confirmPassword')}
             />
             {errors.root?.message && (
               <p role="alert" className="text-sm text-destructive">

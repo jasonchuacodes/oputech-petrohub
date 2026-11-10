@@ -194,7 +194,7 @@ describe('user management', () => {
       .get('/api/auth/session')
       .set('Authorization', `Bearer ${memberToken}`)
       .expect(200)
-      .expect(({ body }) => expect(body.user.displayFullName).toBe('Updated Member'))
+      .expect(({ body }) => expect(body.user.fullName).toBe('Updated Member'))
   })
 
   it('lets administrators reset manageable passwords and revokes target sessions', async () => {

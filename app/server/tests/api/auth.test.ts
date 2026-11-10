@@ -115,7 +115,6 @@ describe('authentication', () => {
     })
     expect(registration.body.shouldChangePassword).toBeUndefined()
     expect(registration.body.displayName).toBeUndefined()
-    expect(registration.body.displayFullName).toBeUndefined()
 
     await request(app.getHttpServer())
       .post('/api/auth/register')
@@ -130,6 +129,7 @@ describe('authentication', () => {
       .expect(200)
     expect(login.body.user).toMatchObject({
       username: 'registered-owner',
+      fullName: 'registered-owner',
       role: UserRole.SUPERADMIN,
     })
     expect(login.body.user.shouldChangePassword).toBeUndefined()
@@ -219,7 +219,7 @@ describe('authentication', () => {
       username: 'admin',
       firstName: 'Test',
       lastName: 'Admin',
-      displayFullName: 'Test Admin',
+      fullName: 'Test Admin',
       role: 'admin',
     })
     expect(login.body.user.passwordHash).toBeUndefined()

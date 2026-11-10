@@ -23,14 +23,13 @@ export type AuthenticatedUser = Pick<
   User,
   | 'firstName'
   | 'lastName'
-  | 'displayFullName'
   | 'username'
   | 'status'
   | 'role'
   | 'tenantIds'
   | 'currentTenantId'
   | 'tenantSelectionVersion'
-> & { id: Types.ObjectId; accountHolderId?: Types.ObjectId }
+> & { id: Types.ObjectId; fullName: string; accountHolderId?: Types.ObjectId }
 
 type CreateUserBase = {
   firstName?: string
@@ -327,7 +326,7 @@ export class UsersService {
       id: user._id,
       firstName: user.firstName,
       lastName: user.lastName,
-      displayFullName: user.displayFullName,
+      fullName: this.getFullName(user),
       username: user.username,
       status: user.status,
       role: user.role,
@@ -336,6 +335,10 @@ export class UsersService {
       currentTenantId: user.currentTenantId,
       tenantSelectionVersion: user.tenantSelectionVersion,
     }
+  }
+
+  getFullName(user: Pick<User, 'firstName' | 'lastName' | 'username'>): string {
+    return [user.firstName, user.lastName].filter(Boolean).join(' ') || user.username
   }
 
   private async findUserInScope(

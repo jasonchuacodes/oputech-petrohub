@@ -122,9 +122,8 @@ class AuthSession {
     })
   }
 
-  updateProfile(input: { firstName?: string; lastName?: string }): void {
+  updateProfile(input: { firstName?: string; lastName?: string; fullName: string }): void {
     if (!this.snapshot.session) return
-    const displayFullName = [input.firstName, input.lastName].filter(Boolean).join(' ')
     this.update({
       ...this.snapshot,
       session: {
@@ -133,7 +132,7 @@ class AuthSession {
           ...this.snapshot.session.user,
           firstName: input.firstName,
           lastName: input.lastName,
-          displayFullName: displayFullName || undefined,
+          fullName: input.fullName,
         },
       },
     })

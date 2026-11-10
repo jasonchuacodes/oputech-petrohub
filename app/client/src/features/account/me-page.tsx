@@ -51,7 +51,7 @@ export function MePage() {
         </span>
         <div className="min-w-0 flex-1">
           <p className="truncate text-card-title font-medium text-text-heading">
-            {user?.username ?? 'Account'}
+            {user?.fullName || user?.username || 'Account'}
           </p>
           <p className="text-sm text-text-tertiary">{getRoleLabel(user?.role)}</p>
         </div>
@@ -110,7 +110,7 @@ function ActionContent({ title, description }: { title: string; description: str
 }
 
 function getInitials(user?: AuthUser): string {
-  const name = user?.displayFullName?.trim() || [user?.firstName, user?.lastName].filter(Boolean).join(' ')
+  const name = user?.fullName?.trim() || user?.username || ''
   const parts = name.split(/\s+/).filter(Boolean)
 
   if (parts.length > 1) return `${parts[0][0]}${parts.at(-1)?.[0] ?? ''}`.toUpperCase()
