@@ -41,7 +41,7 @@ Tenant discovery and authorization use `TenantService.listForUser(user)` and `Te
 
 ## Client
 
-The client uses Vite and React Router. Phone layouts use bottom navigation, tablet layouts use a compact rail, and wide desktop layouts use a sidebar. UI primitives are adapted from Oputech Sales while retaining Petromate-specific workflows.
+The client uses the Next.js App Router. Public, protected, and private route groups separate sign-in, authenticated transition flows, and the station-aware application shell. Phone layouts use bottom navigation, tablet layouts use a compact rail, and wide desktop layouts use a sidebar. UI primitives are adapted from Oputech Sales while retaining Petromate-specific workflows.
 
 Server data belongs in TanStack Query. Form drafts belong in React Hook Form. Shareable filters belong in the URL. Sheets and menus use local state.
 

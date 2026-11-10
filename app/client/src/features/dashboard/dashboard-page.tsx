@@ -1,3 +1,5 @@
+'use client'
+
 import { PageHeader } from '~/components/ui/page-header'
 import { setActiveTenant } from '../tenants/active-tenant'
 import { useAppShellContext } from '../layout/use-active-tenant'

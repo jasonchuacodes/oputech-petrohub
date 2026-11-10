@@ -5,7 +5,7 @@ import {
   getAuthSession,
 } from '~/features/auth/auth-session'
 
-const graphqlUrl = import.meta.env.VITE_GRAPHQL_URL || 'http://localhost:3000/graphql'
+const graphqlUrl = '/graphql'
 const client = new GraphQLClient(graphqlUrl, {
   cache: 'no-store',
   credentials: 'include',

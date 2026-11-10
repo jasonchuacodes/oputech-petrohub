@@ -4,7 +4,7 @@ Petromate is a mobile-first, multi-tenant station operations application centere
 
 ## Stack
 
-- Client: React, Vite, React Router, TanStack Query, React Hook Form, Zod, Tailwind CSS, and Radix primitives.
+- Client: Next.js, React, TanStack Query, React Hook Form, Zod, Tailwind CSS, and Radix primitives.
 - Server: NestJS with REST authentication and a GraphQL domain API.
 - Database: MongoDB through Mongoose. A replica set is mandatory for report transactions.
 - Authentication: short-lived bearer access tokens with rotating, path-scoped HTTP-only refresh cookies and persisted session revocation.
@@ -12,7 +12,7 @@ Petromate is a mobile-first, multi-tenant station operations application centere
 ## Workspace
 
 ```text
-app/client  React application
+app/client  Next.js application
 app/server  NestJS application
 docs        Product and architecture documentation
 ```

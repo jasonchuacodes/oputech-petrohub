@@ -1,3 +1,5 @@
+'use client'
+
 import { PageHeader } from '~/components/ui/page-header'
 import { useActiveTenant } from '../layout/use-active-tenant'
 

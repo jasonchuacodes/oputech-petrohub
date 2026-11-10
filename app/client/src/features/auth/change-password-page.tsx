@@ -1,6 +1,8 @@
+'use client'
+
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
-import { useNavigate } from 'react-router-dom'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { useChangePasswordMutation } from './auth.queries'
@@ -11,7 +13,7 @@ import {
 
 export function ChangePasswordPage() {
   const changePassword = useChangePasswordMutation()
-  const navigate = useNavigate()
+  const router = useRouter()
   const {
     register,
     handleSubmit,
@@ -24,7 +26,7 @@ export function ChangePasswordPage() {
   const submit = handleSubmit(({ currentPassword, newPassword }) => {
     changePassword.mutate(
       { currentPassword, newPassword },
-      { onSuccess: () => navigate('/login', { replace: true }) },
+      { onSuccess: () => router.replace('/login') },
     )
   })
 

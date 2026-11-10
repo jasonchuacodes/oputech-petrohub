@@ -16,7 +16,7 @@ export type AuthUser = {
   shouldChangePassword: boolean
 }
 
-export type TenantAccess = {
+type TenantAccess = {
   tenantId: string
   role: UserRole
 }

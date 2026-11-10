@@ -1,20 +1,23 @@
+'use client'
+
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Eye, EyeOff } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { Navigate, useNavigate } from 'react-router-dom'
+import { useRouter } from 'next/navigation'
 import { OputechPetrohubLogo } from '~/components/brand/oputech-petrohub-logo'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { Spinner } from '~/components/ui/spinner'
 import { useLoginMutation, useSessionQuery } from './auth.queries'
+import { getUserLandingPath } from './auth-routing'
 import { loginSchema, type LoginValues } from './login.schema'
 
 export function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const session = useSessionQuery()
   const login = useLoginMutation()
-  const navigate = useNavigate()
+  const router = useRouter()
   const {
     register,
     handleSubmit,
@@ -25,26 +28,21 @@ export function LoginPage() {
     mode: 'onChange',
   })
 
-  if (session.data) {
+  useEffect(() => {
+    if (session.data) router.replace(getUserLandingPath(session.data))
+  }, [router, session.data])
+
+  if (session.isPending || session.data) {
     return (
-      <Navigate
-        to={session.data.user.currentTenantId ? '/home' : '/onboarding'}
-        replace
-      />
+      <div className="flex min-h-dvh items-center justify-center">
+        <Spinner className="size-6" />
+      </div>
     )
   }
 
   const submit = handleSubmit((values) => {
     login.mutate(values, {
-      onSuccess: ({ user }) =>
-        navigate(
-          user.shouldChangePassword
-            ? '/change-password'
-            : user.currentTenantId
-              ? '/home'
-              : '/onboarding',
-          { replace: true },
-        ),
+      onSuccess: (nextSession) => router.replace(getUserLandingPath(nextSession)),
     })
   })
 

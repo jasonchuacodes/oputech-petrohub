@@ -7,7 +7,7 @@ import {
 } from './auth.api'
 import type { Session, SessionResponse } from './auth.types'
 
-export type AuthStatus =
+type AuthStatus =
   | 'bootstrapping'
   | 'anonymous'
   | 'authenticating'
@@ -239,11 +239,4 @@ export function getAuthSession(): AuthSession {
   if (typeof window === 'undefined') return new AuthSession()
   browserSession ??= new AuthSession()
   return browserSession
-}
-
-export function isTerminalAuthError(error: unknown): boolean {
-  return (
-    error instanceof AuthenticationRequiredError ||
-    (error instanceof AuthApiError && error.status === 401)
-  )
 }

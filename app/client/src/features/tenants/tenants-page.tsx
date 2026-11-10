@@ -1,8 +1,11 @@
+'use client'
+
 import { ArrowLeftRight, Check, Plus } from 'lucide-react'
-import { useState } from 'react'
-import { Navigate } from 'react-router-dom'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import { Button } from '~/components/ui/button'
 import { PageHeader } from '~/components/ui/page-header'
+import { Spinner } from '~/components/ui/spinner'
 import { useAuth } from '../auth/auth-context'
 import { useSessionQuery } from '../auth/auth.queries'
 import { useAppShellContext } from '../layout/use-active-tenant'
@@ -16,11 +19,22 @@ export function TenantsPage() {
   const session = useSessionQuery()
   const { tenant: selected, tenants } = useAppShellContext()
   const [creating, setCreating] = useState(false)
+  const router = useRouter()
   const role = session.data?.user.role
   const isAdmin = role === 'superadmin' || role === 'admin'
   const canCreate = role === 'superadmin'
 
-  if (!isAdmin) return <Navigate to="/me" replace />
+  useEffect(() => {
+    if (role && !isAdmin) router.replace('/me')
+  }, [isAdmin, role, router])
+
+  if (!role || !isAdmin) {
+    return (
+      <div className="flex min-h-full items-center justify-center">
+        <Spinner className="size-6" />
+      </div>
+    )
+  }
 
   const selectTenant = (tenantId: string) => {
     if (tenantId === selected.tenant.id) return

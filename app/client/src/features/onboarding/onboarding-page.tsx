@@ -1,8 +1,10 @@
+'use client'
+
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ClientError } from 'graphql-request'
 import { Check, LogOut, Plus, Users } from 'lucide-react'
 import { useForm } from 'react-hook-form'
-import { Navigate, useNavigate } from 'react-router-dom'
+import { useRouter } from 'next/navigation'
 import { OputechPetrohubLogo } from '~/components/brand/oputech-petrohub-logo'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
@@ -17,7 +19,7 @@ export function OnboardingPage() {
   const auth = useAuth()
   const createTenant = useCreateTenantMutation()
   const logout = useLogoutMutation()
-  const navigate = useNavigate()
+  const router = useRouter()
   const {
     register,
     handleSubmit,
@@ -30,15 +32,20 @@ export function OnboardingPage() {
   })
 
   const user = auth.session?.user
-  if (!user) return <Navigate to="/login" replace />
-  if (user.currentTenantId) return <Navigate to="/home" replace />
+  if (!user || user.currentTenantId) {
+    return (
+      <div className="flex min-h-dvh items-center justify-center">
+        <Spinner className="size-6" />
+      </div>
+    )
+  }
 
   const submit = handleSubmit(async ({ name }) => {
     try {
       const tenant = await createTenant.mutateAsync(name)
       setActiveTenant(tenant.id)
       auth.activateTenant(tenant.id)
-      navigate('/home', { replace: true })
+      router.replace('/home')
     } catch (error) {
       setError('root', { message: getCreateTenantErrorMessage(error) })
     }
