@@ -48,6 +48,8 @@ function NavigationLink({ item, compact = false }: { item: NavigationItem; compa
 export function AppShell({ children }: { children: ReactNode }) {
   const tenants = useTenantsQuery()
   const activeTenantId = useActiveTenantId()
+  const pathname = usePathname()
+  const isReportDetail = pathname.split('/').filter(Boolean).length === 2 && pathname.startsWith('/report/')
 
   useEffect(() => {
     if (!tenants.data?.length) return
@@ -115,18 +117,20 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="flex min-w-0 flex-1 flex-col">
           <main className="min-h-0 flex-1 overflow-y-auto">{children}</main>
 
-          <nav
-            aria-label="Primary navigation"
-            className="z-30 shrink-0 bg-card pt-1 pb-[calc(0.25rem+env(safe-area-inset-bottom))] shadow-[0_-2px_8px_rgba(16,16,16,0.05)] md:hidden"
-          >
-            <div className="mx-auto flex w-full max-w-lg px-1">
-              {navigation.map((item) => (
-                <div key={item.href} className="min-w-0 flex-1">
-                  <NavigationLink item={item} compact />
-                </div>
-              ))}
-            </div>
-          </nav>
+          {!isReportDetail && (
+            <nav
+              aria-label="Primary navigation"
+              className="z-30 shrink-0 bg-card pt-1 pb-[calc(0.25rem+env(safe-area-inset-bottom))] shadow-[0_-2px_8px_rgba(16,16,16,0.05)] md:hidden"
+            >
+              <div className="mx-auto flex w-full max-w-lg px-1">
+                {navigation.map((item) => (
+                  <div key={item.href} className="min-w-0 flex-1">
+                    <NavigationLink item={item} compact />
+                  </div>
+                ))}
+              </div>
+            </nav>
+          )}
         </div>
       </div>
     </AppShellContext.Provider>

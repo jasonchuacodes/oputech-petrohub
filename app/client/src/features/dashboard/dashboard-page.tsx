@@ -3,9 +3,12 @@
 import { PageHeader } from '~/components/ui/page-header'
 import { setActiveTenant } from '../tenants/active-tenant'
 import { useAppShellContext } from '../layout/use-active-tenant'
+import { MemberHomePage } from './member-home'
 
 export function DashboardPage() {
   const { tenant: selected, tenants } = useAppShellContext()
+
+  if (selected.role === 'member') return <MemberHomePage />
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-5 px-5 py-5 md:p-6">
