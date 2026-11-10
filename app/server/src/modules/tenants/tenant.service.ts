@@ -1,19 +1,37 @@
 import { Injectable } from '@nestjs/common'
 import { InjectConnection, InjectModel } from '@nestjs/mongoose'
 import { Connection, Model, Types } from 'mongoose'
-import { ForbiddenException, InvalidInputException } from '../../common/exceptions'
+import {
+  ConflictException,
+  ForbiddenException,
+  InvalidInputException,
+  NotFoundException,
+} from '../../common/exceptions'
+import { ReportsService } from '../reports/reports.service'
 import { Session as AuthSession } from '../auth/schemas/session.schema'
 import { MemberActivity } from '../member-activity/schemas/member-activity.schema'
 import { User, UserRole, UserStatus } from '../users/schemas/user.schema'
 import { Tenant, TenantStatus } from './schemas/tenant.schema'
-import { CreateTenantInput, DeleteTenantInput, UpdateTenantInput } from './tenant.schemas'
+import { Shift } from './schemas/shift.schema'
+import {
+  CreateShiftInput,
+  CreateTenantInput,
+  DeleteShiftInput,
+  DeleteTenantInput,
+  UpdateShiftInput,
+  UpdateTenantInput,
+} from './tenant.schemas'
 import { TenantActor } from './tenant.types'
 
 export type TenantRecord = Tenant & {
   _id: Types.ObjectId
+  revision: number
   createdAt: Date
   updatedAt: Date
 }
+
+const maxShiftsPerTenant = 20
+const shiftCreationAttempts = 5
 
 export type TenantDeletionResult = {
   tenants: number
@@ -21,6 +39,7 @@ export type TenantDeletionResult = {
   users: number
   sessions: number
   userAssignments: number
+  reports: number
 }
 
 @Injectable()
@@ -32,6 +51,7 @@ export class TenantService {
     private readonly memberActivityModel: Model<MemberActivity>,
     @InjectModel(AuthSession.name) private readonly sessionModel: Model<AuthSession>,
     @InjectConnection() private readonly connection: Connection,
+    private readonly reportsService: ReportsService,
   ) {}
 
   async listForUser(user: TenantActor): Promise<TenantRecord[]> {
@@ -111,6 +131,103 @@ export class TenantService {
     const tenant = await this.assertAccess(user, input.tenantId.toHexString())
     const deleted = await this.hardDelete(tenant._id)
     return deleted.tenants === 1
+  }
+
+  async listShifts(tenantId: Types.ObjectId): Promise<Shift[]> {
+    const tenant = await this.tenantModel
+      .findById(tenantId)
+      .select('shifts')
+      .lean<TenantRecord>()
+      .exec()
+    if (!tenant) throw new ForbiddenException('You do not have access to this tenant.')
+    return sortShifts(tenant.shifts ?? [])
+  }
+
+  async createShift(tenantId: Types.ObjectId, input: CreateShiftInput): Promise<Shift> {
+    for (let attempt = 0; attempt < shiftCreationAttempts; attempt += 1) {
+      const tenant = await this.tenantModel
+        .findById(tenantId)
+        .select('shifts revision')
+        .lean<TenantRecord>()
+        .exec()
+      if (!tenant) throw new ForbiddenException('You do not have access to this tenant.')
+
+      const shifts = tenant.shifts ?? []
+      if (shifts.length >= maxShiftsPerTenant) {
+        throw new InvalidInputException(`A tenant can have up to ${maxShiftsPerTenant} shifts.`)
+      }
+      if (shifts.some((shift) => intervalsOverlap(shift, input))) {
+        throw new InvalidInputException('This shift overlaps an existing shift.')
+      }
+
+      const shift: Shift = { id: new Types.ObjectId(), ...input }
+      const updated = await this.tenantModel
+        .findOneAndUpdate(
+          { _id: tenantId, revision: tenant.revision },
+          { $push: { shifts: shift }, $inc: { revision: 1 } },
+          { new: true, runValidators: true },
+        )
+        .select('_id')
+        .lean()
+        .exec()
+      if (updated) return shift
+    }
+
+    throw new ConflictException('Shifts were changed by another request. Please try again.')
+  }
+
+  async updateShift(tenantId: Types.ObjectId, input: UpdateShiftInput): Promise<Shift> {
+    for (let attempt = 0; attempt < shiftCreationAttempts; attempt += 1) {
+      const tenant = await this.tenantModel
+        .findById(tenantId)
+        .select('shifts revision')
+        .lean<TenantRecord>()
+        .exec()
+      if (!tenant) throw new ForbiddenException('You do not have access to this tenant.')
+
+      const current = tenant.shifts?.find((shift) => shift.id.equals(input.shiftId))
+      if (!current) throw new NotFoundException('Shift not found.')
+      if (
+        tenant.shifts.some(
+          (shift) => !shift.id.equals(input.shiftId) && intervalsOverlap(shift, input),
+        )
+      ) {
+        throw new InvalidInputException('This shift overlaps an existing shift.')
+      }
+
+      const updated = await this.tenantModel
+        .findOneAndUpdate(
+          { _id: tenantId, revision: tenant.revision, 'shifts.id': input.shiftId },
+          {
+            $set: {
+              'shifts.$.startTime': input.startTime,
+              'shifts.$.endTime': input.endTime,
+            },
+            $inc: { revision: 1 },
+          },
+          { new: true, runValidators: true },
+        )
+        .select('_id')
+        .lean()
+        .exec()
+      if (updated) return { id: input.shiftId, startTime: input.startTime, endTime: input.endTime }
+    }
+
+    throw new ConflictException('Shifts were changed by another request. Please try again.')
+  }
+
+  async deleteShift(tenantId: Types.ObjectId, input: DeleteShiftInput): Promise<boolean> {
+    const updated = await this.tenantModel
+      .findOneAndUpdate(
+        { _id: tenantId, 'shifts.id': input.shiftId },
+        { $pull: { shifts: { id: input.shiftId } }, $inc: { revision: 1 } },
+        { new: true, runValidators: true },
+      )
+      .select('_id')
+      .lean()
+      .exec()
+    if (!updated) throw new NotFoundException('Shift not found.')
+    return true
   }
 
   async assertAccess(user: TenantActor, tenantIdValue: string): Promise<TenantRecord> {
@@ -236,6 +353,7 @@ export class TenantService {
           { tenantId },
           { session: databaseSession },
         )
+        nextResult.reports = await this.reportsService.deleteForTenant(tenantId, databaseSession)
         const deletedTenant = await this.tenantModel.deleteOne(
           { _id: tenantId },
           { session: databaseSession },
@@ -260,6 +378,44 @@ export class TenantService {
   }
 }
 
+function sortShifts(shifts: Shift[]): Shift[] {
+  return [...shifts].sort(
+    (left, right) =>
+      left.startTime.localeCompare(right.startTime) ||
+      left.endTime.localeCompare(right.endTime) ||
+      left.id.toHexString().localeCompare(right.id.toHexString()),
+  )
+}
+
+function intervalsOverlap(
+  left: Pick<Shift, 'startTime' | 'endTime'>,
+  right: Pick<Shift, 'startTime' | 'endTime'>,
+): boolean {
+  return toSegments(left).some(([leftStart, leftEnd]) =>
+    toSegments(right).some(
+      ([rightStart, rightEnd]) => Math.max(leftStart, rightStart) < Math.min(leftEnd, rightEnd),
+    ),
+  )
+}
+
+function toSegments(shift: Pick<Shift, 'startTime' | 'endTime'>): Array<[number, number]> {
+  const start = toMinutes(shift.startTime)
+  const end = toMinutes(shift.endTime)
+  return start < end ? [[start, end]] : [[start, 24 * 60], [0, end]]
+}
+
+function toMinutes(value: string): number {
+  const [hours = 0, minutes = 0] = value.split(':').map(Number)
+  return hours * 60 + minutes
+}
+
 function emptyDeletionResult(): TenantDeletionResult {
-  return { tenants: 0, memberActivities: 0, users: 0, sessions: 0, userAssignments: 0 }
+  return {
+    tenants: 0,
+    memberActivities: 0,
+    users: 0,
+    sessions: 0,
+    userAssignments: 0,
+    reports: 0,
+  }
 }

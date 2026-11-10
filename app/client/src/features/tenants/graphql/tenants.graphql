@@ -31,3 +31,31 @@ mutation UpdateTenant($input: UpdateTenantInput!) {
 mutation DeleteTenant($input: DeleteTenantInput!) {
   deleteTenant(input: $input)
 }
+
+query Shifts {
+  shifts {
+    id
+    startTime
+    endTime
+  }
+}
+
+mutation CreateShift($input: CreateShiftInput!) {
+  createShift(input: $input) {
+    id
+    startTime
+    endTime
+  }
+}
+
+mutation UpdateShift($input: UpdateShiftInput!) {
+  updateShift(input: $input) {
+    id
+    startTime
+    endTime
+  }
+}
+
+mutation DeleteShift($input: DeleteShiftInput!) {
+  deleteShift(input: $input)
+}

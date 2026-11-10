@@ -1,0 +1,79 @@
+extend type Query {
+  reportCreationContext: ReportCreationContext!
+  report(input: ReportInput!): Report!
+  reports(input: ReportsInput!): ReportPage!
+}
+
+extend type Mutation {
+  createReport(input: CreateReportInput!): CreateReportPayload!
+  submitReport(input: ReportRevisionInput!): Report!
+  deleteReport(input: ReportRevisionInput!): Boolean!
+}
+
+input CreateReportInput {
+  shiftId: ObjectId!
+  businessDate: String!
+}
+
+input ReportInput {
+  reportId: ObjectId!
+}
+
+input ReportsInput {
+  offset: Int = 0
+  limit: Int = 20
+}
+
+input ReportRevisionInput {
+  reportId: ObjectId!
+  expectedRevision: Int!
+}
+
+type CreateReportPayload {
+  report: Report!
+  created: Boolean!
+}
+
+type ReportCreationContext {
+  businessDate: String!
+  slots: [ReportSlot!]!
+}
+
+type ReportSlot {
+  shift: Shift!
+  report: Report
+  canCreate: Boolean!
+  blockedReason: String
+}
+
+type ReportPage {
+  items: [Report!]!
+  totalCount: Int!
+}
+
+type Report {
+  id: ObjectId!
+  businessDate: String!
+  shiftId: ObjectId!
+  interval: ReportIntervalSnapshot!
+  creatorId: ObjectId!
+  creatorName: String!
+  status: ReportStatus!
+  revision: Int!
+  createdAt: String!
+  updatedAt: String!
+  submittedAt: String
+  submittedById: ObjectId
+  submittedByName: String
+}
+
+type ReportIntervalSnapshot {
+  startTime: String!
+  endTime: String!
+  timezone: String!
+}
+
+enum ReportStatus {
+  draft
+  submitted
+}

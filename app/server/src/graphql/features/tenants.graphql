@@ -1,0 +1,30 @@
+extend type Query {
+  shifts: [Shift!]!
+}
+
+extend type Mutation {
+  createShift(input: CreateShiftInput!): Shift!
+  updateShift(input: UpdateShiftInput!): Shift!
+  deleteShift(input: DeleteShiftInput!): Boolean!
+}
+
+input CreateShiftInput {
+  startTime: String!
+  endTime: String!
+}
+
+input UpdateShiftInput {
+  shiftId: ObjectId!
+  startTime: String!
+  endTime: String!
+}
+
+input DeleteShiftInput {
+  shiftId: ObjectId!
+}
+
+type Shift {
+  id: ObjectId!
+  startTime: String!
+  endTime: String!
+}

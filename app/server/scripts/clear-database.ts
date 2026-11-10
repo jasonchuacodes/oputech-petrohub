@@ -10,6 +10,7 @@ import { TenantService } from '../src/modules/tenants/tenant.service'
 const collectionFlags = {
   '--member-activities': 'memberActivities',
   '--sessions': 'sessions',
+  '--reports': 'reports',
   '--tenants': 'tenants',
   '--users': 'users',
 } as const
@@ -43,6 +44,7 @@ async function clearDatabase(): Promise<void> {
         addResult(results, 'memberActivities', deleted.memberActivities)
         addResult(results, 'sessions', deleted.sessions)
         addResult(results, 'users', deleted.users)
+        addResult(results, 'reports', deleted.reports)
       }
     }
 
@@ -78,7 +80,7 @@ function parseCollectionFlags(args: string[]): Set<CollectionName> {
 }
 
 function deletionOrder(selected: Set<CollectionName>): CollectionName[] {
-  return (['memberActivities', 'sessions', 'tenants', 'users'] as const).filter((name) =>
+  return (['reports', 'memberActivities', 'sessions', 'tenants', 'users'] as const).filter((name) =>
     selected.has(name),
   )
 }
@@ -87,7 +89,7 @@ function displayOrder(
   selected: Set<CollectionName>,
   results: Map<CollectionName, number>,
 ): CollectionName[] {
-  return (['users', 'tenants', 'sessions', 'memberActivities'] as const).filter(
+  return (['users', 'tenants', 'reports', 'sessions', 'memberActivities'] as const).filter(
     (name) => selected.has(name) || results.has(name),
   )
 }
@@ -101,7 +103,7 @@ function addResult(
 }
 
 function usage(): string {
-  return 'Use --users, --tenants, --sessions, --member-activities, or --all.'
+  return 'Use --users, --tenants, --reports, --sessions, --member-activities, or --all.'
 }
 
 clearDatabase().catch((error: unknown) => {

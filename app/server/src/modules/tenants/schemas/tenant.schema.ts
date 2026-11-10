@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { HydratedDocument, Types } from 'mongoose'
+import { Shift, ShiftSchema } from './shift.schema'
 
 export enum TenantStatus {
   ACTIVE = 'active',
@@ -22,6 +23,9 @@ export class Tenant {
 
   @Prop({ required: true, enum: TenantStatus, default: TenantStatus.ACTIVE, type: String })
   status!: TenantStatus
+
+  @Prop({ default: [], type: [ShiftSchema] })
+  shifts!: Shift[]
 
   createdAt!: Date
   updatedAt!: Date

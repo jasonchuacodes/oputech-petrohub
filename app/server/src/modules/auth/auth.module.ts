@@ -10,12 +10,15 @@ import { TenantAccessGuard } from './guards/tenant-access.guard'
 import { SuperadminGuard } from './guards/superadmin.guard'
 import { SessionModule } from './session/session.module'
 import { TenantResolver } from './tenant.resolver'
+import { ReportsModule } from '../reports/reports.module'
+import { ReportsResolver } from '../reports/reports.resolver'
 
 @Module({
   imports: [
     SessionModule,
     UsersModule,
     TenantModule,
+    ReportsModule,
   ],
   controllers: [AuthController],
   providers: [
@@ -26,6 +29,7 @@ import { TenantResolver } from './tenant.resolver'
     SuperadminGuard,
     TenantResolver,
     UsersResolver,
+    ReportsResolver,
   ],
   exports: [SessionModule, TenantAccessGuard, RolesGuard],
 })

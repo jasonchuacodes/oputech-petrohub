@@ -1,0 +1,71 @@
+fragment ReportFields on Report {
+  id
+  businessDate
+  shiftId
+  interval {
+    startTime
+    endTime
+    timezone
+  }
+  creatorId
+  creatorName
+  status
+  revision
+  createdAt
+  updatedAt
+  submittedAt
+  submittedById
+  submittedByName
+}
+
+query ReportCreationContext {
+  reportCreationContext {
+    businessDate
+    slots {
+      canCreate
+      blockedReason
+      shift {
+        id
+        startTime
+        endTime
+      }
+      report {
+        ...ReportFields
+      }
+    }
+  }
+}
+
+query Reports($input: ReportsInput!) {
+  reports(input: $input) {
+    items {
+      ...ReportFields
+    }
+    totalCount
+  }
+}
+
+query Report($input: ReportInput!) {
+  report(input: $input) {
+    ...ReportFields
+  }
+}
+
+mutation CreateReport($input: CreateReportInput!) {
+  createReport(input: $input) {
+    created
+    report {
+      ...ReportFields
+    }
+  }
+}
+
+mutation SubmitReport($input: ReportRevisionInput!) {
+  submitReport(input: $input) {
+    ...ReportFields
+  }
+}
+
+mutation DeleteReport($input: ReportRevisionInput!) {
+  deleteReport(input: $input)
+}

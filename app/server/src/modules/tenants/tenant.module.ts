@@ -8,9 +8,11 @@ import {
   MemberActivitySchema,
 } from '../member-activity/schemas/member-activity.schema'
 import { Session, SessionSchema } from '../auth/schemas/session.schema'
+import { ReportsModule } from '../reports/reports.module'
 
 @Module({
   imports: [
+    ReportsModule,
     MongooseModule.forFeature([
       { name: Tenant.name, schema: TenantSchema },
       { name: User.name, schema: UserSchema },

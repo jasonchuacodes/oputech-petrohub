@@ -1,23 +1,22 @@
 'use client'
 
-import { Bell, CheckCircle2, ChevronRight } from 'lucide-react'
+import { Bell, ChevronRight, FilePlus2 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback, useState } from 'react'
 import { Button } from '~/components/ui/button'
-import { ContentSection } from '~/components/ui/content-section'
 import { PageHeader } from '~/components/ui/page-header'
 import { useSessionQuery } from '../../auth/auth.queries'
 import { CreateReportSheet } from '../../reports/create-report-sheet'
-import {
-  reportPreviewDate,
-  reportShiftPreviews,
-  type ReportPreviewId,
-} from '../../reports/report-preview-data'
+import { formatBusinessDate } from '../../reports/create-report-sheet'
+import { useReportCreationContextQuery } from '../../reports/reports.queries'
+import { useActiveTenant } from '../../layout/use-active-tenant'
 
 export function MemberHomePage() {
   const router = useRouter()
   const session = useSessionQuery()
+  const { tenant } = useActiveTenant()
+  const reports = useReportCreationContextQuery(tenant.id)
   const [showCreateReport, setShowCreateReport] = useState(false)
   const [isCheckedIn, setIsCheckedIn] = useState(true)
   const user = session.data?.user
@@ -25,7 +24,7 @@ export function MemberHomePage() {
 
   const closeCreateReport = useCallback(() => setShowCreateReport(false), [])
   const openReport = useCallback(
-    (reportId: ReportPreviewId) => {
+    (reportId: string) => {
       setShowCreateReport(false)
       router.push(`/report/${reportId}`)
     },
@@ -58,7 +57,7 @@ export function MemberHomePage() {
         <div className="p-5 sm:p-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm font-medium text-white/75 sm:text-base">
-              {reportPreviewDate.label} · Tuesday
+               {reports.data ? formatBusinessDate(reports.data.businessDate) : 'Today'}
             </p>
             <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white/90">
               <span
@@ -111,67 +110,122 @@ export function MemberHomePage() {
         </div>
       </section>
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.4fr)_minmax(18rem,0.6fr)]">
-        <ContentSection label="Today’s reports">
-          <div className="overflow-hidden rounded-md bg-card shadow-card">
-            {reportShiftPreviews.map((shift) => (
+      <section aria-labelledby="overview-heading">
+        <h2
+          id="overview-heading"
+          className="flex min-h-10 items-center font-sans text-sm font-semibold tracking-[0.14em] text-text-heading uppercase"
+        >
+          Reports overview
+        </h2>
+        <div className="overflow-hidden rounded-md bg-card shadow-card">
+            {reports.data?.slots.map(({ shift, report }, index) => (
               <div
                 key={shift.id}
-                className="flex min-h-24 items-center gap-3 border-b border-border/60 px-4 py-3 last:border-b-0"
+                className="border-b border-border/60 px-4 py-3 last:border-b-0"
               >
-                <div className="min-w-0 flex-1">
-                  <h3 className="font-medium text-text-heading">{shift.ordinal}</h3>
-                  <p className="text-sm text-text-secondary">{shift.time}</p>
-                  {shift.state === 'submitted' ? (
-                    <span className="mt-1 inline-flex rounded-sm bg-status-success/12 px-2 py-0.5 text-xs font-medium text-status-success">
-                      Submitted · {shift.submittedBy}
+                <div className="flex min-h-7 items-center justify-between gap-3">
+                  <span className="flex min-w-0 items-baseline gap-1.5">
+                    <span className="shrink-0 font-semibold text-text-heading">
+                      {formatShiftNumber(index)}
                     </span>
-                  ) : (
-                    <span className="mt-1 inline-flex rounded-sm bg-status-warning/12 px-2 py-0.5 text-xs font-medium text-status-warning">
-                      Not started
+                    <span className="truncate text-sm font-normal text-text-tertiary">
+                      ({formatTime(shift.startTime)}–{formatTime(shift.endTime)})
                     </span>
+                  </span>
+                  {report && (
+                    <Link
+                      href={`/report/${report.id}`}
+                      aria-label={`View ${formatShiftNumber(index)} report`}
+                      className="group flex size-9 items-center justify-center rounded-sm text-primary outline-none hover:bg-primary/10 focus-visible:ring-3 focus-visible:ring-ring/30"
+                    >
+                      <ChevronRight
+                        aria-hidden="true"
+                        className="size-5 transition-transform group-hover:translate-x-0.5"
+                      />
+                    </Link>
                   )}
                 </div>
-                {shift.state === 'submitted' && (
-                  <Button type="button" variant="ghost" disabled className="gap-1 px-2">
-                    View
-                    <ChevronRight aria-hidden="true" />
-                  </Button>
-                )}
+                <div className="mt-1 flex items-center justify-between gap-3">
+                  <p className="min-w-0 truncate text-sm text-text-secondary">
+                    {report ? `Created by: ${report.creatorName}` : 'Not created yet'}
+                  </p>
+                  <span
+                    className={`shrink-0 rounded-sm px-2 py-0.5 text-xs font-medium ${
+                      report?.status === 'submitted'
+                        ? 'bg-status-success/12 text-status-success'
+                        : report
+                          ? 'bg-status-warning/12 text-status-warning'
+                          : 'bg-muted text-text-secondary'
+                    }`}
+                  >
+                    {report?.status === 'submitted' ? 'Submitted' : report ? 'Draft' : 'Pending'}
+                  </span>
+                </div>
               </div>
             ))}
-          </div>
+            {reports.isPending && (
+              <p className="p-4 text-sm text-text-secondary">Loading report overview…</p>
+            )}
+            {reports.isError && (
+              <p className="p-4 text-sm text-destructive">Unable to load report overview.</p>
+            )}
+            {reports.data?.slots.length === 0 && (
+              <p className="p-4 text-sm text-text-secondary">No shifts configured.</p>
+            )}
+        </div>
+      </section>
 
-          <div className="mt-4 flex flex-col gap-1">
-            <Button type="button" className="w-full wide:h-11" onClick={() => setShowCreateReport(true)}>
-              Create report
-            </Button>
-            <Button asChild variant="ghost" className="w-full wide:h-11">
-              <Link href="/report">View all reports</Link>
-            </Button>
-          </div>
-        </ContentSection>
-
-        <ContentSection label="Recent attendance">
-          <Link
-            href="/timesheet"
-            className="flex min-h-20 items-center gap-3 rounded-md bg-card p-4 shadow-card outline-none transition-colors hover:bg-surface-hover focus-visible:ring-3 focus-visible:ring-ring/30"
-          >
-            <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-status-success/12 text-status-success">
-              <CheckCircle2 aria-hidden="true" className="size-5" />
+      <section aria-labelledby="actions-heading">
+        <h2
+          id="actions-heading"
+          className="flex min-h-10 items-center font-sans text-sm font-semibold tracking-[0.14em] text-text-heading uppercase"
+        >
+          Actions
+        </h2>
+        <button
+          type="button"
+          className="group flex min-h-24 w-full items-center gap-4 rounded-md bg-card px-5 py-4 text-left shadow-card outline-none transition-colors hover:bg-surface-hover focus-visible:ring-3 focus-visible:ring-ring/30"
+          onClick={() => setShowCreateReport(true)}
+        >
+          <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+            <FilePlus2 aria-hidden="true" className="size-6" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block font-semibold text-text-heading">Create report</span>
+            <span className="mt-1 block text-sm text-text-secondary">
+              Choose a shift and submit your report.
             </span>
-            <span className="min-w-0 flex-1">
-              <span className="block font-medium text-text-heading">Checked in</span>
-              <span className="block text-sm text-text-tertiary">Today, 12:35 PM</span>
-            </span>
-            <ChevronRight aria-hidden="true" className="size-5 shrink-0 text-primary" />
-          </Link>
-        </ContentSection>
-      </div>
+          </span>
+        </button>
+      </section>
 
       {showCreateReport && (
         <CreateReportSheet onClose={closeCreateReport} onOpenReport={openReport} />
       )}
     </div>
   )
+}
+
+function formatShiftNumber(index: number): string {
+  const number = index + 1
+  const remainder = number % 100
+  const suffix =
+    remainder >= 11 && remainder <= 13
+      ? 'th'
+      : number % 10 === 1
+        ? 'st'
+        : number % 10 === 2
+          ? 'nd'
+          : number % 10 === 3
+            ? 'rd'
+            : 'th'
+  return `${number}${suffix} shift`
+}
+
+function formatTime(value: string): string {
+  const [hours = 0, minutes = '00'] = value.split(':')
+  const hour = Number(hours)
+  const period = hour >= 12 ? 'PM' : 'AM'
+  const displayHour = hour % 12 || 12
+  return `${displayHour}:${minutes} ${period}`
 }

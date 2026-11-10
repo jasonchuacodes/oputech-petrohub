@@ -3,10 +3,16 @@ import { Args, Mutation, Query, Resolver } from '@nestjs/graphql'
 import type { Mutation as GraphqlMutation, Query as GraphqlQuery } from '../../generated/graphql'
 import { ZodValidationPipe } from '../../common/validation/zod-validation.pipe'
 import {
+  createShiftInputSchema,
+  CreateShiftInput,
   createTenantInputSchema,
   CreateTenantInput,
+  deleteShiftInputSchema,
+  DeleteShiftInput,
   deleteTenantInputSchema,
   DeleteTenantInput,
+  updateShiftInputSchema,
+  UpdateShiftInput,
   updateTenantInputSchema,
   UpdateTenantInput,
 } from '../tenants/tenant.schemas'
@@ -17,6 +23,8 @@ import { CurrentTenant } from './decorators/current-tenant.decorator'
 import { TenantAccessGuard } from './guards/tenant-access.guard'
 import { SuperadminGuard } from './guards/superadmin.guard'
 import { AccessTokenGuard } from './session/guards/access-token.guard'
+import { RequireRoles, RolesGuard } from './guards/roles.guard'
+import { UserRole } from '../users/schemas/user.schema'
 
 @Resolver()
 @UseGuards(AccessTokenGuard)
@@ -86,5 +94,44 @@ export class TenantResolver {
       timezone: context.tenant.timezone,
       currency: context.tenant.currency,
     }
+  }
+
+  @Query('shifts')
+  @UseGuards(TenantAccessGuard, RolesGuard)
+  @RequireRoles(UserRole.SUPERADMIN, UserRole.ADMIN)
+  async shifts(
+    @CurrentTenant() context: AuthorizedTenant,
+  ): Promise<GraphqlQuery['shifts']> {
+    return this.tenantService.listShifts(context.tenantId)
+  }
+
+  @Mutation('createShift')
+  @UseGuards(TenantAccessGuard, RolesGuard)
+  @RequireRoles(UserRole.SUPERADMIN, UserRole.ADMIN)
+  async createShift(
+    @CurrentTenant() context: AuthorizedTenant,
+    @Args('input', new ZodValidationPipe(createShiftInputSchema)) input: CreateShiftInput,
+  ): Promise<GraphqlMutation['createShift']> {
+    return this.tenantService.createShift(context.tenantId, input)
+  }
+
+  @Mutation('updateShift')
+  @UseGuards(TenantAccessGuard, RolesGuard)
+  @RequireRoles(UserRole.SUPERADMIN, UserRole.ADMIN)
+  async updateShift(
+    @CurrentTenant() context: AuthorizedTenant,
+    @Args('input', new ZodValidationPipe(updateShiftInputSchema)) input: UpdateShiftInput,
+  ): Promise<GraphqlMutation['updateShift']> {
+    return this.tenantService.updateShift(context.tenantId, input)
+  }
+
+  @Mutation('deleteShift')
+  @UseGuards(TenantAccessGuard, RolesGuard)
+  @RequireRoles(UserRole.SUPERADMIN, UserRole.ADMIN)
+  async deleteShift(
+    @CurrentTenant() context: AuthorizedTenant,
+    @Args('input', new ZodValidationPipe(deleteShiftInputSchema)) input: DeleteShiftInput,
+  ): Promise<GraphqlMutation['deleteShift']> {
+    return this.tenantService.deleteShift(context.tenantId, input)
   }
 }

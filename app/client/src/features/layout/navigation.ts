@@ -11,5 +11,5 @@ export const navigation: NavigationItem[] = [
   { label: 'Home', href: '/home', icon: House },
   { label: 'Report', href: '/report', icon: ClipboardList },
   { label: 'Timesheet', href: '/timesheet', icon: Clock3 },
-  { label: 'Me', href: '/me', icon: UserRound, activePaths: ['/account', '/tenants', '/users'] },
+  { label: 'Me', href: '/me', icon: UserRound, activePaths: ['/account', '/tenants', '/users', '/shifts'] },
 ]

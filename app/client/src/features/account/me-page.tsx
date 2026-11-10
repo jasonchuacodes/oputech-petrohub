@@ -21,9 +21,10 @@ const actions = [
     href: '/tenants',
   },
   {
-    title: 'Reports',
-    description: 'Generate and review shift reports',
-    href: '/report',
+    title: 'Shift management',
+    description: 'Configure the daily shift schedule',
+    adminOnly: true,
+    href: '/shifts',
   },
 ] as const
 
