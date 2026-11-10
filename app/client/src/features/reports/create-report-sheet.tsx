@@ -77,8 +77,7 @@ export function CreateReportSheet({ onClose, onOpenReport }: CreateReportSheetPr
       <form ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby={titleId} aria-describedby={descriptionId} className="relative flex max-h-[90dvh] w-full flex-col overflow-hidden rounded-t-sheet bg-card shadow-2xl wide:max-w-xl wide:rounded-lg" noValidate onKeyDown={handleKeyDown} onSubmit={submit}>
         <div aria-hidden="true" className="mx-auto mt-3 h-1.5 w-14 shrink-0 rounded-full bg-foreground/35 wide:hidden" />
         <header className="flex shrink-0 items-start gap-3 p-5 pb-4">
-          <span className="flex size-11 shrink-0 items-center justify-center rounded-md bg-brand text-white"><CalendarDays aria-hidden="true" className="size-5" /></span>
-          <div className="min-w-0 flex-1"><h2 id={titleId} className="text-lg font-semibold text-text-heading">Create shift report</h2><p id={descriptionId} className="mt-0.5 text-sm text-text-secondary">Choose a configured shift to create or open its report.</p></div>
+          <div className="min-w-0 flex-1"><h2 id={titleId} className="text-xl font-semibold text-text-heading">Create shift report</h2><p id={descriptionId} className="mt-0.5 text-sm text-text-secondary">Choose a configured shift to create or open its report.</p></div>
           <Button type="button" variant="ghost" size="icon" aria-label="Close create shift report sheet" className="-mr-2 -mt-1 text-text-secondary" disabled={createReport.isPending} onClick={onClose}><X aria-hidden="true" /></Button>
         </header>
         <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-4">

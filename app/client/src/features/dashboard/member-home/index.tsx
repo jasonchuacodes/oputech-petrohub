@@ -110,71 +110,6 @@ export function MemberHomePage() {
         </div>
       </section>
 
-      <section aria-labelledby="overview-heading">
-        <h2
-          id="overview-heading"
-          className="flex min-h-10 items-center font-sans text-sm font-semibold tracking-[0.14em] text-text-heading uppercase"
-        >
-          Reports overview
-        </h2>
-        <div className="overflow-hidden rounded-md bg-card shadow-card">
-            {reports.data?.slots.map(({ shift, report }, index) => (
-              <div
-                key={shift.id}
-                className="border-b border-border/60 px-4 py-3 last:border-b-0"
-              >
-                <div className="flex min-h-7 items-center justify-between gap-3">
-                  <span className="flex min-w-0 items-baseline gap-1.5">
-                    <span className="shrink-0 font-semibold text-text-heading">
-                      {formatShiftNumber(index)}
-                    </span>
-                    <span className="truncate text-sm font-normal text-text-tertiary">
-                      ({formatTime(shift.startTime)}–{formatTime(shift.endTime)})
-                    </span>
-                  </span>
-                  {report && (
-                    <Link
-                      href={`/report/${report.id}`}
-                      aria-label={`View ${formatShiftNumber(index)} report`}
-                      className="group flex size-9 items-center justify-center rounded-sm text-primary outline-none hover:bg-primary/10 focus-visible:ring-3 focus-visible:ring-ring/30"
-                    >
-                      <ChevronRight
-                        aria-hidden="true"
-                        className="size-5 transition-transform group-hover:translate-x-0.5"
-                      />
-                    </Link>
-                  )}
-                </div>
-                <div className="mt-1 flex items-center justify-between gap-3">
-                  <p className="min-w-0 truncate text-sm text-text-secondary">
-                    {report ? `Created by: ${report.creatorName}` : 'Not created yet'}
-                  </p>
-                  <span
-                    className={`shrink-0 rounded-sm px-2 py-0.5 text-xs font-medium ${
-                      report?.status === 'submitted'
-                        ? 'bg-status-success/12 text-status-success'
-                        : report
-                          ? 'bg-status-warning/12 text-status-warning'
-                          : 'bg-muted text-text-secondary'
-                    }`}
-                  >
-                    {report?.status === 'submitted' ? 'Submitted' : report ? 'Draft' : 'Pending'}
-                  </span>
-                </div>
-              </div>
-            ))}
-            {reports.isPending && (
-              <p className="p-4 text-sm text-text-secondary">Loading report overview…</p>
-            )}
-            {reports.isError && (
-              <p className="p-4 text-sm text-destructive">Unable to load report overview.</p>
-            )}
-            {reports.data?.slots.length === 0 && (
-              <p className="p-4 text-sm text-text-secondary">No shifts configured.</p>
-            )}
-        </div>
-      </section>
-
       <section aria-labelledby="actions-heading">
         <h2
           id="actions-heading"
@@ -197,6 +132,68 @@ export function MemberHomePage() {
             </span>
           </span>
         </button>
+      </section>
+
+      <section aria-labelledby="overview-heading">
+        <h2
+          id="overview-heading"
+          className="flex min-h-10 items-center font-sans text-sm font-semibold tracking-[0.14em] text-text-heading uppercase"
+        >
+          Reports overview
+        </h2>
+        <div className="overflow-hidden rounded-md bg-card shadow-card">
+          {reports.data?.slots.map(({ shift, report }, index) => (
+            <div
+              key={shift.id}
+              className="border-b border-border/60 px-4 py-3 last:border-b-0"
+            >
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <span className="shrink-0 font-semibold text-text-heading">
+                      {formatShiftNumber(index)}
+                    </span>
+                    <span
+                      className={`shrink-0 rounded-sm px-2 py-0.5 text-xs font-medium ${
+                        report?.status === 'submitted'
+                          ? 'bg-status-success/12 text-status-success'
+                          : report
+                            ? 'bg-status-warning/12 text-status-warning'
+                            : 'bg-muted text-text-secondary'
+                      }`}
+                    >
+                      {report?.status === 'submitted' ? 'Submitted' : report ? 'Draft' : 'Pending'}
+                    </span>
+                  </div>
+                  <p className="mt-1 truncate text-sm text-text-secondary">
+                    {formatTime(shift.startTime)}-{formatTime(shift.endTime)}
+                  </p>
+                </div>
+                {report && (
+                  <Link
+                    href={`/report/${report.id}`}
+                    aria-label={`View ${formatShiftNumber(index)} report`}
+                    className="group flex size-9 items-center justify-center rounded-sm text-primary outline-none hover:bg-primary/10 focus-visible:ring-3 focus-visible:ring-ring/30"
+                  >
+                    <ChevronRight
+                      aria-hidden="true"
+                      className="size-5 transition-transform group-hover:translate-x-0.5"
+                    />
+                  </Link>
+                )}
+              </div>
+            </div>
+          ))}
+          {reports.isPending && (
+            <p className="p-4 text-sm text-text-secondary">Loading report overview…</p>
+          )}
+          {reports.isError && (
+            <p className="p-4 text-sm text-destructive">Unable to load report overview.</p>
+          )}
+          {reports.data?.slots.length === 0 && (
+            <p className="p-4 text-sm text-text-secondary">No shifts configured.</p>
+          )}
+        </div>
       </section>
 
       {showCreateReport && (
@@ -227,5 +224,5 @@ function formatTime(value: string): string {
   const hour = Number(hours)
   const period = hour >= 12 ? 'PM' : 'AM'
   const displayHour = hour % 12 || 12
-  return `${displayHour}:${minutes} ${period}`
+  return `${displayHour}:${minutes}${period}`
 }

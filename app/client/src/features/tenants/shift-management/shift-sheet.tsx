@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Clock3, Pencil, Trash2, X } from 'lucide-react'
+import { Pencil, Trash2, X } from 'lucide-react'
 import { useCallback, useEffect, useId, useRef, useState, type KeyboardEvent } from 'react'
 import { useForm } from 'react-hook-form'
 import { createPortal } from 'react-dom'
@@ -152,11 +152,8 @@ export function ShiftSheet({ open, tenantId, tenantName, shift, onClose }: Shift
         <div aria-hidden="true" className="mx-auto mt-3 h-1.5 w-14 shrink-0 rounded-full bg-foreground/35 wide:hidden" />
 
         <header className="flex shrink-0 items-start gap-3 p-5 pb-4">
-          <span className="flex size-11 shrink-0 items-center justify-center rounded-md bg-brand text-white">
-            <Clock3 aria-hidden="true" className="size-5" />
-          </span>
           <div className="min-w-0 flex-1">
-            <h2 id={titleId} className="text-lg font-semibold text-text-heading">
+            <h2 id={titleId} className="text-xl font-semibold text-text-heading">
               {shift ? (editing ? 'Edit shift' : 'Shift actions') : 'Add shift'}
             </h2>
             <p id={descriptionId} className="mt-0.5 text-sm text-text-secondary">

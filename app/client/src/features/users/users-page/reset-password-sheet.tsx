@@ -102,7 +102,7 @@ export function ResetPasswordSheet({
           className="mx-auto mt-3 h-1.5 w-14 shrink-0 rounded-full bg-foreground/35 wide:hidden"
         />
         <header className="relative flex shrink-0 flex-col gap-1 p-5 pr-16">
-          <h2 id={titleId} className="text-lg font-semibold text-text-heading">
+          <h2 id={titleId} className="text-xl font-semibold text-text-heading">
             Reset Password
           </h2>
           <p id={descriptionId} className="text-sm text-text-secondary">

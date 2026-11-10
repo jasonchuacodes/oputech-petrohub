@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ChevronDown, Eye, EyeOff, UserPlus, X } from 'lucide-react'
+import { ChevronDown, Eye, EyeOff, X } from 'lucide-react'
 import { useCallback, useEffect, useId, useState, type ReactNode } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { createPortal } from 'react-dom'
@@ -134,11 +134,8 @@ export function AddUserSheet({ open, tenantId, actorRole, onClose }: AddUserShee
         />
 
         <header className="flex shrink-0 items-start gap-3 p-5 pb-4">
-          <span className="flex size-11 shrink-0 items-center justify-center rounded-md bg-brand text-white">
-            <UserPlus aria-hidden="true" className="size-5" />
-          </span>
           <div className="min-w-0 flex-1">
-            <h2 id={titleId} className="text-lg font-semibold text-text-heading">
+            <h2 id={titleId} className="text-xl font-semibold text-text-heading">
               Add User
             </h2>
             <p id={descriptionId} className="mt-0.5 text-sm text-text-secondary">

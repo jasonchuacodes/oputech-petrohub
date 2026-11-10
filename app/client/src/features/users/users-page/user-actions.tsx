@@ -195,7 +195,7 @@ export function UserActions({
               />
 
               <header className="relative flex shrink-0 flex-col gap-1 p-5 pr-16">
-                <h2 id={titleId} className="text-lg font-semibold text-text-heading">
+                <h2 id={titleId} className="text-xl font-semibold text-text-heading">
                   {editing ? 'Edit User' : 'User Actions'}
                 </h2>
                 <p id={descriptionId} className="text-sm text-text-secondary">

@@ -1,4 +1,4 @@
-import { Building2, X } from 'lucide-react'
+import { X } from 'lucide-react'
 import { useCallback, useEffect, useId, useState, type FormEvent } from 'react'
 import { createPortal } from 'react-dom'
 import { Button } from '~/components/ui/button'
@@ -86,11 +86,8 @@ export function AddTenantSheet({ open, onClose, onCreated }: AddTenantSheetProps
         />
 
         <header className="flex shrink-0 items-start gap-3 p-5 pb-4">
-          <span className="flex size-11 shrink-0 items-center justify-center rounded-md bg-brand text-white">
-            <Building2 aria-hidden="true" className="size-5" />
-          </span>
           <div className="min-w-0 flex-1">
-            <h2 id={titleId} className="text-lg font-semibold text-text-heading">
+            <h2 id={titleId} className="text-xl font-semibold text-text-heading">
               Add Tenant
             </h2>
             <p id={descriptionId} className="mt-0.5 text-sm text-text-secondary">
