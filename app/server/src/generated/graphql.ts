@@ -16,8 +16,13 @@ export type Scalars = {
 export type Query = {
   __typename?: 'Query';
   activeTenant?: Maybe<TenantSummary>;
-  tenants: Array<ViewerTenant>;
-  viewer: Viewer;
+  tenants: Array<TenantAccess>;
+};
+
+export type TenantAccess = {
+  __typename?: 'TenantAccess';
+  role: UserRole;
+  tenant: TenantSummary;
 };
 
 export type TenantSummary = {
@@ -32,26 +37,6 @@ export type UserRole =
   | 'admin'
   | 'member'
   | 'superadmin';
-
-export type Viewer = {
-  __typename?: 'Viewer';
-  accountHolderId?: Maybe<Scalars['ObjectId']['output']>;
-  currentTenantId?: Maybe<Scalars['ObjectId']['output']>;
-  displayName: Scalars['String']['output'];
-  id: Scalars['ObjectId']['output'];
-  role: UserRole;
-  shouldChangePassword: Scalars['Boolean']['output'];
-  status: Scalars['String']['output'];
-  tenantIds: Array<Scalars['ObjectId']['output']>;
-  tenantSelectionVersion: Scalars['Int']['output'];
-  username: Scalars['String']['output'];
-};
-
-export type ViewerTenant = {
-  __typename?: 'ViewerTenant';
-  role: UserRole;
-  tenant: TenantSummary;
-};
 
 
 
@@ -127,26 +112,22 @@ export type DirectiveResolverFn<TResult = Record<PropertyKey, never>, TParent = 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
-  Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   ObjectId: ResolverTypeWrapper<Scalars['ObjectId']['output']>;
   Query: ResolverTypeWrapper<Record<PropertyKey, never>>;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
+  TenantAccess: ResolverTypeWrapper<TenantAccess>;
   TenantSummary: ResolverTypeWrapper<TenantSummary>;
   UserRole: UserRole;
-  Viewer: ResolverTypeWrapper<Viewer>;
-  ViewerTenant: ResolverTypeWrapper<ViewerTenant>;
 };
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
   Boolean: Scalars['Boolean']['output'];
-  Int: Scalars['Int']['output'];
   ObjectId: Scalars['ObjectId']['output'];
   Query: Record<PropertyKey, never>;
   String: Scalars['String']['output'];
+  TenantAccess: TenantAccess;
   TenantSummary: TenantSummary;
-  Viewer: Viewer;
-  ViewerTenant: ViewerTenant;
 };
 
 export interface ObjectIdScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['ObjectId'], any> {
@@ -155,8 +136,12 @@ export interface ObjectIdScalarConfig extends GraphQLScalarTypeConfig<ResolversT
 
 export type QueryResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   activeTenant?: Resolver<Maybe<ResolversTypes['TenantSummary']>, ParentType, ContextType>;
-  tenants?: Resolver<Array<ResolversTypes['ViewerTenant']>, ParentType, ContextType>;
-  viewer?: Resolver<ResolversTypes['Viewer'], ParentType, ContextType>;
+  tenants?: Resolver<Array<ResolversTypes['TenantAccess']>, ParentType, ContextType>;
+};
+
+export type TenantAccessResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['TenantAccess'] = ResolversParentTypes['TenantAccess']> = {
+  role?: Resolver<ResolversTypes['UserRole'], ParentType, ContextType>;
+  tenant?: Resolver<ResolversTypes['TenantSummary'], ParentType, ContextType>;
 };
 
 export type TenantSummaryResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['TenantSummary'] = ResolversParentTypes['TenantSummary']> = {
@@ -166,29 +151,10 @@ export type TenantSummaryResolvers<ContextType = GraphqlContext, ParentType exte
   timezone?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
-export type ViewerResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['Viewer'] = ResolversParentTypes['Viewer']> = {
-  accountHolderId?: Resolver<Maybe<ResolversTypes['ObjectId']>, ParentType, ContextType>;
-  currentTenantId?: Resolver<Maybe<ResolversTypes['ObjectId']>, ParentType, ContextType>;
-  displayName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  id?: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
-  role?: Resolver<ResolversTypes['UserRole'], ParentType, ContextType>;
-  shouldChangePassword?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  status?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  tenantIds?: Resolver<Array<ResolversTypes['ObjectId']>, ParentType, ContextType>;
-  tenantSelectionVersion?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  username?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-};
-
-export type ViewerTenantResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['ViewerTenant'] = ResolversParentTypes['ViewerTenant']> = {
-  role?: Resolver<ResolversTypes['UserRole'], ParentType, ContextType>;
-  tenant?: Resolver<ResolversTypes['TenantSummary'], ParentType, ContextType>;
-};
-
 export type Resolvers<ContextType = GraphqlContext> = {
   ObjectId?: GraphQLScalarType;
   Query?: QueryResolvers<ContextType>;
+  TenantAccess?: TenantAccessResolvers<ContextType>;
   TenantSummary?: TenantSummaryResolvers<ContextType>;
-  Viewer?: ViewerResolvers<ContextType>;
-  ViewerTenant?: ViewerTenantResolvers<ContextType>;
 };
 

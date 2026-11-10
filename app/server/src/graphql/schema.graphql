@@ -1,25 +1,11 @@
 scalar ObjectId
 
 type Query {
-  viewer: Viewer!
-  tenants: [ViewerTenant!]!
+  tenants: [TenantAccess!]!
   activeTenant: TenantSummary
 }
 
-type Viewer {
-  id: ObjectId!
-  displayName: String!
-  username: String!
-  status: String!
-  role: UserRole!
-  accountHolderId: ObjectId
-  tenantIds: [ObjectId!]!
-  currentTenantId: ObjectId
-  tenantSelectionVersion: Int!
-  shouldChangePassword: Boolean!
-}
-
-type ViewerTenant {
+type TenantAccess {
   role: UserRole!
   tenant: TenantSummary!
 }

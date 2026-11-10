@@ -32,7 +32,9 @@ describe('ProtectedRoute', () => {
       data: {
         user: {
           id: 'user-1',
-          displayName: 'Station Admin',
+          firstName: 'Station',
+          lastName: 'Admin',
+          displayFullName: 'Station Admin',
           username: 'admin',
           status: 'active',
           role: 'admin',
@@ -53,7 +55,9 @@ describe('ProtectedRoute', () => {
       data: {
         user: {
           id: 'user-1',
-          displayName: 'Station Admin',
+          firstName: 'Station',
+          lastName: 'Admin',
+          displayFullName: 'Station Admin',
           username: 'admin',
           status: 'active',
           role: 'admin',

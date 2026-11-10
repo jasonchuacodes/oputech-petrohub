@@ -1,24 +1,17 @@
-import { Query, Resolver } from '@nestjs/graphql'
 import { UseGuards } from '@nestjs/common'
+import { Query, Resolver } from '@nestjs/graphql'
 import type { Query as GraphqlQuery } from '../../generated/graphql'
+import { TenantService } from '../tenants/tenant.service'
+import { AuthenticatedActor, AuthorizedTenant } from './auth.types'
 import { CurrentActor } from './decorators/current-actor.decorator'
 import { CurrentTenant } from './decorators/current-tenant.decorator'
-import { AuthenticatedActor, AuthorizedTenant } from './auth.types'
-import { AccessTokenGuard } from './session/guards/access-token.guard'
 import { TenantAccessGuard } from './guards/tenant-access.guard'
-import { TenantService } from '../tenants/tenant.service'
+import { AccessTokenGuard } from './session/guards/access-token.guard'
 
 @Resolver()
 @UseGuards(AccessTokenGuard)
-export class ViewerResolver {
-  constructor(
-    private readonly tenantService: TenantService,
-  ) {}
-
-  @Query('viewer')
-  viewer(@CurrentActor() actor: AuthenticatedActor): GraphqlQuery['viewer'] {
-    return actor.user
-  }
+export class TenantResolver {
+  constructor(private readonly tenantService: TenantService) {}
 
   @Query('tenants')
   async tenants(@CurrentActor() actor: AuthenticatedActor): Promise<GraphqlQuery['tenants']> {
@@ -46,5 +39,4 @@ export class ViewerResolver {
       currency: context.tenant.currency,
     }
   }
-
 }

@@ -30,6 +30,16 @@ pnpm --dir app/server db:indexes
 pnpm dev
 ```
 
+To clear selected development collections while preserving their indexes, pass one or more
+collection flags. Clearing tenants also hard-deletes their tenant-owned records and cleans up
+account assignments.
+
+```bash
+pnpm db:clear -- --sessions --member-activities
+pnpm db:clear -- --tenants
+pnpm db:clear -- --all
+```
+
 After the server starts, register the initial superadmin from another terminal:
 
 ```bash

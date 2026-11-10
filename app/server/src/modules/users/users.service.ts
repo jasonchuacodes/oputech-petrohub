@@ -3,13 +3,14 @@ import { InjectModel } from '@nestjs/mongoose'
 import { Model, Types } from 'mongoose'
 import { User, UserDocument, UserRole, UserStatus } from './schemas/user.schema'
 
-export type SafeUser = Pick<
+export type AuthenticatedUser = Pick<
   User,
-  | 'displayName'
+  | 'firstName'
+  | 'lastName'
+  | 'displayFullName'
   | 'username'
   | 'status'
   | 'role'
-  | 'credentialVersion'
   | 'shouldChangePassword'
   | 'tenantIds'
   | 'currentTenantId'
@@ -17,7 +18,8 @@ export type SafeUser = Pick<
 > & { id: Types.ObjectId; accountHolderId?: Types.ObjectId }
 
 type CreateUserBase = {
-  displayName: string
+  firstName?: string
+  lastName?: string
   username: string
   passwordHash: string
   shouldChangePassword?: boolean
@@ -79,10 +81,12 @@ export class UsersService {
     )
   }
 
-  toSafeUser(user: UserDocument): SafeUser {
+  toAuthenticatedUser(user: UserDocument): AuthenticatedUser {
     return {
       id: user._id,
-      displayName: user.displayName,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      displayFullName: user.displayFullName,
       username: user.username,
       status: user.status,
       role: user.role,
@@ -90,7 +94,6 @@ export class UsersService {
       tenantIds: user.tenantIds,
       currentTenantId: user.currentTenantId,
       tenantSelectionVersion: user.tenantSelectionVersion,
-      credentialVersion: user.credentialVersion,
       shouldChangePassword: user.shouldChangePassword,
     }
   }

@@ -21,6 +21,7 @@ describe('authentication', () => {
   let tenantId: Types.ObjectId
   let secondTenantId: Types.ObjectId
   let memberId: Types.ObjectId
+  let accountHolderId: Types.ObjectId
 
   beforeAll(async () => {
     replicaSet = await MongoMemoryReplSet.create({ replSet: { count: 1 } })
@@ -40,12 +41,14 @@ describe('authentication', () => {
     const users = app.get(UsersService)
     const tenants = app.get(TenantService)
     const accountHolder = await users.create({
-      displayName: 'Account Holder',
+      firstName: 'Account',
+      lastName: 'Holder',
       username: 'owner',
       passwordHash: await hash('OwnerPassword123'),
       role: UserRole.SUPERADMIN,
       shouldChangePassword: false,
     })
+    accountHolderId = accountHolder._id
     const tenant = await tenants.create(accountHolder._id, {
       name: 'Test Station',
       key: 'test-station',
@@ -59,7 +62,8 @@ describe('authentication', () => {
       currency: 'PHP',
     })
     const user = await users.create({
-      displayName: 'Test Admin',
+      firstName: 'Test',
+      lastName: 'Admin',
       username: 'admin',
       passwordHash: await hash('StrongPassword123'),
       role: UserRole.ADMIN,
@@ -68,7 +72,8 @@ describe('authentication', () => {
       shouldChangePassword: false,
     })
     await users.create({
-      displayName: 'Test Member',
+      firstName: 'Test',
+      lastName: 'Member',
       username: 'member',
       passwordHash: await hash('MemberPassword123'),
       role: UserRole.MEMBER,
@@ -114,11 +119,12 @@ describe('authentication', () => {
       .expect(201)
 
     expect(registration.body).toMatchObject({
-      displayName: 'registered-owner',
       username: 'registered-owner',
       role: UserRole.SUPERADMIN,
       shouldChangePassword: false,
     })
+    expect(registration.body.displayName).toBeUndefined()
+    expect(registration.body.displayFullName).toBeUndefined()
 
     await request(app.getHttpServer())
       .post('/api/auth/register')
@@ -147,7 +153,6 @@ describe('authentication', () => {
 
     await expect(
       users.create({
-        displayName: 'Invalid Admin',
         username: 'invalid-admin',
         passwordHash: await hash('InvalidPassword123'),
         role: UserRole.ADMIN,
@@ -156,7 +161,6 @@ describe('authentication', () => {
 
     await expect(
       users.create({
-        displayName: 'Invalid Owner',
         username: 'invalid-owner',
         passwordHash: await hash('InvalidPassword123'),
         role: UserRole.SUPERADMIN,
@@ -183,10 +187,14 @@ describe('authentication', () => {
 
     expect(login.body.user).toMatchObject({
       username: 'admin',
-      displayName: 'Test Admin',
+      firstName: 'Test',
+      lastName: 'Admin',
+      displayFullName: 'Test Admin',
       role: 'admin',
     })
     expect(login.body.user.passwordHash).toBeUndefined()
+    expect(login.body.user.credentialVersion).toBeUndefined()
+    expect(login.body.user.displayName).toBeUndefined()
     expect(login.body.tenantAccess).toEqual([
       expect.objectContaining({ tenantId: tenantId.toHexString(), role: 'admin' }),
     ])
@@ -210,12 +218,10 @@ describe('authentication', () => {
     await request(app.getHttpServer())
       .post('/graphql')
       .set('Authorization', `Bearer ${login.body.accessToken}`)
-      .send({ query: '{ viewer { username role } tenants { role tenant { name } } }' })
+      .send({ query: '{ tenants { role tenant { name } } }' })
       .expect(200)
       .expect(({ body }) => {
         expect(body.errors).toBeUndefined()
-        expect(body.data.viewer.username).toBe('admin')
-        expect(body.data.viewer.role).toBe('admin')
         expect(body.data.tenants[0].role).toBe('admin')
         expect(body.data.tenants[0].tenant.name).toBe('Test Station')
       })
@@ -354,6 +360,66 @@ describe('authentication', () => {
       .toArray()
     expect(activities).toHaveLength(1)
     expect(activities[0]?.action).toBe(`created report: ${reportId.toHexString()}`)
+  })
+
+  it('hard-deletes a tenant and its dependent records', async () => {
+    const users = app.get(UsersService)
+    const tenants = app.get(TenantService)
+    const connection = app.get<Connection>(getConnectionToken())
+    const events = app.get(EventEmitter2)
+    const tenant = await tenants.create(accountHolderId, {
+      name: 'Temporary Station',
+      key: 'temporary-station',
+      timezone: 'Asia/Manila',
+      currency: 'PHP',
+    })
+    const admin = await users.create({
+      username: 'temporary-admin',
+      passwordHash: await hash('TemporaryAdmin123'),
+      role: UserRole.ADMIN,
+      accountHolderId,
+      tenantIds: [tenant._id, secondTenantId],
+      shouldChangePassword: false,
+    })
+    const member = await users.create({
+      username: 'temporary-member',
+      passwordHash: await hash('TemporaryMember123'),
+      role: UserRole.MEMBER,
+      accountHolderId,
+      tenantIds: [tenant._id],
+      shouldChangePassword: false,
+    })
+    const reportId = new Types.ObjectId()
+
+    await request(app.getHttpServer())
+      .post('/api/auth/session')
+      .set('origin', 'http://localhost:5173')
+      .send({ username: 'temporary-member', password: 'TemporaryMember123' })
+      .expect(200)
+    await events.emitAsync(
+      REPORT_CREATED_EVENT,
+      new ReportCreatedEvent(tenant._id, member._id, reportId, new Date()),
+    )
+
+    const deleted = await tenants.hardDelete(tenant._id)
+
+    expect(deleted).toEqual({
+      tenants: 1,
+      memberActivities: 1,
+      users: 1,
+      sessions: 1,
+      userAssignments: 1,
+    })
+    expect(await connection.collection('tenants').findOne({ _id: tenant._id })).toBeNull()
+    expect(
+      await connection.collection('memberActivities').findOne({ tenantId: tenant._id }),
+    ).toBeNull()
+    expect(await connection.collection('users').findOne({ _id: member._id })).toBeNull()
+    expect(await connection.collection('sessions').findOne({ userId: member._id })).toBeNull()
+
+    const preservedAdmin = await connection.collection('users').findOne({ _id: admin._id })
+    expect(preservedAdmin?.tenantIds).toEqual([secondTenantId])
+    expect(preservedAdmin?.currentTenantId).toEqual(secondTenantId)
   })
 
   it('revokes existing sessions when the password changes', async () => {

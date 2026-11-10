@@ -228,8 +228,8 @@ export class SessionService {
     return this.toActor(user)
   }
 
-  private toActor(user: Parameters<UsersService['toSafeUser']>[0]): AuthenticatedActor {
-    return { userId: user._id, user: this.users.toSafeUser(user) }
+  private toActor(user: Parameters<UsersService['toAuthenticatedUser']>[0]): AuthenticatedActor {
+    return { userId: user._id, user: this.users.toAuthenticatedUser(user) }
   }
 
   private async toIssuedSession(

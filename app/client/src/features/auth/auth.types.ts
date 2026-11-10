@@ -3,7 +3,9 @@ import type { UserRole } from '~/generated/graphql'
 
 export type AuthUser = {
   id: string
-  displayName: string
+  firstName?: string
+  lastName?: string
+  displayFullName?: string
   username: string
   status: string
   role: UserRole

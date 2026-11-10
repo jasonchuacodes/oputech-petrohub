@@ -5,7 +5,7 @@ import {
 } from '~/generated/graphql'
 import { graphqlClient } from '~/lib/graphql'
 
-export type ViewerTenant = TenantsQuery['tenants'][number]
+export type TenantAccess = TenantsQuery['tenants'][number]
 
 export function useTenantsQuery() {
   return useQuery({

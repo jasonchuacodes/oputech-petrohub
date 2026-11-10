@@ -7,7 +7,7 @@ import { OriginGuard } from './guards/origin.guard'
 import { RolesGuard } from './guards/roles.guard'
 import { TenantAccessGuard } from './guards/tenant-access.guard'
 import { SessionModule } from './session/session.module'
-import { ViewerResolver } from './viewer.resolver'
+import { TenantResolver } from './tenant.resolver'
 
 @Module({
   imports: [
@@ -21,7 +21,7 @@ import { ViewerResolver } from './viewer.resolver'
     OriginGuard,
     TenantAccessGuard,
     RolesGuard,
-    ViewerResolver,
+    TenantResolver,
   ],
   exports: [SessionModule, TenantAccessGuard, RolesGuard],
 })

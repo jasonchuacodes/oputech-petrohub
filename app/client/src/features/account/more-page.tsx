@@ -14,8 +14,12 @@ export function MorePage() {
       <PageHeader title="More" description="Account and station management." />
       <section className="flex flex-col gap-4 rounded-md bg-card p-4 shadow-card">
         <div>
-          <p className="font-medium text-text-heading">{session.data?.user.displayName}</p>
-          <p className="text-sm text-text-tertiary">@{session.data?.user.username}</p>
+          <p className="font-medium text-text-heading">
+            {session.data?.user.displayFullName ?? `@${session.data?.user.username}`}
+          </p>
+          {session.data?.user.displayFullName && (
+            <p className="text-sm text-text-tertiary">@{session.data.user.username}</p>
+          )}
         </div>
         <Button
           type="button"

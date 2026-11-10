@@ -8,6 +8,7 @@
     "generate:graphql:watch": "graphql-codegen --config codegen.ts --watch",
     "lint": "pnpm -r lint",
     "register-superadmin": "pnpm --filter @petromate/server register-superadmin",
+    "db:clear": "pnpm --filter @petromate/server db:clear",
     "test": "pnpm generate:graphql && pnpm -r test",
     "typecheck": "pnpm generate:graphql && pnpm -r typecheck"
   },

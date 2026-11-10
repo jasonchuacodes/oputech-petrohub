@@ -12,6 +12,7 @@
     "test": "jest --runInBand",
     "test:watch": "jest --watch",
     "register-superadmin": "tsx scripts/register-superadmin.ts",
+    "db:clear": "tsx scripts/clear-database.ts",
     "db:indexes": "tsx scripts/ensure-indexes.ts"
   },
   "dependencies": {

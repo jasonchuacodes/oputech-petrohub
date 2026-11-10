@@ -1,4 +1,4 @@
-import { SafeUser } from '../../users/users.service'
+import { AuthenticatedUser } from '../../users/users.service'
 import { UserRole } from '../../users/schemas/user.schema'
 import { TokenType } from '../token-type.enum'
 
@@ -6,7 +6,7 @@ export type SessionResponse = {
   accessToken: string
   tokenType: TokenType.ACCESS
   dateTimeExpiration: string
-  user: SafeUser
+  user: AuthenticatedUser
   tenantAccess: Array<{ tenantId: string; role: UserRole }>
 }
 

@@ -20,7 +20,6 @@ export class AuthService {
     }
 
     const user = await this.users.create({
-      displayName: input.username,
       username: input.username,
       passwordHash: await hash(input.password),
       role: UserRole.SUPERADMIN,
@@ -29,7 +28,6 @@ export class AuthService {
 
     return {
       id: user._id,
-      displayName: user.displayName,
       username: user.username,
       role: user.role,
       shouldChangePassword: user.shouldChangePassword,
