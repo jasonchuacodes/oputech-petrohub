@@ -18,14 +18,30 @@ export type CreateTenantInput = {
   name: Scalars['String']['input'];
 };
 
+export type DeleteTenantInput = {
+  tenantId: Scalars['ObjectId']['input'];
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   createTenant: TenantSummary;
+  deleteTenant: Scalars['Boolean']['output'];
+  updateTenant: TenantSummary;
 };
 
 
 export type MutationCreateTenantArgs = {
   input: CreateTenantInput;
+};
+
+
+export type MutationDeleteTenantArgs = {
+  input: DeleteTenantInput;
+};
+
+
+export type MutationUpdateTenantArgs = {
+  input: UpdateTenantInput;
 };
 
 export type Query = {
@@ -46,6 +62,11 @@ export type TenantSummary = {
   id: Scalars['ObjectId']['output'];
   name: Scalars['String']['output'];
   timezone: Scalars['String']['output'];
+};
+
+export type UpdateTenantInput = {
+  name: Scalars['String']['input'];
+  tenantId: Scalars['ObjectId']['input'];
 };
 
 export type UserRole =
@@ -128,12 +149,14 @@ export type DirectiveResolverFn<TResult = Record<PropertyKey, never>, TParent = 
 export type ResolversTypes = {
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
   CreateTenantInput: CreateTenantInput;
+  DeleteTenantInput: DeleteTenantInput;
   Mutation: ResolverTypeWrapper<Record<PropertyKey, never>>;
   ObjectId: ResolverTypeWrapper<Scalars['ObjectId']['output']>;
   Query: ResolverTypeWrapper<Record<PropertyKey, never>>;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
   TenantAccess: ResolverTypeWrapper<TenantAccess>;
   TenantSummary: ResolverTypeWrapper<TenantSummary>;
+  UpdateTenantInput: UpdateTenantInput;
   UserRole: UserRole;
 };
 
@@ -141,16 +164,20 @@ export type ResolversTypes = {
 export type ResolversParentTypes = {
   Boolean: Scalars['Boolean']['output'];
   CreateTenantInput: CreateTenantInput;
+  DeleteTenantInput: DeleteTenantInput;
   Mutation: Record<PropertyKey, never>;
   ObjectId: Scalars['ObjectId']['output'];
   Query: Record<PropertyKey, never>;
   String: Scalars['String']['output'];
   TenantAccess: TenantAccess;
   TenantSummary: TenantSummary;
+  UpdateTenantInput: UpdateTenantInput;
 };
 
 export type MutationResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
   createTenant?: Resolver<ResolversTypes['TenantSummary'], ParentType, ContextType, RequireFields<MutationCreateTenantArgs, 'input'>>;
+  deleteTenant?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteTenantArgs, 'input'>>;
+  updateTenant?: Resolver<ResolversTypes['TenantSummary'], ParentType, ContextType, RequireFields<MutationUpdateTenantArgs, 'input'>>;
 };
 
 export interface ObjectIdScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['ObjectId'], any> {

@@ -28,7 +28,7 @@ export function LoginPage() {
   if (session.data) {
     return (
       <Navigate
-        to={session.data.user.currentTenantId ? '/reports' : '/onboarding'}
+        to={session.data.user.currentTenantId ? '/home' : '/onboarding'}
         replace
       />
     )
@@ -41,7 +41,7 @@ export function LoginPage() {
           user.shouldChangePassword
             ? '/change-password'
             : user.currentTenantId
-              ? '/reports'
+              ? '/home'
               : '/onboarding',
           { replace: true },
         ),
@@ -59,56 +59,58 @@ export function LoginPage() {
           </header>
 
           <form className="mt-7 flex flex-col gap-5" noValidate onSubmit={submit}>
-            <div className="flex flex-col gap-2">
-              <label htmlFor="username" className="text-sm font-medium">
-                Username
-              </label>
-              <Input
-                id="username"
-                autoComplete="username"
-                autoCapitalize="none"
-                placeholder="Enter your username"
-                aria-invalid={Boolean(errors.username)}
-                aria-describedby={errors.username ? 'username-error' : undefined}
-                {...register('username')}
-              />
-              {errors.username && (
-                <p id="username-error" role="alert" className="text-sm text-destructive">
-                  {errors.username.message}
-                </p>
-              )}
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <label htmlFor="password" className="text-sm font-medium">
-                Password
-              </label>
-              <div className="relative">
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-2">
+                <label htmlFor="username" className="text-sm font-medium">
+                  Username
+                </label>
                 <Input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  autoComplete="current-password"
-                  placeholder="Enter your password"
-                  className="pr-12"
-                  aria-invalid={Boolean(errors.password)}
-                  aria-describedby={errors.password ? 'password-error' : undefined}
-                  {...register('password')}
+                  id="username"
+                  autoComplete="username"
+                  autoCapitalize="none"
+                  placeholder="Enter your username"
+                  aria-invalid={Boolean(errors.username)}
+                  aria-describedby={errors.username ? 'username-error' : undefined}
+                  {...register('username')}
                 />
-                <button
-                  type="button"
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                  aria-pressed={showPassword}
-                  className="absolute inset-y-0 right-0 flex w-12 items-center justify-center rounded-r-sm border-l border-input text-text-tertiary outline-none transition-colors hover:text-foreground focus-visible:ring-3 focus-visible:ring-inset focus-visible:ring-ring/40"
-                  onClick={() => setShowPassword((visible) => !visible)}
-                >
-                  {showPassword ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
-                </button>
+                {errors.username && (
+                  <p id="username-error" role="alert" className="text-sm text-destructive">
+                    {errors.username.message}
+                  </p>
+                )}
               </div>
-              {errors.password && (
-                <p id="password-error" role="alert" className="text-sm text-destructive">
-                  {errors.password.message}
-                </p>
-              )}
+
+              <div className="flex flex-col gap-2">
+                <label htmlFor="password" className="text-sm font-medium">
+                  Password
+                </label>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    autoComplete="current-password"
+                    placeholder="Enter your password"
+                    className="pr-12"
+                    aria-invalid={Boolean(errors.password)}
+                    aria-describedby={errors.password ? 'password-error' : undefined}
+                    {...register('password')}
+                  />
+                  <button
+                    type="button"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    aria-pressed={showPassword}
+                    className="absolute inset-y-0 right-0 flex w-12 items-center justify-center rounded-r-sm border-l border-input text-text-tertiary outline-none transition-colors hover:text-foreground focus-visible:ring-3 focus-visible:ring-inset focus-visible:ring-ring/40"
+                    onClick={() => setShowPassword((visible) => !visible)}
+                  >
+                    {showPassword ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
+                  </button>
+                </div>
+                {errors.password && (
+                  <p id="password-error" role="alert" className="text-sm text-destructive">
+                    {errors.password.message}
+                  </p>
+                )}
+              </div>
             </div>
 
             {login.isError && (

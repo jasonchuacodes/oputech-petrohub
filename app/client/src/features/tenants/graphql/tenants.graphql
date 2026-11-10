@@ -18,3 +18,16 @@ mutation CreateTenant($input: CreateTenantInput!) {
     currency
   }
 }
+
+mutation UpdateTenant($input: UpdateTenantInput!) {
+  updateTenant(input: $input) {
+    id
+    name
+    timezone
+    currency
+  }
+}
+
+mutation DeleteTenant($input: DeleteTenantInput!) {
+  deleteTenant(input: $input)
+}

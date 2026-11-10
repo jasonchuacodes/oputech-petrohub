@@ -31,14 +31,14 @@ export function OnboardingPage() {
 
   const user = auth.session?.user
   if (!user) return <Navigate to="/login" replace />
-  if (user.currentTenantId) return <Navigate to="/reports" replace />
+  if (user.currentTenantId) return <Navigate to="/home" replace />
 
   const submit = handleSubmit(async ({ name }) => {
     try {
       const tenant = await createTenant.mutateAsync(name)
       setActiveTenant(tenant.id)
       auth.activateTenant(tenant.id)
-      navigate('/reports', { replace: true })
+      navigate('/home', { replace: true })
     } catch (error) {
       setError('root', { message: getCreateTenantErrorMessage(error) })
     }
@@ -53,20 +53,20 @@ export function OnboardingPage() {
           <OputechPetrohubLogo variant="mark" className="mx-auto mb-4 h-auto w-16" />
           <h1 className="text-page-title font-semibold">Set up your workspace</h1>
           <p className="mt-2 text-sm text-text-secondary">
-            Create the tenant where you&apos;ll manage reports and station operations.
+            Create the station where you&apos;ll manage reports and daily operations.
           </p>
         </div>
 
         <div className="shadow-card rounded-md bg-card p-4 sm:p-5">
           {user.role === 'superadmin' ? (
-            <section aria-labelledby="create-tenant-heading">
+            <section aria-labelledby="create-station-heading">
               <div className="mb-4 flex items-start gap-3">
                 <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
                   <Plus className="size-5" aria-hidden="true" />
                 </span>
                 <div>
-                  <h2 id="create-tenant-heading" className="font-medium text-text-heading">
-                    Create your first tenant
+                  <h2 id="create-station-heading" className="font-medium text-text-heading">
+                    Create your first station
                   </h2>
                   <p className="mt-0.5 text-sm text-text-secondary">
                     Use your business or station name.
@@ -77,7 +77,7 @@ export function OnboardingPage() {
               <form className="flex flex-col gap-4" noValidate onSubmit={submit}>
                 <div className="flex flex-col gap-1.5">
                   <label htmlFor="tenant-name" className="text-sm font-medium">
-                    Tenant name
+                    Station name
                   </label>
                   <Input
                     id="tenant-name"
@@ -100,7 +100,7 @@ export function OnboardingPage() {
                   {isSubmitting || createTenant.isPending ? (
                     <>
                       <Spinner className="size-4" />
-                      Creating tenant…
+                      Creating station…
                     </>
                   ) : (
                     <>
@@ -112,15 +112,15 @@ export function OnboardingPage() {
               </form>
             </section>
           ) : (
-            <section className="text-center" aria-labelledby="tenant-access-heading">
+            <section className="text-center" aria-labelledby="station-access-heading">
               <span className="mx-auto flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
                 <Users className="size-6" aria-hidden="true" />
               </span>
-              <h2 id="tenant-access-heading" className="mt-4 font-medium">
-                Tenant access required
+              <h2 id="station-access-heading" className="mt-4 font-medium">
+                Station access required
               </h2>
               <p className="mt-2 text-sm text-text-secondary">
-                Ask a super administrator to assign a tenant to your account.
+                Ask a super administrator to assign a station to your account.
               </p>
             </section>
           )}
@@ -148,7 +148,7 @@ export function OnboardingPage() {
 }
 
 function getCreateTenantErrorMessage(error: unknown): string {
-  const fallback = 'Unable to create the tenant. Please try again.'
+  const fallback = 'Unable to create the station. Please try again.'
   if (!(error instanceof ClientError)) {
     return error instanceof Error && error.message ? error.message : fallback
   }

@@ -25,7 +25,7 @@ export function ProtectedRoute() {
   if (location.pathname === '/change-password') {
     return (
       <Navigate
-        to={session.data.user.currentTenantId ? '/reports' : '/onboarding'}
+        to={session.data.user.currentTenantId ? '/home' : '/onboarding'}
         replace
       />
     )
@@ -34,7 +34,7 @@ export function ProtectedRoute() {
     return <Navigate to="/onboarding" replace />
   }
   if (session.data.user.currentTenantId && location.pathname === '/onboarding') {
-    return <Navigate to="/reports" replace />
+    return <Navigate to="/home" replace />
   }
   return <Outlet />
 }

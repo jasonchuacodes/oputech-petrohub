@@ -1,5 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
-import { MorePage } from './features/account/more-page'
+import { MePage } from './features/account/me-page'
 import { AttendancePage } from './features/attendance/attendance-page'
 import { LoginPage } from './features/auth/login-page'
 import { ChangePasswordPage } from './features/auth/change-password-page'
@@ -8,6 +8,7 @@ import { DashboardPage } from './features/dashboard/dashboard-page'
 import { AppShell } from './features/layout/app-shell'
 import { OnboardingPage } from './features/onboarding/onboarding-page'
 import { ReportsPage } from './features/reports/reports-page'
+import { TenantsPage } from './features/tenants/tenants-page'
 
 export function App() {
   return (
@@ -17,14 +18,15 @@ export function App() {
         <Route path="change-password" element={<ChangePasswordPage />} />
         <Route path="onboarding" element={<OnboardingPage />} />
         <Route element={<AppShell />}>
-          <Route index element={<Navigate to="/reports" replace />} />
-          <Route path="reports" element={<ReportsPage />} />
-          <Route path="attendance" element={<AttendancePage />} />
-          <Route path="dashboard" element={<DashboardPage />} />
-          <Route path="more" element={<MorePage />} />
+          <Route index element={<Navigate to="/home" replace />} />
+          <Route path="home" element={<DashboardPage />} />
+          <Route path="report" element={<ReportsPage />} />
+          <Route path="timesheet" element={<AttendancePage />} />
+          <Route path="me" element={<MePage />} />
+          <Route path="tenants" element={<TenantsPage />} />
         </Route>
       </Route>
-      <Route path="*" element={<Navigate to="/reports" replace />} />
+      <Route path="*" element={<Navigate to="/home" replace />} />
     </Routes>
   )
 }

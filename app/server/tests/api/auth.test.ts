@@ -388,6 +388,97 @@ describe('authentication', () => {
       .expect(({ body }) => expect(body.errors).toHaveLength(1))
   })
 
+  it('allows administrators to rename accessible tenants', async () => {
+    const adminLogin = await request(app.getHttpServer())
+      .post('/api/auth/session')
+      .set('origin', 'http://localhost:5173')
+      .send({ username: 'admin', password: 'StrongPassword123' })
+      .expect(200)
+    const mutation =
+      'mutation ($input: UpdateTenantInput!) { updateTenant(input: $input) { id name } }'
+
+    await request(app.getHttpServer())
+      .post('/graphql')
+      .set('Authorization', `Bearer ${adminLogin.body.accessToken}`)
+      .send({
+        query: mutation,
+        variables: { input: { tenantId: tenantId.toHexString(), name: 'Renamed Station' } },
+      })
+      .expect(200)
+      .expect(({ body }) => {
+        expect(body.errors).toBeUndefined()
+        expect(body.data.updateTenant).toEqual({
+          id: tenantId.toHexString(),
+          name: 'Renamed Station',
+        })
+      })
+
+    const memberLogin = await request(app.getHttpServer())
+      .post('/api/auth/session')
+      .set('origin', 'http://localhost:5173')
+      .send({ username: 'member', password: 'MemberPassword123' })
+      .expect(200)
+    await request(app.getHttpServer())
+      .post('/graphql')
+      .set('Authorization', `Bearer ${memberLogin.body.accessToken}`)
+      .send({
+        query: mutation,
+        variables: { input: { tenantId: tenantId.toHexString(), name: 'Forbidden Rename' } },
+      })
+      .expect(200)
+      .expect(({ body }) => expect(body.errors).toHaveLength(1))
+
+    await request(app.getHttpServer())
+      .post('/graphql')
+      .set('Authorization', `Bearer ${adminLogin.body.accessToken}`)
+      .send({
+        query: mutation,
+        variables: { input: { tenantId: tenantId.toHexString(), name: 'Test Station' } },
+      })
+      .expect(200)
+      .expect(({ body }) => expect(body.errors).toBeUndefined())
+  })
+
+  it('allows only the owning superadmin to delete a tenant', async () => {
+    const tenants = app.get(TenantService)
+    const tenant = await tenants.create(accountHolderId, { name: 'Delete Through API' })
+    const mutation =
+      'mutation ($input: DeleteTenantInput!) { deleteTenant(input: $input) }'
+    const adminLogin = await request(app.getHttpServer())
+      .post('/api/auth/session')
+      .set('origin', 'http://localhost:5173')
+      .send({ username: 'admin', password: 'StrongPassword123' })
+      .expect(200)
+
+    await request(app.getHttpServer())
+      .post('/graphql')
+      .set('Authorization', `Bearer ${adminLogin.body.accessToken}`)
+      .send({
+        query: mutation,
+        variables: { input: { tenantId: tenant._id.toHexString() } },
+      })
+      .expect(200)
+      .expect(({ body }) => expect(body.errors).toHaveLength(1))
+
+    const ownerLogin = await request(app.getHttpServer())
+      .post('/api/auth/session')
+      .set('origin', 'http://localhost:5173')
+      .send({ username: 'owner', password: 'OwnerPassword123' })
+      .expect(200)
+    await request(app.getHttpServer())
+      .post('/graphql')
+      .set('Authorization', `Bearer ${ownerLogin.body.accessToken}`)
+      .send({
+        query: mutation,
+        variables: { input: { tenantId: tenant._id.toHexString() } },
+      })
+      .expect(200)
+      .expect(({ body }) => {
+        expect(body.errors).toBeUndefined()
+        expect(body.data.deleteTenant).toBe(true)
+      })
+  })
+
   it('records report creation activity exactly once', async () => {
     const reportId = new Types.ObjectId()
     const events = app.get(EventEmitter2)

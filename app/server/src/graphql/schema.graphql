@@ -7,10 +7,21 @@ type Query {
 
 type Mutation {
   createTenant(input: CreateTenantInput!): TenantSummary!
+  updateTenant(input: UpdateTenantInput!): TenantSummary!
+  deleteTenant(input: DeleteTenantInput!): Boolean!
 }
 
 input CreateTenantInput {
   name: String!
+}
+
+input UpdateTenantInput {
+  tenantId: ObjectId!
+  name: String!
+}
+
+input DeleteTenantInput {
+  tenantId: ObjectId!
 }
 
 type TenantAccess {

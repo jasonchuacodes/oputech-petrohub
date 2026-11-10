@@ -5,6 +5,10 @@ import { ZodValidationPipe } from '../../common/validation/zod-validation.pipe'
 import {
   createTenantInputSchema,
   CreateTenantInput,
+  deleteTenantInputSchema,
+  DeleteTenantInput,
+  updateTenantInputSchema,
+  UpdateTenantInput,
 } from '../tenants/tenant.schemas'
 import { TenantService } from '../tenants/tenant.service'
 import { AuthenticatedActor, AuthorizedTenant } from './auth.types'
@@ -46,6 +50,29 @@ export class TenantResolver {
       timezone: tenant.timezone,
       currency: tenant.currency,
     }
+  }
+
+  @Mutation('updateTenant')
+  async updateTenant(
+    @CurrentActor() actor: AuthenticatedActor,
+    @Args('input', new ZodValidationPipe(updateTenantInputSchema)) input: UpdateTenantInput,
+  ): Promise<GraphqlMutation['updateTenant']> {
+    const tenant = await this.tenantService.update(actor, input)
+    return {
+      id: tenant._id,
+      name: tenant.name,
+      timezone: tenant.timezone,
+      currency: tenant.currency,
+    }
+  }
+
+  @Mutation('deleteTenant')
+  @UseGuards(SuperadminGuard)
+  async deleteTenant(
+    @CurrentActor() actor: AuthenticatedActor,
+    @Args('input', new ZodValidationPipe(deleteTenantInputSchema)) input: DeleteTenantInput,
+  ): Promise<GraphqlMutation['deleteTenant']> {
+    return this.tenantService.delete(actor, input)
   }
 
   @Query('activeTenant')

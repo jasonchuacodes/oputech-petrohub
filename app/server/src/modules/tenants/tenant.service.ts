@@ -6,7 +6,7 @@ import { Session as AuthSession } from '../auth/schemas/session.schema'
 import { MemberActivity } from '../member-activity/schemas/member-activity.schema'
 import { User, UserRole, UserStatus } from '../users/schemas/user.schema'
 import { Tenant, TenantStatus } from './schemas/tenant.schema'
-import { CreateTenantInput } from './tenant.schemas'
+import { CreateTenantInput, DeleteTenantInput, UpdateTenantInput } from './tenant.schemas'
 import { TenantActor } from './tenant.types'
 
 export type TenantRecord = Tenant & {
@@ -82,6 +82,35 @@ export class TenantService {
     )
 
     return tenant.toObject<TenantRecord>()
+  }
+
+  async update(user: TenantActor, input: UpdateTenantInput): Promise<TenantRecord> {
+    if (user.user.role === UserRole.MEMBER) {
+      throw forbidden('Only administrators can update tenants.')
+    }
+
+    const tenant = await this.assertAccess(user, input.tenantId.toHexString())
+    const updated = await this.tenantModel
+      .findByIdAndUpdate(
+        tenant._id,
+        { $set: { name: input.name } },
+        { new: true, runValidators: true },
+      )
+      .lean<TenantRecord>()
+      .exec()
+
+    if (!updated) throw forbidden('You do not have access to this tenant.')
+    return updated
+  }
+
+  async delete(user: TenantActor, input: DeleteTenantInput): Promise<boolean> {
+    if (user.user.role !== UserRole.SUPERADMIN) {
+      throw forbidden('Only super administrators can delete tenants.')
+    }
+
+    const tenant = await this.assertAccess(user, input.tenantId.toHexString())
+    const deleted = await this.hardDelete(tenant._id)
+    return deleted.tenants === 1
   }
 
   async assertAccess(user: TenantActor, tenantIdValue: string): Promise<TenantRecord> {

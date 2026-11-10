@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { Spinner } from '~/components/ui/spinner'
 import { cn } from '~/utils/cn'
 import { setActiveTenant, useActiveTenantId } from '../tenants/active-tenant'
@@ -8,19 +8,40 @@ import { navigation, type NavigationItem } from './navigation'
 
 function NavigationLink({ item, compact = false }: { item: NavigationItem; compact?: boolean }) {
   const Icon = item.icon
+  const { pathname } = useLocation()
+  const relatedActive = item.activePaths?.some(
+    (path) => pathname === path || pathname.startsWith(`${path}/`),
+  )
   return (
     <NavLink
       to={item.href}
+      aria-current={relatedActive ? 'page' : undefined}
       className={({ isActive }) =>
         cn(
-          'flex min-h-11 items-center rounded-sm font-medium outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/30',
-          compact ? 'flex-col justify-center gap-1 px-1 py-1 text-xs' : 'gap-3 px-3 text-sm',
-          isActive ? 'bg-primary/10 text-primary' : 'text-text-secondary hover:bg-surface-hover',
+          'flex items-center font-medium outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/30',
+          compact
+            ? 'min-h-16 flex-col justify-center gap-1 px-1 py-2 text-xs'
+            : 'min-h-11 gap-3 rounded-sm px-3 text-sm',
+          isActive || relatedActive
+            ? compact
+              ? 'text-primary'
+              : 'bg-primary/10 text-primary'
+            : compact
+              ? 'text-text-tertiary hover:text-text-secondary'
+              : 'text-text-secondary hover:bg-surface-hover',
         )
       }
     >
-      <Icon aria-hidden="true" className={compact ? 'size-6' : 'size-5 shrink-0'} />
-      <span className={cn(!compact && 'md:sr-only wide:not-sr-only')}>{item.label}</span>
+      {({ isActive }) => (
+        <>
+          <Icon
+            aria-hidden="true"
+            strokeWidth={compact ? (isActive || relatedActive ? 2 : 1.75) : 2}
+            className={compact ? 'size-6' : 'size-5 shrink-0'}
+          />
+          <span className={cn(!compact && 'md:sr-only wide:not-sr-only')}>{item.label}</span>
+        </>
+      )}
     </NavLink>
   )
 }
@@ -59,10 +80,6 @@ export function AppShell() {
 
   const selected =
     tenants.data.find(({ tenant }) => tenant.id === activeTenantId) ?? tenants.data[0]
-  const visibleNavigation = navigation.filter(
-    (item) => !item.adminOnly || selected.role === 'superadmin' || selected.role === 'admin',
-  )
-
   return (
     <div className="flex h-dvh overflow-hidden bg-background">
       <aside className="hidden w-20 shrink-0 flex-col border-r border-border/70 bg-card px-2 py-4 md:flex wide:w-64">
@@ -89,26 +106,23 @@ export function AppShell() {
         </label>
 
         <nav aria-label="Primary navigation" className="flex flex-1 flex-col gap-1">
-          {visibleNavigation.map((item) => (
+          {navigation.map((item) => (
             <NavigationLink key={item.href} item={item} />
           ))}
         </nav>
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-14 shrink-0 items-center border-b border-border/60 bg-card px-5 md:hidden">
-          <p className="min-w-0 truncate font-medium">{selected.tenant.name}</p>
-        </header>
-        <main className="min-h-0 flex-1 overflow-y-auto pb-24 md:pb-0">
-          <Outlet context={{ tenant: selected }} />
+        <main className="min-h-0 flex-1 overflow-y-auto">
+          <Outlet context={{ tenant: selected, tenants: tenants.data }} />
         </main>
 
         <nav
           aria-label="Primary navigation"
-          className="fixed inset-x-0 bottom-0 z-30 bg-card pt-1 pb-[calc(0.25rem+env(safe-area-inset-bottom))] shadow-[0_-2px_8px_rgba(16,16,16,0.05)] md:hidden"
+          className="z-30 shrink-0 bg-card pt-1 pb-[calc(0.25rem+env(safe-area-inset-bottom))] shadow-[0_-2px_8px_rgba(16,16,16,0.05)] md:hidden"
         >
           <div className="mx-auto flex w-full max-w-lg px-1">
-            {visibleNavigation.map((item) => (
+            {navigation.map((item) => (
               <div key={item.href} className="min-w-0 flex-1">
                 <NavigationLink item={item} compact />
               </div>
