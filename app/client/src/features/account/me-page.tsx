@@ -9,11 +9,6 @@ import { clearActiveTenant } from '../tenants/active-tenant'
 
 const actions = [
   {
-    title: 'Account settings',
-    description: 'Manage your personal account and security',
-    href: '/account',
-  },
-  {
     title: 'User management',
     description: 'Manage users, roles, and station access',
     adminOnly: true,
@@ -43,20 +38,25 @@ export function MePage() {
     <div className="mx-auto flex min-h-full w-full max-w-3xl flex-col gap-5 px-5 py-5 md:p-6">
       <h1 className="sr-only">Me</h1>
 
-      <section className="flex items-center gap-4 rounded-md bg-card p-4 shadow-card">
+      <Link
+        href="/account"
+        aria-label="Open Account settings"
+        className="flex items-center gap-4 rounded-md bg-card p-4 shadow-card outline-none transition-colors hover:bg-surface-hover focus-visible:ring-3 focus-visible:ring-ring/30"
+      >
         <span
           aria-hidden="true"
           className="flex size-14 shrink-0 items-center justify-center rounded-full bg-primary text-lg font-medium text-primary-foreground sm:size-16 sm:text-xl"
         >
           {getInitials(user)}
         </span>
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <p className="truncate text-card-title font-medium text-text-heading">
             {user?.username ?? 'Account'}
           </p>
           <p className="text-sm text-text-tertiary">{getRoleLabel(user?.role)}</p>
         </div>
-      </section>
+        <ChevronRight aria-hidden="true" className="size-5 shrink-0 text-text-tertiary" />
+      </Link>
 
       <section aria-labelledby="manage-heading" className="flex flex-col gap-0">
         <div className="flex min-h-10 items-center">

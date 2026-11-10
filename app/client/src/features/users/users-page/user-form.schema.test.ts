@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { addUserFormSchema, editUserFormSchema } from './user-form.schema'
+import {
+  addUserFormSchema,
+  editUserFormSchema,
+  resetPasswordFormSchema,
+} from './user-form.schema'
 
 describe('user form schemas', () => {
   it('requires only a username and password when adding a user', () => {
@@ -25,6 +29,21 @@ describe('user form schemas', () => {
         firstName: '',
         lastName: '',
         role: 'superadmin',
+      }).success,
+    ).toBe(false)
+  })
+
+  it('validates matching reset passwords without trimming them', () => {
+    expect(
+      resetPasswordFormSchema.parse({
+        newPassword: '  secret  ',
+        confirmPassword: '  secret  ',
+      }).newPassword,
+    ).toBe('  secret  ')
+    expect(
+      resetPasswordFormSchema.safeParse({
+        newPassword: 'secret-one',
+        confirmPassword: 'secret-two',
       }).success,
     ).toBe(false)
   })

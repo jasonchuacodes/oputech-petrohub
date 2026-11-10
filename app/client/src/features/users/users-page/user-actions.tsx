@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ChevronDown, ChevronRight, Pencil, Trash2, X } from 'lucide-react'
+import { ChevronDown, ChevronRight, KeyRound, Pencil, Trash2, X } from 'lucide-react'
 import { useCallback, useEffect, useId, useState, type ReactNode } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { createPortal } from 'react-dom'
@@ -22,6 +22,7 @@ import {
   type EditUserFormValues,
 } from './user-form.schema'
 import { getRoleLabel, RoleSelectSheet, type ManageableUserRole } from './role-select-sheet'
+import { ResetPasswordSheet } from './reset-password-sheet'
 
 const assignableRoles = ['member', 'admin'] as const satisfies readonly ManageableUserRole[]
 
@@ -44,6 +45,7 @@ export function UserActions({
   const deleteUser = useDeleteUserMutation()
   const actions = useDisclosure()
   const deleteConfirmation = useDisclosure()
+  const passwordReset = useDisclosure()
   const roleOptions = useDisclosure()
   const [view, setView] = useState<'actions' | 'edit'>('actions')
   const [deleteError, setDeleteError] = useState<string>()
@@ -330,6 +332,19 @@ export function UserActions({
                     variant="outline"
                     className="w-full"
                     disabled={!canManage}
+                    onClick={() => {
+                      resetAndClose()
+                      passwordReset.onOpen()
+                    }}
+                  >
+                    <KeyRound aria-hidden="true" />
+                    Reset Password
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    disabled={!canManage}
                     onClick={openEdit}
                   >
                     <Pencil aria-hidden="true" />
@@ -405,6 +420,13 @@ export function UserActions({
           </p>
         )}
       </ConfirmationDialog>
+
+      <ResetPasswordSheet
+        open={passwordReset.open}
+        tenantId={tenantId}
+        user={user}
+        onClose={passwordReset.onClose}
+      />
     </>
   )
 }

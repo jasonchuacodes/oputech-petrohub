@@ -2,9 +2,11 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   CreateUserDocument,
   DeleteUserDocument,
+  ResetUserPasswordDocument,
   UpdateUserDocument,
   UsersDocument,
   type CreateUserInput,
+  type ResetUserPasswordInput,
   type UpdateUserInput,
   type UsersQuery,
 } from '~/generated/graphql'
@@ -62,6 +64,24 @@ export function useDeleteUserMutation() {
       (await graphqlClient.request(DeleteUserDocument, { input: { userId } }, { tenantId }))
         .deleteUser,
     onSuccess: async (_deleted, { tenantId }) => {
+      await queryClient.invalidateQueries({ queryKey: userKeys.tenant(tenantId) })
+    },
+  })
+}
+
+export function useResetUserPasswordMutation() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({
+      tenantId,
+      input,
+    }: {
+      tenantId: string
+      input: ResetUserPasswordInput
+    }) =>
+      (await graphqlClient.request(ResetUserPasswordDocument, { input }, { tenantId }))
+        .resetUserPassword,
+    onSuccess: async (_user, { tenantId }) => {
       await queryClient.invalidateQueries({ queryKey: userKeys.tenant(tenantId) })
     },
   })

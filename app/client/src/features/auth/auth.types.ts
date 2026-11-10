@@ -13,7 +13,6 @@ export type AuthUser = {
   tenantIds: string[]
   currentTenantId?: string
   tenantSelectionVersion: number
-  shouldChangePassword: boolean
 }
 
 type TenantAccess = {

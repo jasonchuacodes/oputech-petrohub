@@ -73,9 +73,6 @@ export class User {
   @Prop({ required: true, default: 1, type: Number })
   credentialVersion!: number
 
-  @Prop({ required: true, default: true, type: Boolean })
-  shouldChangePassword!: boolean
-
   createdAt!: Date
   updatedAt!: Date
 }

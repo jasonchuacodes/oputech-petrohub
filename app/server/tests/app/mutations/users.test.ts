@@ -18,13 +18,14 @@ const userFields = `
   username
   role
   status
-  shouldChangePassword
 `
 
 describe('user management', () => {
   let replicaSet: MongoMemoryReplSet
   let app: INestApplication
   let tenantId: Types.ObjectId
+  let ownerId: Types.ObjectId
+  let anotherAdminId: Types.ObjectId
 
   beforeAll(async () => {
     replicaSet = await MongoMemoryReplSet.create({ replSet: { count: 1 } })
@@ -47,8 +48,8 @@ describe('user management', () => {
       username: 'users-owner',
       passwordHash: await hash('OwnerPassword123'),
       role: UserRole.SUPERADMIN,
-      shouldChangePassword: false,
     })
+    ownerId = owner._id
     const tenant = await tenants.create(owner._id, { name: 'Users Station' })
     tenantId = tenant._id
     await users.create({
@@ -57,15 +58,21 @@ describe('user management', () => {
       role: UserRole.ADMIN,
       accountHolderId: owner._id,
       tenantIds: [tenant._id],
-      shouldChangePassword: false,
     })
+    const anotherAdmin = await users.create({
+      username: 'users-admin-two',
+      passwordHash: await hash('AdminTwoPassword123'),
+      role: UserRole.ADMIN,
+      accountHolderId: owner._id,
+      tenantIds: [tenant._id],
+    })
+    anotherAdminId = anotherAdmin._id
     await users.create({
       username: 'users-member',
       passwordHash: await hash('MemberPassword123'),
       role: UserRole.MEMBER,
       accountHolderId: owner._id,
       tenantIds: [tenant._id],
-      shouldChangePassword: false,
     })
   }, 60_000)
 
@@ -97,7 +104,6 @@ describe('user management', () => {
       username: 'new-operator',
       role: 'member',
       status: 'active',
-      shouldChangePassword: true,
     })
 
     const usersModel = app.get<Model<User>>(getModelToken(User.name))
@@ -189,6 +195,57 @@ describe('user management', () => {
       .set('Authorization', `Bearer ${memberToken}`)
       .expect(200)
       .expect(({ body }) => expect(body.user.displayFullName).toBe('Updated Member'))
+  })
+
+  it('lets administrators reset manageable passwords and revokes target sessions', async () => {
+    const ownerToken = await login('users-owner', 'OwnerPassword123')
+    const adminToken = await login('users-admin', 'AdminPassword123')
+    const memberToken = await login('users-member', 'MemberPassword123')
+    const listing = await graphql(
+      ownerToken,
+      'query ($input: UsersInput!) { users(input: $input) { items { id username } } }',
+      { input: { offset: 0, limit: 20 } },
+    )
+    const memberId = listing.body.data.users.items.find(
+      (user: { username: string }) => user.username === 'users-member',
+    ).id as string
+    const mutation = `
+      mutation ($input: ResetUserPasswordInput!) {
+        resetUserPassword(input: $input) { id username }
+      }
+    `
+
+    const reset = await graphql(adminToken, mutation, {
+      input: { userId: memberId, newPassword: 'UpdatedPassword123' },
+    })
+    expect(reset.body.errors).toBeUndefined()
+    expect(reset.body.data.resetUserPassword).toMatchObject({
+      id: memberId,
+      username: 'users-member',
+    })
+
+    await request(app.getHttpServer())
+      .get('/api/auth/session')
+      .set('Authorization', `Bearer ${memberToken}`)
+      .expect(401)
+    await request(app.getHttpServer())
+      .post('/api/auth/session')
+      .set('origin', 'http://localhost:5173')
+      .send({ username: 'users-member', password: 'MemberPassword123' })
+      .expect(401)
+    await login('users-member', 'UpdatedPassword123')
+
+    const forbidden = await graphql(adminToken, mutation, {
+      input: { userId: anotherAdminId.toHexString(), newPassword: 'UpdatedAdminPassword123' },
+    })
+    expect(forbidden.body.errors[0].extensions.originalError).toMatchObject({ code: 'FORBIDDEN' })
+
+    const selfReset = await graphql(ownerToken, mutation, {
+      input: { userId: ownerId.toHexString(), newPassword: 'UpdatedOwnerPassword123' },
+    })
+    expect(selfReset.body.errors[0].extensions.originalError).toMatchObject({
+      code: 'INVALID_INPUT',
+    })
   })
 
   it('updates users, revokes their session on role change, and deletes them', async () => {

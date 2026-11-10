@@ -13,6 +13,7 @@ import { User, UserDocument, UserRole, UserStatus } from './schemas/user.schema'
 import {
   CreateUserInput,
   DeleteUserInput,
+  ResetUserPasswordInput,
   UpdateMyProfileInput,
   UpdateUserInput,
   UsersInput,
@@ -26,7 +27,6 @@ export type AuthenticatedUser = Pick<
   | 'username'
   | 'status'
   | 'role'
-  | 'shouldChangePassword'
   | 'tenantIds'
   | 'currentTenantId'
   | 'tenantSelectionVersion'
@@ -37,7 +37,6 @@ type CreateUserBase = {
   lastName?: string
   username: string
   passwordHash: string
-  shouldChangePassword?: boolean
 }
 
 type PersistUserInput =
@@ -138,7 +137,6 @@ export class UsersService {
         role: input.role,
         accountHolderId: scope.accountHolderId,
         tenantIds: [scope.tenantId],
-        shouldChangePassword: true,
       })
     } catch (error) {
       if (isDuplicateKeyError(error)) {
@@ -259,11 +257,66 @@ export class UsersService {
     return true
   }
 
+  async resetUserPassword(
+    actor: UserManagementActor,
+    scope: TenantUserScope,
+    input: ResetUserPasswordInput,
+  ): Promise<UserDocument> {
+    if (actor.userId.equals(input.userId)) {
+      throw new InvalidInputException('Change your own password from Account settings.')
+    }
+
+    const user = await this.findUserInScope(scope, input.userId)
+    this.assertCanManageUser(actor, user)
+    const passwordHash = await hash(input.newPassword)
+    const databaseSession = await this.connection.startSession()
+    let updated: UserDocument | null = null
+
+    try {
+      await databaseSession.withTransaction(async () => {
+        const currentUser = await this.users
+          .findOne({
+            _id: input.userId,
+            accountHolderId: scope.accountHolderId,
+            tenantIds: scope.tenantId,
+            role: { $in: [UserRole.ADMIN, UserRole.MEMBER] },
+          })
+          .session(databaseSession)
+          .exec()
+        if (!currentUser) throw new NotFoundException('User not found.')
+        this.assertCanManageUser(actor, currentUser)
+
+        updated = await this.users
+          .findOneAndUpdate(
+            {
+              _id: currentUser._id,
+              accountHolderId: scope.accountHolderId,
+              tenantIds: scope.tenantId,
+              role: currentUser.role,
+            },
+            { $set: { passwordHash }, $inc: { credentialVersion: 1 } },
+            { new: true, runValidators: true, session: databaseSession },
+          )
+          .exec()
+        if (!updated) throw new NotFoundException('User not found.')
+
+        await this.sessions
+          .deleteMany({ userId: currentUser._id }, { session: databaseSession })
+          .exec()
+      })
+    } finally {
+      await databaseSession.endSession()
+    }
+
+    if (!updated) throw new NotFoundException('User not found.')
+    return updated
+  }
+
   async updatePassword(userId: Types.ObjectId, passwordHash: string): Promise<void> {
     await this.users.updateOne(
       { _id: userId, status: UserStatus.ACTIVE },
       {
-        $set: { passwordHash, shouldChangePassword: false },
+        $set: { passwordHash },
         $inc: { credentialVersion: 1 },
       },
     )
@@ -282,7 +335,6 @@ export class UsersService {
       tenantIds: user.tenantIds,
       currentTenantId: user.currentTenantId,
       tenantSelectionVersion: user.tenantSelectionVersion,
-      shouldChangePassword: user.shouldChangePassword,
     }
   }
 

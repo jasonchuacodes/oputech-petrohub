@@ -28,6 +28,17 @@ async function ensureIndexes(): Promise<void> {
       console.log(`Removed obsolete keys from ${cleanup.modifiedCount} tenant records`)
     }
 
+    const users = database.collection('users')
+    const userCleanup = await users.updateMany(
+      { shouldChangePassword: { $exists: true } },
+      { $unset: { shouldChangePassword: '' } },
+    )
+    if (userCleanup.modifiedCount > 0) {
+      console.log(
+        `Removed obsolete password-change flags from ${userCleanup.modifiedCount} user records`,
+      )
+    }
+
     for (const model of Object.values(connection.models)) {
       await model.createIndexes()
       console.log(`Indexes ensured for ${model.collection.collectionName}`)

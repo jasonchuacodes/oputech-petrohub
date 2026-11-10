@@ -13,6 +13,8 @@ import {
   CreateUserInput,
   deleteUserInputSchema,
   DeleteUserInput,
+  resetUserPasswordInputSchema,
+  ResetUserPasswordInput,
   updateUserInputSchema,
   UpdateUserInput,
   updateMyProfileInputSchema,
@@ -58,6 +60,22 @@ export class UsersResolver {
     @Args('input', new ZodValidationPipe(updateUserInputSchema)) input: UpdateUserInput,
   ) {
     return this.usersService.updateUser(this.toActor(actor), this.toScope(tenant), input)
+  }
+
+  @Mutation('resetUserPassword')
+  @UseGuards(...userManagementGuards)
+  @RequireRoles(UserRole.SUPERADMIN, UserRole.ADMIN)
+  resetUserPassword(
+    @CurrentActor() actor: AuthenticatedActor,
+    @CurrentTenant() tenant: AuthorizedTenant,
+    @Args('input', new ZodValidationPipe(resetUserPasswordInputSchema))
+    input: ResetUserPasswordInput,
+  ) {
+    return this.usersService.resetUserPassword(
+      this.toActor(actor),
+      this.toScope(tenant),
+      input,
+    )
   }
 
   @Mutation('updateMyProfile')

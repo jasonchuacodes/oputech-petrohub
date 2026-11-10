@@ -8,7 +8,6 @@ query Users($input: UsersInput!) {
       username
       role
       status
-      shouldChangePassword
     }
     totalCount
   }
@@ -23,7 +22,6 @@ mutation CreateUser($input: CreateUserInput!) {
     username
     role
     status
-    shouldChangePassword
   }
 }
 
@@ -36,7 +34,13 @@ mutation UpdateUser($input: UpdateUserInput!) {
     username
     role
     status
-    shouldChangePassword
+  }
+}
+
+mutation ResetUserPassword($input: ResetUserPasswordInput!) {
+  resetUserPassword(input: $input) {
+    id
+    username
   }
 }
 

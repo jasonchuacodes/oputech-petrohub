@@ -46,7 +46,6 @@ describe('authentication', () => {
       username: 'owner',
       passwordHash: await hash('OwnerPassword123'),
       role: UserRole.SUPERADMIN,
-      shouldChangePassword: false,
     })
     accountHolderId = accountHolder._id
     const tenant = await tenants.create(accountHolder._id, {
@@ -63,7 +62,6 @@ describe('authentication', () => {
       role: UserRole.ADMIN,
       accountHolderId: accountHolder._id,
       tenantIds: [tenant._id],
-      shouldChangePassword: false,
     })
     await users.create({
       firstName: 'Test',
@@ -73,7 +71,6 @@ describe('authentication', () => {
       role: UserRole.MEMBER,
       accountHolderId: accountHolder._id,
       tenantIds: [tenant._id],
-      shouldChangePassword: false,
     })
     tenantId = tenant._id
     secondTenantId = secondTenant._id
@@ -115,8 +112,8 @@ describe('authentication', () => {
     expect(registration.body).toMatchObject({
       username: 'registered-owner',
       role: UserRole.SUPERADMIN,
-      shouldChangePassword: false,
     })
+    expect(registration.body.shouldChangePassword).toBeUndefined()
     expect(registration.body.displayName).toBeUndefined()
     expect(registration.body.displayFullName).toBeUndefined()
 
@@ -134,8 +131,8 @@ describe('authentication', () => {
     expect(login.body.user).toMatchObject({
       username: 'registered-owner',
       role: UserRole.SUPERADMIN,
-      shouldChangePassword: false,
     })
+    expect(login.body.user.shouldChangePassword).toBeUndefined()
     expect(login.body.tenantAccess).toEqual([])
 
     await request(app.getHttpServer())
@@ -510,7 +507,6 @@ describe('authentication', () => {
       role: UserRole.ADMIN,
       accountHolderId,
       tenantIds: [tenant._id, secondTenantId],
-      shouldChangePassword: false,
     })
     const member = await users.create({
       username: 'temporary-member',
@@ -518,7 +514,6 @@ describe('authentication', () => {
       role: UserRole.MEMBER,
       accountHolderId,
       tenantIds: [tenant._id],
-      shouldChangePassword: false,
     })
     const reportId = new Types.ObjectId()
 

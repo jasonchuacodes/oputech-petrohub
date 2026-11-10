@@ -38,6 +38,7 @@ export type Mutation = {
   createUser: User;
   deleteTenant: Scalars['Boolean']['output'];
   deleteUser: Scalars['Boolean']['output'];
+  resetUserPassword: User;
   updateMyProfile: User;
   updateTenant: TenantSummary;
   updateUser: User;
@@ -61,6 +62,11 @@ export type MutationDeleteTenantArgs = {
 
 export type MutationDeleteUserArgs = {
   input: DeleteUserInput;
+};
+
+
+export type MutationResetUserPasswordArgs = {
+  input: ResetUserPasswordInput;
 };
 
 
@@ -88,6 +94,11 @@ export type Query = {
 
 export type QueryUsersArgs = {
   input: UsersInput;
+};
+
+export type ResetUserPasswordInput = {
+  newPassword: Scalars['String']['input'];
+  userId: Scalars['ObjectId']['input'];
 };
 
 export type TenantAccess = {
@@ -129,7 +140,6 @@ export type User = {
   id: Scalars['ObjectId']['output'];
   lastName?: Maybe<Scalars['String']['output']>;
   role: UserRole;
-  shouldChangePassword: Scalars['Boolean']['output'];
   status: UserStatus;
   username: Scalars['String']['output'];
 };
@@ -236,6 +246,7 @@ export type ResolversTypes = {
   Mutation: ResolverTypeWrapper<Record<PropertyKey, never>>;
   ObjectId: ResolverTypeWrapper<Scalars['ObjectId']['output']>;
   Query: ResolverTypeWrapper<Record<PropertyKey, never>>;
+  ResetUserPasswordInput: ResetUserPasswordInput;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
   TenantAccess: ResolverTypeWrapper<TenantAccess>;
   TenantSummary: ResolverTypeWrapper<TenantSummary>;
@@ -260,6 +271,7 @@ export type ResolversParentTypes = {
   Mutation: Record<PropertyKey, never>;
   ObjectId: Scalars['ObjectId']['output'];
   Query: Record<PropertyKey, never>;
+  ResetUserPasswordInput: ResetUserPasswordInput;
   String: Scalars['String']['output'];
   TenantAccess: TenantAccess;
   TenantSummary: TenantSummary;
@@ -276,6 +288,7 @@ export type MutationResolvers<ContextType = GraphqlContext, ParentType extends R
   createUser?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationCreateUserArgs, 'input'>>;
   deleteTenant?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteTenantArgs, 'input'>>;
   deleteUser?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteUserArgs, 'input'>>;
+  resetUserPassword?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationResetUserPasswordArgs, 'input'>>;
   updateMyProfile?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationUpdateMyProfileArgs, 'input'>>;
   updateTenant?: Resolver<ResolversTypes['TenantSummary'], ParentType, ContextType, RequireFields<MutationUpdateTenantArgs, 'input'>>;
   updateUser?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationUpdateUserArgs, 'input'>>;
@@ -309,7 +322,6 @@ export type UserResolvers<ContextType = GraphqlContext, ParentType extends Resol
   id?: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
   lastName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   role?: Resolver<ResolversTypes['UserRole'], ParentType, ContextType>;
-  shouldChangePassword?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   status?: Resolver<ResolversTypes['UserStatus'], ParentType, ContextType>;
   username?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
