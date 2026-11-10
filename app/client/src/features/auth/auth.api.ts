@@ -1,7 +1,7 @@
 import axios from 'axios'
 import type { SessionResponse } from './auth.types'
 
-const apiUrl = '/api'
+const apiUrl = process.env.NEXT_PUBLIC_API_URL?.trim() || '/api'
 const authHttp = axios.create({
   baseURL: apiUrl,
   headers: { 'Content-Type': 'application/json' },

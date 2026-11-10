@@ -1,6 +1,18 @@
 import type { NextConfig } from 'next'
 
-const nestApiUrl = process.env.NEST_API_URL ?? 'http://localhost:3000'
+const nestApiUrl = getNestApiUrl()
+
+function getNestApiUrl(): string {
+  const value = process.env.NEST_API_URL?.trim() || 'http://localhost:3000'
+
+  try {
+    const url = new URL(value)
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') throw new Error()
+    return url.origin
+  } catch {
+    throw new Error('NEST_API_URL must be an absolute HTTP(S) URL, for example http://localhost:3000')
+  }
+}
 
 const nextConfig: NextConfig = {
   async rewrites() {

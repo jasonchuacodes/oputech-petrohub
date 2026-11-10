@@ -5,11 +5,8 @@ import {
   getAuthSession,
 } from '~/features/auth/auth-session'
 
-const graphqlUrl = '/graphql'
-const client = new GraphQLClient(graphqlUrl, {
-  cache: 'no-store',
-  credentials: 'include',
-})
+const configuredGraphqlUrl = process.env.NEXT_PUBLIC_GRAPHQL_URL?.trim() || '/graphql'
+let client: GraphQLClient | undefined
 
 async function request<TResult, TVariables extends object>(
   document: TypedDocumentNode<TResult, TVariables>,
@@ -40,11 +37,24 @@ function requestWithToken<TResult, TVariables extends object>(
   variables: TVariables | undefined,
   accessToken: string,
 ): Promise<TResult> {
-  return client.request({
+  return getClient().request({
     document,
     variables,
     requestHeaders: { Authorization: `Bearer ${accessToken}` },
   } as unknown as RequestOptions<TVariables, TResult>)
+}
+
+function getClient(): GraphQLClient {
+  client ??= new GraphQLClient(resolveBrowserUrl(configuredGraphqlUrl), {
+    cache: 'no-store',
+    credentials: 'include',
+  })
+  return client
+}
+
+function resolveBrowserUrl(value: string): string {
+  if (typeof window === 'undefined') return value
+  return new URL(value, window.location.origin).toString()
 }
 
 function isAuthenticationError(error: unknown): boolean {
