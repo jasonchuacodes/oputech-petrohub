@@ -9,10 +9,3 @@ export type TenantActor = {
     tenantIds: Types.ObjectId[]
   }
 }
-
-export type CreateTenantInput = {
-  name: string
-  key: string
-  timezone: string
-  currency: string
-}

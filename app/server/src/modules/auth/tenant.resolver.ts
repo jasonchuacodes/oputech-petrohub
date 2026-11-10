@@ -1,11 +1,17 @@
 import { UseGuards } from '@nestjs/common'
-import { Query, Resolver } from '@nestjs/graphql'
-import type { Query as GraphqlQuery } from '../../generated/graphql'
+import { Args, Mutation, Query, Resolver } from '@nestjs/graphql'
+import type { Mutation as GraphqlMutation, Query as GraphqlQuery } from '../../generated/graphql'
+import { ZodValidationPipe } from '../../common/validation/zod-validation.pipe'
+import {
+  createTenantInputSchema,
+  CreateTenantInput,
+} from '../tenants/tenant.schemas'
 import { TenantService } from '../tenants/tenant.service'
 import { AuthenticatedActor, AuthorizedTenant } from './auth.types'
 import { CurrentActor } from './decorators/current-actor.decorator'
 import { CurrentTenant } from './decorators/current-tenant.decorator'
 import { TenantAccessGuard } from './guards/tenant-access.guard'
+import { SuperadminGuard } from './guards/superadmin.guard'
 import { AccessTokenGuard } from './session/guards/access-token.guard'
 
 @Resolver()
@@ -25,6 +31,21 @@ export class TenantResolver {
         currency: tenant.currency,
       },
     }))
+  }
+
+  @Mutation('createTenant')
+  @UseGuards(SuperadminGuard)
+  async createTenant(
+    @CurrentActor() actor: AuthenticatedActor,
+    @Args('input', new ZodValidationPipe(createTenantInputSchema)) input: CreateTenantInput,
+  ): Promise<GraphqlMutation['createTenant']> {
+    const tenant = await this.tenantService.create(actor.userId, input)
+    return {
+      id: tenant._id,
+      name: tenant.name,
+      timezone: tenant.timezone,
+      currency: tenant.currency,
+    }
   }
 
   @Query('activeTenant')

@@ -9,3 +9,12 @@ query Tenants {
     }
   }
 }
+
+mutation CreateTenant($input: CreateTenantInput!) {
+  createTenant(input: $input) {
+    id
+    name
+    timezone
+    currency
+  }
+}

@@ -36,6 +36,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         ...snapshot,
         login: session.login.bind(session),
         logout: session.logout.bind(session),
+        activateTenant: session.activateTenant.bind(session),
         changePassword: session.changePassword.bind(session),
       }}
     >

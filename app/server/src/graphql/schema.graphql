@@ -5,6 +5,14 @@ type Query {
   activeTenant: TenantSummary
 }
 
+type Mutation {
+  createTenant(input: CreateTenantInput!): TenantSummary!
+}
+
+input CreateTenantInput {
+  name: String!
+}
+
 type TenantAccess {
   role: UserRole!
   tenant: TenantSummary!

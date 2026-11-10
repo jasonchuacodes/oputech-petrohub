@@ -1,6 +1,6 @@
-import { render, screen } from '@testing-library/react'
+import { cleanup, render, screen } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useSessionQuery } from './auth.queries'
 import { ProtectedRoute } from './protected-route'
 
@@ -15,6 +15,7 @@ function renderRoutes(initialPath: string) {
         <Route element={<ProtectedRoute />}>
           <Route path="reports" element={<div>Reports page</div>} />
           <Route path="change-password" element={<div>Change password page</div>} />
+          <Route path="onboarding" element={<div>Onboarding page</div>} />
         </Route>
         <Route path="login" element={<div>Login page</div>} />
       </Routes>
@@ -24,6 +25,7 @@ function renderRoutes(initialPath: string) {
 
 describe('ProtectedRoute', () => {
   beforeEach(() => vi.resetAllMocks())
+  afterEach(cleanup)
 
   it('forces temporary-password users into the password flow', async () => {
     mockedSessionQuery.mockReturnValue({
@@ -61,6 +63,7 @@ describe('ProtectedRoute', () => {
           username: 'admin',
           status: 'active',
           role: 'admin',
+          currentTenantId: 'tenant-1',
           shouldChangePassword: false,
         },
         tenantAccess: [],
@@ -68,6 +71,47 @@ describe('ProtectedRoute', () => {
     } as unknown as ReturnType<typeof useSessionQuery>)
 
     renderRoutes('/change-password')
+    expect(await screen.findByText('Reports page')).toBeInTheDocument()
+  })
+
+  it('routes a new superadmin without a tenant into onboarding', async () => {
+    mockedSessionQuery.mockReturnValue({
+      isPending: false,
+      isError: false,
+      data: {
+        user: {
+          id: 'user-1',
+          username: 'owner',
+          status: 'active',
+          role: 'superadmin',
+          shouldChangePassword: false,
+        },
+        tenantAccess: [],
+      },
+    } as unknown as ReturnType<typeof useSessionQuery>)
+
+    renderRoutes('/reports')
+    expect(await screen.findByText('Onboarding page')).toBeInTheDocument()
+  })
+
+  it('keeps users with a tenant out of onboarding', async () => {
+    mockedSessionQuery.mockReturnValue({
+      isPending: false,
+      isError: false,
+      data: {
+        user: {
+          id: 'user-1',
+          username: 'owner',
+          status: 'active',
+          role: 'superadmin',
+          currentTenantId: 'tenant-1',
+          shouldChangePassword: false,
+        },
+        tenantAccess: [{ tenantId: 'tenant-1', role: 'superadmin' }],
+      },
+    } as unknown as ReturnType<typeof useSessionQuery>)
+
+    renderRoutes('/onboarding')
     expect(await screen.findByText('Reports page')).toBeInTheDocument()
   })
 })

@@ -103,6 +103,25 @@ class AuthSession {
     await this.rotateCredential('bootstrap')
   }
 
+  activateTenant(tenantId: string): void {
+    if (!this.snapshot.session) return
+
+    const { user, tenantAccess } = this.snapshot.session
+    this.update({
+      ...this.snapshot,
+      session: {
+        user: {
+          ...user,
+          currentTenantId: tenantId,
+          tenantSelectionVersion: user.tenantSelectionVersion + 1,
+        },
+        tenantAccess: tenantAccess.some((item) => item.tenantId === tenantId)
+          ? tenantAccess
+          : [...tenantAccess, { tenantId, role: user.role }],
+      },
+    })
+  }
+
   async getAccessToken(): Promise<string> {
     if (this.refreshPromise) return this.refreshPromise
     if (this.snapshot.status === 'bootstrapping') await this.bootstrap()

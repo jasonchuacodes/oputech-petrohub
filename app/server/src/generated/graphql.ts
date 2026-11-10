@@ -3,6 +3,7 @@ import type { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } f
 import type { GraphqlContext } from '../common/graphql/graphql-context';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
+export type RequireFields<T, K extends keyof T> = Omit<T, K> & { [P in K]-?: NonNullable<T[P]> };
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: { input: string; output: string; }
@@ -11,6 +12,20 @@ export type Scalars = {
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
   ObjectId: { input: Types.ObjectId; output: Types.ObjectId; }
+};
+
+export type CreateTenantInput = {
+  name: Scalars['String']['input'];
+};
+
+export type Mutation = {
+  __typename?: 'Mutation';
+  createTenant: TenantSummary;
+};
+
+
+export type MutationCreateTenantArgs = {
+  input: CreateTenantInput;
 };
 
 export type Query = {
@@ -112,6 +127,8 @@ export type DirectiveResolverFn<TResult = Record<PropertyKey, never>, TParent = 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
+  CreateTenantInput: CreateTenantInput;
+  Mutation: ResolverTypeWrapper<Record<PropertyKey, never>>;
   ObjectId: ResolverTypeWrapper<Scalars['ObjectId']['output']>;
   Query: ResolverTypeWrapper<Record<PropertyKey, never>>;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
@@ -123,11 +140,17 @@ export type ResolversTypes = {
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
   Boolean: Scalars['Boolean']['output'];
+  CreateTenantInput: CreateTenantInput;
+  Mutation: Record<PropertyKey, never>;
   ObjectId: Scalars['ObjectId']['output'];
   Query: Record<PropertyKey, never>;
   String: Scalars['String']['output'];
   TenantAccess: TenantAccess;
   TenantSummary: TenantSummary;
+};
+
+export type MutationResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
+  createTenant?: Resolver<ResolversTypes['TenantSummary'], ParentType, ContextType, RequireFields<MutationCreateTenantArgs, 'input'>>;
 };
 
 export interface ObjectIdScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['ObjectId'], any> {
@@ -152,6 +175,7 @@ export type TenantSummaryResolvers<ContextType = GraphqlContext, ParentType exte
 };
 
 export type Resolvers<ContextType = GraphqlContext> = {
+  Mutation?: MutationResolvers<ContextType>;
   ObjectId?: GraphQLScalarType;
   Query?: QueryResolvers<ContextType>;
   TenantAccess?: TenantAccessResolvers<ContextType>;

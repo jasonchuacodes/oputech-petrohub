@@ -11,6 +11,24 @@ async function ensureIndexes(): Promise<void> {
     const connection = application.get<Connection>(getConnectionToken())
     for (const model of Object.values(connection.models)) {
       await model.createCollection()
+    }
+
+    const database = connection.db
+    if (!database) throw new Error('Database connection is unavailable')
+    const tenants = database.collection('tenants')
+    if (await tenants.indexExists('key_1')) {
+      await tenants.dropIndex('key_1')
+      console.log('Dropped obsolete tenants.key_1 index')
+    }
+    const cleanup = await tenants.updateMany(
+      { key: { $exists: true } },
+      { $unset: { key: '' } },
+    )
+    if (cleanup.modifiedCount > 0) {
+      console.log(`Removed obsolete keys from ${cleanup.modifiedCount} tenant records`)
+    }
+
+    for (const model of Object.values(connection.models)) {
       await model.createIndexes()
       console.log(`Indexes ensured for ${model.collection.collectionName}`)
     }

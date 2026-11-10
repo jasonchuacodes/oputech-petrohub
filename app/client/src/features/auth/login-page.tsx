@@ -25,12 +25,26 @@ export function LoginPage() {
     mode: 'onChange',
   })
 
-  if (session.isSuccess) return <Navigate to="/reports" replace />
+  if (session.data) {
+    return (
+      <Navigate
+        to={session.data.user.currentTenantId ? '/reports' : '/onboarding'}
+        replace
+      />
+    )
+  }
 
   const submit = handleSubmit((values) => {
     login.mutate(values, {
       onSuccess: ({ user }) =>
-        navigate(user.shouldChangePassword ? '/change-password' : '/reports', { replace: true }),
+        navigate(
+          user.shouldChangePassword
+            ? '/change-password'
+            : user.currentTenantId
+              ? '/reports'
+              : '/onboarding',
+          { replace: true },
+        ),
     })
   })
 

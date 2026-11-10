@@ -1,8 +1,9 @@
 import axios from 'axios'
 import type { SessionResponse } from './auth.types'
 
+const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
 const authHttp = axios.create({
-  baseURL: '',
+  baseURL: apiUrl,
   headers: { 'Content-Type': 'application/json' },
   timeout: 15_000,
   withCredentials: true,
@@ -32,15 +33,15 @@ async function authRequest<T>(request: () => Promise<{ data: T }>): Promise<T> {
 }
 
 export function loginSession(input: { username: string; password: string }) {
-  return authRequest(() => authHttp.post<SessionResponse>('/api/auth/session', input))
+  return authRequest(() => authHttp.post<SessionResponse>('auth/session', input))
 }
 
 export function refreshSession() {
-  return authRequest(() => authHttp.post<SessionResponse>('/api/auth/session/refresh', {}))
+  return authRequest(() => authHttp.post<SessionResponse>('auth/session/refresh', {}))
 }
 
 export function logoutSession() {
-  return authRequest(() => authHttp.delete<void>('/api/auth/session', { data: {} }))
+  return authRequest(() => authHttp.delete<void>('auth/session', { data: {} }))
 }
 
 export function changePasswordRequest(
@@ -48,7 +49,7 @@ export function changePasswordRequest(
   input: { currentPassword: string; newPassword: string },
 ) {
   return authRequest(() =>
-    authHttp.post<void>('/api/auth/change-password', input, {
+    authHttp.post<void>('auth/change-password', input, {
       headers: { Authorization: `Bearer ${accessToken}` },
     }),
   )

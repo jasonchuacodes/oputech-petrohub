@@ -6,6 +6,7 @@ import { AuthService } from './auth.service'
 import { OriginGuard } from './guards/origin.guard'
 import { RolesGuard } from './guards/roles.guard'
 import { TenantAccessGuard } from './guards/tenant-access.guard'
+import { SuperadminGuard } from './guards/superadmin.guard'
 import { SessionModule } from './session/session.module'
 import { TenantResolver } from './tenant.resolver'
 
@@ -21,6 +22,7 @@ import { TenantResolver } from './tenant.resolver'
     OriginGuard,
     TenantAccessGuard,
     RolesGuard,
+    SuperadminGuard,
     TenantResolver,
   ],
   exports: [SessionModule, TenantAccessGuard, RolesGuard],

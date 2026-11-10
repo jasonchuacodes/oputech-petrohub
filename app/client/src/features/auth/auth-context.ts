@@ -5,6 +5,7 @@ import type { SessionResponse } from './auth.types'
 export type AuthContextValue = AuthSessionSnapshot & {
   login: (input: { username: string; password: string }) => Promise<SessionResponse>
   logout: () => Promise<void>
+  activateTenant: (tenantId: string) => void
   changePassword: (input: { currentPassword: string; newPassword: string }) => Promise<void>
 }
 

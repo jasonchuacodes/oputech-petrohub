@@ -5,7 +5,11 @@ import {
   getAuthSession,
 } from '~/features/auth/auth-session'
 
-const client = new GraphQLClient('/graphql', { cache: 'no-store', credentials: 'include' })
+const graphqlUrl = import.meta.env.VITE_GRAPHQL_URL || 'http://localhost:3000/graphql'
+const client = new GraphQLClient(graphqlUrl, {
+  cache: 'no-store',
+  credentials: 'include',
+})
 
 async function request<TResult, TVariables extends object>(
   document: TypedDocumentNode<TResult, TVariables>,
@@ -17,7 +21,7 @@ async function request<TResult, TVariables extends object>(
   try {
     return await requestWithToken(document, variables, accessToken)
   } catch (error) {
-    if (!isQueryDocument(document) || !isAuthenticationError(error)) throw error
+    if (!isAuthenticationError(error)) throw error
     const nextAccessToken = await session.recoverAccessToken(accessToken)
     try {
       return await requestWithToken(document, variables, nextAccessToken)
@@ -29,15 +33,6 @@ async function request<TResult, TVariables extends object>(
       throw retryError
     }
   }
-}
-
-function isQueryDocument<TResult, TVariables extends object>(
-  document: TypedDocumentNode<TResult, TVariables>,
-): boolean {
-  return document.definitions.some(
-    (definition) =>
-      definition.kind === 'OperationDefinition' && definition.operation === 'query',
-  )
 }
 
 function requestWithToken<TResult, TVariables extends object>(

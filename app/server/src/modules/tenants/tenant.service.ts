@@ -6,7 +6,8 @@ import { Session as AuthSession } from '../auth/schemas/session.schema'
 import { MemberActivity } from '../member-activity/schemas/member-activity.schema'
 import { User, UserRole, UserStatus } from '../users/schemas/user.schema'
 import { Tenant, TenantStatus } from './schemas/tenant.schema'
-import { CreateTenantInput, TenantActor } from './tenant.types'
+import { CreateTenantInput } from './tenant.schemas'
+import { TenantActor } from './tenant.types'
 
 export type TenantRecord = Tenant & {
   _id: Types.ObjectId
@@ -63,10 +64,13 @@ export class TenantService {
       throw invalidInput('Tenant account holder must be an active superadmin.')
     }
 
+    const tenantId = new Types.ObjectId()
     const tenant = await this.tenantModel.create({
-      ...input,
+      _id: tenantId,
       accountHolderId,
-      key: input.key.trim().toLowerCase(),
+      name: input.name,
+      timezone: 'Asia/Manila',
+      currency: 'PHP',
     })
 
     await this.userModel.updateOne(
@@ -109,13 +113,6 @@ export class TenantService {
     if (!tenant) throw forbidden('You do not have access to this tenant.')
 
     return tenant
-  }
-
-  findByKey(key: string): Promise<TenantRecord | null> {
-    return this.tenantModel
-      .findOne({ key: key.trim().toLowerCase() })
-      .lean<TenantRecord>()
-      .exec()
   }
 
   async hardDelete(tenantIdValue: Types.ObjectId | string): Promise<TenantDeletionResult> {

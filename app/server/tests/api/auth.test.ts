@@ -51,15 +51,9 @@ describe('authentication', () => {
     accountHolderId = accountHolder._id
     const tenant = await tenants.create(accountHolder._id, {
       name: 'Test Station',
-      key: 'test-station',
-      timezone: 'Asia/Manila',
-      currency: 'PHP',
     })
     const secondTenant = await tenants.create(accountHolder._id, {
       name: 'Second Station',
-      key: 'second-station',
-      timezone: 'Asia/Manila',
-      currency: 'PHP',
     })
     const user = await users.create({
       firstName: 'Test',
@@ -98,7 +92,7 @@ describe('authentication', () => {
       .expect(403)
   })
 
-  it('registers a superadmin with the configured script secret', async () => {
+  it('registers a superadmin and creates their first tenant', async () => {
     const input = {
       username: 'Registered-Owner',
       password: '123456',
@@ -132,18 +126,60 @@ describe('authentication', () => {
       .send(input)
       .expect(409)
 
-    await request(app.getHttpServer())
+    const login = await request(app.getHttpServer())
       .post('/api/auth/session')
       .set('origin', 'http://localhost:5173')
       .send({ username: 'registered-owner', password: input.password })
       .expect(200)
+    expect(login.body.user).toMatchObject({
+      username: 'registered-owner',
+      role: UserRole.SUPERADMIN,
+      shouldChangePassword: false,
+    })
+    expect(login.body.tenantAccess).toEqual([])
+
+    await request(app.getHttpServer())
+      .post('/graphql')
+      .set('Authorization', `Bearer ${login.body.accessToken}`)
+      .send({
+        query: 'mutation ($input: CreateTenantInput!) { createTenant(input: $input) { id } }',
+        variables: { input: { name: '   ' } },
+      })
+      .expect(200)
+      .expect(({ body }) => expect(body.errors).toHaveLength(1))
+
+    const creation = await request(app.getHttpServer())
+      .post('/graphql')
+      .set('Authorization', `Bearer ${login.body.accessToken}`)
+      .send({
+        query:
+          'mutation ($input: CreateTenantInput!) { createTenant(input: $input) { id name timezone currency } }',
+        variables: { input: { name: '  Registered Station  ' } },
+      })
+      .expect(200)
+    expect(creation.body.errors).toBeUndefined()
+    expect(creation.body.data.createTenant).toMatchObject({
+      name: 'Registered Station',
+      timezone: 'Asia/Manila',
+      currency: 'PHP',
+    })
+
+    const cookie = (login.headers['set-cookie'] as unknown as string[] | undefined)?.[0]
+    if (!cookie) throw new Error('Login did not set a refresh cookie')
+    await request(app.getHttpServer())
+      .post('/api/auth/session/refresh')
+      .set('origin', 'http://localhost:5173')
+      .set('Cookie', [cookie])
+      .send({})
+      .expect(200)
       .expect(({ body }) => {
-        expect(body.user).toMatchObject({
-          username: 'registered-owner',
-          role: UserRole.SUPERADMIN,
-          shouldChangePassword: false,
-        })
-        expect(body.tenantAccess).toEqual([])
+        expect(body.user.currentTenantId).toBe(creation.body.data.createTenant.id)
+        expect(body.tenantAccess).toEqual([
+          {
+            tenantId: creation.body.data.createTenant.id,
+            role: UserRole.SUPERADMIN,
+          },
+        ])
       })
   })
 
@@ -171,9 +207,6 @@ describe('authentication', () => {
     await expect(
       tenants.create(memberId, {
         name: 'Invalid Ownership',
-        key: 'invalid-ownership',
-        timezone: 'Asia/Manila',
-        currency: 'PHP',
       }),
     ).rejects.toThrow(/active superadmin/)
   })
@@ -203,6 +236,16 @@ describe('authentication', () => {
       tokenType: 'access',
       dateTimeExpiration: expect.any(String),
     })
+
+    await request(app.getHttpServer())
+      .post('/graphql')
+      .set('Authorization', `Bearer ${login.body.accessToken}`)
+      .send({
+        query: 'mutation ($input: CreateTenantInput!) { createTenant(input: $input) { id } }',
+        variables: { input: { name: 'Forbidden Station' } },
+      })
+      .expect(200)
+      .expect(({ body }) => expect(body.errors).toHaveLength(1))
     const cookie = (login.headers['set-cookie'] as unknown as string[] | undefined)?.[0]
     if (!cookie) throw new Error('Login did not set a refresh cookie')
     expect(cookie).toContain('petromate_refresh=')
@@ -369,9 +412,6 @@ describe('authentication', () => {
     const events = app.get(EventEmitter2)
     const tenant = await tenants.create(accountHolderId, {
       name: 'Temporary Station',
-      key: 'temporary-station',
-      timezone: 'Asia/Manila',
-      currency: 'PHP',
     })
     const admin = await users.create({
       username: 'temporary-admin',

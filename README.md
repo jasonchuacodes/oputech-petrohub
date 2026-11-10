@@ -46,7 +46,7 @@ After the server starts, register the initial superadmin from another terminal:
 pnpm register-superadmin -- --username admin --password 'StrongPassword123'
 ```
 
-Set a strong `SUPERADMIN_SCRIPT_SECRET` in `app/server/.env` before running the command. The command only creates the superadmin account; it does not create a tenant. The client runs on `http://localhost:5173`; the server runs on `http://localhost:3000` by default.
+Set a strong `SUPERADMIN_SCRIPT_SECRET` in `app/server/.env` before running the command. The command only creates the superadmin account; after signing in, the onboarding flow creates its first tenant. The client runs on `http://localhost:5173`; the server runs on `http://localhost:3000` by default.
 
 ## Checks
 
