@@ -7,16 +7,16 @@ export class Session {
   @Prop({ required: true, type: MongooseSchema.Types.ObjectId })
   userId!: Types.ObjectId
 
-  @Prop({ required: true })
+  @Prop({ required: true, type: String })
   sessionKey!: string
 
-  @Prop({ required: true, min: 0 })
+  @Prop({ required: true, min: 0, type: Number })
   credentialVersion!: number
 
   @Prop({ required: true, enum: [TokenType.REFRESH], type: String })
   tokenType!: TokenType.REFRESH
 
-  @Prop({ required: true })
+  @Prop({ required: true, type: String })
   jti!: string
 
   @Prop({ required: true, type: Date })

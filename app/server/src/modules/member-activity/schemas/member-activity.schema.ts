@@ -17,16 +17,16 @@ export class MemberActivity {
   @Prop({ required: true, type: Types.ObjectId })
   memberId!: Types.ObjectId
 
-  @Prop({ required: true, trim: true })
+  @Prop({ required: true, trim: true, type: String })
   action!: string
 
-  @Prop({ required: true, enum: ActivityEntityType })
+  @Prop({ required: true, enum: ActivityEntityType, type: String })
   entityType!: ActivityEntityType
 
   @Prop({ required: true, type: Types.ObjectId })
   entityId!: Types.ObjectId
 
-  @Prop({ required: true })
+  @Prop({ required: true, type: String })
   eventKey!: string
 
   createdAt!: Date

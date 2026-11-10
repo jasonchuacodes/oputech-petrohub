@@ -96,7 +96,7 @@ describe('authentication', () => {
   it('registers a superadmin with the configured script secret', async () => {
     const input = {
       username: 'Registered-Owner',
-      password: 'InitialPassword123',
+      password: '123456',
     }
 
     await request(app.getHttpServer()).post('/api/auth/register').send(input).expect(403)
@@ -117,7 +117,7 @@ describe('authentication', () => {
       displayName: 'registered-owner',
       username: 'registered-owner',
       role: UserRole.SUPERADMIN,
-      shouldChangePassword: true,
+      shouldChangePassword: false,
     })
 
     await request(app.getHttpServer())
@@ -135,7 +135,7 @@ describe('authentication', () => {
         expect(body.user).toMatchObject({
           username: 'registered-owner',
           role: UserRole.SUPERADMIN,
-          shouldChangePassword: true,
+          shouldChangePassword: false,
         })
         expect(body.tenantAccess).toEqual([])
       })

@@ -24,7 +24,7 @@ export class AuthService {
       username: input.username,
       passwordHash: await hash(input.password),
       role: UserRole.SUPERADMIN,
-      shouldChangePassword: true,
+      shouldChangePassword: false,
     })
 
     return {

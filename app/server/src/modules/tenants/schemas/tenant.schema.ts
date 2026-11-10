@@ -11,19 +11,19 @@ export class Tenant {
   @Prop({ required: true, type: Types.ObjectId, index: true })
   accountHolderId!: Types.ObjectId
 
-  @Prop({ required: true, trim: true })
+  @Prop({ required: true, trim: true, type: String })
   name!: string
 
-  @Prop({ required: true, lowercase: true, trim: true })
+  @Prop({ required: true, lowercase: true, trim: true, type: String })
   key!: string
 
-  @Prop({ required: true, trim: true, default: 'Asia/Manila' })
+  @Prop({ required: true, trim: true, default: 'Asia/Manila', type: String })
   timezone!: string
 
-  @Prop({ required: true, uppercase: true, trim: true, default: 'PHP' })
+  @Prop({ required: true, uppercase: true, trim: true, default: 'PHP', type: String })
   currency!: string
 
-  @Prop({ required: true, enum: TenantStatus, default: TenantStatus.ACTIVE })
+  @Prop({ required: true, enum: TenantStatus, default: TenantStatus.ACTIVE, type: String })
   status!: TenantStatus
 
   createdAt!: Date

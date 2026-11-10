@@ -1,18 +1,12 @@
 import { z } from 'zod'
 
 const username = z.string().trim().min(3).max(80).toLowerCase()
-const strongPassword = z
-  .string()
-  .min(12, 'Use at least 12 characters.')
-  .max(128)
-  .regex(/[a-z]/, 'Include a lowercase letter.')
-  .regex(/[A-Z]/, 'Include an uppercase letter.')
-  .regex(/[0-9]/, 'Include a number.')
+const password = z.string().min(6, 'Use at least 6 characters.').max(128)
 
 export const registerSchema = z
   .object({
     username,
-    password: strongPassword,
+    password,
   })
   .strict()
 
@@ -26,7 +20,7 @@ export const loginSchema = z
 export const changePasswordSchema = z
   .object({
     currentPassword: z.string().min(1).max(256),
-    newPassword: strongPassword,
+    newPassword: password,
   })
   .strict()
 

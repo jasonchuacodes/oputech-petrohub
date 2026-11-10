@@ -50,6 +50,8 @@
   --color-brand: #17434d;
   --color-brand-hover: #0f343d;
   --color-brand-light: #e9f0f1;
+  --color-logo-primary: #00143f;
+  --color-logo-accent: #009b93;
   --color-text-primary: #101010;
   --color-text-heading: var(--text-heading);
   --color-text-secondary: rgb(16 16 16 / 70%);

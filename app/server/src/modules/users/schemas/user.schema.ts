@@ -14,19 +14,19 @@ export enum UserRole {
 
 @Schema({ collection: 'users', timestamps: true, versionKey: 'revision' })
 export class User {
-  @Prop({ required: true, trim: true })
+  @Prop({ required: true, trim: true, type: String })
   displayName!: string
 
-  @Prop({ required: true, lowercase: true, trim: true })
+  @Prop({ required: true, lowercase: true, trim: true, type: String })
   username!: string
 
-  @Prop({ required: true, select: false })
+  @Prop({ required: true, select: false, type: String })
   passwordHash!: string
 
-  @Prop({ required: true, enum: UserStatus, default: UserStatus.ACTIVE })
+  @Prop({ required: true, enum: UserStatus, default: UserStatus.ACTIVE, type: String })
   status!: UserStatus
 
-  @Prop({ required: true, enum: UserRole })
+  @Prop({ required: true, enum: UserRole, type: String })
   role!: UserRole
 
   @Prop({
@@ -62,13 +62,13 @@ export class User {
   @Prop({ type: Types.ObjectId })
   currentTenantId?: Types.ObjectId
 
-  @Prop({ required: true, default: 0 })
+  @Prop({ required: true, default: 0, type: Number })
   tenantSelectionVersion!: number
 
-  @Prop({ required: true, default: 1 })
+  @Prop({ required: true, default: 1, type: Number })
   credentialVersion!: number
 
-  @Prop({ required: true, default: true })
+  @Prop({ required: true, default: true, type: Boolean })
   shouldChangePassword!: boolean
 
   createdAt!: Date
