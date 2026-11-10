@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose'
 import { verify } from 'argon2'
 import { randomUUID } from 'node:crypto'
 import { Model, Types } from 'mongoose'
-import { invalidCredentials, invalidSession } from '../../../common/exceptions/errors'
+import { InvalidCredentialsException, InvalidSessionException } from '../../../common/exceptions'
 import { TenantService } from '../../tenants/tenant.service'
 import { UsersService } from '../../users/users.service'
 import { LoginInput } from '../auth.schemas'
@@ -28,7 +28,9 @@ export class SessionService {
 
   async postSession(input: LoginInput): Promise<IssuedSession> {
     const user = await this.users.findByUsername(input.username)
-    if (!user || !(await verify(user.passwordHash, input.password))) throw invalidCredentials()
+    if (!user || !(await verify(user.passwordHash, input.password))) {
+      throw new InvalidCredentialsException()
+    }
 
     const sessionKey = randomUUID()
     const jti = randomUUID()
@@ -88,7 +90,7 @@ export class SessionService {
     } catch {
       throw new ServiceUnavailableException('Authentication service is unavailable')
     }
-    if (!session) throw invalidSession()
+    if (!session) throw new InvalidSessionException()
     return this.findSessionActor(claims.sub, session.credentialVersion)
   }
 
@@ -109,7 +111,7 @@ export class SessionService {
     } catch {
       throw new ServiceUnavailableException('Authentication service is unavailable')
     }
-    if (!session) throw invalidSession()
+    if (!session) throw new InvalidSessionException()
 
     const actor = await this.findSessionActor(claims.sub, session.credentialVersion)
     const maximumExpiration = new Date(
@@ -119,7 +121,7 @@ export class SessionService {
     const requestedDateTimeExpiration = new Date(
       Math.min(rollingExpiration.getTime(), maximumExpiration.getTime()),
     )
-    if (requestedDateTimeExpiration <= dateTimeNow) throw invalidSession()
+    if (requestedDateTimeExpiration <= dateTimeNow) throw new InvalidSessionException()
 
     const nextJti = randomUUID()
     const refreshCredential = await this.tokenService.issueRefreshToken(
@@ -157,7 +159,7 @@ export class SessionService {
     } catch {
       throw new ServiceUnavailableException('Authentication service is unavailable')
     }
-    if (!updatedSession) throw invalidSession()
+    if (!updatedSession) throw new InvalidSessionException()
 
     return this.toIssuedSession(
       actor,
@@ -186,7 +188,7 @@ export class SessionService {
     } catch {
       throw new ServiceUnavailableException('Authentication service is unavailable')
     }
-    if (result.matchedCount === 0) throw invalidSession()
+    if (result.matchedCount === 0) throw new InvalidSessionException()
   }
 
   async revokeAllForUser(userId: string | Types.ObjectId): Promise<void> {
@@ -224,7 +226,9 @@ export class SessionService {
     credentialVersion: number,
   ): Promise<AuthenticatedActor> {
     const user = await this.users.findById(userId)
-    if (!user || user.credentialVersion !== credentialVersion) throw invalidSession()
+    if (!user || user.credentialVersion !== credentialVersion) {
+      throw new InvalidSessionException()
+    }
     return this.toActor(user)
   }
 

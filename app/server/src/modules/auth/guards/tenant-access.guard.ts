@@ -1,7 +1,7 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common'
 import { GqlExecutionContext } from '@nestjs/graphql'
 import { Request } from 'express'
-import { unauthenticated } from '../../../common/exceptions/errors'
+import { AuthenticationRequiredException } from '../../../common/exceptions'
 import { TenantService } from '../../tenants/tenant.service'
 
 @Injectable()
@@ -12,7 +12,7 @@ export class TenantAccessGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = this.getRequest(context)
-    if (!request.actor) throw unauthenticated()
+    if (!request.actor) throw new AuthenticationRequiredException()
 
     const tenantHeader = request.header('x-tenant-id')
     const tenant = await this.tenants.assertAccess(request.actor, tenantHeader ?? '')

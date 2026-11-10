@@ -2,7 +2,7 @@ import { Injectable, ServiceUnavailableException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
 import { z } from 'zod'
-import { invalidSession } from '../../../common/exceptions/errors'
+import { InvalidSessionException } from '../../../common/exceptions'
 import { Environment } from '../../../config/environment'
 import { TokenType } from '../token-type.enum'
 import {
@@ -59,7 +59,7 @@ export class SessionTokenService {
       })
       return accessTokenClaimsSchema.parse(claims)
     } catch {
-      throw invalidSession()
+      throw new InvalidSessionException()
     }
   }
 
@@ -102,7 +102,7 @@ export class SessionTokenService {
       })
       return refreshTokenClaimsSchema.parse(claims)
     } catch {
-      throw invalidSession()
+      throw new InvalidSessionException()
     }
   }
 }

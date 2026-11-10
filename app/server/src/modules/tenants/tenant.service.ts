@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { InjectConnection, InjectModel } from '@nestjs/mongoose'
 import { Connection, Model, Types } from 'mongoose'
-import { forbidden, invalidInput } from '../../common/exceptions/errors'
+import { ForbiddenException, InvalidInputException } from '../../common/exceptions'
 import { Session as AuthSession } from '../auth/schemas/session.schema'
 import { MemberActivity } from '../member-activity/schemas/member-activity.schema'
 import { User, UserRole, UserStatus } from '../users/schemas/user.schema'
@@ -61,7 +61,7 @@ export class TenantService {
       .lean()
       .exec()
     if (!accountHolder) {
-      throw invalidInput('Tenant account holder must be an active superadmin.')
+      throw new InvalidInputException('Tenant account holder must be an active superadmin.')
     }
 
     const tenantId = new Types.ObjectId()
@@ -86,7 +86,7 @@ export class TenantService {
 
   async update(user: TenantActor, input: UpdateTenantInput): Promise<TenantRecord> {
     if (user.user.role === UserRole.MEMBER) {
-      throw forbidden('Only administrators can update tenants.')
+      throw new ForbiddenException('Only administrators can update tenants.')
     }
 
     const tenant = await this.assertAccess(user, input.tenantId.toHexString())
@@ -99,13 +99,13 @@ export class TenantService {
       .lean<TenantRecord>()
       .exec()
 
-    if (!updated) throw forbidden('You do not have access to this tenant.')
+    if (!updated) throw new ForbiddenException('You do not have access to this tenant.')
     return updated
   }
 
   async delete(user: TenantActor, input: DeleteTenantInput): Promise<boolean> {
     if (user.user.role !== UserRole.SUPERADMIN) {
-      throw forbidden('Only super administrators can delete tenants.')
+      throw new ForbiddenException('Only super administrators can delete tenants.')
     }
 
     const tenant = await this.assertAccess(user, input.tenantId.toHexString())
@@ -115,7 +115,7 @@ export class TenantService {
 
   async assertAccess(user: TenantActor, tenantIdValue: string): Promise<TenantRecord> {
     if (!/^[a-f\d]{24}$/i.test(tenantIdValue)) {
-      throw invalidInput('A valid tenant is required.')
+      throw new InvalidInputException('A valid tenant is required.')
     }
 
     const tenantId = new Types.ObjectId(tenantIdValue)
@@ -124,7 +124,7 @@ export class TenantService {
         assignedTenantId.equals(tenantId),
       )
       if (!assigned || !user.user.accountHolderId) {
-        throw forbidden('You do not have access to this tenant.')
+        throw new ForbiddenException('You do not have access to this tenant.')
       }
     }
 
@@ -139,7 +139,7 @@ export class TenantService {
       })
       .lean<TenantRecord>()
       .exec()
-    if (!tenant) throw forbidden('You do not have access to this tenant.')
+    if (!tenant) throw new ForbiddenException('You do not have access to this tenant.')
 
     return tenant
   }
@@ -253,7 +253,9 @@ export class TenantService {
 
   private toTenantId(value: Types.ObjectId | string): Types.ObjectId {
     if (value instanceof Types.ObjectId) return value
-    if (!/^[a-f\d]{24}$/i.test(value)) throw invalidInput('A valid tenant is required.')
+    if (!/^[a-f\d]{24}$/i.test(value)) {
+      throw new InvalidInputException('A valid tenant is required.')
+    }
     return new Types.ObjectId(value)
   }
 }

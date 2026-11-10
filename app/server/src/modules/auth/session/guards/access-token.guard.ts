@@ -1,5 +1,5 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common'
-import { invalidSession } from '../../../../common/exceptions/errors'
+import { InvalidSessionException } from '../../../../common/exceptions'
 import { getSessionRequest } from '../session-request'
 import { SessionService } from '../session.service'
 
@@ -11,7 +11,7 @@ export class AccessTokenGuard implements CanActivate {
     const request = getSessionRequest(context)
     const match = /^Bearer\s+(\S+)$/i.exec(request.headers.authorization ?? '')
     const accessToken = match?.[1]
-    if (!accessToken) throw invalidSession()
+    if (!accessToken) throw new InvalidSessionException()
 
     request.actor = await this.sessions.verifySession(accessToken)
     return true

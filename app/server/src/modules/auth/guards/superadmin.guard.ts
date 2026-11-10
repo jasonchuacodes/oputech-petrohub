@@ -1,5 +1,5 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common'
-import { forbidden, unauthenticated } from '../../../common/exceptions/errors'
+import { AuthenticationRequiredException, ForbiddenException } from '../../../common/exceptions'
 import { UserRole } from '../../users/schemas/user.schema'
 import { getSessionRequest } from '../session/session-request'
 
@@ -7,8 +7,8 @@ import { getSessionRequest } from '../session/session-request'
 export class SuperadminGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const actor = getSessionRequest(context).actor
-    if (!actor) throw unauthenticated()
-    if (actor.user.role !== UserRole.SUPERADMIN) throw forbidden()
+    if (!actor) throw new AuthenticationRequiredException()
+    if (actor.user.role !== UserRole.SUPERADMIN) throw new ForbiddenException()
     return true
   }
 }

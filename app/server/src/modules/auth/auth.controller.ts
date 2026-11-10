@@ -1,6 +1,6 @@
 import { Body, Controller, Headers, HttpCode, Post, UseGuards } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import { forbidden } from '../../common/exceptions/errors'
+import { ForbiddenException } from '../../common/exceptions'
 import { ZodValidationPipe } from '../../common/validation/zod-validation.pipe'
 import { Environment } from '../../config/environment'
 import { CurrentActor } from './decorators/current-actor.decorator'
@@ -29,7 +29,7 @@ export class AuthController {
   ) {
     const configuredSecret = this.config.get('SUPERADMIN_SCRIPT_SECRET', { infer: true })
     if (!configuredSecret || !secret || secret !== configuredSecret) {
-      throw forbidden('The super admin registration secret is invalid or missing.')
+      throw new ForbiddenException('The super admin registration secret is invalid or missing.')
     }
 
     return this.auth.register(input)

@@ -2,7 +2,7 @@ import { CanActivate, ExecutionContext, Injectable, SetMetadata } from '@nestjs/
 import { Reflector } from '@nestjs/core'
 import { GqlExecutionContext } from '@nestjs/graphql'
 import { Request } from 'express'
-import { forbidden, unauthenticated } from '../../../common/exceptions/errors'
+import { AuthenticationRequiredException, ForbiddenException } from '../../../common/exceptions'
 import { UserRole } from '../../users/schemas/user.schema'
 
 const ROLES_KEY = 'user-roles'
@@ -20,8 +20,8 @@ export class RolesGuard implements CanActivate {
     if (!roles?.length) return true
 
     const request = this.getRequest(context)
-    if (!request.authorizedTenant) throw unauthenticated()
-    if (!roles.includes(request.authorizedTenant.role)) throw forbidden()
+    if (!request.authorizedTenant) throw new AuthenticationRequiredException()
+    if (!roles.includes(request.authorizedTenant.role)) throw new ForbiddenException()
     return true
   }
 

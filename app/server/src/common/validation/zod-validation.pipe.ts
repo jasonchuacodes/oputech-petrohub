@@ -1,6 +1,6 @@
 import { Injectable, PipeTransform } from '@nestjs/common'
 import { z } from 'zod'
-import { invalidInput } from '../exceptions/errors'
+import { InvalidInputException } from '../exceptions'
 
 @Injectable()
 export class ZodValidationPipe<T extends z.ZodType> implements PipeTransform<unknown, z.output<T>> {
@@ -10,6 +10,8 @@ export class ZodValidationPipe<T extends z.ZodType> implements PipeTransform<unk
     const result = this.schema.safeParse(value)
     if (result.success) return result.data
 
-    throw invalidInput('Please correct the invalid input fields.', z.flattenError(result.error).fieldErrors)
+    throw new InvalidInputException('Please correct the invalid input fields.', {
+      details: z.flattenError(result.error).fieldErrors,
+    })
   }
 }
