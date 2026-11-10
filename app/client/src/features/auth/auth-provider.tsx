@@ -40,6 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         logout: session.logout.bind(session),
         activateTenant: session.activateTenant.bind(session),
         changePassword: session.changePassword.bind(session),
+        updateProfile: session.updateProfile.bind(session),
       }}
     >
       {children}

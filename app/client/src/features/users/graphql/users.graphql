@@ -1,0 +1,45 @@
+query Users($input: UsersInput!) {
+  users(input: $input) {
+    items {
+      id
+      firstName
+      lastName
+      fullName
+      username
+      role
+      status
+      shouldChangePassword
+    }
+    totalCount
+  }
+}
+
+mutation CreateUser($input: CreateUserInput!) {
+  createUser(input: $input) {
+    id
+    firstName
+    lastName
+    fullName
+    username
+    role
+    status
+    shouldChangePassword
+  }
+}
+
+mutation UpdateUser($input: UpdateUserInput!) {
+  updateUser(input: $input) {
+    id
+    firstName
+    lastName
+    fullName
+    username
+    role
+    status
+    shouldChangePassword
+  }
+}
+
+mutation DeleteUser($input: DeleteUserInput!) {
+  deleteUser(input: $input)
+}

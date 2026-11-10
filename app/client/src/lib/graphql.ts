@@ -8,20 +8,25 @@ import {
 const configuredGraphqlUrl = process.env.NEXT_PUBLIC_GRAPHQL_URL?.trim() || '/graphql'
 let client: GraphQLClient | undefined
 
+type RequestContext = {
+  tenantId?: string
+}
+
 async function request<TResult, TVariables extends object>(
   document: TypedDocumentNode<TResult, TVariables>,
   variables?: TVariables,
+  context: RequestContext = {},
 ): Promise<TResult> {
   const session = getAuthSession()
   const accessToken = await session.getAccessToken()
 
   try {
-    return await requestWithToken(document, variables, accessToken)
+    return await requestWithToken(document, variables, accessToken, context)
   } catch (error) {
     if (!isAuthenticationError(error)) throw error
     const nextAccessToken = await session.recoverAccessToken(accessToken)
     try {
-      return await requestWithToken(document, variables, nextAccessToken)
+      return await requestWithToken(document, variables, nextAccessToken, context)
     } catch (retryError) {
       if (isAuthenticationError(retryError)) {
         session.invalidate()
@@ -36,11 +41,15 @@ function requestWithToken<TResult, TVariables extends object>(
   document: TypedDocumentNode<TResult, TVariables>,
   variables: TVariables | undefined,
   accessToken: string,
+  context: RequestContext,
 ): Promise<TResult> {
   return getClient().request({
     document,
     variables,
-    requestHeaders: { Authorization: `Bearer ${accessToken}` },
+    requestHeaders: {
+      Authorization: `Bearer ${accessToken}`,
+      ...(context.tenantId ? { 'x-tenant-id': context.tenantId } : {}),
+    },
   } as unknown as RequestOptions<TVariables, TResult>)
 }
 

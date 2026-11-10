@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common'
 import { TenantModule } from '../tenants/tenant.module'
 import { UsersModule } from '../users/users.module'
+import { UsersResolver } from '../users/users.resolver'
 import { AuthController } from './auth.controller'
 import { AuthService } from './auth.service'
 import { OriginGuard } from './guards/origin.guard'
@@ -24,6 +25,7 @@ import { TenantResolver } from './tenant.resolver'
     RolesGuard,
     SuperadminGuard,
     TenantResolver,
+    UsersResolver,
   ],
   exports: [SessionModule, TenantAccessGuard, RolesGuard],
 })

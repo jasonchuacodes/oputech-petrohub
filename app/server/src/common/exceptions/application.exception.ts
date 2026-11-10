@@ -21,6 +21,10 @@ export class ApplicationException extends HttpException {
     options: ApplicationExceptionOptions = {},
   ) {
     const { details, ...httpOptions } = options
-    super({ code, message, ...(details === undefined ? {} : { details }) }, status, httpOptions)
+    super(
+      { statusCode: status, code, message, ...(details === undefined ? {} : { details }) },
+      status,
+      httpOptions,
+    )
   }
 }

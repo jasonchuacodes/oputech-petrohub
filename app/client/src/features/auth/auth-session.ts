@@ -122,6 +122,23 @@ class AuthSession {
     })
   }
 
+  updateProfile(input: { firstName?: string; lastName?: string }): void {
+    if (!this.snapshot.session) return
+    const displayFullName = [input.firstName, input.lastName].filter(Boolean).join(' ')
+    this.update({
+      ...this.snapshot,
+      session: {
+        ...this.snapshot.session,
+        user: {
+          ...this.snapshot.session.user,
+          firstName: input.firstName,
+          lastName: input.lastName,
+          displayFullName: displayFullName || undefined,
+        },
+      },
+    })
+  }
+
   async getAccessToken(): Promise<string> {
     if (this.refreshPromise) return this.refreshPromise
     if (this.snapshot.status === 'bootstrapping') await this.bootstrap()

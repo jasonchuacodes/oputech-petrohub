@@ -7,6 +7,7 @@ export type AuthContextValue = AuthSessionSnapshot & {
   logout: () => Promise<void>
   activateTenant: (tenantId: string) => void
   changePassword: (input: { currentPassword: string; newPassword: string }) => Promise<void>
+  updateProfile: (input: { firstName?: string; lastName?: string }) => void
 }
 
 export const AuthContext = createContext<AuthContextValue | null>(null)

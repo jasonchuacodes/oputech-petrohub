@@ -1,7 +1,22 @@
 import { Injectable } from '@nestjs/common'
-import { InjectModel } from '@nestjs/mongoose'
-import { Model, Types } from 'mongoose'
+import { InjectConnection, InjectModel } from '@nestjs/mongoose'
+import { hash } from 'argon2'
+import { Connection, Model, Types } from 'mongoose'
+import {
+  ConflictException,
+  ForbiddenException,
+  InvalidInputException,
+  NotFoundException,
+} from '../../common/exceptions'
+import { Session } from '../auth/schemas/session.schema'
 import { User, UserDocument, UserRole, UserStatus } from './schemas/user.schema'
+import {
+  CreateUserInput,
+  DeleteUserInput,
+  UpdateMyProfileInput,
+  UpdateUserInput,
+  UsersInput,
+} from './users.schemas'
 
 export type AuthenticatedUser = Pick<
   User,
@@ -25,7 +40,7 @@ type CreateUserBase = {
   shouldChangePassword?: boolean
 }
 
-type CreateUserInput =
+type PersistUserInput =
   | (CreateUserBase & {
       role: UserRole.SUPERADMIN
       accountHolderId?: never
@@ -42,9 +57,25 @@ type CreateUserInput =
       tenantIds: [Types.ObjectId]
     })
 
+export type UserRecord = User & { _id: Types.ObjectId }
+
+type TenantUserScope = {
+  accountHolderId: Types.ObjectId
+  tenantId: Types.ObjectId
+}
+
+type UserManagementActor = {
+  userId: Types.ObjectId
+  role: UserRole
+}
+
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel(User.name) private readonly users: Model<User>) {}
+  constructor(
+    @InjectModel(User.name) private readonly users: Model<User>,
+    @InjectModel(Session.name) private readonly sessions: Model<Session>,
+    @InjectConnection() private readonly connection: Connection,
+  ) {}
 
   findByUsername(username: string): Promise<UserDocument | null> {
     return this.users
@@ -61,7 +92,7 @@ export class UsersService {
     return (await this.users.exists({ username: username.trim().toLowerCase() })) !== null
   }
 
-  async create(input: CreateUserInput): Promise<UserDocument> {
+  async create(input: PersistUserInput): Promise<UserDocument> {
     return this.users.create({
       ...input,
       username: input.username.trim().toLowerCase(),
@@ -69,6 +100,163 @@ export class UsersService {
       tenantIds: input.tenantIds ?? [],
       currentTenantId: input.role === UserRole.SUPERADMIN ? undefined : input.tenantIds[0],
     })
+  }
+
+  async listUsers(
+    scope: TenantUserScope,
+    input: UsersInput,
+  ): Promise<{ items: UserRecord[]; totalCount: number }> {
+    const filter = {
+      accountHolderId: scope.accountHolderId,
+      tenantIds: scope.tenantId,
+      role: { $in: [UserRole.ADMIN, UserRole.MEMBER] },
+    }
+    const [items, totalCount] = await Promise.all([
+      this.users
+        .find(filter)
+        .sort({ username: 1, _id: 1 })
+        .skip(input.offset)
+        .limit(input.limit)
+        .lean<UserRecord[]>()
+        .exec(),
+      this.users.countDocuments(filter).exec(),
+    ])
+    return { items, totalCount }
+  }
+
+  async provisionUser(
+    actor: UserManagementActor,
+    scope: TenantUserScope,
+    input: CreateUserInput,
+  ): Promise<UserDocument> {
+    this.assertCanAssignRole(actor.role, input.role)
+
+    try {
+      return await this.create({
+        username: input.username,
+        passwordHash: await hash(input.password),
+        role: input.role,
+        accountHolderId: scope.accountHolderId,
+        tenantIds: [scope.tenantId],
+        shouldChangePassword: true,
+      })
+    } catch (error) {
+      if (isDuplicateKeyError(error)) {
+        throw new ConflictException('This username is already in use.')
+      }
+      throw error
+    }
+  }
+
+  async updateMyProfile(userId: Types.ObjectId, input: UpdateMyProfileInput): Promise<UserDocument> {
+    const user = await this.users
+      .findOneAndUpdate(
+        { _id: userId, status: UserStatus.ACTIVE },
+        {
+          $set: {
+            ...(input.firstName ? { firstName: input.firstName } : {}),
+            ...(input.lastName ? { lastName: input.lastName } : {}),
+          },
+          $unset: {
+            ...(input.firstName ? {} : { firstName: 1 }),
+            ...(input.lastName ? {} : { lastName: 1 }),
+          },
+        },
+        { new: true, runValidators: true },
+      )
+      .exec()
+    if (!user) throw new NotFoundException('User not found.')
+    return user
+  }
+
+  async updateUser(
+    actor: UserManagementActor,
+    scope: TenantUserScope,
+    input: UpdateUserInput,
+  ): Promise<UserDocument> {
+    const user = await this.findUserInScope(scope, input.userId)
+    this.assertCanManageUser(actor, user)
+    this.assertCanAssignRole(actor.role, input.role)
+
+    if (input.role === UserRole.MEMBER && user.tenantIds.length !== 1) {
+      throw new InvalidInputException(
+        'Administrators assigned to multiple tenants cannot be changed to members here.',
+      )
+    }
+
+    const roleChanged = user.role !== input.role
+    const update = {
+      $set: {
+        username: input.username,
+        role: input.role,
+        ...(input.firstName ? { firstName: input.firstName } : {}),
+        ...(input.lastName ? { lastName: input.lastName } : {}),
+      },
+      $unset: {
+        ...(input.firstName ? {} : { firstName: 1 }),
+        ...(input.lastName ? {} : { lastName: 1 }),
+      },
+      ...(roleChanged ? { $inc: { credentialVersion: 1 } } : {}),
+    }
+
+    let updated: UserDocument | null
+    try {
+      updated = await this.users
+        .findOneAndUpdate(
+          {
+            _id: user._id,
+            accountHolderId: scope.accountHolderId,
+            tenantIds: scope.tenantId,
+          },
+          update,
+          { new: true, runValidators: true },
+        )
+        .exec()
+    } catch (error) {
+      if (isDuplicateKeyError(error)) {
+        throw new ConflictException('This username is already in use.')
+      }
+      throw error
+    }
+
+    if (!updated) throw new NotFoundException('User not found.')
+    if (roleChanged) await this.sessions.deleteMany({ userId: updated._id }).exec()
+    return updated
+  }
+
+  async deleteUser(
+    actor: UserManagementActor,
+    scope: TenantUserScope,
+    input: DeleteUserInput,
+  ): Promise<boolean> {
+    if (actor.userId.equals(input.userId)) {
+      throw new InvalidInputException('You cannot delete your own account.')
+    }
+
+    const user = await this.findUserInScope(scope, input.userId)
+    this.assertCanManageUser(actor, user)
+    const databaseSession = await this.connection.startSession()
+    let deleted = false
+
+    try {
+      await databaseSession.withTransaction(async () => {
+        await this.sessions.deleteMany({ userId: user._id }, { session: databaseSession }).exec()
+        const result = await this.users.deleteOne(
+          {
+            _id: user._id,
+            accountHolderId: scope.accountHolderId,
+            tenantIds: scope.tenantId,
+          },
+          { session: databaseSession },
+        )
+        deleted = result.deletedCount === 1
+      })
+    } finally {
+      await databaseSession.endSession()
+    }
+
+    if (!deleted) throw new NotFoundException('User not found.')
+    return true
   }
 
   async updatePassword(userId: Types.ObjectId, passwordHash: string): Promise<void> {
@@ -97,4 +285,36 @@ export class UsersService {
       shouldChangePassword: user.shouldChangePassword,
     }
   }
+
+  private async findUserInScope(
+    scope: TenantUserScope,
+    userId: Types.ObjectId,
+  ): Promise<UserDocument> {
+    const user = await this.users
+      .findOne({
+        _id: userId,
+        accountHolderId: scope.accountHolderId,
+        tenantIds: scope.tenantId,
+        role: { $in: [UserRole.ADMIN, UserRole.MEMBER] },
+      })
+      .exec()
+    if (!user) throw new NotFoundException('User not found.')
+    return user
+  }
+
+  private assertCanManageUser(actor: UserManagementActor, user: UserDocument): void {
+    if (actor.role === UserRole.ADMIN && user.role !== UserRole.MEMBER) {
+      throw new ForbiddenException('Administrators can only manage members.')
+    }
+  }
+
+  private assertCanAssignRole(actorRole: UserRole, targetRole: UserRole): void {
+    if (actorRole === UserRole.ADMIN && targetRole !== UserRole.MEMBER) {
+      throw new ForbiddenException('Administrators can only manage members.')
+    }
+  }
+}
+
+function isDuplicateKeyError(error: unknown): error is { code: 11000 } {
+  return typeof error === 'object' && error !== null && 'code' in error && error.code === 11000
 }

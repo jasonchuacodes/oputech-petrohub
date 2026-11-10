@@ -1,0 +1,59 @@
+extend type Query {
+  users(input: UsersInput!): UserPage!
+}
+
+extend type Mutation {
+  createUser(input: CreateUserInput!): User!
+  updateUser(input: UpdateUserInput!): User!
+  updateMyProfile(input: UpdateMyProfileInput!): User!
+  deleteUser(input: DeleteUserInput!): Boolean!
+}
+
+input UsersInput {
+  offset: Int = 0
+  limit: Int = 20
+}
+
+input CreateUserInput {
+  username: String!
+  password: String!
+  role: UserRole = member
+}
+
+input UpdateMyProfileInput {
+  firstName: String
+  lastName: String
+}
+
+input UpdateUserInput {
+  userId: ObjectId!
+  username: String!
+  firstName: String
+  lastName: String
+  role: UserRole!
+}
+
+input DeleteUserInput {
+  userId: ObjectId!
+}
+
+type UserPage {
+  items: [User!]!
+  totalCount: Int!
+}
+
+type User {
+  id: ObjectId!
+  firstName: String
+  lastName: String
+  fullName: String!
+  username: String!
+  role: UserRole!
+  status: UserStatus!
+  shouldChangePassword: Boolean!
+}
+
+enum UserStatus {
+  active
+  disabled
+}

@@ -11,11 +11,13 @@ const actions = [
   {
     title: 'Account settings',
     description: 'Manage your personal account and security',
+    href: '/account',
   },
   {
     title: 'User management',
     description: 'Manage users, roles, and station access',
     adminOnly: true,
+    href: '/users',
   },
   {
     title: 'Tenant management',
@@ -65,18 +67,12 @@ export function MePage() {
         <ul className="overflow-hidden rounded-md bg-card shadow-card">
           {visibleActions.map((action) => (
             <li key={action.title} className="border-b border-border/60 last:border-b-0">
-              {'href' in action ? (
-                <Link
-                  href={action.href}
-                  className="flex min-h-18 items-center gap-3 px-4 py-3 outline-none transition-colors hover:bg-surface-hover focus-visible:ring-3 focus-visible:ring-inset focus-visible:ring-ring/30"
-                >
-                  <ActionContent title={action.title} description={action.description} />
-                </Link>
-              ) : (
-                <div className="flex min-h-18 items-center gap-3 px-4 py-3">
-                  <ActionContent title={action.title} description={action.description} />
-                </div>
-              )}
+              <Link
+                href={action.href}
+                className="flex min-h-18 items-center gap-3 px-4 py-3 outline-none transition-colors hover:bg-surface-hover focus-visible:ring-3 focus-visible:ring-inset focus-visible:ring-ring/30"
+              >
+                <ActionContent title={action.title} description={action.description} />
+              </Link>
             </li>
           ))}
         </ul>
