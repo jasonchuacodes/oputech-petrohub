@@ -11,12 +11,14 @@ import { Session, SessionSchema } from '../auth/schemas/session.schema'
 import { ReportsModule } from '../reports/reports.module'
 import { FuelSetupModule } from '../fuel-setup/fuel-setup.module'
 import { InventoryModule } from '../inventory/inventory.module'
+import { AttendanceModule } from '../attendance/attendance.module'
 
 @Module({
   imports: [
     ReportsModule,
     FuelSetupModule,
     InventoryModule,
+    AttendanceModule,
     MongooseModule.forFeature([
       { name: Tenant.name, schema: TenantSchema },
       { name: User.name, schema: UserSchema },

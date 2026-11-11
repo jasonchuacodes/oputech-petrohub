@@ -16,6 +16,8 @@ const collectionFlags = {
   '--pump-meters': 'pumpMeters',
   '--inventory-products': 'inventoryProducts',
   '--stock-movements': 'stockMovements',
+  '--attendance-sessions': 'attendanceSessions',
+  '--timesheet-days': 'timesheetDays',
   '--tenants': 'tenants',
   '--users': 'users',
 } as const
@@ -136,6 +138,8 @@ async function clearTenants(
     'inventoryProducts',
     'stockMovements',
     'memberActivities',
+    'attendanceSessions',
+    'timesheetDays',
   ]
   for (const collectionName of tenantCollections) {
     const deleted = await connection.collection(collectionName).deleteMany({ tenantId: { $in: tenantIds } })
@@ -165,7 +169,7 @@ function parseCollectionFlags(args: string[]): Set<CollectionName> {
 }
 
 function deletionOrder(selected: Set<CollectionName>): CollectionName[] {
-  return (['stockMovements', 'disposalBatches', 'meterHeads', 'reports', 'inventoryProducts', 'fuelProducts', 'pumpMeters', 'memberActivities', 'sessions', 'tenants', 'users'] as const).filter((name) =>
+  return (['stockMovements', 'disposalBatches', 'meterHeads', 'reports', 'inventoryProducts', 'fuelProducts', 'pumpMeters', 'attendanceSessions', 'timesheetDays', 'memberActivities', 'sessions', 'tenants', 'users'] as const).filter((name) =>
     selected.has(name),
   )
 }
@@ -174,7 +178,7 @@ function displayOrder(
   selected: Set<CollectionName>,
   results: Map<CollectionName, number>,
 ): CollectionName[] {
-  return (['users', 'tenants', 'reports', 'disposalBatches', 'meterHeads', 'inventoryProducts', 'stockMovements', 'fuelProducts', 'pumpMeters', 'sessions', 'memberActivities'] as const).filter(
+  return (['users', 'tenants', 'reports', 'disposalBatches', 'meterHeads', 'inventoryProducts', 'stockMovements', 'fuelProducts', 'pumpMeters', 'attendanceSessions', 'timesheetDays', 'sessions', 'memberActivities'] as const).filter(
     (name) => selected.has(name) || results.has(name),
   )
 }

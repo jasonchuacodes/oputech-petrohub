@@ -19,6 +19,7 @@ import { ReportsModule } from './modules/reports/reports.module'
 import { FuelSetupModule } from './modules/fuel-setup/fuel-setup.module'
 import { DisposalsModule } from './modules/disposals/disposals.module'
 import { InventoryModule } from './modules/inventory/inventory.module'
+import { AttendanceModule } from './modules/attendance/attendance.module'
 
 @Module({
   imports: [
@@ -70,6 +71,7 @@ import { InventoryModule } from './modules/inventory/inventory.module'
     FuelSetupModule,
     DisposalsModule,
     InventoryModule,
+    AttendanceModule,
     AuthModule,
     HealthModule,
   ],

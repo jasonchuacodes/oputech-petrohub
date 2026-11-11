@@ -8,9 +8,9 @@ import { Button } from '~/components/ui/button'
 import { PageHeader } from '~/components/ui/page-header'
 import { useSessionQuery } from '../../auth/auth.queries'
 import { CreateReportSheet } from '../../reports/create-report-sheet'
-import { formatBusinessDate } from '../../reports/create-report-sheet'
 import { useReportCreationContextQuery } from '../../reports/reports.queries'
 import { useActiveTenant } from '../../layout/use-active-tenant'
+import { AttendanceCard } from './attendance-card'
 
 export function MemberHomePage() {
   const router = useRouter()
@@ -18,7 +18,6 @@ export function MemberHomePage() {
   const { tenant } = useActiveTenant()
   const reports = useReportCreationContextQuery(tenant.id)
   const [showCreateReport, setShowCreateReport] = useState(false)
-  const [isCheckedIn, setIsCheckedIn] = useState(true)
   const user = session.data?.user
   const greetingName = user?.firstName?.trim() || user?.username || 'there'
 
@@ -50,65 +49,7 @@ export function MemberHomePage() {
         }
       />
 
-      <section
-        aria-label="Attendance status"
-        className="overflow-hidden rounded-md bg-primary text-primary-foreground shadow-card"
-      >
-        <div className="p-5 sm:p-6">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="text-sm font-medium text-white/75 sm:text-base">
-               {reports.data ? formatBusinessDate(reports.data.businessDate) : 'Today'}
-            </p>
-            <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white/90">
-              <span
-                aria-hidden="true"
-                className={`size-2 rounded-full ${
-                  isCheckedIn ? 'bg-emerald-400 shadow-[0_0_0_3px_rgb(52_211_153/0.15)]' : 'bg-white/40'
-                }`}
-              />
-              {isCheckedIn ? 'On shift' : 'Off shift'}
-            </span>
-          </div>
-
-          <div className="mt-5 flex items-end justify-between gap-3">
-            <div className="min-w-0">
-              <p className="text-xs font-medium tracking-[0.14em] text-white/60 uppercase">
-                {isCheckedIn ? 'Time on shift' : 'Attendance'}
-              </p>
-              <p
-                className="mt-1 text-[clamp(1.5rem,5vw,2.5rem)] leading-none font-semibold tracking-tight text-white tabular-nums"
-                aria-live="polite"
-              >
-                {isCheckedIn ? '04:19:09' : '00:00:00'}
-                <span className="ml-2 text-base font-medium tracking-normal text-white/65">hrs</span>
-              </p>
-            </div>
-
-            <button
-              type="button"
-              role="switch"
-              aria-checked={isCheckedIn}
-              aria-label={isCheckedIn ? 'Check out' : 'Check in'}
-              onClick={() => setIsCheckedIn((checkedIn) => !checkedIn)}
-              className="group flex min-h-12 shrink-0 items-center justify-center gap-3 rounded-md p-2 text-sm font-semibold text-white outline-none transition-transform active:scale-[0.99] focus-visible:ring-3 focus-visible:ring-white/60 sm:min-h-14 sm:px-4"
-            >
-              <span className="hidden sm:inline">{isCheckedIn ? 'Check out' : 'Check in'}</span>
-              <span
-                aria-hidden="true"
-                className={`flex h-9 w-15 items-center rounded-full p-0.5 transition-colors duration-200 ${
-                  isCheckedIn ? 'bg-emerald-500' : 'bg-white/25'
-                }`}
-              >
-                <span
-                  className={`size-8 rounded-full bg-white shadow-sm transition-transform duration-200 ${
-                    isCheckedIn ? 'translate-x-6' : 'translate-x-0'
-                  }`}
-                />
-              </span>
-            </button>
-          </div>
-        </div>
-      </section>
+      <AttendanceCard tenantId={tenant.id} />
 
       <section aria-labelledby="actions-heading">
         <h2

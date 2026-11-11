@@ -16,6 +16,8 @@ import { FuelSetupModule } from '../fuel-setup/fuel-setup.module'
 import { FuelSetupResolver } from '../fuel-setup/fuel-setup.resolver'
 import { InventoryModule } from '../inventory/inventory.module'
 import { InventoryResolver } from '../inventory/inventory.resolver'
+import { AttendanceModule } from '../attendance/attendance.module'
+import { AttendanceResolver } from '../attendance/attendance.resolver'
 
 @Module({
   imports: [
@@ -25,6 +27,7 @@ import { InventoryResolver } from '../inventory/inventory.resolver'
     ReportsModule,
     FuelSetupModule,
     InventoryModule,
+    AttendanceModule,
   ],
   controllers: [AuthController],
   providers: [
@@ -38,6 +41,7 @@ import { InventoryResolver } from '../inventory/inventory.resolver'
     ReportsResolver,
     FuelSetupResolver,
     InventoryResolver,
+    AttendanceResolver,
   ],
   exports: [SessionModule, TenantAccessGuard, RolesGuard],
 })

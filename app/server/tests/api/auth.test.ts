@@ -526,6 +526,21 @@ describe('authentication', () => {
       REPORT_CREATED_EVENT,
       new ReportCreatedEvent(tenant._id, member._id, reportId, new Date()),
     )
+    await connection.collection('attendanceSessions').insertOne({
+      tenantId: tenant._id,
+      userId: member._id,
+      startedAt: new Date(),
+      endedAt: null,
+      idempotencyKey: 'tenant-deletion-attendance',
+    })
+    await connection.collection('timesheetDays').insertOne({
+      tenantId: tenant._id,
+      userId: member._id,
+      localDate: '2026-11-11',
+      overrideHours: null,
+      updatedById: admin._id,
+      revision: 1,
+    })
 
     const deleted = await tenants.hardDelete(tenant._id)
 
@@ -542,6 +557,8 @@ describe('authentication', () => {
       pumpMeters: 0,
       inventoryProducts: 0,
       stockMovements: 0,
+      attendanceSessions: 1,
+      timesheetDays: 1,
     })
     expect(await connection.collection('tenants').findOne({ _id: tenant._id })).toBeNull()
     expect(
@@ -549,6 +566,8 @@ describe('authentication', () => {
     ).toBeNull()
     expect(await connection.collection('users').findOne({ _id: member._id })).toBeNull()
     expect(await connection.collection('sessions').findOne({ userId: member._id })).toBeNull()
+    expect(await connection.collection('attendanceSessions').findOne({ tenantId: tenant._id })).toBeNull()
+    expect(await connection.collection('timesheetDays').findOne({ tenantId: tenant._id })).toBeNull()
 
     const preservedAdmin = await connection.collection('users').findOne({ _id: admin._id })
     expect(preservedAdmin?.tenantIds).toEqual([secondTenantId])

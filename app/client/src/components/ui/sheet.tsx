@@ -27,6 +27,7 @@ export type SheetProps = {
   manageFocus?: boolean
   initialFocusRef?: RefObject<HTMLElement | null>
   returnFocusRef?: RefObject<HTMLElement | null>
+  showCloseButton?: boolean
 }
 
 export function Sheet({
@@ -40,6 +41,7 @@ export function Sheet({
   manageFocus = false,
   initialFocusRef,
   returnFocusRef,
+  showCloseButton = true,
 }: SheetProps) {
   const titleId = useId()
   const descriptionId = useId()
@@ -124,17 +126,19 @@ export function Sheet({
               </p>
             )}
           </div>
-          <Button
-            ref={closeButtonRef}
-            type="button"
-            variant="ghost"
-            size="icon"
-            aria-label="Close"
-            className="-mr-2 -mt-1 text-text-secondary"
-            onClick={close}
-          >
-            <X aria-hidden="true" />
-          </Button>
+          {showCloseButton && (
+            <Button
+              ref={closeButtonRef}
+              type="button"
+              variant="ghost"
+              size="icon"
+              aria-label="Close"
+              className="-mr-2 -mt-1 text-text-secondary"
+              onClick={close}
+            >
+              <X aria-hidden="true" />
+            </Button>
+          )}
         </header>
         {children}
       </section>

@@ -1,0 +1,53 @@
+fragment AttendanceStatusFields on AttendanceStatus {
+  localDate
+  timezone
+  asOf
+  trackedSeconds
+  automaticSeconds
+  activeSession { id startedAt }
+}
+
+fragment TimesheetDayFields on TimesheetDay {
+  localDate
+  trackedSeconds
+  automaticSeconds
+  overrideHours
+  effectiveHours
+  revision
+}
+
+query MyAttendance {
+  myAttendance { ...AttendanceStatusFields }
+}
+
+mutation CheckInAttendance($input: CheckInAttendanceInput!) {
+  checkInAttendance(input: $input) { ...AttendanceStatusFields }
+}
+
+mutation CheckOutAttendance($input: CheckOutAttendanceInput!) {
+  checkOutAttendance(input: $input) { ...AttendanceStatusFields }
+}
+
+query Timesheets($filter: TimesheetsFilter!) {
+  timesheets(filter: $filter) {
+    startDate
+    endDate
+    timezone
+    asOf
+    totalCount
+    items { userId fullName username totalHours }
+  }
+}
+
+query TimesheetDays($filter: TimesheetDaysFilter!) {
+  timesheetDays(filter: $filter) {
+    userId
+    fullName
+    username
+    days { ...TimesheetDayFields }
+  }
+}
+
+mutation SetTimesheetDayOverride($input: SetTimesheetDayOverrideInput!) {
+  setTimesheetDayOverride(input: $input) { ...TimesheetDayFields }
+}

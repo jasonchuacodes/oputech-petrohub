@@ -9,6 +9,11 @@ import { clearActiveTenant } from '../tenants/active-tenant'
 
 const actions = [
   {
+    title: 'Timesheets',
+    description: 'Review hours for the selected date range',
+    href: '/timesheet',
+  },
+  {
     title: 'User management',
     description: 'Manage users, roles, and station access',
     adminOnly: true,

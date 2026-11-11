@@ -16,6 +16,7 @@ import { User, UserRole, UserStatus } from '../users/schemas/user.schema'
 import { Tenant, TenantStatus } from './schemas/tenant.schema'
 import { Shift } from './schemas/shift.schema'
 import { RecurringIncomeField } from './schemas/recurring-income-field.schema'
+import { AttendanceService } from '../attendance/attendance.service'
 import {
   CreateShiftInput,
   CreateTenantInput,
@@ -50,6 +51,8 @@ export type TenantDeletionResult = {
   pumpMeters: number
   inventoryProducts: number
   stockMovements: number
+  attendanceSessions: number
+  timesheetDays: number
 }
 
 @Injectable()
@@ -64,6 +67,7 @@ export class TenantService {
     private readonly reportsService: ReportsService,
     private readonly fuelSetupService: FuelSetupService,
     private readonly inventoryService: InventoryService,
+    private readonly attendanceService: AttendanceService,
   ) {}
 
   async listForUser(user: TenantActor): Promise<TenantRecord[]> {
@@ -428,6 +432,7 @@ export class TenantService {
         const reportDeletion = await this.reportsService.deleteForTenant(tenantId, databaseSession)
         const setupDeletion = await this.fuelSetupService.deleteForTenant(tenantId, databaseSession)
         const inventoryDeletion = await this.inventoryService.deleteForTenant(tenantId, databaseSession)
+        const attendanceDeletion = await this.attendanceService.deleteForTenant(tenantId, databaseSession)
         nextResult.reports = reportDeletion.reports
         nextResult.disposalBatches = reportDeletion.disposalBatches
         nextResult.meterHeads = reportDeletion.meterHeads
@@ -435,6 +440,8 @@ export class TenantService {
         nextResult.pumpMeters = setupDeletion.meters
         nextResult.inventoryProducts = inventoryDeletion.products
         nextResult.stockMovements = inventoryDeletion.movements
+        nextResult.attendanceSessions = attendanceDeletion.sessions
+        nextResult.timesheetDays = attendanceDeletion.days
         const deletedTenant = await this.tenantModel.deleteOne(
           { _id: tenantId },
           { session: databaseSession },
@@ -504,5 +511,7 @@ function emptyDeletionResult(): TenantDeletionResult {
     pumpMeters: 0,
     inventoryProducts: 0,
     stockMovements: 0,
+    attendanceSessions: 0,
+    timesheetDays: 0,
   }
 }

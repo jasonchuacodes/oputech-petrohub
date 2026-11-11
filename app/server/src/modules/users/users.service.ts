@@ -9,6 +9,7 @@ import {
   NotFoundException,
 } from '../../common/exceptions'
 import { Session } from '../auth/schemas/session.schema'
+import { AttendanceService } from '../attendance/attendance.service'
 import { User, UserDocument, UserRole, UserStatus } from './schemas/user.schema'
 import {
   CreateUserInput,
@@ -73,6 +74,7 @@ export class UsersService {
     @InjectModel(User.name) private readonly users: Model<User>,
     @InjectModel(Session.name) private readonly sessions: Model<Session>,
     @InjectConnection() private readonly connection: Connection,
+    private readonly attendance: AttendanceService,
   ) {}
 
   findByUsername(username: string): Promise<UserDocument | null> {
@@ -237,6 +239,7 @@ export class UsersService {
 
     try {
       await databaseSession.withTransaction(async () => {
+        await this.attendance.deleteForUser(scope.tenantId, user._id, databaseSession)
         await this.sessions.deleteMany({ userId: user._id }, { session: databaseSession }).exec()
         const result = await this.users.deleteOne(
           {

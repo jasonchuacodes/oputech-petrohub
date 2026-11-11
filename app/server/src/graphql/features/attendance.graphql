@@ -1,0 +1,86 @@
+extend type Query {
+  myAttendance: AttendanceStatus!
+  timesheets(filter: TimesheetsFilter!): TimesheetPage!
+  timesheetDays(filter: TimesheetDaysFilter!): UserTimesheet!
+}
+
+extend type Mutation {
+  checkInAttendance(input: CheckInAttendanceInput!): AttendanceStatus!
+  checkOutAttendance(input: CheckOutAttendanceInput!): AttendanceStatus!
+  setTimesheetDayOverride(input: SetTimesheetDayOverrideInput!): TimesheetDay!
+}
+
+input CheckInAttendanceInput {
+  idempotencyKey: String!
+}
+
+input CheckOutAttendanceInput {
+  sessionId: ObjectId!
+}
+
+input TimesheetsFilter {
+  startDate: String
+  endDate: String
+  userId: ObjectId
+  offset: Int = 0
+  limit: Int = 20
+}
+
+input TimesheetDaysFilter {
+  userId: ObjectId!
+  startDate: String!
+  endDate: String!
+}
+
+input SetTimesheetDayOverrideInput {
+  userId: ObjectId!
+  localDate: String!
+  overrideHours: Decimal
+  expectedRevision: Int!
+}
+
+type AttendanceSessionStatus {
+  id: ObjectId!
+  startedAt: String!
+}
+
+type AttendanceStatus {
+  localDate: String!
+  timezone: String!
+  asOf: String!
+  trackedSeconds: Int!
+  automaticSeconds: Int!
+  activeSession: AttendanceSessionStatus
+}
+
+type TimesheetPage {
+  startDate: String!
+  endDate: String!
+  timezone: String!
+  asOf: String!
+  items: [TimesheetUserSummary!]!
+  totalCount: Int!
+}
+
+type TimesheetUserSummary {
+  userId: ObjectId!
+  fullName: String!
+  username: String!
+  totalHours: Decimal!
+}
+
+type UserTimesheet {
+  userId: ObjectId!
+  fullName: String!
+  username: String!
+  days: [TimesheetDay!]!
+}
+
+type TimesheetDay {
+  localDate: String!
+  trackedSeconds: Int!
+  automaticSeconds: Int!
+  overrideHours: Decimal
+  effectiveHours: Decimal!
+  revision: Int!
+}

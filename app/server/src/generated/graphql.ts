@@ -15,6 +15,30 @@ export type Scalars = {
   ObjectId: { input: Types.ObjectId; output: Types.ObjectId; }
 };
 
+export type AttendanceSessionStatus = {
+  __typename?: 'AttendanceSessionStatus';
+  id: Scalars['ObjectId']['output'];
+  startedAt: Scalars['String']['output'];
+};
+
+export type AttendanceStatus = {
+  __typename?: 'AttendanceStatus';
+  activeSession?: Maybe<AttendanceSessionStatus>;
+  asOf: Scalars['String']['output'];
+  automaticSeconds: Scalars['Int']['output'];
+  localDate: Scalars['String']['output'];
+  timezone: Scalars['String']['output'];
+  trackedSeconds: Scalars['Int']['output'];
+};
+
+export type CheckInAttendanceInput = {
+  idempotencyKey: Scalars['String']['input'];
+};
+
+export type CheckOutAttendanceInput = {
+  sessionId: Scalars['ObjectId']['input'];
+};
+
 export type CreateFuelProductInput = {
   name: Scalars['String']['input'];
   unitPrice: Scalars['Decimal']['input'];
@@ -218,6 +242,8 @@ export type ManualStockMovementType =
 
 export type Mutation = {
   __typename?: 'Mutation';
+  checkInAttendance: AttendanceStatus;
+  checkOutAttendance: AttendanceStatus;
   createFuelProduct: FuelProduct;
   createInventoryProduct: InventoryProduct;
   createPumpMeter: PumpMeter;
@@ -235,6 +261,7 @@ export type Mutation = {
   recordStockMovement: StockMovement;
   resetUserPassword: User;
   saveReportDraft: Report;
+  setTimesheetDayOverride: TimesheetDay;
   submitReport: Report;
   updateFuelProduct: FuelProduct;
   updateInventoryProduct: InventoryProduct;
@@ -243,6 +270,16 @@ export type Mutation = {
   updateShift: Shift;
   updateTenant: TenantSummary;
   updateUser: User;
+};
+
+
+export type MutationCheckInAttendanceArgs = {
+  input: CheckInAttendanceInput;
+};
+
+
+export type MutationCheckOutAttendanceArgs = {
+  input: CheckOutAttendanceInput;
 };
 
 
@@ -331,6 +368,11 @@ export type MutationSaveReportDraftArgs = {
 };
 
 
+export type MutationSetTimesheetDayOverrideArgs = {
+  input: SetTimesheetDayOverrideInput;
+};
+
+
 export type MutationSubmitReportArgs = {
   input: ReportTransitionInput;
 };
@@ -386,6 +428,7 @@ export type Query = {
   activeTenant?: Maybe<TenantSummary>;
   fuelSetup: FuelSetup;
   inventoryProducts: InventoryProductPage;
+  myAttendance: AttendanceStatus;
   recurringIncomeConfiguration: RecurringIncomeConfiguration;
   report: Report;
   reportCreationContext: ReportCreationContext;
@@ -393,6 +436,8 @@ export type Query = {
   shifts: Array<Shift>;
   stockMovements: StockMovementPage;
   tenants: Array<TenantAccess>;
+  timesheetDays: UserTimesheet;
+  timesheets: TimesheetPage;
   users: UserPage;
 };
 
@@ -414,6 +459,16 @@ export type QueryReportsArgs = {
 
 export type QueryStockMovementsArgs = {
   input: StockMovementsInput;
+};
+
+
+export type QueryTimesheetDaysArgs = {
+  filter: TimesheetDaysFilter;
+};
+
+
+export type QueryTimesheetsArgs = {
+  filter: TimesheetsFilter;
 };
 
 
@@ -550,6 +605,13 @@ export type SaveReportDraftInput = {
   reportId: Scalars['ObjectId']['input'];
 };
 
+export type SetTimesheetDayOverrideInput = {
+  expectedRevision: Scalars['Int']['input'];
+  localDate: Scalars['String']['input'];
+  overrideHours?: InputMaybe<Scalars['Decimal']['input']>;
+  userId: Scalars['ObjectId']['input'];
+};
+
 export type Shift = {
   __typename?: 'Shift';
   endTime: Scalars['String']['output'];
@@ -604,6 +666,48 @@ export type TenantSummary = {
   id: Scalars['ObjectId']['output'];
   name: Scalars['String']['output'];
   timezone: Scalars['String']['output'];
+};
+
+export type TimesheetDay = {
+  __typename?: 'TimesheetDay';
+  automaticSeconds: Scalars['Int']['output'];
+  effectiveHours: Scalars['Decimal']['output'];
+  localDate: Scalars['String']['output'];
+  overrideHours?: Maybe<Scalars['Decimal']['output']>;
+  revision: Scalars['Int']['output'];
+  trackedSeconds: Scalars['Int']['output'];
+};
+
+export type TimesheetDaysFilter = {
+  endDate: Scalars['String']['input'];
+  startDate: Scalars['String']['input'];
+  userId: Scalars['ObjectId']['input'];
+};
+
+export type TimesheetPage = {
+  __typename?: 'TimesheetPage';
+  asOf: Scalars['String']['output'];
+  endDate: Scalars['String']['output'];
+  items: Array<TimesheetUserSummary>;
+  startDate: Scalars['String']['output'];
+  timezone: Scalars['String']['output'];
+  totalCount: Scalars['Int']['output'];
+};
+
+export type TimesheetUserSummary = {
+  __typename?: 'TimesheetUserSummary';
+  fullName: Scalars['String']['output'];
+  totalHours: Scalars['Decimal']['output'];
+  userId: Scalars['ObjectId']['output'];
+  username: Scalars['String']['output'];
+};
+
+export type TimesheetsFilter = {
+  endDate?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  startDate?: InputMaybe<Scalars['String']['input']>;
+  userId?: InputMaybe<Scalars['ObjectId']['input']>;
 };
 
 export type UpdateFuelProductInput = {
@@ -675,6 +779,14 @@ export type UserRole =
 export type UserStatus =
   | 'active'
   | 'disabled';
+
+export type UserTimesheet = {
+  __typename?: 'UserTimesheet';
+  days: Array<TimesheetDay>;
+  fullName: Scalars['String']['output'];
+  userId: Scalars['ObjectId']['output'];
+  username: Scalars['String']['output'];
+};
 
 export type UsersInput = {
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -754,7 +866,11 @@ export type DirectiveResolverFn<TResult = Record<PropertyKey, never>, TParent = 
 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
+  AttendanceSessionStatus: ResolverTypeWrapper<AttendanceSessionStatus>;
+  AttendanceStatus: ResolverTypeWrapper<AttendanceStatus>;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
+  CheckInAttendanceInput: CheckInAttendanceInput;
+  CheckOutAttendanceInput: CheckOutAttendanceInput;
   CreateFuelProductInput: CreateFuelProductInput;
   CreateInventoryProductInput: CreateInventoryProductInput;
   CreatePumpMeterInput: CreatePumpMeterInput;
@@ -808,6 +924,7 @@ export type ResolversTypes = {
   ReportsInput: ReportsInput;
   ResetUserPasswordInput: ResetUserPasswordInput;
   SaveReportDraftInput: SaveReportDraftInput;
+  SetTimesheetDayOverrideInput: SetTimesheetDayOverrideInput;
   Shift: ResolverTypeWrapper<Shift>;
   StockMovement: ResolverTypeWrapper<StockMovement>;
   StockMovementPage: ResolverTypeWrapper<StockMovementPage>;
@@ -816,6 +933,11 @@ export type ResolversTypes = {
   String: ResolverTypeWrapper<Scalars['String']['output']>;
   TenantAccess: ResolverTypeWrapper<TenantAccess>;
   TenantSummary: ResolverTypeWrapper<TenantSummary>;
+  TimesheetDay: ResolverTypeWrapper<TimesheetDay>;
+  TimesheetDaysFilter: TimesheetDaysFilter;
+  TimesheetPage: ResolverTypeWrapper<TimesheetPage>;
+  TimesheetUserSummary: ResolverTypeWrapper<TimesheetUserSummary>;
+  TimesheetsFilter: TimesheetsFilter;
   UpdateFuelProductInput: UpdateFuelProductInput;
   UpdateInventoryProductInput: UpdateInventoryProductInput;
   UpdateMyProfileInput: UpdateMyProfileInput;
@@ -827,12 +949,17 @@ export type ResolversTypes = {
   UserPage: ResolverTypeWrapper<UserPage>;
   UserRole: UserRole;
   UserStatus: UserStatus;
+  UserTimesheet: ResolverTypeWrapper<UserTimesheet>;
   UsersInput: UsersInput;
 };
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
+  AttendanceSessionStatus: AttendanceSessionStatus;
+  AttendanceStatus: AttendanceStatus;
   Boolean: Scalars['Boolean']['output'];
+  CheckInAttendanceInput: CheckInAttendanceInput;
+  CheckOutAttendanceInput: CheckOutAttendanceInput;
   CreateFuelProductInput: CreateFuelProductInput;
   CreateInventoryProductInput: CreateInventoryProductInput;
   CreatePumpMeterInput: CreatePumpMeterInput;
@@ -880,6 +1007,7 @@ export type ResolversParentTypes = {
   ReportsInput: ReportsInput;
   ResetUserPasswordInput: ResetUserPasswordInput;
   SaveReportDraftInput: SaveReportDraftInput;
+  SetTimesheetDayOverrideInput: SetTimesheetDayOverrideInput;
   Shift: Shift;
   StockMovement: StockMovement;
   StockMovementPage: StockMovementPage;
@@ -887,6 +1015,11 @@ export type ResolversParentTypes = {
   String: Scalars['String']['output'];
   TenantAccess: TenantAccess;
   TenantSummary: TenantSummary;
+  TimesheetDay: TimesheetDay;
+  TimesheetDaysFilter: TimesheetDaysFilter;
+  TimesheetPage: TimesheetPage;
+  TimesheetUserSummary: TimesheetUserSummary;
+  TimesheetsFilter: TimesheetsFilter;
   UpdateFuelProductInput: UpdateFuelProductInput;
   UpdateInventoryProductInput: UpdateInventoryProductInput;
   UpdateMyProfileInput: UpdateMyProfileInput;
@@ -896,7 +1029,22 @@ export type ResolversParentTypes = {
   UpdateUserInput: UpdateUserInput;
   User: User;
   UserPage: UserPage;
+  UserTimesheet: UserTimesheet;
   UsersInput: UsersInput;
+};
+
+export type AttendanceSessionStatusResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['AttendanceSessionStatus'] = ResolversParentTypes['AttendanceSessionStatus']> = {
+  id?: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
+  startedAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
+export type AttendanceStatusResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['AttendanceStatus'] = ResolversParentTypes['AttendanceStatus']> = {
+  activeSession?: Resolver<Maybe<ResolversTypes['AttendanceSessionStatus']>, ParentType, ContextType>;
+  asOf?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  automaticSeconds?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  localDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  timezone?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  trackedSeconds?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
 };
 
 export type CreateReportPayloadResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['CreateReportPayload'] = ResolversParentTypes['CreateReportPayload']> = {
@@ -981,6 +1129,8 @@ export type LubricantSaleResolvers<ContextType = GraphqlContext, ParentType exte
 };
 
 export type MutationResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
+  checkInAttendance?: Resolver<ResolversTypes['AttendanceStatus'], ParentType, ContextType, RequireFields<MutationCheckInAttendanceArgs, 'input'>>;
+  checkOutAttendance?: Resolver<ResolversTypes['AttendanceStatus'], ParentType, ContextType, RequireFields<MutationCheckOutAttendanceArgs, 'input'>>;
   createFuelProduct?: Resolver<ResolversTypes['FuelProduct'], ParentType, ContextType, RequireFields<MutationCreateFuelProductArgs, 'input'>>;
   createInventoryProduct?: Resolver<ResolversTypes['InventoryProduct'], ParentType, ContextType, RequireFields<MutationCreateInventoryProductArgs, 'input'>>;
   createPumpMeter?: Resolver<ResolversTypes['PumpMeter'], ParentType, ContextType, RequireFields<MutationCreatePumpMeterArgs, 'input'>>;
@@ -998,6 +1148,7 @@ export type MutationResolvers<ContextType = GraphqlContext, ParentType extends R
   recordStockMovement?: Resolver<ResolversTypes['StockMovement'], ParentType, ContextType, RequireFields<MutationRecordStockMovementArgs, 'input'>>;
   resetUserPassword?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationResetUserPasswordArgs, 'input'>>;
   saveReportDraft?: Resolver<ResolversTypes['Report'], ParentType, ContextType, RequireFields<MutationSaveReportDraftArgs, 'input'>>;
+  setTimesheetDayOverride?: Resolver<ResolversTypes['TimesheetDay'], ParentType, ContextType, RequireFields<MutationSetTimesheetDayOverrideArgs, 'input'>>;
   submitReport?: Resolver<ResolversTypes['Report'], ParentType, ContextType, RequireFields<MutationSubmitReportArgs, 'input'>>;
   updateFuelProduct?: Resolver<ResolversTypes['FuelProduct'], ParentType, ContextType, RequireFields<MutationUpdateFuelProductArgs, 'input'>>;
   updateInventoryProduct?: Resolver<ResolversTypes['InventoryProduct'], ParentType, ContextType, RequireFields<MutationUpdateInventoryProductArgs, 'input'>>;
@@ -1026,6 +1177,7 @@ export type QueryResolvers<ContextType = GraphqlContext, ParentType extends Reso
   activeTenant?: Resolver<Maybe<ResolversTypes['TenantSummary']>, ParentType, ContextType>;
   fuelSetup?: Resolver<ResolversTypes['FuelSetup'], ParentType, ContextType>;
   inventoryProducts?: Resolver<ResolversTypes['InventoryProductPage'], ParentType, ContextType, RequireFields<QueryInventoryProductsArgs, 'input'>>;
+  myAttendance?: Resolver<ResolversTypes['AttendanceStatus'], ParentType, ContextType>;
   recurringIncomeConfiguration?: Resolver<ResolversTypes['RecurringIncomeConfiguration'], ParentType, ContextType>;
   report?: Resolver<ResolversTypes['Report'], ParentType, ContextType, RequireFields<QueryReportArgs, 'input'>>;
   reportCreationContext?: Resolver<ResolversTypes['ReportCreationContext'], ParentType, ContextType>;
@@ -1033,6 +1185,8 @@ export type QueryResolvers<ContextType = GraphqlContext, ParentType extends Reso
   shifts?: Resolver<Array<ResolversTypes['Shift']>, ParentType, ContextType>;
   stockMovements?: Resolver<ResolversTypes['StockMovementPage'], ParentType, ContextType, RequireFields<QueryStockMovementsArgs, 'input'>>;
   tenants?: Resolver<Array<ResolversTypes['TenantAccess']>, ParentType, ContextType>;
+  timesheetDays?: Resolver<ResolversTypes['UserTimesheet'], ParentType, ContextType, RequireFields<QueryTimesheetDaysArgs, 'filter'>>;
+  timesheets?: Resolver<ResolversTypes['TimesheetPage'], ParentType, ContextType, RequireFields<QueryTimesheetsArgs, 'filter'>>;
   users?: Resolver<ResolversTypes['UserPage'], ParentType, ContextType, RequireFields<QueryUsersArgs, 'input'>>;
 };
 
@@ -1146,6 +1300,31 @@ export type TenantSummaryResolvers<ContextType = GraphqlContext, ParentType exte
   timezone?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
+export type TimesheetDayResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['TimesheetDay'] = ResolversParentTypes['TimesheetDay']> = {
+  automaticSeconds?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  effectiveHours?: Resolver<ResolversTypes['Decimal'], ParentType, ContextType>;
+  localDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  overrideHours?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>;
+  revision?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  trackedSeconds?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+};
+
+export type TimesheetPageResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['TimesheetPage'] = ResolversParentTypes['TimesheetPage']> = {
+  asOf?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  endDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  items?: Resolver<Array<ResolversTypes['TimesheetUserSummary']>, ParentType, ContextType>;
+  startDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  timezone?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  totalCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+};
+
+export type TimesheetUserSummaryResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['TimesheetUserSummary'] = ResolversParentTypes['TimesheetUserSummary']> = {
+  fullName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  totalHours?: Resolver<ResolversTypes['Decimal'], ParentType, ContextType>;
+  userId?: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
+  username?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
 export type UserResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['User'] = ResolversParentTypes['User']> = {
   firstName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   fullName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -1161,7 +1340,16 @@ export type UserPageResolvers<ContextType = GraphqlContext, ParentType extends R
   totalCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
 };
 
+export type UserTimesheetResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['UserTimesheet'] = ResolversParentTypes['UserTimesheet']> = {
+  days?: Resolver<Array<ResolversTypes['TimesheetDay']>, ParentType, ContextType>;
+  fullName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  userId?: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
+  username?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
 export type Resolvers<ContextType = GraphqlContext> = {
+  AttendanceSessionStatus?: AttendanceSessionStatusResolvers<ContextType>;
+  AttendanceStatus?: AttendanceStatusResolvers<ContextType>;
   CreateReportPayload?: CreateReportPayloadResolvers<ContextType>;
   Decimal?: GraphQLScalarType;
   DisposalBatch?: DisposalBatchResolvers<ContextType>;
@@ -1189,7 +1377,11 @@ export type Resolvers<ContextType = GraphqlContext> = {
   StockMovementPage?: StockMovementPageResolvers<ContextType>;
   TenantAccess?: TenantAccessResolvers<ContextType>;
   TenantSummary?: TenantSummaryResolvers<ContextType>;
+  TimesheetDay?: TimesheetDayResolvers<ContextType>;
+  TimesheetPage?: TimesheetPageResolvers<ContextType>;
+  TimesheetUserSummary?: TimesheetUserSummaryResolvers<ContextType>;
   User?: UserResolvers<ContextType>;
   UserPage?: UserPageResolvers<ContextType>;
+  UserTimesheet?: UserTimesheetResolvers<ContextType>;
 };
 

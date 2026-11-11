@@ -32,4 +32,4 @@ function Button({ className, variant, size, asChild = false, ...props }: ButtonP
   return <Component className={cn(buttonVariants({ variant, size }), className)} {...props} />
 }
 
-export { Button }
+export { Button, buttonVariants }
