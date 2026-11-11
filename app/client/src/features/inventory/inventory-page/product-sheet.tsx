@@ -46,9 +46,9 @@ export function ProductSheet({ tenantId, product, onClose }: { tenantId: string;
           {!product && <Field label="Opening stock" error={form.formState.errors.openingStock?.message}><Input inputMode="numeric" disabled={pending} {...form.register('openingStock')} /></Field>}
           {form.formState.errors.root?.message && <p role="alert" className="text-sm text-destructive">{form.formState.errors.root.message}</p>}
         </div>
-        <footer className="flex shrink-0 justify-end gap-2 border-t border-border p-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
-          <Button type="button" size="sm" variant="outline" disabled={pending} onClick={onClose}>Cancel</Button>
-          <Button type="submit" size="sm" disabled={!form.formState.isValid || pending}>{pending && <Spinner className="size-4" />}{pending ? 'Saving…' : 'Save'}</Button>
+        <footer className="flex shrink-0 gap-3 border-t border-border p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
+          <Button type="button" variant="outline" className="flex-1" disabled={pending} onClick={onClose}>Cancel</Button>
+          <Button type="submit" className="flex-1" disabled={!form.formState.isValid || pending}>{pending && <Spinner className="size-4" />}{pending ? 'Saving…' : 'Save'}</Button>
         </footer>
       </form>
     </Sheet>

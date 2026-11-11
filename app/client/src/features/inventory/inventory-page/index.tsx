@@ -146,14 +146,20 @@ function TenantInventory({ tenantId }: { tenantId: string }) {
                           {product.status === 'active' ? 'Active' : 'Inactive'}
                         </span>
                       </div>
-                      <p
-                        className={cn(
-                          'mt-1 text-sm font-medium tabular-nums',
-                          product.stockCount.startsWith('-') && 'text-destructive',
-                        )}
-                      >
-                        {product.stockCount} {product.unit} · {formatMoney(product.unitPrice)}
-                      </p>
+                      <div className="mt-1 flex items-baseline gap-1.5">
+                        <span
+                          className={cn(
+                            'text-sm font-semibold tabular-nums text-text-heading',
+                            product.stockCount.startsWith('-') && 'text-destructive',
+                          )}
+                        >
+                          {product.stockCount} {product.unit}
+                        </span>
+                        <span aria-hidden="true" className="text-xs text-text-tertiary">·</span>
+                        <span className="text-xs font-normal tabular-nums text-text-secondary">
+                          {formatMoney(product.unitPrice)}
+                        </span>
+                      </div>
                     </div>
                     <Button
                       type="button"

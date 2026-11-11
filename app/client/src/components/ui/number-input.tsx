@@ -65,6 +65,7 @@ function NumberInputField({
       <input
         {...props}
         {...field}
+        autoComplete="off"
         value={text}
         placeholder={props.placeholder ?? '0'}
         type="number"
