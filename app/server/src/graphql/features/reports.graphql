@@ -6,8 +6,9 @@ extend type Query {
 
 extend type Mutation {
   createReport(input: CreateReportInput!): CreateReportPayload!
-  submitReport(input: ReportRevisionInput!): Report!
-  deleteReport(input: ReportRevisionInput!): Boolean!
+  saveReportDraft(input: SaveReportDraftInput!): Report!
+  submitReport(input: ReportTransitionInput!): Report!
+  deleteReport(input: DeleteReportInput!): Report!
 }
 
 input CreateReportInput {
@@ -24,9 +25,33 @@ input ReportsInput {
   limit: Int = 20
 }
 
-input ReportRevisionInput {
+input FinancialEntryInput {
+  id: String!
+  description: String!
+  notes: String
+  amount: Decimal!
+}
+
+input SaveReportDraftInput {
   reportId: ObjectId!
-  expectedRevision: Int!
+  expectedReportRevision: Int!
+  expectedDisposalRevision: Int!
+  incomeEntries: [FinancialEntryInput!]!
+  expenseEntries: [FinancialEntryInput!]!
+  disposalReadings: [EditableDisposalInput!]!
+}
+
+input ReportTransitionInput {
+  reportId: ObjectId!
+  expectedReportRevision: Int!
+  expectedDisposalRevision: Int!
+}
+
+input DeleteReportInput {
+  reportId: ObjectId!
+  expectedReportRevision: Int!
+  expectedDisposalRevision: Int!
+  reason: String!
 }
 
 type CreateReportPayload {
@@ -56,6 +81,13 @@ type Report {
   businessDate: String!
   shiftId: ObjectId!
   interval: ReportIntervalSnapshot!
+  currency: String!
+  legacy: Boolean!
+  effective: Boolean!
+  incomeEntries: [FinancialEntry!]!
+  expenseEntries: [FinancialEntry!]!
+  totals: ReportTotals!
+  disposals: DisposalBatch
   creatorId: ObjectId!
   creatorName: String!
   status: ReportStatus!
@@ -65,6 +97,26 @@ type Report {
   submittedAt: String
   submittedById: ObjectId
   submittedByName: String
+  revokedFromStatus: ReportStatus
+  revokedAt: String
+  revokedById: ObjectId
+  revokedByName: String
+  revocationReason: String
+}
+
+type FinancialEntry {
+  id: String!
+  description: String!
+  notes: String
+  amount: Decimal!
+}
+
+type ReportTotals {
+  income: Decimal!
+  expenses: Decimal!
+  cashFuelSales: Decimal!
+  pumpSales: Decimal
+  overShort: Decimal
 }
 
 type ReportIntervalSnapshot {
@@ -76,4 +128,5 @@ type ReportIntervalSnapshot {
 enum ReportStatus {
   draft
   submitted
+  revoked
 }

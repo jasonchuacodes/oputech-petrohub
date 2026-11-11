@@ -16,6 +16,8 @@ import { MemberActivityModule } from './modules/member-activity/member-activity.
 import { TenantModule } from './modules/tenants/tenant.module'
 import { UsersModule } from './modules/users/users.module'
 import { ReportsModule } from './modules/reports/reports.module'
+import { FuelSetupModule } from './modules/fuel-setup/fuel-setup.module'
+import { DisposalsModule } from './modules/disposals/disposals.module'
 
 @Module({
   imports: [
@@ -64,6 +66,8 @@ import { ReportsModule } from './modules/reports/reports.module'
     TenantModule,
     MemberActivityModule,
     ReportsModule,
+    FuelSetupModule,
+    DisposalsModule,
     AuthModule,
     HealthModule,
   ],

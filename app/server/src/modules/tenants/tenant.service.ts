@@ -8,6 +8,7 @@ import {
   NotFoundException,
 } from '../../common/exceptions'
 import { ReportsService } from '../reports/reports.service'
+import { FuelSetupService } from '../fuel-setup/fuel-setup.service'
 import { Session as AuthSession } from '../auth/schemas/session.schema'
 import { MemberActivity } from '../member-activity/schemas/member-activity.schema'
 import { User, UserRole, UserStatus } from '../users/schemas/user.schema'
@@ -40,6 +41,10 @@ export type TenantDeletionResult = {
   sessions: number
   userAssignments: number
   reports: number
+  disposalBatches: number
+  meterHeads: number
+  fuelProducts: number
+  pumpMeters: number
 }
 
 @Injectable()
@@ -52,6 +57,7 @@ export class TenantService {
     @InjectModel(AuthSession.name) private readonly sessionModel: Model<AuthSession>,
     @InjectConnection() private readonly connection: Connection,
     private readonly reportsService: ReportsService,
+    private readonly fuelSetupService: FuelSetupService,
   ) {}
 
   async listForUser(user: TenantActor): Promise<TenantRecord[]> {
@@ -353,7 +359,13 @@ export class TenantService {
           { tenantId },
           { session: databaseSession },
         )
-        nextResult.reports = await this.reportsService.deleteForTenant(tenantId, databaseSession)
+        const reportDeletion = await this.reportsService.deleteForTenant(tenantId, databaseSession)
+        const setupDeletion = await this.fuelSetupService.deleteForTenant(tenantId, databaseSession)
+        nextResult.reports = reportDeletion.reports
+        nextResult.disposalBatches = reportDeletion.disposalBatches
+        nextResult.meterHeads = reportDeletion.meterHeads
+        nextResult.fuelProducts = setupDeletion.products
+        nextResult.pumpMeters = setupDeletion.meters
         const deletedTenant = await this.tenantModel.deleteOne(
           { _id: tenantId },
           { session: databaseSession },
@@ -417,5 +429,9 @@ function emptyDeletionResult(): TenantDeletionResult {
     sessions: 0,
     userAssignments: 0,
     reports: 0,
+    disposalBatches: 0,
+    meterHeads: 0,
+    fuelProducts: 0,
+    pumpMeters: 0,
   }
 }

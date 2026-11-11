@@ -1,4 +1,5 @@
 scalar ObjectId
+scalar Decimal
 
 type Query {
   tenants: [TenantAccess!]!

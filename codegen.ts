@@ -18,6 +18,10 @@ const config: CodegenConfig = {
             input: 'mongoose#Types.ObjectId',
             output: 'mongoose#Types.ObjectId',
           },
+          Decimal: {
+            input: 'string',
+            output: 'string',
+          },
         },
       },
     },
@@ -28,6 +32,10 @@ const config: CodegenConfig = {
         useTypeImports: true,
         scalars: {
           ObjectId: {
+            input: 'string',
+            output: 'string',
+          },
+          Decimal: {
             input: 'string',
             output: 'string',
           },

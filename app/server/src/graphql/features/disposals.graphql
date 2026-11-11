@@ -1,0 +1,34 @@
+type DisposalBatch {
+  id: ObjectId!
+  revision: Int!
+  status: DisposalBatchStatus!
+  predecessorBatchId: ObjectId
+  successorBatchId: ObjectId
+  readings: [DisposalReading!]!
+  pumpSales: Decimal
+  complete: Boolean!
+  blockingIssues: [String!]!
+}
+
+type DisposalReading {
+  meterId: ObjectId!
+  meterLabel: String!
+  productId: ObjectId!
+  productName: String!
+  unitPrice: Decimal!
+  openingReading: Decimal!
+  openingSource: DisposalOpeningSource!
+  closingReading: Decimal
+  calibration: Decimal!
+  netVolume: Decimal
+  sales: Decimal
+}
+
+enum DisposalBatchStatus { draft, submitted, revoked }
+enum DisposalOpeningSource { baseline, previous_report }
+
+input EditableDisposalInput {
+  meterId: ObjectId!
+  closingReading: Decimal
+  calibration: Decimal!
+}

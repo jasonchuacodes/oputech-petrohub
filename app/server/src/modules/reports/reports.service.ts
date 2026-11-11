@@ -1,214 +1,336 @@
 import { Injectable } from '@nestjs/common'
 import { EventEmitter2 } from '@nestjs/event-emitter'
-import { InjectModel } from '@nestjs/mongoose'
-import { ClientSession, Model, Types } from 'mongoose'
-import { ConflictException, InvalidInputException, NotFoundException } from '../../common/exceptions'
+import { InjectConnection, InjectModel } from '@nestjs/mongoose'
+import { ClientSession, Connection, Model, Types } from 'mongoose'
+import { ConflictException, ForbiddenException, InvalidInputException, NotFoundException } from '../../common/exceptions'
+import { decimal, decimal128, sum } from '../../common/numeric/decimal'
+import { DisposalsService, DisposalBatchRecord } from '../disposals/disposals.service'
 import { Shift } from '../tenants/schemas/shift.schema'
+import { UserRole } from '../users/schemas/user.schema'
 import { REPORT_CREATED_EVENT, ReportCreatedEvent } from './events/report-created.event'
 import { businessDateFor } from './report-date'
-import { CreateReportInput, ReportsInput, ReportRevisionInput } from './reports.schemas'
-import { Report, ReportStatus } from './schemas/report.schema'
+import {
+  CreateReportInput,
+  DeleteReportInput,
+  ReportsInput,
+  ReportTransitionInput,
+  SaveReportDraftInput,
+} from './reports.schemas'
+import { Report, ReportFinancialEntry, ReportStatus } from './schemas/report.schema'
 
 export type ReportRecord = Report & { _id: Types.ObjectId }
 
 type ReportTenant = {
   tenantId: Types.ObjectId
   timezone: string
+  currency: string
   shifts: Shift[]
 }
 
 type ReportActor = {
   userId: Types.ObjectId
   name: string
+  role: UserRole
 }
+
+export type ReportDetailRecord = { report: ReportRecord; disposals?: DisposalBatchRecord }
 
 @Injectable()
 export class ReportsService {
   constructor(
     @InjectModel(Report.name) private readonly reports: Model<Report>,
+    @InjectConnection() private readonly connection: Connection,
+    private readonly disposals: DisposalsService,
     private readonly events: EventEmitter2,
   ) {}
 
   async creationContext(tenant: ReportTenant) {
     const businessDate = businessDateFor(tenant.timezone)
     const reports = await this.reports
-      .find({ tenantId: tenant.tenantId, businessDate })
+      .find({ tenantId: tenant.tenantId, businessDate, effective: { $ne: false } })
       .sort({ createdAt: 1 })
       .lean<ReportRecord[]>()
       .exec()
     const byShift = new Map(reports.map((report) => [report.shiftId.toHexString(), report]))
     const orderedShifts = sortShifts(tenant.shifts)
     const configuredIds = new Set(orderedShifts.map((shift) => shift.id.toHexString()))
-    let previousShiftsCreated = true
+    let previousSubmitted = true
     const slots = orderedShifts.map((shift) => {
       const report = byShift.get(shift.id.toHexString())
-      const canCreate = previousShiftsCreated
-      if (!report) previousShiftsCreated = false
+      const canCreate = !report && previousSubmitted
+      const blockedReason = report
+        ? undefined
+        : previousSubmitted
+          ? undefined
+          : 'Submit the previous shift report first.'
+      if (!report || report.status !== ReportStatus.SUBMITTED) previousSubmitted = false
       return {
         shift: report
-          ? {
-              id: report.shiftId,
-              startTime: report.interval.startTime,
-              endTime: report.interval.endTime,
-            }
+          ? { id: report.shiftId, startTime: report.interval.startTime, endTime: report.interval.endTime }
           : shift,
         report,
         canCreate,
-        blockedReason:
-          !report && !canCreate ? 'Create the previous shift report first.' : undefined,
+        blockedReason,
       }
     })
-    const removed = reports
-      .filter((report) => !configuredIds.has(report.shiftId.toHexString()))
-      .map((report) => ({
-        shift: {
-          id: report.shiftId,
-          startTime: report.interval.startTime,
-          endTime: report.interval.endTime,
-        },
-        report,
-        canCreate: false,
-        blockedReason: undefined,
-      }))
-
+    const removed = reports.filter((report) => !configuredIds.has(report.shiftId.toHexString())).map((report) => ({
+      shift: { id: report.shiftId, startTime: report.interval.startTime, endTime: report.interval.endTime },
+      report,
+      canCreate: false,
+      blockedReason: undefined,
+    }))
     return { businessDate, slots: [...slots, ...removed] }
   }
 
   async createOrOpen(tenant: ReportTenant, actor: ReportActor, input: CreateReportInput) {
     const today = businessDateFor(tenant.timezone)
-    if (input.businessDate !== today) {
-      throw new InvalidInputException('Reports can only be created for today.')
-    }
-
-    const filter = {
-      tenantId: tenant.tenantId,
-      businessDate: today,
-      shiftId: input.shiftId,
-    }
-    const existing = await this.reports.findOne(filter).lean<ReportRecord>().exec()
+    if (input.businessDate !== today) throw new InvalidInputException('Reports can only be created for today.')
+    const slotFilter = { tenantId: tenant.tenantId, businessDate: today, shiftId: input.shiftId }
+    const activeFilter = { ...slotFilter, effective: { $ne: false } }
+    const existing = await this.reports.findOne(activeFilter).lean<ReportRecord>().exec()
     if (existing) return { report: existing, created: false }
 
     const orderedShifts = sortShifts(tenant.shifts)
     const shiftIndex = orderedShifts.findIndex((item) => item.id.equals(input.shiftId))
     const shift = orderedShifts[shiftIndex]
     if (!shift) throw new InvalidInputException('Select a tenant shift.')
-
     const previousShiftIds = orderedShifts.slice(0, shiftIndex).map((item) => item.id)
     if (previousShiftIds.length > 0) {
-      const previousReportCount = await this.reports.countDocuments({
+      const previousCount = await this.reports.countDocuments({
         tenantId: tenant.tenantId,
         businessDate: today,
         shiftId: { $in: previousShiftIds },
+        effective: { $ne: false },
+        status: ReportStatus.SUBMITTED,
       })
-      if (previousReportCount !== previousShiftIds.length) {
-        throw new InvalidInputException('Create the previous shift report first.')
-      }
+      if (previousCount !== previousShiftIds.length) throw new InvalidInputException('Submit the previous shift report first.')
     }
 
-    const now = new Date()
+    const databaseSession = await this.connection.startSession()
+    let created: ReportRecord | undefined
+    let didCreate = false
     try {
-      const report = await this.reports.create({
-        ...filter,
-        interval: {
-          startTime: shift.startTime,
-          endTime: shift.endTime,
-          timezone: tenant.timezone,
-        },
-        creatorId: actor.userId,
-        creatorName: actor.name,
-        status: ReportStatus.DRAFT,
+      await databaseSession.withTransaction(async () => {
+        const winner = await this.reports.findOne(activeFilter).session(databaseSession).lean<ReportRecord>().exec()
+        if (winner) {
+          created = winner
+          return
+        }
+        const [document] = await this.reports.create([{
+          ...slotFilter,
+          interval: { startTime: shift.startTime, endTime: shift.endTime, timezone: tenant.timezone },
+          currency: tenant.currency,
+          creatorId: actor.userId,
+          creatorName: actor.name,
+          status: ReportStatus.DRAFT,
+          effective: true,
+        }], { session: databaseSession })
+        if (!document) throw new ConflictException('Unable to create the report.')
+        const batch = await this.disposals.initializeForReport({
+          tenantId: tenant.tenantId,
+          reportId: document._id,
+          businessDate: today,
+          shiftId: shift.id,
+        }, databaseSession)
+        document.disposalBatchId = batch._id
+        await document.save({ session: databaseSession })
+        created = document.toObject<ReportRecord>()
+        didCreate = true
       })
-      const record = report.toObject<ReportRecord>()
-      await this.events.emitAsync(
-        REPORT_CREATED_EVENT,
-        new ReportCreatedEvent(tenant.tenantId, actor.userId, record._id, now),
-      )
-      return { report: record, created: true }
     } catch (error) {
       if (!isDuplicateKeyError(error)) throw error
-      const winner = await this.reports.findOne(filter).lean<ReportRecord>().exec()
-      if (!winner) throw new ConflictException('The report slot was claimed by another request.')
-      return { report: winner, created: false }
+      created = await this.reports.findOne(activeFilter).lean<ReportRecord>().exec() ?? undefined
+    } finally {
+      await databaseSession.endSession()
     }
+    if (!created) throw new ConflictException('The report slot was claimed by another request.')
+    if (didCreate) {
+      await this.events.emitAsync(REPORT_CREATED_EVENT, new ReportCreatedEvent(tenant.tenantId, actor.userId, created._id, created.createdAt))
+    }
+    return { report: created, created: didCreate }
   }
 
   async get(tenantId: Types.ObjectId, reportId: Types.ObjectId): Promise<ReportRecord> {
-    const report = await this.reports
-      .findOne({ _id: reportId, tenantId })
-      .lean<ReportRecord>()
-      .exec()
+    const report = await this.reports.findOne({ _id: reportId, tenantId }).lean<ReportRecord>().exec()
     if (!report) throw new NotFoundException('Report not found.')
     return report
+  }
+
+  async getDetail(tenantId: Types.ObjectId, reportId: Types.ObjectId): Promise<ReportDetailRecord> {
+    const report = await this.get(tenantId, reportId)
+    const disposals = report.disposalBatchId ? await this.disposals.getForReport(tenantId, reportId) : undefined
+    return { report, disposals: disposals ?? undefined }
   }
 
   async list(tenantId: Types.ObjectId, input: ReportsInput) {
     const filter = { tenantId }
     const [items, totalCount] = await Promise.all([
-      this.reports
-        .find(filter)
-        .sort({ businessDate: -1, createdAt: -1, _id: -1 })
-        .skip(input.offset)
-        .limit(input.limit)
-        .lean<ReportRecord[]>()
-        .exec(),
+      this.reports.find(filter).sort({ businessDate: -1, createdAt: -1, _id: -1 }).skip(input.offset).limit(input.limit).lean<ReportRecord[]>().exec(),
       this.reports.countDocuments(filter).exec(),
     ])
     return { items, totalCount }
   }
 
-  async submit(
-    tenantId: Types.ObjectId,
-    actor: ReportActor,
-    input: ReportRevisionInput,
-  ): Promise<ReportRecord> {
-    const report = await this.reports
-      .findOneAndUpdate(
-        {
-          _id: input.reportId,
+  async saveDraft(tenantId: Types.ObjectId, actor: ReportActor, input: SaveReportDraftInput): Promise<ReportDetailRecord> {
+    this.assertUniqueEntryIds(input)
+    const databaseSession = await this.connection.startSession()
+    let result: ReportDetailRecord | undefined
+    try {
+      await databaseSession.withTransaction(async () => {
+        const current = await this.reports.findOne({ _id: input.reportId, tenantId, effective: true }).session(databaseSession).lean<ReportRecord>().exec()
+        if (!current) throw new NotFoundException('Report not found.')
+        this.assertEditor(current, actor)
+        if (current.status !== ReportStatus.DRAFT) throw new ConflictException('Only draft reports can be changed.')
+        if (current.revision !== input.expectedReportRevision) throw new ConflictException('This report changed. Refresh and try again.')
+
+        const disposalBatch = await this.disposals.saveDraft(
           tenantId,
-          revision: input.expectedRevision,
-          status: ReportStatus.DRAFT,
-        },
-        {
-          $set: {
-            status: ReportStatus.SUBMITTED,
-            submittedAt: new Date(),
-            submittedById: actor.userId,
-            submittedByName: actor.name,
+          input.reportId,
+          input.expectedDisposalRevision,
+          input.disposalReadings,
+          databaseSession,
+        )
+        const incomeEntries = toEntries(input.incomeEntries)
+        const expenseEntries = toEntries(input.expenseEntries)
+        const income = sum(incomeEntries.map((entry) => entry.amount.toString()))
+        const expenses = sum(expenseEntries.map((entry) => entry.amount.toString()))
+        const cashFuelSales = income.minus(expenses)
+        const pumpSales = disposalBatch.pumpSales ? decimal(disposalBatch.pumpSales) : undefined
+        const updated = await this.reports.findOneAndUpdate(
+          { _id: input.reportId, tenantId, effective: true, status: ReportStatus.DRAFT, revision: input.expectedReportRevision },
+          {
+            $set: {
+              incomeEntries,
+              expenseEntries,
+              totals: {
+                income: decimal128(income),
+                expenses: decimal128(expenses),
+                cashFuelSales: decimal128(cashFuelSales),
+                ...(pumpSales ? { pumpSales: decimal128(pumpSales), overShort: decimal128(cashFuelSales.minus(pumpSales)) } : {}),
+              },
+            },
+            $inc: { revision: 1 },
           },
-          $inc: { revision: 1 },
-        },
-        { new: true, runValidators: true },
-      )
-      .lean<ReportRecord>()
-      .exec()
-    if (report) return report
-
-    const current = await this.reports.findOne({ _id: input.reportId, tenantId }).lean().exec()
-    if (!current) throw new NotFoundException('Report not found.')
-    if (current.status === ReportStatus.SUBMITTED) {
-      throw new ConflictException('This report has already been submitted.')
+          { new: true, runValidators: true, session: databaseSession },
+        ).lean<ReportRecord>().exec()
+        if (!updated) throw new ConflictException('This report changed. Refresh and try again.')
+        result = { report: updated, disposals: disposalBatch }
+      })
+    } finally {
+      await databaseSession.endSession()
     }
-    throw new ConflictException('This report was changed by another request.')
+    if (!result) throw new ConflictException('Unable to save this report.')
+    return result
   }
 
-  async delete(tenantId: Types.ObjectId, input: ReportRevisionInput): Promise<boolean> {
-    const deleted = await this.reports.deleteOne({
-      _id: input.reportId,
-      tenantId,
-      revision: input.expectedRevision,
-    })
-    if (deleted.deletedCount === 1) return true
-
-    const exists = await this.reports.exists({ _id: input.reportId, tenantId })
-    if (!exists) throw new NotFoundException('Report not found.')
-    throw new ConflictException('This report was changed by another request.')
+  async submit(tenantId: Types.ObjectId, actor: ReportActor, input: ReportTransitionInput): Promise<ReportDetailRecord> {
+    const databaseSession = await this.connection.startSession()
+    let result: ReportDetailRecord | undefined
+    try {
+      await databaseSession.withTransaction(async () => {
+        const current = await this.reports.findOne({ _id: input.reportId, tenantId, effective: true }).session(databaseSession).lean<ReportRecord>().exec()
+        if (!current) throw new NotFoundException('Report not found.')
+        this.assertEditor(current, actor)
+        if (current.status !== ReportStatus.DRAFT || current.revision !== input.expectedReportRevision) throw new ConflictException('This report changed or has already been submitted.')
+        const now = new Date()
+        const disposalBatch = await this.disposals.submitBatch(tenantId, input.reportId, input.expectedDisposalRevision, now, databaseSession)
+        if (!disposalBatch.pumpSales) throw new InvalidInputException('Complete every disposal reading before submitting.')
+        const cashFuelSales = decimal(current.totals.cashFuelSales)
+        const pumpSales = decimal(disposalBatch.pumpSales)
+        const updated = await this.reports.findOneAndUpdate(
+          { _id: input.reportId, tenantId, effective: true, status: ReportStatus.DRAFT, revision: input.expectedReportRevision },
+          {
+            $set: {
+              status: ReportStatus.SUBMITTED,
+              submittedAt: now,
+              submittedById: actor.userId,
+              submittedByName: actor.name,
+              'totals.pumpSales': disposalBatch.pumpSales,
+              'totals.overShort': decimal128(cashFuelSales.minus(pumpSales)),
+            },
+            $inc: { revision: 1 },
+          },
+          { new: true, runValidators: true, session: databaseSession },
+        ).lean<ReportRecord>().exec()
+        if (!updated) throw new ConflictException('This report changed. Refresh and try again.')
+        result = { report: updated, disposals: disposalBatch }
+      })
+    } finally {
+      await databaseSession.endSession()
+    }
+    if (!result) throw new ConflictException('Unable to submit this report.')
+    return result
   }
 
-  async deleteForTenant(tenantId: Types.ObjectId, session: ClientSession): Promise<number> {
-    const result = await this.reports.deleteMany({ tenantId }, { session })
-    return result.deletedCount
+  async delete(tenantId: Types.ObjectId, actor: ReportActor, input: DeleteReportInput): Promise<ReportDetailRecord> {
+    const databaseSession = await this.connection.startSession()
+    let result: ReportDetailRecord | undefined
+    try {
+      await databaseSession.withTransaction(async () => {
+        const current = await this.reports.findOne({ _id: input.reportId, tenantId, effective: true }).session(databaseSession).lean<ReportRecord>().exec()
+        if (!current) throw new NotFoundException('Report not found.')
+        if (current.revision !== input.expectedReportRevision) throw new ConflictException('This report changed. Refresh and try again.')
+        if (![ReportStatus.DRAFT, ReportStatus.SUBMITTED].includes(current.status)) throw new ConflictException('This report is already revoked.')
+        const now = new Date()
+        const disposalBatch = await this.disposals.revokeForReport(
+          tenantId,
+          input.reportId,
+          input.expectedDisposalRevision,
+          actor,
+          input.reason,
+          now,
+          databaseSession,
+        )
+        const updated = await this.reports.findOneAndUpdate(
+          { _id: input.reportId, tenantId, effective: true, revision: input.expectedReportRevision },
+          {
+            $set: {
+              status: ReportStatus.REVOKED,
+              effective: false,
+              revokedFromStatus: current.status,
+              revokedAt: now,
+              revokedById: actor.userId,
+              revokedByName: actor.name,
+              revocationReason: input.reason,
+            },
+            $inc: { revision: 1 },
+          },
+          { new: true, runValidators: true, session: databaseSession },
+        ).lean<ReportRecord>().exec()
+        if (!updated) throw new ConflictException('This report changed. Refresh and try again.')
+        result = { report: updated, disposals: disposalBatch }
+      })
+    } finally {
+      await databaseSession.endSession()
+    }
+    if (!result) throw new ConflictException('Unable to delete this report.')
+    return result
   }
+
+  async deleteForTenant(tenantId: Types.ObjectId, session: ClientSession) {
+    const disposals = await this.disposals.deleteForTenant(tenantId, session)
+    const reports = await this.reports.deleteMany({ tenantId }, { session })
+    return { reports: reports.deletedCount, disposalBatches: disposals.batches, meterHeads: disposals.heads }
+  }
+
+  private assertEditor(report: ReportRecord, actor: ReportActor) {
+    const administrator = actor.role === UserRole.ADMIN || actor.role === UserRole.SUPERADMIN
+    if (!administrator && !report.creatorId.equals(actor.userId)) throw new ForbiddenException('Only the report creator or an administrator can edit this report.')
+  }
+
+  private assertUniqueEntryIds(input: SaveReportDraftInput) {
+    const ids = [...input.incomeEntries, ...input.expenseEntries].map((entry) => entry.id)
+    if (new Set(ids).size !== ids.length) throw new InvalidInputException('Financial entry identifiers must be unique.')
+  }
+}
+
+function toEntries(entries: SaveReportDraftInput['incomeEntries']): ReportFinancialEntry[] {
+  return entries.map((entry) => ({
+    id: entry.id,
+    description: entry.description,
+    notes: entry.notes || undefined,
+    amount: decimal128(entry.amount),
+  }))
 }
 
 function isDuplicateKeyError(error: unknown): error is { code: number } {
@@ -216,10 +338,7 @@ function isDuplicateKeyError(error: unknown): error is { code: number } {
 }
 
 function sortShifts(shifts: Shift[]): Shift[] {
-  return [...shifts].sort(
-    (left, right) =>
-      left.startTime.localeCompare(right.startTime) ||
-      left.endTime.localeCompare(right.endTime) ||
-      left.id.toHexString().localeCompare(right.id.toHexString()),
+  return [...shifts].sort((left, right) =>
+    left.startTime.localeCompare(right.startTime) || left.endTime.localeCompare(right.endTime) || left.id.toHexString().localeCompare(right.id.toHexString()),
   )
 }

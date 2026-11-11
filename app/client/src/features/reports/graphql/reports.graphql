@@ -2,11 +2,7 @@ fragment ReportFields on Report {
   id
   businessDate
   shiftId
-  interval {
-    startTime
-    endTime
-    timezone
-  }
+  interval { startTime endTime timezone }
   creatorId
   creatorName
   status
@@ -16,6 +12,44 @@ fragment ReportFields on Report {
   submittedAt
   submittedById
   submittedByName
+  revokedAt
+  revokedByName
+  revocationReason
+}
+
+fragment ReportDetailFields on Report {
+  ...ReportFields
+  currency
+  legacy
+  effective
+  revokedFromStatus
+  revokedById
+  incomeEntries { id description notes amount }
+  expenseEntries { id description notes amount }
+  totals { income expenses cashFuelSales pumpSales overShort }
+  disposals {
+    id
+    revision
+    status
+    predecessorBatchId
+    successorBatchId
+    pumpSales
+    complete
+    blockingIssues
+    readings {
+      meterId
+      meterLabel
+      productId
+      productName
+      unitPrice
+      openingReading
+      openingSource
+      closingReading
+      calibration
+      netVolume
+      sales
+    }
+  }
 }
 
 query ReportCreationContext {
@@ -24,48 +58,38 @@ query ReportCreationContext {
     slots {
       canCreate
       blockedReason
-      shift {
-        id
-        startTime
-        endTime
-      }
-      report {
-        ...ReportFields
-      }
+      shift { id startTime endTime }
+      report { ...ReportFields }
     }
   }
 }
 
 query Reports($input: ReportsInput!) {
   reports(input: $input) {
-    items {
-      ...ReportFields
-    }
+    items { ...ReportFields }
     totalCount
   }
 }
 
 query Report($input: ReportInput!) {
-  report(input: $input) {
-    ...ReportFields
-  }
+  report(input: $input) { ...ReportDetailFields }
 }
 
 mutation CreateReport($input: CreateReportInput!) {
   createReport(input: $input) {
     created
-    report {
-      ...ReportFields
-    }
+    report { ...ReportDetailFields }
   }
 }
 
-mutation SubmitReport($input: ReportRevisionInput!) {
-  submitReport(input: $input) {
-    ...ReportFields
-  }
+mutation SaveReportDraft($input: SaveReportDraftInput!) {
+  saveReportDraft(input: $input) { ...ReportDetailFields }
 }
 
-mutation DeleteReport($input: ReportRevisionInput!) {
-  deleteReport(input: $input)
+mutation SubmitReport($input: ReportTransitionInput!) {
+  submitReport(input: $input) { ...ReportDetailFields }
+}
+
+mutation DeleteReport($input: DeleteReportInput!) {
+  deleteReport(input: $input) { ...ReportDetailFields }
 }

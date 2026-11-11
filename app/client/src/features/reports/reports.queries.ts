@@ -5,12 +5,18 @@ import {
   ReportCreationContextDocument,
   ReportDocument,
   ReportsDocument,
+  SaveReportDraftDocument,
   SubmitReportDocument,
+  type DeleteReportInput,
   type ReportFieldsFragment,
+  type ReportDetailFieldsFragment,
+  type ReportTransitionInput,
+  type SaveReportDraftInput,
 } from '~/generated/graphql'
 import { graphqlClient } from '~/lib/graphql'
 
 export type ReportRecord = ReportFieldsFragment
+export type ReportDetailRecord = ReportDetailFieldsFragment
 
 export const reportKeys = {
   all: (tenantId: string) => ['reports', tenantId] as const,
@@ -63,7 +69,7 @@ export function useCreateReportMutation(tenantId: string) {
 export function useSubmitReportMutation(tenantId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (input: { reportId: string; expectedRevision: number }) =>
+    mutationFn: async (input: ReportTransitionInput) =>
       (await graphqlClient.request(SubmitReportDocument, { input }, { tenantId })).submitReport,
     onSuccess: async (report) => {
       queryClient.setQueryData(reportKeys.detail(tenantId, report.id), report)
@@ -72,13 +78,25 @@ export function useSubmitReportMutation(tenantId: string) {
   })
 }
 
+export function useSaveReportDraftMutation(tenantId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (input: SaveReportDraftInput) =>
+      (await graphqlClient.request(SaveReportDraftDocument, { input }, { tenantId })).saveReportDraft,
+    onSuccess: async (report) => {
+      queryClient.setQueryData(reportKeys.detail(tenantId, report.id), report)
+      await queryClient.invalidateQueries({ queryKey: reportKeys.list(tenantId) })
+    },
+  })
+}
+
 export function useDeleteReportMutation(tenantId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (input: { reportId: string; expectedRevision: number }) =>
+    mutationFn: async (input: DeleteReportInput) =>
       (await graphqlClient.request(DeleteReportDocument, { input }, { tenantId })).deleteReport,
-    onSuccess: async (_, input) => {
-      queryClient.removeQueries({ queryKey: reportKeys.detail(tenantId, input.reportId) })
+    onSuccess: async (report) => {
+      queryClient.setQueryData(reportKeys.detail(tenantId, report.id), report)
       await queryClient.invalidateQueries({ queryKey: reportKeys.all(tenantId) })
     },
   })

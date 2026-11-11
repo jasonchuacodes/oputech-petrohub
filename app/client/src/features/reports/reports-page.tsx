@@ -53,10 +53,12 @@ export function ReportsPage() {
                 className={
                   report.status === 'submitted'
                     ? 'text-xs font-medium text-status-success'
+                    : report.status === 'revoked'
+                      ? 'text-xs font-medium text-status-error'
                     : 'text-xs font-medium text-status-warning'
                 }
               >
-                {report.status === 'submitted' ? 'Submitted' : 'Draft'}
+                {report.status === 'submitted' ? 'Submitted' : report.status === 'revoked' ? 'Revoked' : 'Draft'}
               </span>
             </span>
             <ChevronRight aria-hidden="true" className="size-5 text-primary" />

@@ -12,6 +12,8 @@ import { SessionModule } from './session/session.module'
 import { TenantResolver } from './tenant.resolver'
 import { ReportsModule } from '../reports/reports.module'
 import { ReportsResolver } from '../reports/reports.resolver'
+import { FuelSetupModule } from '../fuel-setup/fuel-setup.module'
+import { FuelSetupResolver } from '../fuel-setup/fuel-setup.resolver'
 
 @Module({
   imports: [
@@ -19,6 +21,7 @@ import { ReportsResolver } from '../reports/reports.resolver'
     UsersModule,
     TenantModule,
     ReportsModule,
+    FuelSetupModule,
   ],
   controllers: [AuthController],
   providers: [
@@ -30,6 +33,7 @@ import { ReportsResolver } from '../reports/reports.resolver'
     TenantResolver,
     UsersResolver,
     ReportsResolver,
+    FuelSetupResolver,
   ],
   exports: [SessionModule, TenantAccessGuard, RolesGuard],
 })
