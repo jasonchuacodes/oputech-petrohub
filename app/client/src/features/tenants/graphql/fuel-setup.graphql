@@ -1,0 +1,29 @@
+fragment FuelProductFields on FuelProduct { id name unitPrice status revision }
+fragment PumpMeterFields on PumpMeter { id label productId initialReading currentReading status revision }
+
+query FuelSetup {
+  fuelSetup {
+    products { ...FuelProductFields }
+    meters { ...PumpMeterFields }
+  }
+}
+
+mutation CreateFuelProduct($input: CreateFuelProductInput!) {
+  createFuelProduct(input: $input) { ...FuelProductFields }
+}
+
+mutation UpdateFuelProduct($input: UpdateFuelProductInput!) {
+  updateFuelProduct(input: $input) { ...FuelProductFields }
+}
+
+mutation DeactivateFuelProduct($input: DeactivateFuelSetupInput!) {
+  deactivateFuelProduct(input: $input) { ...FuelProductFields }
+}
+
+mutation CreatePumpMeter($input: CreatePumpMeterInput!) {
+  createPumpMeter(input: $input) { ...PumpMeterFields }
+}
+
+mutation DeactivatePumpMeter($input: DeactivateFuelSetupInput!) {
+  deactivatePumpMeter(input: $input) { ...PumpMeterFields }
+}

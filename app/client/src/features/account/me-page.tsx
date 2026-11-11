@@ -26,6 +26,12 @@ const actions = [
     adminOnly: true,
     href: '/shifts',
   },
+  {
+    title: 'Fuel setup',
+    description: 'Configure fuel prices and pump meter baselines',
+    adminOnly: true,
+    href: '/fuel-setup',
+  },
 ] as const
 
 export function MePage() {
