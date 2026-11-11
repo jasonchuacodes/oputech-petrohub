@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Button } from '~/components/ui/button'
 import { PageHeader } from '~/components/ui/page-header'
+import { PageIntro } from '~/components/ui/page-intro'
 import { Spinner } from '~/components/ui/spinner'
 import { useAuth } from '../auth/auth-context'
 import { useSessionQuery } from '../auth/auth.queries'
@@ -59,16 +60,11 @@ export function TenantsPage() {
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-5 py-5 md:p-6">
       <PageHeader
         title="Tenants"
-        description="Manage workspaces and choose where reports are recorded."
-        action={
-          canCreate ? (
-            <Button type="button" className="gap-2" onClick={() => setCreating(true)}>
-              <Plus aria-hidden="true" />
-              Add tenant
-            </Button>
-          ) : undefined
-        }
+        backHref="/me"
+        backLabel="Back to Me"
       />
+
+      <PageIntro>Manage workspaces and choose where reports are recorded.</PageIntro>
 
       <AddTenantSheet
         open={creating}
@@ -126,6 +122,13 @@ export function TenantsPage() {
           )
         })}
       </ul>
+
+      {canCreate && (
+        <Button type="button" variant="outline" className="w-full" onClick={() => setCreating(true)}>
+          <Plus aria-hidden="true" />
+          Add tenant
+        </Button>
+      )}
     </div>
   )
 }

@@ -1,10 +1,11 @@
 'use client'
 
-import { ChevronRight, Clock3, Plus } from 'lucide-react'
+import { Clock3, MoreVertical, Plus } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Button } from '~/components/ui/button'
 import { PageHeader } from '~/components/ui/page-header'
+import { PageIntro } from '~/components/ui/page-intro'
 import { Spinner } from '~/components/ui/spinner'
 import { useSessionQuery } from '../../auth/auth.queries'
 import { useActiveTenant } from '../../layout/use-active-tenant'
@@ -35,7 +36,6 @@ export function ShiftManagementPage() {
       key={selected.tenant.id}
       tenantId={selected.tenant.id}
       tenantName={selected.tenant.name}
-      timezone={selected.tenant.timezone}
     />
   )
 }
@@ -43,27 +43,18 @@ export function ShiftManagementPage() {
 function TenantShiftManagementPage({
   tenantId,
   tenantName,
-  timezone,
 }: {
   tenantId: string
   tenantName: string
-  timezone: string
 }) {
   const [editor, setEditor] = useState<{ shift?: ShiftRecord } | null>(null)
   const shifts = useShiftsQuery(tenantId)
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-5 py-5 md:p-6">
-      <PageHeader
-        title="Shift management"
-        description={`Configure the daily schedule for ${tenantName} (${timezone}).`}
-        action={
-          <Button type="button" className="gap-2" onClick={() => setEditor({})}>
-            <Plus aria-hidden="true" />
-            Add shift
-          </Button>
-        }
-      />
+      <PageHeader title="Shift management" backHref="/me" backLabel="Back to Me" />
+
+      <PageIntro>Configure the daily shift schedule for this tenant.</PageIntro>
 
       {editor && (
         <ShiftSheet
@@ -125,12 +116,19 @@ function TenantShiftManagementPage({
                       {shift.startTime > shift.endTime ? 'Overnight shift' : 'Daily shift'}
                     </span>
                   </span>
-                  <ChevronRight aria-hidden="true" className="size-5 shrink-0 text-text-tertiary" />
+                  <MoreVertical aria-hidden="true" className="size-5 shrink-0 text-text-tertiary" />
                 </button>
               </li>
             ))}
           </ul>
         </section>
+      )}
+
+      {shifts.isSuccess && (
+        <Button type="button" variant="outline" className="w-full" onClick={() => setEditor({})}>
+          <Plus aria-hidden="true" />
+          Add shift
+        </Button>
       )}
     </div>
   )

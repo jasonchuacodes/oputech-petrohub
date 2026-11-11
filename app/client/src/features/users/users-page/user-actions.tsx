@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ChevronDown, ChevronRight, KeyRound, Pencil, Trash2, X } from 'lucide-react'
+import { ChevronDown, KeyRound, MoreVertical, Pencil, Trash2, X } from 'lucide-react'
 import { useCallback, useEffect, useId, useState, type ReactNode } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { createPortal } from 'react-dom'
@@ -161,7 +161,7 @@ export function UserActions({
         title="User actions"
         onClick={openActions}
       >
-        <ChevronRight aria-hidden="true" className="size-5" />
+        <MoreVertical aria-hidden="true" className="size-5" />
       </Button>
 
       {actions.open &&

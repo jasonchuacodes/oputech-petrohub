@@ -1,7 +1,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { AtSign, ChevronLeft, KeyRound, UserRound } from 'lucide-react'
+import { AtSign, KeyRound, UserRound } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useRef, useState } from 'react'
@@ -10,6 +10,8 @@ import { toast } from 'sonner'
 import { Button } from '~/components/ui/button'
 import { ConfirmationDialog } from '~/components/ui/confirmation-dialog'
 import { Input } from '~/components/ui/input'
+import { PageHeader } from '~/components/ui/page-header'
+import { PageIntro } from '~/components/ui/page-intro'
 import { Spinner } from '~/components/ui/spinner'
 import { useDisclosure } from '~/hooks/useDisclosure'
 import type { AuthUser } from '../../auth/auth.types'
@@ -39,14 +41,9 @@ export function AccountSettingsPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-xl flex-col gap-8 px-5 py-5 md:px-6 md:py-8">
-      <header className="flex min-h-11 items-center gap-3">
-        <Button asChild variant="ghost" size="icon" className="-ml-2">
-          <Link href="/me" aria-label="Back to Me">
-            <ChevronLeft aria-hidden="true" className="size-6" />
-          </Link>
-        </Button>
-        <h1 className="text-page-title font-semibold text-text-heading">Account Settings</h1>
-      </header>
+      <PageHeader title="Account Settings" backHref="/me" backLabel="Back to Me" />
+
+      <PageIntro>Manage your account information and security settings.</PageIntro>
 
       <AccountTabs activeTab={activeTab} onSelect={setActiveTab} />
 

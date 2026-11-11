@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Button } from '~/components/ui/button'
 import { PageHeader } from '~/components/ui/page-header'
+import { PageIntro } from '~/components/ui/page-intro'
 import { Spinner } from '~/components/ui/spinner'
 import type { UserRole } from '~/generated/graphql'
 import { useDisclosure } from '~/hooks/useDisclosure'
@@ -40,7 +41,6 @@ export function UsersPage() {
     <TenantUsersPage
       key={selected.tenant.id}
       tenantId={selected.tenant.id}
-      tenantName={selected.tenant.name}
       actorId={user.id}
       actorRole={role}
     />
@@ -49,12 +49,10 @@ export function UsersPage() {
 
 function TenantUsersPage({
   tenantId,
-  tenantName,
   actorId,
   actorRole,
 }: {
   tenantId: string
-  tenantName: string
   actorId: string
   actorRole: UserRole
 }) {
@@ -70,14 +68,11 @@ function TenantUsersPage({
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-5 py-5 md:p-6">
       <PageHeader
         title="Users"
-        description={`Manage users with access to ${tenantName}.`}
-        action={
-          <Button type="button" className="gap-2" onClick={creating.onOpen}>
-            <Plus aria-hidden="true" />
-            Add User
-          </Button>
-        }
+        backHref="/me"
+        backLabel="Back to Me"
       />
+
+      <PageIntro>Manage users and their access to this tenant.</PageIntro>
 
       <AddUserSheet
         open={creating.open}
@@ -173,6 +168,13 @@ function TenantUsersPage({
             </nav>
           )}
         </section>
+      )}
+
+      {users.isSuccess && (
+        <Button type="button" variant="outline" className="w-full" onClick={creating.onOpen}>
+          <Plus aria-hidden="true" />
+          Add user
+        </Button>
       )}
     </div>
   )
