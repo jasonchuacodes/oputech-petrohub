@@ -125,6 +125,7 @@ export type FinancialEntry = {
   description: Scalars['String']['output'];
   id: Scalars['String']['output'];
   notes?: Maybe<Scalars['String']['output']>;
+  recurringIncomeFieldId?: Maybe<Scalars['ObjectId']['output']>;
 };
 
 export type FinancialEntryInput = {
@@ -172,6 +173,7 @@ export type Mutation = {
   submitReport: Report;
   updateFuelProduct: FuelProduct;
   updateMyProfile: User;
+  updateRecurringIncomeConfiguration: RecurringIncomeConfiguration;
   updateShift: Shift;
   updateTenant: TenantSummary;
   updateUser: User;
@@ -263,6 +265,11 @@ export type MutationUpdateMyProfileArgs = {
 };
 
 
+export type MutationUpdateRecurringIncomeConfigurationArgs = {
+  input: UpdateRecurringIncomeConfigurationInput;
+};
+
+
 export type MutationUpdateShiftArgs = {
   input: UpdateShiftInput;
 };
@@ -292,6 +299,7 @@ export type Query = {
   __typename?: 'Query';
   activeTenant?: Maybe<TenantSummary>;
   fuelSetup: FuelSetup;
+  recurringIncomeConfiguration: RecurringIncomeConfiguration;
   report: Report;
   reportCreationContext: ReportCreationContext;
   reports: ReportPage;
@@ -313,6 +321,25 @@ export type QueryReportsArgs = {
 
 export type QueryUsersArgs = {
   input: UsersInput;
+};
+
+export type RecurringIncomeConfiguration = {
+  __typename?: 'RecurringIncomeConfiguration';
+  fields: Array<RecurringIncomeField>;
+  revision: Scalars['Int']['output'];
+};
+
+export type RecurringIncomeField = {
+  __typename?: 'RecurringIncomeField';
+  active: Scalars['Boolean']['output'];
+  description: Scalars['String']['output'];
+  id: Scalars['ObjectId']['output'];
+};
+
+export type RecurringIncomeFieldInput = {
+  active: Scalars['Boolean']['input'];
+  description: Scalars['String']['input'];
+  id?: InputMaybe<Scalars['ObjectId']['input']>;
 };
 
 export type Report = {
@@ -445,6 +472,11 @@ export type UpdateFuelProductInput = {
 export type UpdateMyProfileInput = {
   firstName?: InputMaybe<Scalars['String']['input']>;
   lastName?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type UpdateRecurringIncomeConfigurationInput = {
+  expectedRevision: Scalars['Int']['input'];
+  fields: Array<RecurringIncomeFieldInput>;
 };
 
 export type UpdateShiftInput = {
@@ -599,6 +631,9 @@ export type ResolversTypes = {
   ObjectId: ResolverTypeWrapper<Scalars['ObjectId']['output']>;
   PumpMeter: ResolverTypeWrapper<PumpMeter>;
   Query: ResolverTypeWrapper<Record<PropertyKey, never>>;
+  RecurringIncomeConfiguration: ResolverTypeWrapper<RecurringIncomeConfiguration>;
+  RecurringIncomeField: ResolverTypeWrapper<RecurringIncomeField>;
+  RecurringIncomeFieldInput: RecurringIncomeFieldInput;
   Report: ResolverTypeWrapper<Report>;
   ReportCreationContext: ResolverTypeWrapper<ReportCreationContext>;
   ReportInput: ReportInput;
@@ -617,6 +652,7 @@ export type ResolversTypes = {
   TenantSummary: ResolverTypeWrapper<TenantSummary>;
   UpdateFuelProductInput: UpdateFuelProductInput;
   UpdateMyProfileInput: UpdateMyProfileInput;
+  UpdateRecurringIncomeConfigurationInput: UpdateRecurringIncomeConfigurationInput;
   UpdateShiftInput: UpdateShiftInput;
   UpdateTenantInput: UpdateTenantInput;
   UpdateUserInput: UpdateUserInput;
@@ -655,6 +691,9 @@ export type ResolversParentTypes = {
   ObjectId: Scalars['ObjectId']['output'];
   PumpMeter: PumpMeter;
   Query: Record<PropertyKey, never>;
+  RecurringIncomeConfiguration: RecurringIncomeConfiguration;
+  RecurringIncomeField: RecurringIncomeField;
+  RecurringIncomeFieldInput: RecurringIncomeFieldInput;
   Report: Report;
   ReportCreationContext: ReportCreationContext;
   ReportInput: ReportInput;
@@ -672,6 +711,7 @@ export type ResolversParentTypes = {
   TenantSummary: TenantSummary;
   UpdateFuelProductInput: UpdateFuelProductInput;
   UpdateMyProfileInput: UpdateMyProfileInput;
+  UpdateRecurringIncomeConfigurationInput: UpdateRecurringIncomeConfigurationInput;
   UpdateShiftInput: UpdateShiftInput;
   UpdateTenantInput: UpdateTenantInput;
   UpdateUserInput: UpdateUserInput;
@@ -720,6 +760,7 @@ export type FinancialEntryResolvers<ContextType = GraphqlContext, ParentType ext
   description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   notes?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  recurringIncomeFieldId?: Resolver<Maybe<ResolversTypes['ObjectId']>, ParentType, ContextType>;
 };
 
 export type FuelProductResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['FuelProduct'] = ResolversParentTypes['FuelProduct']> = {
@@ -753,6 +794,7 @@ export type MutationResolvers<ContextType = GraphqlContext, ParentType extends R
   submitReport?: Resolver<ResolversTypes['Report'], ParentType, ContextType, RequireFields<MutationSubmitReportArgs, 'input'>>;
   updateFuelProduct?: Resolver<ResolversTypes['FuelProduct'], ParentType, ContextType, RequireFields<MutationUpdateFuelProductArgs, 'input'>>;
   updateMyProfile?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationUpdateMyProfileArgs, 'input'>>;
+  updateRecurringIncomeConfiguration?: Resolver<ResolversTypes['RecurringIncomeConfiguration'], ParentType, ContextType, RequireFields<MutationUpdateRecurringIncomeConfigurationArgs, 'input'>>;
   updateShift?: Resolver<ResolversTypes['Shift'], ParentType, ContextType, RequireFields<MutationUpdateShiftArgs, 'input'>>;
   updateTenant?: Resolver<ResolversTypes['TenantSummary'], ParentType, ContextType, RequireFields<MutationUpdateTenantArgs, 'input'>>;
   updateUser?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationUpdateUserArgs, 'input'>>;
@@ -775,12 +817,24 @@ export type PumpMeterResolvers<ContextType = GraphqlContext, ParentType extends 
 export type QueryResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   activeTenant?: Resolver<Maybe<ResolversTypes['TenantSummary']>, ParentType, ContextType>;
   fuelSetup?: Resolver<ResolversTypes['FuelSetup'], ParentType, ContextType>;
+  recurringIncomeConfiguration?: Resolver<ResolversTypes['RecurringIncomeConfiguration'], ParentType, ContextType>;
   report?: Resolver<ResolversTypes['Report'], ParentType, ContextType, RequireFields<QueryReportArgs, 'input'>>;
   reportCreationContext?: Resolver<ResolversTypes['ReportCreationContext'], ParentType, ContextType>;
   reports?: Resolver<ResolversTypes['ReportPage'], ParentType, ContextType, RequireFields<QueryReportsArgs, 'input'>>;
   shifts?: Resolver<Array<ResolversTypes['Shift']>, ParentType, ContextType>;
   tenants?: Resolver<Array<ResolversTypes['TenantAccess']>, ParentType, ContextType>;
   users?: Resolver<ResolversTypes['UserPage'], ParentType, ContextType, RequireFields<QueryUsersArgs, 'input'>>;
+};
+
+export type RecurringIncomeConfigurationResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['RecurringIncomeConfiguration'] = ResolversParentTypes['RecurringIncomeConfiguration']> = {
+  fields?: Resolver<Array<ResolversTypes['RecurringIncomeField']>, ParentType, ContextType>;
+  revision?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+};
+
+export type RecurringIncomeFieldResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['RecurringIncomeField'] = ResolversParentTypes['RecurringIncomeField']> = {
+  active?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
 };
 
 export type ReportResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['Report'] = ResolversParentTypes['Report']> = {
@@ -887,6 +941,8 @@ export type Resolvers<ContextType = GraphqlContext> = {
   ObjectId?: GraphQLScalarType;
   PumpMeter?: PumpMeterResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
+  RecurringIncomeConfiguration?: RecurringIncomeConfigurationResolvers<ContextType>;
+  RecurringIncomeField?: RecurringIncomeFieldResolvers<ContextType>;
   Report?: ReportResolvers<ContextType>;
   ReportCreationContext?: ReportCreationContextResolvers<ContextType>;
   ReportIntervalSnapshot?: ReportIntervalSnapshotResolvers<ContextType>;

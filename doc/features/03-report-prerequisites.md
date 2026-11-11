@@ -12,6 +12,7 @@ Provide the tenant-owned reference data required to create complete station repo
 - Capture opening inventory and meter baselines where required.
 - Scope every record and query to the authorized tenant.
 - Prevent inactive reference records from being selected in new reports while retaining historical references.
+- Let tenant administrators configure ordered recurring income fields and archive them without losing their stable historical identities.
 
 ## Outcome
 

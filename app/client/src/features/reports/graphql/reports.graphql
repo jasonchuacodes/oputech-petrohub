@@ -24,8 +24,8 @@ fragment ReportDetailFields on Report {
   effective
   revokedFromStatus
   revokedById
-  incomeEntries { id description notes amount }
-  expenseEntries { id description notes amount }
+  incomeEntries { id recurringIncomeFieldId description notes amount }
+  expenseEntries { id recurringIncomeFieldId description notes amount }
   totals { income expenses cashFuelSales pumpSales overShort }
   disposals {
     id

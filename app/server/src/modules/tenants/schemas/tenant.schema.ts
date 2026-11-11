@@ -1,6 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { HydratedDocument, Types } from 'mongoose'
 import { Shift, ShiftSchema } from './shift.schema'
+import {
+  RecurringIncomeField,
+  RecurringIncomeFieldSchema,
+} from './recurring-income-field.schema'
 
 export enum TenantStatus {
   ACTIVE = 'active',
@@ -26,6 +30,9 @@ export class Tenant {
 
   @Prop({ default: [], type: [ShiftSchema] })
   shifts!: Shift[]
+
+  @Prop({ default: [], type: [RecurringIncomeFieldSchema] })
+  recurringIncomeFields!: RecurringIncomeField[]
 
   createdAt!: Date
   updatedAt!: Date

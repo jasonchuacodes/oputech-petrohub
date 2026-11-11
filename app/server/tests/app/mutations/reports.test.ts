@@ -78,9 +78,65 @@ describe('report disposal lifecycle', () => {
     expect(firstDeleted.body.errors).toBeUndefined()
     expect(firstDeleted.body.data.deleteReport).toMatchObject({ status: 'revoked', effective: false, revokedFromStatus: 'submitted' })
 
+    const memberConfiguration = await graphql(memberToken, `query { recurringIncomeConfiguration { revision } }`)
+    expect(memberConfiguration.body.errors?.[0]?.extensions?.originalError).toMatchObject({ code: 'FORBIDDEN' })
+
+    const configuration = await graphql(adminToken, `query { recurringIncomeConfiguration { revision fields { id description active } } }`)
+    expect(configuration.body.errors).toBeUndefined()
+    const configured = await graphql(adminToken, `mutation ($input: UpdateRecurringIncomeConfigurationInput!) { updateRecurringIncomeConfiguration(input: $input) { revision fields { id description active } } }`, {
+      input: {
+        expectedRevision: configuration.body.data.recurringIncomeConfiguration.revision,
+        fields: [{ id: null, description: 'PayMaya', active: true }],
+      },
+    })
+    expect(configured.body.errors).toBeUndefined()
+
     const recreated = await createReport(memberToken, firstShiftId, businessDate)
     expect(recreated.id).not.toBe(first.id)
     expect(recreated.disposals.readings[0]).toMatchObject({ openingReading: '100', openingSource: 'baseline' })
+    expect(recreated.incomeEntries).toEqual([
+      expect.objectContaining({
+        recurringIncomeFieldId: configured.body.data.updateRecurringIncomeConfiguration.fields[0].id,
+        description: 'PayMaya',
+        amount: '0',
+      }),
+    ])
+
+    const recurringEntry = recreated.incomeEntries[0]
+    const recurringSaved = await graphql(memberToken, `mutation ($input: SaveReportDraftInput!) { saveReportDraft(input: $input) { ${detailFields} } }`, {
+      input: {
+        reportId: recreated.id,
+        expectedReportRevision: recreated.revision,
+        expectedDisposalRevision: recreated.disposals.revision,
+        incomeEntries: [{ id: recurringEntry.id, description: recurringEntry.description, notes: null, amount: '0.00' }],
+        expenseEntries: [],
+        disposalReadings: [{ meterId: recreated.disposals.readings[0].meterId, closingReading: '101.000', calibration: '0.000' }],
+      },
+    })
+    expect(recurringSaved.body.errors).toBeUndefined()
+    expect(recurringSaved.body.data.saveReportDraft.incomeEntries[0]).toMatchObject({ amount: '0', recurringIncomeFieldId: recurringEntry.recurringIncomeFieldId })
+
+    const protectedRemoval = await graphql(memberToken, `mutation ($input: SaveReportDraftInput!) { saveReportDraft(input: $input) { id } }`, {
+      input: {
+        reportId: recreated.id,
+        expectedReportRevision: recurringSaved.body.data.saveReportDraft.revision,
+        expectedDisposalRevision: recurringSaved.body.data.saveReportDraft.disposals.revision,
+        incomeEntries: [],
+        expenseEntries: [],
+        disposalReadings: [{ meterId: recreated.disposals.readings[0].meterId, closingReading: '101.000', calibration: '0.000' }],
+      },
+    })
+    expect(protectedRemoval.body.errors?.[0]?.extensions?.originalError).toMatchObject({ code: 'INVALID_INPUT' })
+
+    const archived = await graphql(adminToken, `mutation ($input: UpdateRecurringIncomeConfigurationInput!) { updateRecurringIncomeConfiguration(input: $input) { fields { id active } } }`, {
+      input: {
+        expectedRevision: configured.body.data.updateRecurringIncomeConfiguration.revision,
+        fields: [{ id: recurringEntry.recurringIncomeFieldId, description: recurringEntry.description, active: false }],
+      },
+    })
+    expect(archived.body.errors).toBeUndefined()
+    expect(archived.body.data.updateRecurringIncomeConfiguration.fields[0]).toMatchObject({ id: recurringEntry.recurringIncomeFieldId, active: false })
+    expect((await reportDetail(memberToken, recreated.id)).incomeEntries[0]).toMatchObject({ recurringIncomeFieldId: recurringEntry.recurringIncomeFieldId, description: 'PayMaya' })
   })
 
   async function login(username: string, password: string): Promise<string> {
@@ -132,6 +188,7 @@ describe('report disposal lifecycle', () => {
 
 const detailFields = `
   id status effective revision revokedFromStatus
+  incomeEntries { id recurringIncomeFieldId description notes amount }
   totals { cashFuelSales pumpSales overShort }
   disposals {
     revision status

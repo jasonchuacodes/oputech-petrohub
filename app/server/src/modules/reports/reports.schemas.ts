@@ -23,20 +23,23 @@ export const reportsInputSchema = z
   .strict()
 export type ReportsInput = z.infer<typeof reportsInputSchema>
 
-const moneySchema = z.string().regex(/^(?:0|[1-9]\d*)(?:\.\d{1,2})?$/).refine((value) => Number(value) > 0)
+const nonnegativeMoneySchema = z.string().regex(/^(?:0|[1-9]\d*)(?:\.\d{1,2})?$/)
+const positiveMoneySchema = nonnegativeMoneySchema.refine((value) => !/^0(?:\.0{1,2})?$/.test(value))
 const financialEntrySchema = z.object({
   id: z.string().trim().min(1).max(64),
   description: z.string().trim().min(1).max(120),
   notes: z.string().trim().max(240).nullable(),
-  amount: moneySchema,
 }).strict()
+
+const incomeEntrySchema = financialEntrySchema.extend({ amount: nonnegativeMoneySchema })
+const expenseEntrySchema = financialEntrySchema.extend({ amount: positiveMoneySchema })
 
 export const saveReportDraftInputSchema = z.object({
   reportId: z.instanceof(Types.ObjectId),
   expectedReportRevision: z.number().int().min(0),
   expectedDisposalRevision: z.number().int().min(0),
-  incomeEntries: z.array(financialEntrySchema).max(100),
-  expenseEntries: z.array(financialEntrySchema).max(100),
+  incomeEntries: z.array(incomeEntrySchema).max(100),
+  expenseEntries: z.array(expenseEntrySchema).max(100),
   disposalReadings: z.array(editableDisposalInputSchema).max(100),
 }).strict()
 export type SaveReportDraftInput = z.infer<typeof saveReportDraftInputSchema>

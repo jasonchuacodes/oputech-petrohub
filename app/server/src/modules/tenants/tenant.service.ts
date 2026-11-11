@@ -14,6 +14,7 @@ import { MemberActivity } from '../member-activity/schemas/member-activity.schem
 import { User, UserRole, UserStatus } from '../users/schemas/user.schema'
 import { Tenant, TenantStatus } from './schemas/tenant.schema'
 import { Shift } from './schemas/shift.schema'
+import { RecurringIncomeField } from './schemas/recurring-income-field.schema'
 import {
   CreateShiftInput,
   CreateTenantInput,
@@ -21,6 +22,7 @@ import {
   DeleteTenantInput,
   UpdateShiftInput,
   UpdateTenantInput,
+  UpdateRecurringIncomeConfigurationInput,
 } from './tenant.schemas'
 import { TenantActor } from './tenant.types'
 
@@ -234,6 +236,66 @@ export class TenantService {
       .exec()
     if (!updated) throw new NotFoundException('Shift not found.')
     return true
+  }
+
+  async getRecurringIncomeConfiguration(tenantId: Types.ObjectId) {
+    const tenant = await this.tenantModel
+      .findById(tenantId)
+      .select('recurringIncomeFields revision')
+      .lean<TenantRecord>()
+      .exec()
+    if (!tenant) throw new ForbiddenException('You do not have access to this tenant.')
+    return { revision: tenant.revision, fields: tenant.recurringIncomeFields ?? [] }
+  }
+
+  async updateRecurringIncomeConfiguration(
+    tenantId: Types.ObjectId,
+    input: UpdateRecurringIncomeConfigurationInput,
+  ) {
+    const tenant = await this.tenantModel
+      .findById(tenantId)
+      .select('recurringIncomeFields revision')
+      .lean<TenantRecord>()
+      .exec()
+    if (!tenant) throw new ForbiddenException('You do not have access to this tenant.')
+    if (tenant.revision !== input.expectedRevision) {
+      throw new ConflictException('Income fields were changed by another request. Reload and try again.')
+    }
+
+    const currentFields = tenant.recurringIncomeFields ?? []
+    const currentById = new Map(currentFields.map((field) => [field.id.toHexString(), field]))
+    const suppliedIds = new Set<string>()
+    const nextFields: RecurringIncomeField[] = input.fields.map((field) => {
+      if (!field.id) {
+        return { id: new Types.ObjectId(), description: field.description, active: field.active }
+      }
+      const id = field.id.toHexString()
+      const current = currentById.get(id)
+      if (!current) throw new InvalidInputException('Select a valid recurring income field.')
+      suppliedIds.add(id)
+      return { id: current.id, description: field.description, active: field.active }
+    })
+
+    for (const field of currentFields) {
+      if (!suppliedIds.has(field.id.toHexString())) nextFields.push({ ...field, active: false })
+    }
+    if (nextFields.length > 200) {
+      throw new InvalidInputException('A tenant can retain up to 200 recurring income fields.')
+    }
+
+    const updated = await this.tenantModel
+      .findOneAndUpdate(
+        { _id: tenantId, revision: input.expectedRevision },
+        { $set: { recurringIncomeFields: nextFields }, $inc: { revision: 1 } },
+        { new: true, runValidators: true },
+      )
+      .select('recurringIncomeFields revision')
+      .lean<TenantRecord>()
+      .exec()
+    if (!updated) {
+      throw new ConflictException('Income fields were changed by another request. Reload and try again.')
+    }
+    return { revision: updated.revision, fields: updated.recurringIncomeFields ?? [] }
   }
 
   async assertAccess(user: TenantActor, tenantIdValue: string): Promise<TenantRecord> {

@@ -15,6 +15,8 @@ import {
   UpdateShiftInput,
   updateTenantInputSchema,
   UpdateTenantInput,
+  updateRecurringIncomeConfigurationInputSchema,
+  UpdateRecurringIncomeConfigurationInput,
 } from '../tenants/tenant.schemas'
 import { TenantService } from '../tenants/tenant.service'
 import { AuthenticatedActor, AuthorizedTenant } from './auth.types'
@@ -133,5 +135,25 @@ export class TenantResolver {
     @Args('input', new ZodValidationPipe(deleteShiftInputSchema)) input: DeleteShiftInput,
   ): Promise<GraphqlMutation['deleteShift']> {
     return this.tenantService.deleteShift(context.tenantId, input)
+  }
+
+  @Query('recurringIncomeConfiguration')
+  @UseGuards(TenantAccessGuard, RolesGuard)
+  @RequireRoles(UserRole.SUPERADMIN, UserRole.ADMIN)
+  async recurringIncomeConfiguration(
+    @CurrentTenant() context: AuthorizedTenant,
+  ): Promise<GraphqlQuery['recurringIncomeConfiguration']> {
+    return this.tenantService.getRecurringIncomeConfiguration(context.tenantId)
+  }
+
+  @Mutation('updateRecurringIncomeConfiguration')
+  @UseGuards(TenantAccessGuard, RolesGuard)
+  @RequireRoles(UserRole.SUPERADMIN, UserRole.ADMIN)
+  async updateRecurringIncomeConfiguration(
+    @CurrentTenant() context: AuthorizedTenant,
+    @Args('input', new ZodValidationPipe(updateRecurringIncomeConfigurationInputSchema))
+    input: UpdateRecurringIncomeConfigurationInput,
+  ): Promise<GraphqlMutation['updateRecurringIncomeConfiguration']> {
+    return this.tenantService.updateRecurringIncomeConfiguration(context.tenantId, input)
   }
 }

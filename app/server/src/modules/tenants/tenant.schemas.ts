@@ -50,3 +50,44 @@ export type UpdateShiftInput = z.infer<typeof updateShiftInputSchema>
 export const deleteShiftInputSchema = z.object({ shiftId: z.instanceof(Types.ObjectId) }).strict()
 
 export type DeleteShiftInput = z.infer<typeof deleteShiftInputSchema>
+
+const recurringIncomeDescriptionSchema = z
+  .string()
+  .transform((value) => value.trim().replace(/\s+/g, ' '))
+  .pipe(z.string().min(1, 'Description is required.').max(120))
+
+const recurringIncomeFieldInputSchema = z
+  .object({
+    id: z.instanceof(Types.ObjectId).nullish().transform((value) => value ?? null),
+    description: recurringIncomeDescriptionSchema,
+    active: z.boolean(),
+  })
+  .strict()
+
+export const updateRecurringIncomeConfigurationInputSchema = z
+  .object({
+    expectedRevision: z.number().int().min(0),
+    fields: z.array(recurringIncomeFieldInputSchema).max(200),
+  })
+  .strict()
+  .superRefine((input, context) => {
+    const ids = input.fields
+      .map((field) => field.id?.toHexString())
+      .filter((id): id is string => Boolean(id))
+    if (new Set(ids).size !== ids.length) {
+      context.addIssue({ code: 'custom', message: 'Income field identifiers must be unique.', path: ['fields'] })
+    }
+
+    const activeFields = input.fields.filter((field) => field.active)
+    if (activeFields.length > 100) {
+      context.addIssue({ code: 'custom', message: 'A tenant can have up to 100 active income fields.', path: ['fields'] })
+    }
+    const descriptions = input.fields.map((field) => field.description.toLocaleLowerCase())
+    if (new Set(descriptions).size !== descriptions.length) {
+      context.addIssue({ code: 'custom', message: 'Income field descriptions must be unique.', path: ['fields'] })
+    }
+  })
+
+export type UpdateRecurringIncomeConfigurationInput = z.infer<
+  typeof updateRecurringIncomeConfigurationInputSchema
+>

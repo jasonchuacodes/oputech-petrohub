@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common'
+import { randomUUID } from 'node:crypto'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { InjectConnection, InjectModel } from '@nestjs/mongoose'
 import { ClientSession, Connection, Model, Types } from 'mongoose'
@@ -6,6 +7,7 @@ import { ConflictException, ForbiddenException, InvalidInputException, NotFoundE
 import { decimal, decimal128, sum } from '../../common/numeric/decimal'
 import { DisposalsService, DisposalBatchRecord } from '../disposals/disposals.service'
 import { Shift } from '../tenants/schemas/shift.schema'
+import { RecurringIncomeField } from '../tenants/schemas/recurring-income-field.schema'
 import { UserRole } from '../users/schemas/user.schema'
 import { REPORT_CREATED_EVENT, ReportCreatedEvent } from './events/report-created.event'
 import { businessDateFor } from './report-date'
@@ -25,6 +27,7 @@ type ReportTenant = {
   timezone: string
   currency: string
   shifts: Shift[]
+  recurringIncomeFields: RecurringIncomeField[]
 }
 
 type ReportActor = {
@@ -124,6 +127,14 @@ export class ReportsService {
           creatorName: actor.name,
           status: ReportStatus.DRAFT,
           effective: true,
+          incomeEntries: tenant.recurringIncomeFields
+            .filter((field) => field.active)
+            .map((field) => ({
+              id: randomUUID(),
+              recurringIncomeFieldId: field.id,
+              description: field.description,
+              amount: decimal128('0'),
+            })),
         }], { session: databaseSession })
         if (!document) throw new ConflictException('Unable to create the report.')
         const batch = await this.disposals.initializeForReport({
@@ -183,6 +194,8 @@ export class ReportsService {
         if (current.status !== ReportStatus.DRAFT) throw new ConflictException('Only draft reports can be changed.')
         if (current.revision !== input.expectedReportRevision) throw new ConflictException('This report changed. Refresh and try again.')
 
+        const incomeEntries = toIncomeEntries(current, input.incomeEntries)
+        const expenseEntries = toEntries(input.expenseEntries)
         const disposalBatch = await this.disposals.saveDraft(
           tenantId,
           input.reportId,
@@ -190,8 +203,6 @@ export class ReportsService {
           input.disposalReadings,
           databaseSession,
         )
-        const incomeEntries = toEntries(input.incomeEntries)
-        const expenseEntries = toEntries(input.expenseEntries)
         const income = sum(incomeEntries.map((entry) => entry.amount.toString()))
         const expenses = sum(expenseEntries.map((entry) => entry.amount.toString()))
         const cashFuelSales = income.plus(expenses)
@@ -331,6 +342,50 @@ function toEntries(entries: SaveReportDraftInput['incomeEntries']): ReportFinanc
     notes: entry.notes || undefined,
     amount: decimal128(entry.amount),
   }))
+}
+
+function toIncomeEntries(
+  current: ReportRecord,
+  entries: SaveReportDraftInput['incomeEntries'],
+): ReportFinancialEntry[] {
+  const configured = (current.incomeEntries ?? []).filter((entry) => entry.recurringIncomeFieldId)
+  const configuredIds = new Set(configured.map((entry) => entry.id))
+  const submittedById = new Map(entries.map((entry) => [entry.id, entry]))
+  const protectedEntries = configured.map((entry) => {
+    const submitted = submittedById.get(entry.id)
+    if (!submitted) {
+      throw new InvalidInputException('Configured income fields cannot be removed.')
+    }
+    if (
+      submitted.description !== entry.description ||
+      (submitted.notes || undefined) !== (entry.notes || undefined)
+    ) {
+      throw new InvalidInputException('Configured income field details cannot be changed in a report.')
+    }
+    return {
+      id: entry.id,
+      recurringIncomeFieldId: entry.recurringIncomeFieldId,
+      description: entry.description,
+      notes: entry.notes,
+      amount: decimal128(submitted.amount),
+    }
+  })
+
+  const customEntries = entries
+    .filter((entry) => !configuredIds.has(entry.id))
+    .map((entry) => {
+      if (decimal(entry.amount).isZero()) {
+        throw new InvalidInputException('Custom income amounts must be greater than zero.')
+      }
+      return {
+        id: entry.id,
+        description: entry.description,
+        notes: entry.notes || undefined,
+        amount: decimal128(entry.amount),
+      }
+    })
+
+  return [...protectedEntries, ...customEntries]
 }
 
 function isDuplicateKeyError(error: unknown): error is { code: number } {

@@ -119,6 +119,7 @@ export class ReportsResolver {
       timezone: tenant.tenant.timezone,
       currency: tenant.tenant.currency,
       shifts: tenant.tenant.shifts ?? [],
+      recurringIncomeFields: tenant.tenant.recurringIncomeFields ?? [],
     }
   }
 
@@ -144,8 +145,16 @@ export class ReportsResolver {
       currency: report.currency ?? 'PHP',
       legacy: !report.disposalBatchId,
       effective: report.effective ?? report.status !== 'revoked',
-      incomeEntries: (report.incomeEntries ?? []).map((entry) => ({ ...entry, amount: entry.amount.toString() })),
-      expenseEntries: (report.expenseEntries ?? []).map((entry) => ({ ...entry, amount: entry.amount.toString() })),
+      incomeEntries: (report.incomeEntries ?? []).map((entry) => ({
+        ...entry,
+        recurringIncomeFieldId: entry.recurringIncomeFieldId ?? null,
+        amount: entry.amount.toString(),
+      })),
+      expenseEntries: (report.expenseEntries ?? []).map((entry) => ({
+        ...entry,
+        recurringIncomeFieldId: entry.recurringIncomeFieldId ?? null,
+        amount: entry.amount.toString(),
+      })),
       totals: {
         income: totals.income.toString(),
         expenses: totals.expenses.toString(),

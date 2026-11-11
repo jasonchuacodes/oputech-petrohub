@@ -59,3 +59,25 @@ mutation UpdateShift($input: UpdateShiftInput!) {
 mutation DeleteShift($input: DeleteShiftInput!) {
   deleteShift(input: $input)
 }
+
+query RecurringIncomeConfiguration {
+  recurringIncomeConfiguration {
+    revision
+    fields {
+      id
+      description
+      active
+    }
+  }
+}
+
+mutation UpdateRecurringIncomeConfiguration($input: UpdateRecurringIncomeConfigurationInput!) {
+  updateRecurringIncomeConfiguration(input: $input) {
+    revision
+    fields {
+      id
+      description
+      active
+    }
+  }
+}

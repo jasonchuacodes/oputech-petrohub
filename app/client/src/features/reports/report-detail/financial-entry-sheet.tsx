@@ -2,10 +2,8 @@
 
 import { useCallback, useEffect, useId, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useForm, useWatch } from 'react-hook-form';
 import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
-import { NumberInput } from '~/components/ui/number-input';
 import { reportEntrySchema } from './report-detail.schema';
 import { useReportEditor } from './report-editor-context';
 
@@ -20,10 +18,7 @@ export function FinancialEntrySheet({ kind, index, onClose }: FinancialEntryShee
   const fieldArray = kind === 'income' ? income : expenses;
   const entry = index === undefined ? undefined : fieldArray.fields[index];
   const [description, setDescription] = useState(entry?.description ?? '');
-  const amountForm = useForm<{ amount?: number }>({
-    defaultValues: { amount: entry ? Number(entry.amount) : undefined },
-  });
-  const amount = useWatch({ control: amountForm.control, name: 'amount' });
+  const [amount, setAmount] = useState(entry?.amount ?? '');
   const titleId = useId();
   const descriptionId = useId();
   const title = `${entry ? 'Edit' : 'Add'} ${kind}`;
@@ -31,7 +26,8 @@ export function FinancialEntrySheet({ kind, index, onClose }: FinancialEntryShee
     id: entry?.id ?? 'new-entry',
     description,
     notes: entry?.notes ?? '',
-    amount: amount === undefined ? '' : String(amount),
+    recurringIncomeFieldId: null,
+    amount,
   });
   const close = useCallback(() => onClose(), [onClose]);
 
@@ -100,12 +96,11 @@ export function FinancialEntrySheet({ kind, index, onClose }: FinancialEntryShee
           </label>
           <label className="flex flex-col gap-1.5">
             <span className="text-sm font-medium">Amount</span>
-            <NumberInput
-              control={amountForm.control}
-              name="amount"
-              step={0.01}
-              min={0.01}
+            <Input
+              inputMode="decimal"
+              value={amount}
               placeholder="0.00"
+              onChange={(event) => setAmount(event.target.value)}
             />
           </label>
         </div>

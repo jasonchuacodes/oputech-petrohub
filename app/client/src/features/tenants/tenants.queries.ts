@@ -8,11 +8,14 @@ import {
   TenantsDocument,
   UpdateTenantDocument,
   UpdateShiftDocument,
+  RecurringIncomeConfigurationDocument,
+  UpdateRecurringIncomeConfigurationDocument,
   type CreateShiftInput,
   type CreateTenantMutation,
   type UpdateShiftInput,
   type ShiftsQuery,
   type TenantsQuery,
+  type UpdateRecurringIncomeConfigurationInput,
 } from '~/generated/graphql'
 import { graphqlClient } from '~/lib/graphql'
 import { reportKeys } from '../reports/reports.queries'
@@ -24,6 +27,34 @@ export type ShiftRecord = ShiftsQuery['shifts'][number]
 const tenantKeys = {
   all: ['tenants'] as const,
   shifts: (tenantId: string) => ['tenants', tenantId, 'shifts'] as const,
+  recurringIncome: (tenantId: string) => ['tenants', tenantId, 'recurring-income'] as const,
+}
+
+export function useRecurringIncomeConfigurationQuery(tenantId: string, enabled = true) {
+  return useQuery({
+    queryKey: tenantKeys.recurringIncome(tenantId),
+    queryFn: async () =>
+      (await graphqlClient.request(RecurringIncomeConfigurationDocument, undefined, { tenantId }))
+        .recurringIncomeConfiguration,
+    enabled,
+  })
+}
+
+export function useUpdateRecurringIncomeConfigurationMutation(tenantId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (input: UpdateRecurringIncomeConfigurationInput) =>
+      (
+        await graphqlClient.request(
+          UpdateRecurringIncomeConfigurationDocument,
+          { input },
+          { tenantId },
+        )
+      ).updateRecurringIncomeConfiguration,
+    onSuccess: (configuration) => {
+      queryClient.setQueryData(tenantKeys.recurringIncome(tenantId), configuration)
+    },
+  })
 }
 
 export function useShiftsQuery(tenantId: string, enabled = true) {

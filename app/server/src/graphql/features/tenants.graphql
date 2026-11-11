@@ -1,11 +1,13 @@
 extend type Query {
   shifts: [Shift!]!
+  recurringIncomeConfiguration: RecurringIncomeConfiguration!
 }
 
 extend type Mutation {
   createShift(input: CreateShiftInput!): Shift!
   updateShift(input: UpdateShiftInput!): Shift!
   deleteShift(input: DeleteShiftInput!): Boolean!
+  updateRecurringIncomeConfiguration(input: UpdateRecurringIncomeConfigurationInput!): RecurringIncomeConfiguration!
 }
 
 input CreateShiftInput {
@@ -27,4 +29,26 @@ type Shift {
   id: ObjectId!
   startTime: String!
   endTime: String!
+}
+
+type RecurringIncomeConfiguration {
+  revision: Int!
+  fields: [RecurringIncomeField!]!
+}
+
+type RecurringIncomeField {
+  id: ObjectId!
+  description: String!
+  active: Boolean!
+}
+
+input UpdateRecurringIncomeConfigurationInput {
+  expectedRevision: Int!
+  fields: [RecurringIncomeFieldInput!]!
+}
+
+input RecurringIncomeFieldInput {
+  id: ObjectId
+  description: String!
+  active: Boolean!
 }

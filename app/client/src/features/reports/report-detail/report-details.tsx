@@ -79,10 +79,11 @@ type EntryField = {
   description: string;
   notes: string;
   amount: string;
+  recurringIncomeFieldId: string | null;
 };
 
 function FinancialSection({ kind }: { kind: 'income' | 'expense' }) {
-  const { canEdit, income, expenses, preview, openFinancialEntry } = useReportEditor();
+  const { canEdit, form, income, expenses, preview, openFinancialEntry } = useReportEditor();
   const title = kind === 'income' ? 'Income' : 'Expense';
   const fieldArray = kind === 'income' ? income : expenses;
   const fields: EntryField[] = fieldArray.fields;
@@ -96,43 +97,64 @@ function FinancialSection({ kind }: { kind: 'income' | 'expense' }) {
         </h2>
       </div>
       <div className="overflow-hidden rounded-md bg-card px-4 shadow-card">
-        {fields.map((field, index) =>
-          canEdit ? (
+        {fields.map((field, index) => {
+          const recurring = kind === 'income' && Boolean(field.recurringIncomeFieldId);
+          return canEdit ? (
             <div
               key={field.fieldKey}
-              className="grid grid-cols-[minmax(0,1fr)_minmax(7rem,0.8fr)_2.75rem] items-center gap-3 border-b border-border/60 py-3"
+              className={cn(
+                'grid items-center gap-3 border-b border-border/60 py-3',
+                recurring
+                  ? 'grid-cols-[minmax(0,1fr)_minmax(7rem,0.8fr)]'
+                  : 'grid-cols-[minmax(0,1fr)_minmax(7rem,0.8fr)_2.75rem]',
+              )}
             >
-              <Input
-                readOnly
-                aria-label={`${title} description: ${field.description}`}
-                value={field.description}
-                className="cursor-pointer hover:bg-surface-hover"
-                onClick={() => openFinancialEntry(kind, index)}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter' || event.key === ' ')
-                    openFinancialEntry(kind, index);
-                }}
-              />
-              <Input
-                readOnly
-                aria-label={`${title} amount: ${formatMoney(field.amount)}`}
-                value={formatMoney(field.amount)}
-                className="cursor-pointer text-right font-medium tabular-nums hover:bg-surface-hover"
-                onClick={() => openFinancialEntry(kind, index)}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter' || event.key === ' ')
-                    openFinancialEntry(kind, index);
-                }}
-              />
-              <Button
-                type="button"
-                size="icon"
-                variant="ghost"
-                aria-label={`Remove ${field.description}`}
-                onClick={() => fieldArray.remove(index)}
-              >
-                <Trash2 aria-hidden="true" />
-              </Button>
+              {recurring ? (
+                <span className="min-w-0 truncate text-text-heading">{field.description}</span>
+              ) : (
+                <Input
+                  readOnly
+                  aria-label={`${title} description: ${field.description}`}
+                  value={field.description}
+                  className="cursor-pointer hover:bg-surface-hover"
+                  onClick={() => openFinancialEntry(kind, index)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') openFinancialEntry(kind, index);
+                  }}
+                />
+              )}
+              {recurring ? (
+                <Input
+                  aria-label={`${field.description} amount`}
+                  inputMode="decimal"
+                  placeholder="0.00"
+                  className="text-right font-medium tabular-nums"
+                  aria-invalid={Boolean(form.formState.errors.incomeEntries?.[index]?.amount)}
+                  {...form.register(`incomeEntries.${index}.amount`)}
+                />
+              ) : (
+                <Input
+                  readOnly
+                  aria-label={`${title} amount: ${formatMoney(field.amount)}`}
+                  value={formatMoney(field.amount)}
+                  className="cursor-pointer text-right font-medium tabular-nums hover:bg-surface-hover"
+                  onClick={() => openFinancialEntry(kind, index)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') openFinancialEntry(kind, index);
+                  }}
+                />
+              )}
+              {!recurring && (
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="ghost"
+                  aria-label={`Remove ${field.description}`}
+                  onClick={() => fieldArray.remove(index)}
+                >
+                  <Trash2 aria-hidden="true" />
+                </Button>
+              )}
             </div>
           ) : (
             <div
@@ -144,8 +166,8 @@ function FinancialSection({ kind }: { kind: 'income' | 'expense' }) {
                 {formatMoney(field.amount)}
               </span>
             </div>
-          ),
-        )}
+          );
+        })}
         {fields.length === 0 && (
           <p className="py-4 text-sm text-text-tertiary">No {kind} entries.</p>
         )}

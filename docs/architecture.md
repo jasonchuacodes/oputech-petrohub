@@ -47,7 +47,7 @@ Server data belongs in TanStack Query. Form drafts belong in React Hook Form. Sh
 
 ## Report direction
 
-Reports are aggregate documents. Draft content is editable with revision checks. Submission creates an immutable snapshot and applies inventory and meter effects in one transaction. Submitted reports are corrected through void/replacement workflows rather than edits or deletion.
+Reports are aggregate documents. Draft content is editable with revision checks. Submission creates an immutable snapshot and applies inventory and meter effects in one transaction. Submitted reports are corrected through void/replacement workflows rather than edits or deletion. Tenant-configured recurring income fields are copied into reports at creation with stable source identifiers; archived or renamed configuration never rewrites existing reports.
 
 Dashboard values will be aggregated directly from effective submitted snapshots; there are no rollup collections.
 

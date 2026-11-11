@@ -32,6 +32,12 @@ const actions = [
     adminOnly: true,
     href: '/fuel-setup',
   },
+  {
+    title: 'Recurring income',
+    description: 'Configure income fields for new reports',
+    adminOnly: true,
+    href: '/income-setup',
+  },
 ] as const
 
 export function MePage() {

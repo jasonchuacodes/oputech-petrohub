@@ -10,6 +10,7 @@ export enum ReportStatus {
 @Schema({ _id: false, versionKey: false })
 export class ReportFinancialEntry {
   @Prop({ required: true, trim: true, type: String }) id!: string
+  @Prop({ type: Types.ObjectId }) recurringIncomeFieldId?: Types.ObjectId
   @Prop({ required: true, trim: true, type: String }) description!: string
   @Prop({ trim: true, type: String }) notes?: string
   @Prop({ required: true, type: MongooseSchema.Types.Decimal128 }) amount!: Types.Decimal128

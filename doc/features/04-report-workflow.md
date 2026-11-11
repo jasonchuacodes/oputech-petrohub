@@ -8,6 +8,8 @@ Deliver the primary Petromate workflow for preparing, submitting, reviewing, and
 
 - Create and list tenant-scoped draft reports.
 - Capture shift details, assigned employees, fuel readings, financial entries, and item sales.
+- Snapshot active recurring income fields into new reports with zero amounts and stable tenant-scoped field identifiers.
+- Keep recurring income labels fixed in a report while allowing their amounts to be entered inline; tenant configuration changes affect only future reports.
 - Save drafts with revision checks to prevent lost updates.
 - Calculate totals on the server using decimal-safe arithmetic.
 - Submit a report in a MongoDB transaction and store an immutable snapshot.

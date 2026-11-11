@@ -136,4 +136,25 @@ describe('disposal form mapping', () => {
       calibration: '2.000',
     });
   });
+
+  it('preserves recurring income provenance locally but excludes it from save input', () => {
+    const report = createReport();
+    report.incomeEntries = [{
+      id: 'income-1',
+      recurringIncomeFieldId: 'recurring-1',
+      description: 'PayMaya',
+      notes: null,
+      amount: '0',
+    }];
+
+    const values = toFormValues(report);
+    expect(values.incomeEntries[0].recurringIncomeFieldId).toBe('recurring-1');
+    expect(values.incomeEntries[0].amount).toBe('');
+    expect(toSaveInput(report, values).incomeEntries[0]).toEqual({
+      id: 'income-1',
+      description: 'PayMaya',
+      notes: null,
+      amount: '0',
+    });
+  });
 });

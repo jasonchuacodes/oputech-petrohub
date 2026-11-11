@@ -32,7 +32,15 @@ export function formValuesEqual(left: ReportDetailFormValues, right: ReportDetai
 
 export function toFormValues(report: ReportDetailRecord): ReportDetailFormValues {
   return {
-    incomeEntries: report.incomeEntries.map((entry) => ({ ...entry, notes: entry.notes ?? '' })),
+    incomeEntries: report.incomeEntries.map((entry) => ({
+      ...entry,
+      notes: entry.notes ?? '',
+      amount: entry.recurringIncomeFieldId && new Decimal(entry.amount).isZero()
+        ? ''
+        : entry.recurringIncomeFieldId
+          ? new Decimal(entry.amount).toFixed(2)
+          : entry.amount,
+    })),
     expenseEntries: report.expenseEntries.map((entry) => ({ ...entry, notes: entry.notes ?? '' })),
     disposalReadings:
       report.disposals?.readings.map((reading) => ({
@@ -49,10 +57,17 @@ export function toSaveInput(report: ReportDetailRecord, values: ReportDetailForm
     reportId: report.id,
     expectedReportRevision: report.revision,
     expectedDisposalRevision: report.disposals.revision,
-    incomeEntries: values.incomeEntries.map((entry) => ({ ...entry, notes: entry.notes || null })),
-    expenseEntries: values.expenseEntries.map((entry) => ({
-      ...entry,
+    incomeEntries: values.incomeEntries.map((entry) => ({
+      id: entry.id,
+      description: entry.description,
       notes: entry.notes || null,
+      amount: entry.recurringIncomeFieldId && entry.amount === '' ? '0' : entry.amount,
+    })),
+    expenseEntries: values.expenseEntries.map((entry) => ({
+      id: entry.id,
+      description: entry.description,
+      notes: entry.notes || null,
+      amount: entry.amount,
     })),
     disposalReadings: values.disposalReadings.map((reading) => ({
       ...reading,

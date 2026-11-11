@@ -106,6 +106,7 @@ type Report {
 
 type FinancialEntry {
   id: String!
+  recurringIncomeFieldId: ObjectId
   description: String!
   notes: String
   amount: Decimal!

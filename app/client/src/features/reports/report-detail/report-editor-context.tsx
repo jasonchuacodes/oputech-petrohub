@@ -91,6 +91,11 @@ function useReportEditorState({
   const pending = saveReport.isPending || submitReport.isPending || deleteReport.isPending;
 
   const openFinancialEntry = (kind: FinancialEntryTarget['kind'], index?: number) => {
+    if (
+      kind === 'income' &&
+      index !== undefined &&
+      form.getValues(`incomeEntries.${index}.recurringIncomeFieldId`)
+    ) return;
     setFinancialEntryTarget({ kind, index });
     financialEntryEditor.onOpen();
   };
@@ -114,7 +119,7 @@ function useReportEditorState({
         const updated = await saveReport.mutateAsync(toSaveInput(reportRef.current, formValues));
         reportRef.current = updated;
         const changedWhileSaving = !formValuesEqual(form.getValues(), submittedValues);
-        form.reset(toFormValues(updated), changedWhileSaving ? { keepValues: true } : undefined);
+        if (!changedWhileSaving) form.reset(toFormValues(updated));
         setSaveState('saved');
         return updated;
       } catch {
