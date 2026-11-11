@@ -31,9 +31,20 @@ export const disposalReadingSchema = z.object({
   calibration: meterInputSchema,
 })
 
+export const lubricantSaleSchema = z.object({
+  id: z.string().min(1),
+  productId: z.string().regex(/^[a-f\d]{24}$/i),
+  productName: z.string().trim().min(1).max(80),
+  unit: z.string().trim().min(1).max(40),
+  quantity: z.string().regex(/^[1-9]\d*$/, 'Quantity must be a whole number greater than zero'),
+  unitPrice: moneyInputSchema,
+  amount: moneyInputSchema,
+})
+
 export const reportDetailFormSchema = z.object({
   incomeEntries: z.array(reportIncomeEntrySchema).max(100),
   expenseEntries: z.array(reportEntrySchema).max(100),
+  lubricantSales: z.array(lubricantSaleSchema).max(100),
   disposalReadings: z.array(disposalReadingSchema).max(100),
 })
 

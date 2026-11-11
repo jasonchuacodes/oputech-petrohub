@@ -33,7 +33,7 @@ export function ReportDetailsPanel() {
 }
 
 function FinancialShortcuts() {
-  const { openFinancialEntry } = useReportEditor();
+  const { openFinancialEntry, openLubricantSale } = useReportEditor();
 
   return (
     <section aria-label="Report shortcuts">
@@ -60,8 +60,8 @@ function FinancialShortcuts() {
         </button>
         <button
           type="button"
-          disabled
-          className="flex min-h-24 cursor-not-allowed flex-col items-center justify-start gap-2 rounded-md bg-card px-2 py-3 text-center opacity-50 shadow-card outline-none"
+          className="flex min-h-24 flex-col items-center justify-start gap-2 rounded-md bg-card px-2 py-3 text-center shadow-card outline-none transition-shadow hover:shadow-md focus-visible:ring-3 focus-visible:ring-ring/30"
+          onClick={() => openLubricantSale()}
         >
           <span className="flex size-11 items-center justify-center rounded-full border border-primary/25 text-primary">
             <Droplet aria-hidden="true" className="size-6" />
@@ -229,6 +229,7 @@ export function SummaryCard({ compact = false }: { compact?: boolean }) {
           <SummaryRow label="Cash fuel sales" value={formatMoney(preview.cashFuelSales)} />
           <SummaryRow label="Income" value={formatMoney(preview.income)} nested />
           <SummaryRow label="Expenses" value={formatMoney(preview.expenses)} nested />
+          <SummaryRow label="Lubricant sales" value={formatMoney(preview.lubricantSales)} />
           <div className="my-2 border-y border-border/60">
             <SummaryRow
               label="Pump sales"

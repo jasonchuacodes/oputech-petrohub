@@ -9,6 +9,8 @@ import { DisposalsService, DisposalBatchRecord } from '../disposals/disposals.se
 import { Shift } from '../tenants/schemas/shift.schema'
 import { RecurringIncomeField } from '../tenants/schemas/recurring-income-field.schema'
 import { UserRole } from '../users/schemas/user.schema'
+import { InventoryService } from '../inventory/inventory.service'
+import { StockMovementService } from '../inventory/stock-movement.service'
 import { REPORT_CREATED_EVENT, ReportCreatedEvent } from './events/report-created.event'
 import { businessDateFor } from './report-date'
 import {
@@ -44,6 +46,8 @@ export class ReportsService {
     @InjectModel(Report.name) private readonly reports: Model<Report>,
     @InjectConnection() private readonly connection: Connection,
     private readonly disposals: DisposalsService,
+    private readonly inventory: InventoryService,
+    private readonly stockMovements: StockMovementService,
     private readonly events: EventEmitter2,
   ) {}
 
@@ -196,6 +200,14 @@ export class ReportsService {
 
         const incomeEntries = toIncomeEntries(current, input.incomeEntries)
         const expenseEntries = toEntries(input.expenseEntries)
+        const lubricantSales = input.lubricantSales === undefined
+          ? current.lubricantSales ?? []
+          : await this.inventory.snapshotSales(
+            tenantId,
+            current.lubricantSales ?? [],
+            input.lubricantSales,
+            databaseSession,
+          )
         const disposalBatch = await this.disposals.saveDraft(
           tenantId,
           input.reportId,
@@ -206,6 +218,7 @@ export class ReportsService {
         const income = sum(incomeEntries.map((entry) => entry.amount.toString()))
         const expenses = sum(expenseEntries.map((entry) => entry.amount.toString()))
         const cashFuelSales = income.plus(expenses)
+        const lubricantSalesTotal = sum(lubricantSales.map((sale) => sale.amount.toString()))
         const pumpSales = disposalBatch.pumpSales ? decimal(disposalBatch.pumpSales) : undefined
         const updated = await this.reports.findOneAndUpdate(
           { _id: input.reportId, tenantId, effective: true, status: ReportStatus.DRAFT, revision: input.expectedReportRevision },
@@ -213,10 +226,12 @@ export class ReportsService {
             $set: {
               incomeEntries,
               expenseEntries,
+              lubricantSales,
               totals: {
                 income: decimal128(income),
                 expenses: decimal128(expenses),
                 cashFuelSales: decimal128(cashFuelSales),
+                lubricantSales: decimal128(lubricantSalesTotal),
                 ...(pumpSales ? { pumpSales: decimal128(pumpSales), overShort: decimal128(cashFuelSales.minus(pumpSales)) } : {}),
               },
             },
@@ -246,6 +261,13 @@ export class ReportsService {
         const now = new Date()
         const disposalBatch = await this.disposals.submitBatch(tenantId, input.reportId, input.expectedDisposalRevision, now, databaseSession)
         if (!disposalBatch.pumpSales) throw new InvalidInputException('Complete every disposal reading before submitting.')
+        await this.stockMovements.applyReportSales(
+          tenantId,
+          current._id,
+          current.lubricantSales ?? [],
+          actor,
+          databaseSession,
+        )
         const cashFuelSales = decimal(current.totals.cashFuelSales)
         const pumpSales = decimal(disposalBatch.pumpSales)
         const updated = await this.reports.findOneAndUpdate(
@@ -293,6 +315,15 @@ export class ReportsService {
           now,
           databaseSession,
         )
+        if (current.status === ReportStatus.SUBMITTED) {
+          await this.stockMovements.reverseReportSales(
+            tenantId,
+            current._id,
+            current.lubricantSales ?? [],
+            actor,
+            databaseSession,
+          )
+        }
         const updated = await this.reports.findOneAndUpdate(
           { _id: input.reportId, tenantId, effective: true, revision: input.expectedReportRevision },
           {
@@ -335,6 +366,8 @@ export class ReportsService {
   private assertUniqueEntryIds(input: SaveReportDraftInput) {
     const ids = [...input.incomeEntries, ...input.expenseEntries].map((entry) => entry.id)
     if (new Set(ids).size !== ids.length) throw new InvalidInputException('Financial entry identifiers must be unique.')
+    const lubricantIds = (input.lubricantSales ?? []).map((sale) => sale.id)
+    if (new Set(lubricantIds).size !== lubricantIds.length) throw new InvalidInputException('Lubricant sale identifiers must be unique.')
   }
 }
 

@@ -51,11 +51,13 @@ function useReportEditorState({
   const submitReport = useSubmitReportMutation(tenantId);
   const deleteReport = useDeleteReportMutation(tenantId);
   const reportRef = useRef(report);
-  const [tab, setTab] = useState<'detail' | 'disposals'>('detail');
+  const [tab, setTab] = useState<'detail' | 'lubricants' | 'disposals'>('detail');
   const submitConfirmation = useDisclosure();
   const reportActions = useDisclosure();
   const deleteConfirmation = useDisclosure();
   const financialEntryEditor = useDisclosure();
+  const lubricantSaleEditor = useDisclosure();
+  const [lubricantSaleIndex, setLubricantSaleIndex] = useState<number>();
   const [financialEntryTarget, setFinancialEntryTarget] = useState<FinancialEntryTarget>();
   const [deleteReason, setDeleteReason] = useState('');
   const [actionError, setActionError] = useState<string>();
@@ -85,6 +87,11 @@ function useReportEditorState({
     name: 'expenseEntries',
     keyName: 'fieldKey',
   });
+  const lubricants = useFieldArray({
+    control: form.control,
+    name: 'lubricantSales',
+    keyName: 'fieldKey',
+  });
   const values = useWatch({ control: form.control });
   const preview = calculatePreview(report, values);
   const { isDirty, isValid } = form.formState;
@@ -105,6 +112,17 @@ function useReportEditorState({
   const closeFinancialEntry = () => {
     financialEntryEditor.onClose();
     setFinancialEntryTarget(undefined);
+  };
+
+  const openLubricantSale = (index?: number) => {
+    setTab('lubricants');
+    setLubricantSaleIndex(index);
+    lubricantSaleEditor.onOpen();
+  };
+
+  const closeLubricantSale = () => {
+    lubricantSaleEditor.onClose();
+    setLubricantSaleIndex(undefined);
   };
 
   useEffect(() => {
@@ -216,7 +234,7 @@ function useReportEditorState({
         reason: deleteReason.trim(),
       });
       deleteConfirmation.onClose();
-      toast.success('Report deleted and readings rolled back');
+      toast.success('Report deleted and report effects rolled back');
     } catch {
       setActionError(
         'Unable to delete this report. A later report may already depend on its readings.',
@@ -227,9 +245,11 @@ function useReportEditorState({
 
   return {
     report,
+    tenantId,
     form,
     income,
     expenses,
+    lubricants,
     preview,
     tab,
     setTab,
@@ -251,6 +271,10 @@ function useReportEditorState({
     financialEntryTarget,
     openFinancialEntry,
     closeFinancialEntry,
+    lubricantSaleEditor,
+    lubricantSaleIndex,
+    openLubricantSale,
+    closeLubricantSale,
     deleteReason,
     setDeleteReason,
   };

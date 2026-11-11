@@ -20,6 +20,14 @@ export type CreateFuelProductInput = {
   unitPrice: Scalars['Decimal']['input'];
 };
 
+export type CreateInventoryProductInput = {
+  idempotencyKey: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  openingStock: Scalars['Decimal']['input'];
+  unit: Scalars['String']['input'];
+  unitPrice: Scalars['Decimal']['input'];
+};
+
 export type CreatePumpMeterInput = {
   initialReading: Scalars['Decimal']['input'];
   label: Scalars['String']['input'];
@@ -55,6 +63,11 @@ export type CreateUserInput = {
 export type DeactivateFuelSetupInput = {
   expectedRevision: Scalars['Int']['input'];
   id: Scalars['ObjectId']['input'];
+};
+
+export type DeactivateInventoryProductInput = {
+  expectedRevision: Scalars['Int']['input'];
+  productId: Scalars['ObjectId']['input'];
 };
 
 export type DeleteReportInput = {
@@ -154,24 +167,77 @@ export type FuelSetupStatus =
   | 'active'
   | 'inactive';
 
+export type InventoryProduct = {
+  __typename?: 'InventoryProduct';
+  id: Scalars['ObjectId']['output'];
+  name: Scalars['String']['output'];
+  revision: Scalars['Int']['output'];
+  status: InventoryProductStatus;
+  stockCount: Scalars['Decimal']['output'];
+  unit: Scalars['String']['output'];
+  unitPrice: Scalars['Decimal']['output'];
+};
+
+export type InventoryProductPage = {
+  __typename?: 'InventoryProductPage';
+  items: Array<InventoryProduct>;
+  totalCount: Scalars['Int']['output'];
+};
+
+export type InventoryProductStatus =
+  | 'active'
+  | 'inactive';
+
+export type InventoryProductsInput = {
+  activeOnly?: InputMaybe<Scalars['Boolean']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  search?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type LubricantSale = {
+  __typename?: 'LubricantSale';
+  amount: Scalars['Decimal']['output'];
+  id: Scalars['String']['output'];
+  productId: Scalars['ObjectId']['output'];
+  productName: Scalars['String']['output'];
+  quantity: Scalars['Decimal']['output'];
+  unit: Scalars['String']['output'];
+  unitPrice: Scalars['Decimal']['output'];
+};
+
+export type LubricantSaleInput = {
+  id: Scalars['String']['input'];
+  productId: Scalars['ObjectId']['input'];
+  quantity: Scalars['Decimal']['input'];
+};
+
+export type ManualStockMovementType =
+  | 'stock_in'
+  | 'stock_out';
+
 export type Mutation = {
   __typename?: 'Mutation';
   createFuelProduct: FuelProduct;
+  createInventoryProduct: InventoryProduct;
   createPumpMeter: PumpMeter;
   createReport: CreateReportPayload;
   createShift: Shift;
   createTenant: TenantSummary;
   createUser: User;
   deactivateFuelProduct: FuelProduct;
+  deactivateInventoryProduct: InventoryProduct;
   deactivatePumpMeter: PumpMeter;
   deleteReport: Report;
   deleteShift: Scalars['Boolean']['output'];
   deleteTenant: Scalars['Boolean']['output'];
   deleteUser: Scalars['Boolean']['output'];
+  recordStockMovement: StockMovement;
   resetUserPassword: User;
   saveReportDraft: Report;
   submitReport: Report;
   updateFuelProduct: FuelProduct;
+  updateInventoryProduct: InventoryProduct;
   updateMyProfile: User;
   updateRecurringIncomeConfiguration: RecurringIncomeConfiguration;
   updateShift: Shift;
@@ -182,6 +248,11 @@ export type Mutation = {
 
 export type MutationCreateFuelProductArgs = {
   input: CreateFuelProductInput;
+};
+
+
+export type MutationCreateInventoryProductArgs = {
+  input: CreateInventoryProductInput;
 };
 
 
@@ -215,6 +286,11 @@ export type MutationDeactivateFuelProductArgs = {
 };
 
 
+export type MutationDeactivateInventoryProductArgs = {
+  input: DeactivateInventoryProductInput;
+};
+
+
 export type MutationDeactivatePumpMeterArgs = {
   input: DeactivateFuelSetupInput;
 };
@@ -240,6 +316,11 @@ export type MutationDeleteUserArgs = {
 };
 
 
+export type MutationRecordStockMovementArgs = {
+  input: RecordStockMovementInput;
+};
+
+
 export type MutationResetUserPasswordArgs = {
   input: ResetUserPasswordInput;
 };
@@ -257,6 +338,11 @@ export type MutationSubmitReportArgs = {
 
 export type MutationUpdateFuelProductArgs = {
   input: UpdateFuelProductInput;
+};
+
+
+export type MutationUpdateInventoryProductArgs = {
+  input: UpdateInventoryProductInput;
 };
 
 
@@ -299,13 +385,20 @@ export type Query = {
   __typename?: 'Query';
   activeTenant?: Maybe<TenantSummary>;
   fuelSetup: FuelSetup;
+  inventoryProducts: InventoryProductPage;
   recurringIncomeConfiguration: RecurringIncomeConfiguration;
   report: Report;
   reportCreationContext: ReportCreationContext;
   reports: ReportPage;
   shifts: Array<Shift>;
+  stockMovements: StockMovementPage;
   tenants: Array<TenantAccess>;
   users: UserPage;
+};
+
+
+export type QueryInventoryProductsArgs = {
+  input: InventoryProductsInput;
 };
 
 
@@ -319,8 +412,21 @@ export type QueryReportsArgs = {
 };
 
 
+export type QueryStockMovementsArgs = {
+  input: StockMovementsInput;
+};
+
+
 export type QueryUsersArgs = {
   input: UsersInput;
+};
+
+export type RecordStockMovementInput = {
+  idempotencyKey: Scalars['String']['input'];
+  productId: Scalars['ObjectId']['input'];
+  quantity: Scalars['Decimal']['input'];
+  reason: Scalars['String']['input'];
+  type: ManualStockMovementType;
 };
 
 export type RecurringIncomeConfiguration = {
@@ -356,6 +462,7 @@ export type Report = {
   incomeEntries: Array<FinancialEntry>;
   interval: ReportIntervalSnapshot;
   legacy: Scalars['Boolean']['output'];
+  lubricantSales: Array<LubricantSale>;
   revision: Scalars['Int']['output'];
   revocationReason?: Maybe<Scalars['String']['output']>;
   revokedAt?: Maybe<Scalars['String']['output']>;
@@ -412,6 +519,7 @@ export type ReportTotals = {
   cashFuelSales: Scalars['Decimal']['output'];
   expenses: Scalars['Decimal']['output'];
   income: Scalars['Decimal']['output'];
+  lubricantSales: Scalars['Decimal']['output'];
   overShort?: Maybe<Scalars['Decimal']['output']>;
   pumpSales?: Maybe<Scalars['Decimal']['output']>;
 };
@@ -438,6 +546,7 @@ export type SaveReportDraftInput = {
   expectedReportRevision: Scalars['Int']['input'];
   expenseEntries: Array<FinancialEntryInput>;
   incomeEntries: Array<FinancialEntryInput>;
+  lubricantSales?: InputMaybe<Array<LubricantSaleInput>>;
   reportId: Scalars['ObjectId']['input'];
 };
 
@@ -446,6 +555,41 @@ export type Shift = {
   endTime: Scalars['String']['output'];
   id: Scalars['ObjectId']['output'];
   startTime: Scalars['String']['output'];
+};
+
+export type StockMovement = {
+  __typename?: 'StockMovement';
+  actorName: Scalars['String']['output'];
+  balanceAfter: Scalars['Decimal']['output'];
+  balanceBefore: Scalars['Decimal']['output'];
+  createdAt: Scalars['String']['output'];
+  id: Scalars['ObjectId']['output'];
+  productId: Scalars['ObjectId']['output'];
+  productName: Scalars['String']['output'];
+  quantityChange: Scalars['Decimal']['output'];
+  reason?: Maybe<Scalars['String']['output']>;
+  reportId?: Maybe<Scalars['ObjectId']['output']>;
+  type: StockMovementType;
+  unit: Scalars['String']['output'];
+};
+
+export type StockMovementPage = {
+  __typename?: 'StockMovementPage';
+  items: Array<StockMovement>;
+  totalCount: Scalars['Int']['output'];
+};
+
+export type StockMovementType =
+  | 'opening'
+  | 'report_reversal'
+  | 'report_sale'
+  | 'stock_in'
+  | 'stock_out';
+
+export type StockMovementsInput = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  productId: Scalars['ObjectId']['input'];
 };
 
 export type TenantAccess = {
@@ -466,6 +610,14 @@ export type UpdateFuelProductInput = {
   expectedRevision: Scalars['Int']['input'];
   name: Scalars['String']['input'];
   productId: Scalars['ObjectId']['input'];
+  unitPrice: Scalars['Decimal']['input'];
+};
+
+export type UpdateInventoryProductInput = {
+  expectedRevision: Scalars['Int']['input'];
+  name: Scalars['String']['input'];
+  productId: Scalars['ObjectId']['input'];
+  unit: Scalars['String']['input'];
   unitPrice: Scalars['Decimal']['input'];
 };
 
@@ -604,6 +756,7 @@ export type DirectiveResolverFn<TResult = Record<PropertyKey, never>, TParent = 
 export type ResolversTypes = {
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
   CreateFuelProductInput: CreateFuelProductInput;
+  CreateInventoryProductInput: CreateInventoryProductInput;
   CreatePumpMeterInput: CreatePumpMeterInput;
   CreateReportInput: CreateReportInput;
   CreateReportPayload: ResolverTypeWrapper<CreateReportPayload>;
@@ -611,6 +764,7 @@ export type ResolversTypes = {
   CreateTenantInput: CreateTenantInput;
   CreateUserInput: CreateUserInput;
   DeactivateFuelSetupInput: DeactivateFuelSetupInput;
+  DeactivateInventoryProductInput: DeactivateInventoryProductInput;
   Decimal: ResolverTypeWrapper<Scalars['Decimal']['output']>;
   DeleteReportInput: DeleteReportInput;
   DeleteShiftInput: DeleteShiftInput;
@@ -627,10 +781,18 @@ export type ResolversTypes = {
   FuelSetup: ResolverTypeWrapper<FuelSetup>;
   FuelSetupStatus: FuelSetupStatus;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
+  InventoryProduct: ResolverTypeWrapper<InventoryProduct>;
+  InventoryProductPage: ResolverTypeWrapper<InventoryProductPage>;
+  InventoryProductStatus: InventoryProductStatus;
+  InventoryProductsInput: InventoryProductsInput;
+  LubricantSale: ResolverTypeWrapper<LubricantSale>;
+  LubricantSaleInput: LubricantSaleInput;
+  ManualStockMovementType: ManualStockMovementType;
   Mutation: ResolverTypeWrapper<Record<PropertyKey, never>>;
   ObjectId: ResolverTypeWrapper<Scalars['ObjectId']['output']>;
   PumpMeter: ResolverTypeWrapper<PumpMeter>;
   Query: ResolverTypeWrapper<Record<PropertyKey, never>>;
+  RecordStockMovementInput: RecordStockMovementInput;
   RecurringIncomeConfiguration: ResolverTypeWrapper<RecurringIncomeConfiguration>;
   RecurringIncomeField: ResolverTypeWrapper<RecurringIncomeField>;
   RecurringIncomeFieldInput: RecurringIncomeFieldInput;
@@ -647,10 +809,15 @@ export type ResolversTypes = {
   ResetUserPasswordInput: ResetUserPasswordInput;
   SaveReportDraftInput: SaveReportDraftInput;
   Shift: ResolverTypeWrapper<Shift>;
+  StockMovement: ResolverTypeWrapper<StockMovement>;
+  StockMovementPage: ResolverTypeWrapper<StockMovementPage>;
+  StockMovementType: StockMovementType;
+  StockMovementsInput: StockMovementsInput;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
   TenantAccess: ResolverTypeWrapper<TenantAccess>;
   TenantSummary: ResolverTypeWrapper<TenantSummary>;
   UpdateFuelProductInput: UpdateFuelProductInput;
+  UpdateInventoryProductInput: UpdateInventoryProductInput;
   UpdateMyProfileInput: UpdateMyProfileInput;
   UpdateRecurringIncomeConfigurationInput: UpdateRecurringIncomeConfigurationInput;
   UpdateShiftInput: UpdateShiftInput;
@@ -667,6 +834,7 @@ export type ResolversTypes = {
 export type ResolversParentTypes = {
   Boolean: Scalars['Boolean']['output'];
   CreateFuelProductInput: CreateFuelProductInput;
+  CreateInventoryProductInput: CreateInventoryProductInput;
   CreatePumpMeterInput: CreatePumpMeterInput;
   CreateReportInput: CreateReportInput;
   CreateReportPayload: CreateReportPayload;
@@ -674,6 +842,7 @@ export type ResolversParentTypes = {
   CreateTenantInput: CreateTenantInput;
   CreateUserInput: CreateUserInput;
   DeactivateFuelSetupInput: DeactivateFuelSetupInput;
+  DeactivateInventoryProductInput: DeactivateInventoryProductInput;
   Decimal: Scalars['Decimal']['output'];
   DeleteReportInput: DeleteReportInput;
   DeleteShiftInput: DeleteShiftInput;
@@ -687,10 +856,16 @@ export type ResolversParentTypes = {
   FuelProduct: FuelProduct;
   FuelSetup: FuelSetup;
   Int: Scalars['Int']['output'];
+  InventoryProduct: InventoryProduct;
+  InventoryProductPage: InventoryProductPage;
+  InventoryProductsInput: InventoryProductsInput;
+  LubricantSale: LubricantSale;
+  LubricantSaleInput: LubricantSaleInput;
   Mutation: Record<PropertyKey, never>;
   ObjectId: Scalars['ObjectId']['output'];
   PumpMeter: PumpMeter;
   Query: Record<PropertyKey, never>;
+  RecordStockMovementInput: RecordStockMovementInput;
   RecurringIncomeConfiguration: RecurringIncomeConfiguration;
   RecurringIncomeField: RecurringIncomeField;
   RecurringIncomeFieldInput: RecurringIncomeFieldInput;
@@ -706,10 +881,14 @@ export type ResolversParentTypes = {
   ResetUserPasswordInput: ResetUserPasswordInput;
   SaveReportDraftInput: SaveReportDraftInput;
   Shift: Shift;
+  StockMovement: StockMovement;
+  StockMovementPage: StockMovementPage;
+  StockMovementsInput: StockMovementsInput;
   String: Scalars['String']['output'];
   TenantAccess: TenantAccess;
   TenantSummary: TenantSummary;
   UpdateFuelProductInput: UpdateFuelProductInput;
+  UpdateInventoryProductInput: UpdateInventoryProductInput;
   UpdateMyProfileInput: UpdateMyProfileInput;
   UpdateRecurringIncomeConfigurationInput: UpdateRecurringIncomeConfigurationInput;
   UpdateShiftInput: UpdateShiftInput;
@@ -776,23 +955,52 @@ export type FuelSetupResolvers<ContextType = GraphqlContext, ParentType extends 
   products?: Resolver<Array<ResolversTypes['FuelProduct']>, ParentType, ContextType>;
 };
 
+export type InventoryProductResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['InventoryProduct'] = ResolversParentTypes['InventoryProduct']> = {
+  id?: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  revision?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  status?: Resolver<ResolversTypes['InventoryProductStatus'], ParentType, ContextType>;
+  stockCount?: Resolver<ResolversTypes['Decimal'], ParentType, ContextType>;
+  unit?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  unitPrice?: Resolver<ResolversTypes['Decimal'], ParentType, ContextType>;
+};
+
+export type InventoryProductPageResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['InventoryProductPage'] = ResolversParentTypes['InventoryProductPage']> = {
+  items?: Resolver<Array<ResolversTypes['InventoryProduct']>, ParentType, ContextType>;
+  totalCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+};
+
+export type LubricantSaleResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['LubricantSale'] = ResolversParentTypes['LubricantSale']> = {
+  amount?: Resolver<ResolversTypes['Decimal'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  productId?: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
+  productName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  quantity?: Resolver<ResolversTypes['Decimal'], ParentType, ContextType>;
+  unit?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  unitPrice?: Resolver<ResolversTypes['Decimal'], ParentType, ContextType>;
+};
+
 export type MutationResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
   createFuelProduct?: Resolver<ResolversTypes['FuelProduct'], ParentType, ContextType, RequireFields<MutationCreateFuelProductArgs, 'input'>>;
+  createInventoryProduct?: Resolver<ResolversTypes['InventoryProduct'], ParentType, ContextType, RequireFields<MutationCreateInventoryProductArgs, 'input'>>;
   createPumpMeter?: Resolver<ResolversTypes['PumpMeter'], ParentType, ContextType, RequireFields<MutationCreatePumpMeterArgs, 'input'>>;
   createReport?: Resolver<ResolversTypes['CreateReportPayload'], ParentType, ContextType, RequireFields<MutationCreateReportArgs, 'input'>>;
   createShift?: Resolver<ResolversTypes['Shift'], ParentType, ContextType, RequireFields<MutationCreateShiftArgs, 'input'>>;
   createTenant?: Resolver<ResolversTypes['TenantSummary'], ParentType, ContextType, RequireFields<MutationCreateTenantArgs, 'input'>>;
   createUser?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationCreateUserArgs, 'input'>>;
   deactivateFuelProduct?: Resolver<ResolversTypes['FuelProduct'], ParentType, ContextType, RequireFields<MutationDeactivateFuelProductArgs, 'input'>>;
+  deactivateInventoryProduct?: Resolver<ResolversTypes['InventoryProduct'], ParentType, ContextType, RequireFields<MutationDeactivateInventoryProductArgs, 'input'>>;
   deactivatePumpMeter?: Resolver<ResolversTypes['PumpMeter'], ParentType, ContextType, RequireFields<MutationDeactivatePumpMeterArgs, 'input'>>;
   deleteReport?: Resolver<ResolversTypes['Report'], ParentType, ContextType, RequireFields<MutationDeleteReportArgs, 'input'>>;
   deleteShift?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteShiftArgs, 'input'>>;
   deleteTenant?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteTenantArgs, 'input'>>;
   deleteUser?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteUserArgs, 'input'>>;
+  recordStockMovement?: Resolver<ResolversTypes['StockMovement'], ParentType, ContextType, RequireFields<MutationRecordStockMovementArgs, 'input'>>;
   resetUserPassword?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationResetUserPasswordArgs, 'input'>>;
   saveReportDraft?: Resolver<ResolversTypes['Report'], ParentType, ContextType, RequireFields<MutationSaveReportDraftArgs, 'input'>>;
   submitReport?: Resolver<ResolversTypes['Report'], ParentType, ContextType, RequireFields<MutationSubmitReportArgs, 'input'>>;
   updateFuelProduct?: Resolver<ResolversTypes['FuelProduct'], ParentType, ContextType, RequireFields<MutationUpdateFuelProductArgs, 'input'>>;
+  updateInventoryProduct?: Resolver<ResolversTypes['InventoryProduct'], ParentType, ContextType, RequireFields<MutationUpdateInventoryProductArgs, 'input'>>;
   updateMyProfile?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationUpdateMyProfileArgs, 'input'>>;
   updateRecurringIncomeConfiguration?: Resolver<ResolversTypes['RecurringIncomeConfiguration'], ParentType, ContextType, RequireFields<MutationUpdateRecurringIncomeConfigurationArgs, 'input'>>;
   updateShift?: Resolver<ResolversTypes['Shift'], ParentType, ContextType, RequireFields<MutationUpdateShiftArgs, 'input'>>;
@@ -817,11 +1025,13 @@ export type PumpMeterResolvers<ContextType = GraphqlContext, ParentType extends 
 export type QueryResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   activeTenant?: Resolver<Maybe<ResolversTypes['TenantSummary']>, ParentType, ContextType>;
   fuelSetup?: Resolver<ResolversTypes['FuelSetup'], ParentType, ContextType>;
+  inventoryProducts?: Resolver<ResolversTypes['InventoryProductPage'], ParentType, ContextType, RequireFields<QueryInventoryProductsArgs, 'input'>>;
   recurringIncomeConfiguration?: Resolver<ResolversTypes['RecurringIncomeConfiguration'], ParentType, ContextType>;
   report?: Resolver<ResolversTypes['Report'], ParentType, ContextType, RequireFields<QueryReportArgs, 'input'>>;
   reportCreationContext?: Resolver<ResolversTypes['ReportCreationContext'], ParentType, ContextType>;
   reports?: Resolver<ResolversTypes['ReportPage'], ParentType, ContextType, RequireFields<QueryReportsArgs, 'input'>>;
   shifts?: Resolver<Array<ResolversTypes['Shift']>, ParentType, ContextType>;
+  stockMovements?: Resolver<ResolversTypes['StockMovementPage'], ParentType, ContextType, RequireFields<QueryStockMovementsArgs, 'input'>>;
   tenants?: Resolver<Array<ResolversTypes['TenantAccess']>, ParentType, ContextType>;
   users?: Resolver<ResolversTypes['UserPage'], ParentType, ContextType, RequireFields<QueryUsersArgs, 'input'>>;
 };
@@ -850,6 +1060,7 @@ export type ReportResolvers<ContextType = GraphqlContext, ParentType extends Res
   incomeEntries?: Resolver<Array<ResolversTypes['FinancialEntry']>, ParentType, ContextType>;
   interval?: Resolver<ResolversTypes['ReportIntervalSnapshot'], ParentType, ContextType>;
   legacy?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  lubricantSales?: Resolver<Array<ResolversTypes['LubricantSale']>, ParentType, ContextType>;
   revision?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   revocationReason?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   revokedAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -892,6 +1103,7 @@ export type ReportTotalsResolvers<ContextType = GraphqlContext, ParentType exten
   cashFuelSales?: Resolver<ResolversTypes['Decimal'], ParentType, ContextType>;
   expenses?: Resolver<ResolversTypes['Decimal'], ParentType, ContextType>;
   income?: Resolver<ResolversTypes['Decimal'], ParentType, ContextType>;
+  lubricantSales?: Resolver<ResolversTypes['Decimal'], ParentType, ContextType>;
   overShort?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>;
   pumpSales?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>;
 };
@@ -900,6 +1112,26 @@ export type ShiftResolvers<ContextType = GraphqlContext, ParentType extends Reso
   endTime?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
   startTime?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
+export type StockMovementResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['StockMovement'] = ResolversParentTypes['StockMovement']> = {
+  actorName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  balanceAfter?: Resolver<ResolversTypes['Decimal'], ParentType, ContextType>;
+  balanceBefore?: Resolver<ResolversTypes['Decimal'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
+  productId?: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
+  productName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  quantityChange?: Resolver<ResolversTypes['Decimal'], ParentType, ContextType>;
+  reason?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  reportId?: Resolver<Maybe<ResolversTypes['ObjectId']>, ParentType, ContextType>;
+  type?: Resolver<ResolversTypes['StockMovementType'], ParentType, ContextType>;
+  unit?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
+export type StockMovementPageResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['StockMovementPage'] = ResolversParentTypes['StockMovementPage']> = {
+  items?: Resolver<Array<ResolversTypes['StockMovement']>, ParentType, ContextType>;
+  totalCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
 };
 
 export type TenantAccessResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['TenantAccess'] = ResolversParentTypes['TenantAccess']> = {
@@ -937,6 +1169,9 @@ export type Resolvers<ContextType = GraphqlContext> = {
   FinancialEntry?: FinancialEntryResolvers<ContextType>;
   FuelProduct?: FuelProductResolvers<ContextType>;
   FuelSetup?: FuelSetupResolvers<ContextType>;
+  InventoryProduct?: InventoryProductResolvers<ContextType>;
+  InventoryProductPage?: InventoryProductPageResolvers<ContextType>;
+  LubricantSale?: LubricantSaleResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
   ObjectId?: GraphQLScalarType;
   PumpMeter?: PumpMeterResolvers<ContextType>;
@@ -950,6 +1185,8 @@ export type Resolvers<ContextType = GraphqlContext> = {
   ReportSlot?: ReportSlotResolvers<ContextType>;
   ReportTotals?: ReportTotalsResolvers<ContextType>;
   Shift?: ShiftResolvers<ContextType>;
+  StockMovement?: StockMovementResolvers<ContextType>;
+  StockMovementPage?: StockMovementPageResolvers<ContextType>;
   TenantAccess?: TenantAccessResolvers<ContextType>;
   TenantSummary?: TenantSummaryResolvers<ContextType>;
   User?: UserResolvers<ContextType>;

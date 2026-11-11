@@ -1,0 +1,54 @@
+fragment InventoryProductFields on InventoryProduct {
+  id
+  name
+  unit
+  unitPrice
+  stockCount
+  status
+  revision
+}
+
+fragment StockMovementFields on StockMovement {
+  id
+  productId
+  productName
+  unit
+  type
+  quantityChange
+  balanceBefore
+  balanceAfter
+  reason
+  actorName
+  reportId
+  createdAt
+}
+
+query InventoryProducts($input: InventoryProductsInput!) {
+  inventoryProducts(input: $input) {
+    items { ...InventoryProductFields }
+    totalCount
+  }
+}
+
+query StockMovements($input: StockMovementsInput!) {
+  stockMovements(input: $input) {
+    items { ...StockMovementFields }
+    totalCount
+  }
+}
+
+mutation CreateInventoryProduct($input: CreateInventoryProductInput!) {
+  createInventoryProduct(input: $input) { ...InventoryProductFields }
+}
+
+mutation UpdateInventoryProduct($input: UpdateInventoryProductInput!) {
+  updateInventoryProduct(input: $input) { ...InventoryProductFields }
+}
+
+mutation DeactivateInventoryProduct($input: DeactivateInventoryProductInput!) {
+  deactivateInventoryProduct(input: $input) { ...InventoryProductFields }
+}
+
+mutation RecordStockMovement($input: RecordStockMovementInput!) {
+  recordStockMovement(input: $input) { ...StockMovementFields }
+}

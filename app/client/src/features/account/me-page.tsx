@@ -33,6 +33,12 @@ const actions = [
     href: '/fuel-setup',
   },
   {
+    title: 'Inventory',
+    description: 'Manage lubricant products and stock movements',
+    adminOnly: true,
+    href: '/inventory',
+  },
+  {
     title: 'Recurring income',
     description: 'Configure income fields for new reports',
     adminOnly: true,

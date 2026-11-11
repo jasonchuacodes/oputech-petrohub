@@ -19,12 +19,26 @@ export class ReportFinancialEntry {
 const ReportFinancialEntrySchema = SchemaFactory.createForClass(ReportFinancialEntry)
 
 @Schema({ _id: false, versionKey: false })
+export class ReportLubricantSale {
+  @Prop({ required: true, trim: true, type: String }) id!: string
+  @Prop({ required: true, type: Types.ObjectId }) productId!: Types.ObjectId
+  @Prop({ required: true, trim: true, type: String }) productName!: string
+  @Prop({ required: true, trim: true, type: String }) unit!: string
+  @Prop({ required: true, type: MongooseSchema.Types.Decimal128 }) quantity!: Types.Decimal128
+  @Prop({ required: true, type: MongooseSchema.Types.Decimal128 }) unitPrice!: Types.Decimal128
+  @Prop({ required: true, type: MongooseSchema.Types.Decimal128 }) amount!: Types.Decimal128
+}
+
+const ReportLubricantSaleSchema = SchemaFactory.createForClass(ReportLubricantSale)
+
+@Schema({ _id: false, versionKey: false })
 export class ReportTotals {
   @Prop({ required: true, type: MongooseSchema.Types.Decimal128 }) income!: Types.Decimal128
   @Prop({ required: true, type: MongooseSchema.Types.Decimal128 }) expenses!: Types.Decimal128
   @Prop({ required: true, type: MongooseSchema.Types.Decimal128 }) cashFuelSales!: Types.Decimal128
   @Prop({ type: MongooseSchema.Types.Decimal128 }) pumpSales?: Types.Decimal128
   @Prop({ type: MongooseSchema.Types.Decimal128 }) overShort?: Types.Decimal128
+  @Prop({ required: true, default: () => Types.Decimal128.fromString('0'), type: MongooseSchema.Types.Decimal128 }) lubricantSales!: Types.Decimal128
 }
 
 const ReportTotalsSchema = SchemaFactory.createForClass(ReportTotals)
@@ -72,9 +86,12 @@ export class Report {
   @Prop({ required: true, default: [], type: [ReportFinancialEntrySchema] })
   expenseEntries!: ReportFinancialEntry[]
 
+  @Prop({ required: true, default: [], type: [ReportLubricantSaleSchema] })
+  lubricantSales!: ReportLubricantSale[]
+
   @Prop({
     required: true,
-    default: () => ({ income: Types.Decimal128.fromString('0'), expenses: Types.Decimal128.fromString('0'), cashFuelSales: Types.Decimal128.fromString('0') }),
+    default: () => ({ income: Types.Decimal128.fromString('0'), expenses: Types.Decimal128.fromString('0'), cashFuelSales: Types.Decimal128.fromString('0'), lubricantSales: Types.Decimal128.fromString('0') }),
     type: ReportTotalsSchema,
   })
   totals!: ReportTotals

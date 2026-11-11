@@ -8,6 +8,7 @@ export type ReportPreview = {
   cashFuelSales: string;
   pumpSales?: string;
   overShort?: string;
+  lubricantSales: string;
   complete: boolean;
   readings: Array<{ net?: string; sales?: string }>;
 };
@@ -15,6 +16,7 @@ export type ReportPreview = {
 type PreviewValues = {
   incomeEntries?: Array<{ amount?: string }>;
   expenseEntries?: Array<{ amount?: string }>;
+  lubricantSales?: Array<{ amount?: string }>;
   disposalReadings?: Array<{ closingReading?: string; calibration?: string }>;
 };
 
@@ -22,6 +24,7 @@ export function cloneFormValues(values: ReportDetailFormValues): ReportDetailFor
   return {
     incomeEntries: values.incomeEntries.map((entry) => ({ ...entry })),
     expenseEntries: values.expenseEntries.map((entry) => ({ ...entry })),
+    lubricantSales: values.lubricantSales.map((sale) => ({ ...sale })),
     disposalReadings: values.disposalReadings.map((reading) => ({ ...reading })),
   };
 }
@@ -42,6 +45,7 @@ export function toFormValues(report: ReportDetailRecord): ReportDetailFormValues
           : entry.amount,
     })),
     expenseEntries: report.expenseEntries.map((entry) => ({ ...entry, notes: entry.notes ?? '' })),
+    lubricantSales: report.lubricantSales.map((sale) => ({ ...sale })),
     disposalReadings:
       report.disposals?.readings.map((reading) => ({
         meterId: reading.meterId,
@@ -69,6 +73,11 @@ export function toSaveInput(report: ReportDetailRecord, values: ReportDetailForm
       notes: entry.notes || null,
       amount: entry.amount,
     })),
+    lubricantSales: values.lubricantSales.map((sale) => ({
+      id: sale.id,
+      productId: sale.productId,
+      quantity: sale.quantity,
+    })),
     disposalReadings: values.disposalReadings.map((reading) => ({
       ...reading,
       closingReading: reading.closingReading || null,
@@ -83,6 +92,7 @@ export function calculatePreview(
   const income = addAmounts(values.incomeEntries);
   const expenses = addAmounts(values.expenseEntries);
   const cashFuelSales = income.plus(expenses);
+  const lubricantSales = addAmounts(values.lubricantSales);
   let complete = Boolean(report.disposals?.readings.length);
   const readings = (report.disposals?.readings ?? []).map((reading, index) => {
     try {
@@ -113,6 +123,7 @@ export function calculatePreview(
     income: income.toFixed(2),
     expenses: expenses.toFixed(2),
     cashFuelSales: cashFuelSales.toFixed(2),
+    lubricantSales: lubricantSales.toFixed(2),
     pumpSales: pumpSales?.toFixed(2),
     overShort: pumpSales ? cashFuelSales.minus(pumpSales).toFixed(2) : undefined,
     complete,

@@ -1,0 +1,92 @@
+extend type Query {
+  inventoryProducts(input: InventoryProductsInput!): InventoryProductPage!
+  stockMovements(input: StockMovementsInput!): StockMovementPage!
+}
+
+extend type Mutation {
+  createInventoryProduct(input: CreateInventoryProductInput!): InventoryProduct!
+  updateInventoryProduct(input: UpdateInventoryProductInput!): InventoryProduct!
+  deactivateInventoryProduct(input: DeactivateInventoryProductInput!): InventoryProduct!
+  recordStockMovement(input: RecordStockMovementInput!): StockMovement!
+}
+
+input InventoryProductsInput {
+  search: String = ""
+  activeOnly: Boolean = false
+  offset: Int = 0
+  limit: Int = 20
+}
+
+input StockMovementsInput {
+  productId: ObjectId!
+  offset: Int = 0
+  limit: Int = 20
+}
+
+input CreateInventoryProductInput {
+  name: String!
+  unit: String!
+  unitPrice: Decimal!
+  openingStock: Decimal!
+  idempotencyKey: String!
+}
+
+input UpdateInventoryProductInput {
+  productId: ObjectId!
+  expectedRevision: Int!
+  name: String!
+  unit: String!
+  unitPrice: Decimal!
+}
+
+input DeactivateInventoryProductInput {
+  productId: ObjectId!
+  expectedRevision: Int!
+}
+
+input RecordStockMovementInput {
+  productId: ObjectId!
+  type: ManualStockMovementType!
+  quantity: Decimal!
+  reason: String!
+  idempotencyKey: String!
+}
+
+type InventoryProductPage {
+  items: [InventoryProduct!]!
+  totalCount: Int!
+}
+
+type StockMovementPage {
+  items: [StockMovement!]!
+  totalCount: Int!
+}
+
+type InventoryProduct {
+  id: ObjectId!
+  name: String!
+  unit: String!
+  unitPrice: Decimal!
+  stockCount: Decimal!
+  status: InventoryProductStatus!
+  revision: Int!
+}
+
+type StockMovement {
+  id: ObjectId!
+  productId: ObjectId!
+  productName: String!
+  unit: String!
+  type: StockMovementType!
+  quantityChange: Decimal!
+  balanceBefore: Decimal!
+  balanceAfter: Decimal!
+  reason: String
+  actorName: String!
+  reportId: ObjectId
+  createdAt: String!
+}
+
+enum InventoryProductStatus { active inactive }
+enum ManualStockMovementType { stock_in stock_out }
+enum StockMovementType { opening stock_in stock_out report_sale report_reversal }

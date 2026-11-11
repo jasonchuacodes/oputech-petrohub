@@ -9,6 +9,8 @@ import { formatBusinessDate, formatShiftTime } from '../create-report-sheet';
 import type { ReportDetailRecord } from '../reports.queries';
 import { ReportDisposalsPanel } from './report-disposals';
 import { ReportDetailsPanel } from './report-details';
+import { ReportLubricantsPanel } from './report-lubricants';
+import { LubricantSaleSheet } from './lubricant-sale-sheet';
 import { ReportEditorDialogs, ReportEditorFooter } from './report-editor-actions';
 import { ReportEditorProvider, useReportEditor } from './report-editor-context';
 
@@ -28,7 +30,7 @@ export function ReportEditor(props: ReportEditorProps) {
 }
 
 function ReportEditorLayout() {
-  const { report, tab, setTab, actionError, canDelete, pending, reportActions } =
+  const { report, tab, setTab, actionError, canDelete, pending, reportActions, lubricantSaleEditor } =
     useReportEditor();
 
   return (
@@ -90,6 +92,20 @@ function ReportEditorLayout() {
         <button
           type="button"
           role="tab"
+          aria-selected={tab === 'lubricants'}
+          className={cn(
+            'min-h-11 flex-1 rounded-sm px-3 text-sm font-medium',
+            tab === 'lubricants'
+              ? 'bg-primary text-primary-foreground shadow-sm'
+              : 'text-text-secondary',
+          )}
+          onClick={() => setTab('lubricants')}
+        >
+          Lubes
+        </button>
+        <button
+          type="button"
+          role="tab"
           aria-selected={tab === 'disposals'}
           className={cn(
             'min-h-11 flex-1 rounded-sm px-3 text-sm font-medium',
@@ -104,7 +120,7 @@ function ReportEditorLayout() {
       </div>
 
       <div className="flex flex-1 flex-col">
-        {tab === 'detail' ? <ReportDetailsPanel /> : <ReportDisposalsPanel />}
+        {tab === 'detail' ? <ReportDetailsPanel /> : tab === 'lubricants' ? <ReportLubricantsPanel /> : <ReportDisposalsPanel />}
 
         {actionError && (
           <p role="alert" className="mt-4 text-sm text-destructive">
@@ -114,6 +130,7 @@ function ReportEditorLayout() {
       </div>
       <ReportEditorFooter />
       <ReportEditorDialogs />
+      {lubricantSaleEditor.open && <LubricantSaleSheet />}
     </form>
   );
 }

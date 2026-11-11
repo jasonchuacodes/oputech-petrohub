@@ -14,6 +14,8 @@ import { ReportsModule } from '../reports/reports.module'
 import { ReportsResolver } from '../reports/reports.resolver'
 import { FuelSetupModule } from '../fuel-setup/fuel-setup.module'
 import { FuelSetupResolver } from '../fuel-setup/fuel-setup.resolver'
+import { InventoryModule } from '../inventory/inventory.module'
+import { InventoryResolver } from '../inventory/inventory.resolver'
 
 @Module({
   imports: [
@@ -22,6 +24,7 @@ import { FuelSetupResolver } from '../fuel-setup/fuel-setup.resolver'
     TenantModule,
     ReportsModule,
     FuelSetupModule,
+    InventoryModule,
   ],
   controllers: [AuthController],
   providers: [
@@ -34,6 +37,7 @@ import { FuelSetupResolver } from '../fuel-setup/fuel-setup.resolver'
     UsersResolver,
     ReportsResolver,
     FuelSetupResolver,
+    InventoryResolver,
   ],
   exports: [SessionModule, TenantAccessGuard, RolesGuard],
 })

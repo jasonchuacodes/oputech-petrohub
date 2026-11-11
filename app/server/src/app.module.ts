@@ -18,6 +18,7 @@ import { UsersModule } from './modules/users/users.module'
 import { ReportsModule } from './modules/reports/reports.module'
 import { FuelSetupModule } from './modules/fuel-setup/fuel-setup.module'
 import { DisposalsModule } from './modules/disposals/disposals.module'
+import { InventoryModule } from './modules/inventory/inventory.module'
 
 @Module({
   imports: [
@@ -68,6 +69,7 @@ import { DisposalsModule } from './modules/disposals/disposals.module'
     ReportsModule,
     FuelSetupModule,
     DisposalsModule,
+    InventoryModule,
     AuthModule,
     HealthModule,
   ],

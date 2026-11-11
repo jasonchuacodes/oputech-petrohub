@@ -14,6 +14,8 @@ const collectionFlags = {
   '--meter-heads': 'meterHeads',
   '--fuel-products': 'fuelProducts',
   '--pump-meters': 'pumpMeters',
+  '--inventory-products': 'inventoryProducts',
+  '--stock-movements': 'stockMovements',
   '--tenants': 'tenants',
   '--users': 'users',
 } as const
@@ -27,6 +29,8 @@ async function clearDatabase(): Promise<void> {
   if (selected.has('reports')) {
     selected.add('disposalBatches')
     selected.add('meterHeads')
+    selected.add('inventoryProducts')
+    selected.add('stockMovements')
   }
   const application = await NestFactory.createApplicationContext(AppModule, { logger: false })
 
@@ -129,6 +133,8 @@ async function clearTenants(
     'reports',
     'fuelProducts',
     'pumpMeters',
+    'inventoryProducts',
+    'stockMovements',
     'memberActivities',
   ]
   for (const collectionName of tenantCollections) {
@@ -159,7 +165,7 @@ function parseCollectionFlags(args: string[]): Set<CollectionName> {
 }
 
 function deletionOrder(selected: Set<CollectionName>): CollectionName[] {
-  return (['disposalBatches', 'meterHeads', 'reports', 'fuelProducts', 'pumpMeters', 'memberActivities', 'sessions', 'tenants', 'users'] as const).filter((name) =>
+  return (['stockMovements', 'disposalBatches', 'meterHeads', 'reports', 'inventoryProducts', 'fuelProducts', 'pumpMeters', 'memberActivities', 'sessions', 'tenants', 'users'] as const).filter((name) =>
     selected.has(name),
   )
 }
@@ -168,7 +174,7 @@ function displayOrder(
   selected: Set<CollectionName>,
   results: Map<CollectionName, number>,
 ): CollectionName[] {
-  return (['users', 'tenants', 'reports', 'disposalBatches', 'meterHeads', 'fuelProducts', 'pumpMeters', 'sessions', 'memberActivities'] as const).filter(
+  return (['users', 'tenants', 'reports', 'disposalBatches', 'meterHeads', 'inventoryProducts', 'stockMovements', 'fuelProducts', 'pumpMeters', 'sessions', 'memberActivities'] as const).filter(
     (name) => selected.has(name) || results.has(name),
   )
 }
@@ -182,7 +188,7 @@ function addResult(
 }
 
 function usage(): string {
-  return 'Use --users, --tenants, --reports, --disposal-batches, --meter-heads, --fuel-products, --pump-meters, --sessions, --member-activities, or --all.'
+  return 'Use --users, --tenants, --reports, --disposal-batches, --meter-heads, --inventory-products, --stock-movements, --fuel-products, --pump-meters, --sessions, --member-activities, or --all.'
 }
 
 clearDatabase().catch((error: unknown) => {

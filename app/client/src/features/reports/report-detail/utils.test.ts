@@ -34,12 +34,14 @@ function createReport(): ReportDetailRecord {
     revokedById: null,
     incomeEntries: [],
     expenseEntries: [],
+    lubricantSales: [],
     totals: {
       income: '0.00',
       expenses: '0.00',
       cashFuelSales: '0.00',
       pumpSales: null,
       overShort: null,
+      lubricantSales: '0.00',
     },
     disposals: {
       id: 'disposal-1',
@@ -134,6 +136,18 @@ describe('disposal preview', () => {
     expect(preview.complete).toBe(false);
     expect(preview.readings[0]).toEqual({});
     expect(preview.pumpSales).toBeUndefined();
+  });
+});
+
+describe('lubricant sales', () => {
+  it('keeps lubricant sales separate from cash fuel sales', () => {
+    const preview = calculatePreview(createReport(), {
+      incomeEntries: [{ amount: '1000.00' }],
+      expenseEntries: [{ amount: '100.00' }],
+      lubricantSales: [{ amount: '250.00' }],
+    });
+    expect(preview.cashFuelSales).toBe('1100.00');
+    expect(preview.lubricantSales).toBe('250.00');
   });
 });
 

@@ -5,6 +5,7 @@ import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import request from 'supertest'
 import { configureApplication } from '../../../src/configure-application'
 import { FuelSetupService } from '../../../src/modules/fuel-setup/fuel-setup.service'
+import { InventoryService } from '../../../src/modules/inventory/inventory.service'
 import { TenantService } from '../../../src/modules/tenants/tenant.service'
 import { UserRole } from '../../../src/modules/users/schemas/user.schema'
 import { UsersService } from '../../../src/modules/users/users.service'
@@ -15,6 +16,7 @@ describe('report disposal lifecycle', () => {
   let tenantId: string
   let firstShiftId: string
   let secondShiftId: string
+  let lubricantProductId: string
 
   beforeAll(async () => {
     replicaSet = await MongoMemoryReplSet.create({ replSet: { count: 1 } })
@@ -34,6 +36,7 @@ describe('report disposal lifecycle', () => {
     const users = app.get(UsersService)
     const tenants = app.get(TenantService)
     const setup = app.get(FuelSetupService)
+    const inventory = app.get(InventoryService)
     const owner = await users.create({ username: 'report-owner', passwordHash: await hash('OwnerPassword123'), role: UserRole.SUPERADMIN })
     const tenant = await tenants.create(owner._id, { name: 'Report Station' })
     tenantId = tenant._id.toHexString()
@@ -46,6 +49,12 @@ describe('report disposal lifecycle', () => {
     secondShiftId = second.id.toHexString()
     const product = await setup.createProduct(tenant._id, { name: 'ADO', unitPrice: '10.00' })
     await setup.createMeter(tenant._id, { label: 'ADO 1', productId: product._id, initialReading: '100.000' })
+    const lubricant = await inventory.createProduct(
+      tenant._id,
+      { userId: owner._id, name: owner.username },
+      { name: 'Engine Oil 1L', unit: 'bottle', unitPrice: '125.00', openingStock: '1', idempotencyKey: 'test-opening-engine-oil' },
+    )
+    lubricantProductId = lubricant._id.toHexString()
   }, 60_000)
 
   afterAll(async () => {
@@ -65,6 +74,8 @@ describe('report disposal lifecycle', () => {
     const firstSaved = await saveReport(memberToken, first.id, first.revision, first.disposals.revision, '110.000')
     const firstSubmitted = await transition(memberToken, 'submitReport', firstSaved.id, firstSaved.revision, firstSaved.disposals.revision)
     expect(firstSubmitted.totals).toMatchObject({ cashFuelSales: '1100', pumpSales: '80', overShort: '1020' })
+    expect(firstSubmitted.totals.lubricantSales).toBe('375')
+    expect((await inventoryProducts(memberToken)).items.find((item: { id: string }) => item.id === lubricantProductId)).toMatchObject({ id: lubricantProductId, stockCount: '-2' })
 
     const second = await createReport(memberToken, secondShiftId, businessDate)
     expect(second.disposals.readings[0].openingReading).toBe('110')
@@ -83,6 +94,27 @@ describe('report disposal lifecycle', () => {
     const firstDeleted = await deleteReport(adminToken, latestFirst, 'Incorrect submitted readings')
     expect(firstDeleted.body.errors).toBeUndefined()
     expect(firstDeleted.body.data.deleteReport).toMatchObject({ status: 'revoked', effective: false, revokedFromStatus: 'submitted' })
+    expect((await inventoryProducts(memberToken)).items.find((item: { id: string }) => item.id === lubricantProductId)?.stockCount).toBe('1')
+    const stockHistory = await graphql(memberToken, `query ($input: StockMovementsInput!) { stockMovements(input: $input) { items { type quantityChange balanceBefore balanceAfter } } }`, { input: { productId: lubricantProductId, offset: 0, limit: 20 } })
+    expect(stockHistory.body.errors).toBeUndefined()
+    expect(stockHistory.body.data.stockMovements.items).toEqual(expect.arrayContaining([
+      expect.objectContaining({ type: 'report_sale', quantityChange: '-3', balanceAfter: '-2' }),
+      expect.objectContaining({ type: 'report_reversal', quantityChange: '3', balanceAfter: '1' }),
+    ]))
+
+    const negativeManual = await graphql(adminToken, `mutation ($input: RecordStockMovementInput!) { recordStockMovement(input: $input) { type quantityChange balanceAfter } }`, { input: { productId: lubricantProductId, type: 'stock_out', quantity: '5', reason: 'Damaged stock correction', idempotencyKey: 'test-manual-negative-stock' } })
+    expect(negativeManual.body.errors).toBeUndefined()
+    expect(negativeManual.body.data.recordStockMovement).toEqual({ type: 'stock_out', quantityChange: '-5', balanceAfter: '-4' })
+    const forbiddenMovement = await graphql(memberToken, `mutation ($input: RecordStockMovementInput!) { recordStockMovement(input: $input) { id } }`, { input: { productId: lubricantProductId, type: 'stock_in', quantity: '1', reason: 'Unauthorized change', idempotencyKey: 'test-forbidden-stock-change' } })
+    expect(forbiddenMovement.body.errors?.[0]?.extensions?.originalError).toMatchObject({ code: 'FORBIDDEN' })
+
+    const productInput = { name: 'Transmission Fluid', unit: 'bottle', unitPrice: '95.00', openingStock: '-3', idempotencyKey: 'test-negative-opening-stock' }
+    const createdProduct = await graphql(adminToken, `mutation ($input: CreateInventoryProductInput!) { createInventoryProduct(input: $input) { id name stockCount unitPrice unit } }`, { input: productInput })
+    expect(createdProduct.body.errors).toBeUndefined()
+    expect(createdProduct.body.data.createInventoryProduct).toMatchObject({ name: 'Transmission Fluid', stockCount: '-3', unitPrice: '95', unit: 'bottle' })
+    const retriedProduct = await graphql(adminToken, `mutation ($input: CreateInventoryProductInput!) { createInventoryProduct(input: $input) { id } }`, { input: productInput })
+    expect(retriedProduct.body.errors).toBeUndefined()
+    expect(retriedProduct.body.data.createInventoryProduct.id).toBe(createdProduct.body.data.createInventoryProduct.id)
 
     const memberConfiguration = await graphql(memberToken, `query { recurringIncomeConfiguration { revision } }`)
     expect(memberConfiguration.body.errors?.[0]?.extensions?.originalError).toMatchObject({ code: 'FORBIDDEN' })
@@ -172,11 +204,18 @@ describe('report disposal lifecycle', () => {
         expectedDisposalRevision,
         incomeEntries: [{ id: 'income-1', description: 'Cash received', notes: null, amount: '1000.00' }],
         expenseEntries: [{ id: 'expense-1', description: 'Cash expense', notes: null, amount: '100.00' }],
+        lubricantSales: [{ id: 'lube-1', productId: lubricantProductId, quantity: '3' }],
         disposalReadings: [{ meterId: (await reportDetail(token, reportId)).disposals.readings[0].meterId, closingReading, calibration: '2.000' }],
       },
     })
     expect(response.body.errors).toBeUndefined()
     return response.body.data.saveReportDraft
+  }
+
+  async function inventoryProducts(token: string) {
+    const response = await graphql(token, `query ($input: InventoryProductsInput!) { inventoryProducts(input: $input) { items { id stockCount } } }`, { input: { search: '', activeOnly: false, offset: 0, limit: 20 } })
+    expect(response.body.errors).toBeUndefined()
+    return response.body.data.inventoryProducts
   }
 
   async function reportDetail(token: string, reportId: string) {
@@ -199,7 +238,8 @@ describe('report disposal lifecycle', () => {
 const detailFields = `
   id status effective revision revokedFromStatus
   incomeEntries { id recurringIncomeFieldId description notes amount }
-  totals { cashFuelSales pumpSales overShort }
+  lubricantSales { id productId productName unit quantity unitPrice amount }
+  totals { cashFuelSales pumpSales overShort lubricantSales }
   disposals {
     revision status
     readings { meterId openingReading openingSource closingReading calibration netVolume sales }

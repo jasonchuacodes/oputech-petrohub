@@ -1,6 +1,7 @@
 import { Types } from 'mongoose'
 import { z } from 'zod'
 import { editableDisposalInputSchema } from '../disposals/disposals.schemas'
+import { lubricantSaleInputSchema } from '../inventory/inventory.schemas'
 
 const businessDateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/)
 
@@ -40,6 +41,7 @@ export const saveReportDraftInputSchema = z.object({
   expectedDisposalRevision: z.number().int().min(0),
   incomeEntries: z.array(incomeEntrySchema).max(100),
   expenseEntries: z.array(expenseEntrySchema).max(100),
+  lubricantSales: z.array(lubricantSaleInputSchema).max(100).optional(),
   disposalReadings: z.array(editableDisposalInputSchema).max(100),
 }).strict()
 export type SaveReportDraftInput = z.infer<typeof saveReportDraftInputSchema>

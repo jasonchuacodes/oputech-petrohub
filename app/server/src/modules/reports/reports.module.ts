@@ -3,9 +3,10 @@ import { MongooseModule } from '@nestjs/mongoose'
 import { Report, ReportSchema } from './schemas/report.schema'
 import { ReportsService } from './reports.service'
 import { DisposalsModule } from '../disposals/disposals.module'
+import { InventoryModule } from '../inventory/inventory.module'
 
 @Module({
-  imports: [DisposalsModule, MongooseModule.forFeature([{ name: Report.name, schema: ReportSchema }])],
+  imports: [DisposalsModule, InventoryModule, MongooseModule.forFeature([{ name: Report.name, schema: ReportSchema }])],
   providers: [ReportsService],
   exports: [ReportsService],
 })

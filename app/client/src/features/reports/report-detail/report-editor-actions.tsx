@@ -89,6 +89,9 @@ export function ReportEditorDialogs() {
         onConfirm={() => void submit()}
       >
         <SummaryCard compact />
+        <p className="mt-3 text-sm text-text-secondary">
+          Lubricant sales will update inventory when this report is submitted.
+        </p>
         {!preview.complete && (
           <p className="mt-3 text-sm text-destructive">
             Complete every disposal reading before submitting.
@@ -98,7 +101,7 @@ export function ReportEditorDialogs() {
       <ConfirmationDialog
         open={deleteConfirmation.open}
         title="Delete report?"
-        description="The report will be marked revoked. Submitted pump readings will roll back to their openings."
+        description="The report will be marked revoked. Submitted pump readings and lubricant stock movements will be rolled back."
         icon={Trash2}
         variant="danger"
         confirmText="Delete report"

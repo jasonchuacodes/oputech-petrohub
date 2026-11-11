@@ -5,6 +5,7 @@ function values(closingReading: string, calibration = '0') {
   return {
     incomeEntries: [],
     expenseEntries: [],
+    lubricantSales: [],
     disposalReadings: [{ meterId: 'meter-1', closingReading, calibration }],
   };
 }
@@ -22,6 +23,18 @@ describe('report detail disposal readings', () => {
     expect(reportDetailFormSchema.safeParse(values('10', '0.125')).success).toBe(true);
     expect(reportDetailFormSchema.safeParse(values('10', '')).success).toBe(false);
     expect(reportDetailFormSchema.safeParse(values('10', '-1')).success).toBe(false);
+  });
+});
+
+describe('report lubricant sales', () => {
+  const sale = { id: 'sale-1', productId: '507f1f77bcf86cd799439011', productName: 'Engine Oil', unit: 'bottle', unitPrice: '125.00', amount: '250.00' };
+
+  it('accepts positive whole quantities', () => {
+    expect(reportDetailFormSchema.safeParse({ ...values('10'), lubricantSales: [{ ...sale, quantity: '2' }] }).success).toBe(true);
+  });
+
+  it.each(['0', '-1', '1.5'])('rejects lubricant quantity %j', (quantity) => {
+    expect(reportDetailFormSchema.safeParse({ ...values('10'), lubricantSales: [{ ...sale, quantity }] }).success).toBe(false);
   });
 });
 

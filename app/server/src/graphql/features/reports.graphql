@@ -38,7 +38,14 @@ input SaveReportDraftInput {
   expectedDisposalRevision: Int!
   incomeEntries: [FinancialEntryInput!]!
   expenseEntries: [FinancialEntryInput!]!
+  lubricantSales: [LubricantSaleInput!]
   disposalReadings: [EditableDisposalInput!]!
+}
+
+input LubricantSaleInput {
+  id: String!
+  productId: ObjectId!
+  quantity: Decimal!
 }
 
 input ReportTransitionInput {
@@ -86,6 +93,7 @@ type Report {
   effective: Boolean!
   incomeEntries: [FinancialEntry!]!
   expenseEntries: [FinancialEntry!]!
+  lubricantSales: [LubricantSale!]!
   totals: ReportTotals!
   disposals: DisposalBatch
   creatorId: ObjectId!
@@ -104,6 +112,16 @@ type Report {
   revocationReason: String
 }
 
+type LubricantSale {
+  id: String!
+  productId: ObjectId!
+  productName: String!
+  unit: String!
+  quantity: Decimal!
+  unitPrice: Decimal!
+  amount: Decimal!
+}
+
 type FinancialEntry {
   id: String!
   recurringIncomeFieldId: ObjectId
@@ -118,6 +136,7 @@ type ReportTotals {
   cashFuelSales: Decimal!
   pumpSales: Decimal
   overShort: Decimal
+  lubricantSales: Decimal!
 }
 
 type ReportIntervalSnapshot {

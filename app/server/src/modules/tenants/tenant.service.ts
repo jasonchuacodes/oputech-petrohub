@@ -9,6 +9,7 @@ import {
 } from '../../common/exceptions'
 import { ReportsService } from '../reports/reports.service'
 import { FuelSetupService } from '../fuel-setup/fuel-setup.service'
+import { InventoryService } from '../inventory/inventory.service'
 import { Session as AuthSession } from '../auth/schemas/session.schema'
 import { MemberActivity } from '../member-activity/schemas/member-activity.schema'
 import { User, UserRole, UserStatus } from '../users/schemas/user.schema'
@@ -47,6 +48,8 @@ export type TenantDeletionResult = {
   meterHeads: number
   fuelProducts: number
   pumpMeters: number
+  inventoryProducts: number
+  stockMovements: number
 }
 
 @Injectable()
@@ -60,6 +63,7 @@ export class TenantService {
     @InjectConnection() private readonly connection: Connection,
     private readonly reportsService: ReportsService,
     private readonly fuelSetupService: FuelSetupService,
+    private readonly inventoryService: InventoryService,
   ) {}
 
   async listForUser(user: TenantActor): Promise<TenantRecord[]> {
@@ -423,11 +427,14 @@ export class TenantService {
         )
         const reportDeletion = await this.reportsService.deleteForTenant(tenantId, databaseSession)
         const setupDeletion = await this.fuelSetupService.deleteForTenant(tenantId, databaseSession)
+        const inventoryDeletion = await this.inventoryService.deleteForTenant(tenantId, databaseSession)
         nextResult.reports = reportDeletion.reports
         nextResult.disposalBatches = reportDeletion.disposalBatches
         nextResult.meterHeads = reportDeletion.meterHeads
         nextResult.fuelProducts = setupDeletion.products
         nextResult.pumpMeters = setupDeletion.meters
+        nextResult.inventoryProducts = inventoryDeletion.products
+        nextResult.stockMovements = inventoryDeletion.movements
         const deletedTenant = await this.tenantModel.deleteOne(
           { _id: tenantId },
           { session: databaseSession },
@@ -495,5 +502,7 @@ function emptyDeletionResult(): TenantDeletionResult {
     meterHeads: 0,
     fuelProducts: 0,
     pumpMeters: 0,
+    inventoryProducts: 0,
+    stockMovements: 0,
   }
 }

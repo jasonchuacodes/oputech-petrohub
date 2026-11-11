@@ -14,6 +14,7 @@ import {
   type SaveReportDraftInput,
 } from '~/generated/graphql'
 import { graphqlClient } from '~/lib/graphql'
+import { inventoryKeys } from '../inventory/inventory.queries'
 
 export type ReportRecord = ReportFieldsFragment
 export type ReportDetailRecord = ReportDetailFieldsFragment
@@ -74,6 +75,7 @@ export function useSubmitReportMutation(tenantId: string) {
     onSuccess: async (report) => {
       queryClient.setQueryData(reportKeys.detail(tenantId, report.id), report)
       await queryClient.invalidateQueries({ queryKey: reportKeys.all(tenantId) })
+      await queryClient.invalidateQueries({ queryKey: inventoryKeys.all(tenantId) })
     },
   })
 }
@@ -98,6 +100,7 @@ export function useDeleteReportMutation(tenantId: string) {
     onSuccess: async (report) => {
       queryClient.setQueryData(reportKeys.detail(tenantId, report.id), report)
       await queryClient.invalidateQueries({ queryKey: reportKeys.all(tenantId) })
+      await queryClient.invalidateQueries({ queryKey: inventoryKeys.all(tenantId) })
     },
   })
 }

@@ -26,7 +26,8 @@ fragment ReportDetailFields on Report {
   revokedById
   incomeEntries { id recurringIncomeFieldId description notes amount }
   expenseEntries { id recurringIncomeFieldId description notes amount }
-  totals { income expenses cashFuelSales pumpSales overShort }
+  lubricantSales { id productId productName unit quantity unitPrice amount }
+  totals { income expenses cashFuelSales pumpSales overShort lubricantSales }
   disposals {
     id
     revision

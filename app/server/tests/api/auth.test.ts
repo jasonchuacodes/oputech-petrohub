@@ -540,6 +540,8 @@ describe('authentication', () => {
       meterHeads: 0,
       fuelProducts: 0,
       pumpMeters: 0,
+      inventoryProducts: 0,
+      stockMovements: 0,
     })
     expect(await connection.collection('tenants').findOne({ _id: tenant._id })).toBeNull()
     expect(
