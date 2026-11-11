@@ -61,7 +61,7 @@ describe('report disposal lifecycle', () => {
     const first = await createReport(memberToken, firstShiftId, businessDate)
     const firstSaved = await saveReport(memberToken, first.id, first.revision, first.disposals.revision, '110.000')
     const firstSubmitted = await transition(memberToken, 'submitReport', firstSaved.id, firstSaved.revision, firstSaved.disposals.revision)
-    expect(firstSubmitted.totals).toMatchObject({ cashFuelSales: '1000', pumpSales: '80', overShort: '920' })
+    expect(firstSubmitted.totals).toMatchObject({ cashFuelSales: '1100', pumpSales: '80', overShort: '1020' })
 
     const second = await createReport(memberToken, secondShiftId, businessDate)
     expect(second.disposals.readings[0].openingReading).toBe('110')
@@ -105,7 +105,7 @@ describe('report disposal lifecycle', () => {
         expectedReportRevision,
         expectedDisposalRevision,
         incomeEntries: [{ id: 'income-1', description: 'Cash received', notes: null, amount: '1000.00' }],
-        expenseEntries: [],
+        expenseEntries: [{ id: 'expense-1', description: 'Cash expense', notes: null, amount: '100.00' }],
         disposalReadings: [{ meterId: (await reportDetail(token, reportId)).disposals.readings[0].meterId, closingReading, calibration: '2.000' }],
       },
     })

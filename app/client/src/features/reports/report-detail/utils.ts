@@ -67,7 +67,7 @@ export function calculatePreview(
 ): ReportPreview {
   const income = addAmounts(values.incomeEntries);
   const expenses = addAmounts(values.expenseEntries);
-  const cashFuelSales = income.minus(expenses);
+  const cashFuelSales = income.plus(expenses);
   let complete = Boolean(report.disposals?.readings.length);
   const readings = (report.disposals?.readings ?? []).map((reading, index) => {
     try {
@@ -122,4 +122,13 @@ export function formatMoney(value: string) {
 
 export function formatReading(value: string) {
   return new Decimal(value).toFixed(3);
+}
+
+export function formatCurrentReading(value?: string | null) {
+  if (!value) return '—';
+  try {
+    return formatReading(value);
+  } catch {
+    return value;
+  }
 }

@@ -86,13 +86,15 @@ function ReportEditorLayout() {
         </button>
       </div>
 
-      {tab === 'detail' ? <ReportDetailsPanel /> : <ReportDisposalsPanel />}
+      <div className="flex flex-1 flex-col">
+        {tab === 'detail' ? <ReportDetailsPanel /> : <ReportDisposalsPanel />}
 
-      {actionError && (
-        <p role="alert" className="mt-4 text-sm text-destructive">
-          {actionError}
-        </p>
-      )}
+        {actionError && (
+          <p role="alert" className="mt-4 text-sm text-destructive">
+            {actionError}
+          </p>
+        )}
+      </div>
       <ReportEditorFooter />
       <ReportEditorDialogs />
     </form>

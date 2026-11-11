@@ -194,7 +194,7 @@ export class ReportsService {
         const expenseEntries = toEntries(input.expenseEntries)
         const income = sum(incomeEntries.map((entry) => entry.amount.toString()))
         const expenses = sum(expenseEntries.map((entry) => entry.amount.toString()))
-        const cashFuelSales = income.minus(expenses)
+        const cashFuelSales = income.plus(expenses)
         const pumpSales = disposalBatch.pumpSales ? decimal(disposalBatch.pumpSales) : undefined
         const updated = await this.reports.findOneAndUpdate(
           { _id: input.reportId, tenantId, effective: true, status: ReportStatus.DRAFT, revision: input.expectedReportRevision },

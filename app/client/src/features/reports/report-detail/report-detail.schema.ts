@@ -13,14 +13,16 @@ export const reportEntrySchema = z.object({
   amount: moneyInputSchema.refine((value) => Number(value) > 0, 'Amount must be greater than zero'),
 })
 
+export const disposalReadingSchema = z.object({
+  meterId: z.string().min(1),
+  closingReading: z.union([z.literal(''), meterInputSchema]),
+  calibration: meterInputSchema,
+})
+
 export const reportDetailFormSchema = z.object({
   incomeEntries: z.array(reportEntrySchema).max(100),
   expenseEntries: z.array(reportEntrySchema).max(100),
-  disposalReadings: z.array(z.object({
-    meterId: z.string().min(1),
-    closingReading: z.union([z.literal(''), meterInputSchema]),
-    calibration: meterInputSchema,
-  })).max(100),
+  disposalReadings: z.array(disposalReadingSchema).max(100),
 })
 
 export type ReportDetailFormValues = z.infer<typeof reportDetailFormSchema>

@@ -96,37 +96,34 @@ function FinancialSection({ kind }: { kind: 'income' | 'expense' }) {
         </h2>
       </div>
       <div className="overflow-hidden rounded-md bg-card px-4 shadow-card">
-        {fields.map((field, index) => (
-          <div
-            key={field.fieldKey}
-            className="grid grid-cols-[minmax(0,1fr)_minmax(7rem,0.8fr)_2.75rem] items-center gap-3 border-b border-border/60 py-3"
-          >
-            <Input
-              readOnly
-              aria-label={`${title} description: ${field.description}`}
-              value={field.description}
-              className={cn(canEdit && 'cursor-pointer hover:bg-surface-hover')}
-              onClick={() => canEdit && openFinancialEntry(kind, index)}
-              onKeyDown={(event) => {
-                if (canEdit && (event.key === 'Enter' || event.key === ' '))
-                  openFinancialEntry(kind, index);
-              }}
-            />
-            <Input
-              readOnly
-              aria-label={`${title} amount: ${formatMoney(field.amount)}`}
-              value={formatMoney(field.amount)}
-              className={cn(
-                'text-right font-medium tabular-nums',
-                canEdit && 'cursor-pointer hover:bg-surface-hover',
-              )}
-              onClick={() => canEdit && openFinancialEntry(kind, index)}
-              onKeyDown={(event) => {
-                if (canEdit && (event.key === 'Enter' || event.key === ' '))
-                  openFinancialEntry(kind, index);
-              }}
-            />
-            {canEdit ? (
+        {fields.map((field, index) =>
+          canEdit ? (
+            <div
+              key={field.fieldKey}
+              className="grid grid-cols-[minmax(0,1fr)_minmax(7rem,0.8fr)_2.75rem] items-center gap-3 border-b border-border/60 py-3"
+            >
+              <Input
+                readOnly
+                aria-label={`${title} description: ${field.description}`}
+                value={field.description}
+                className="cursor-pointer hover:bg-surface-hover"
+                onClick={() => openFinancialEntry(kind, index)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ')
+                    openFinancialEntry(kind, index);
+                }}
+              />
+              <Input
+                readOnly
+                aria-label={`${title} amount: ${formatMoney(field.amount)}`}
+                value={formatMoney(field.amount)}
+                className="cursor-pointer text-right font-medium tabular-nums hover:bg-surface-hover"
+                onClick={() => openFinancialEntry(kind, index)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ')
+                    openFinancialEntry(kind, index);
+                }}
+              />
               <Button
                 type="button"
                 size="icon"
@@ -136,11 +133,19 @@ function FinancialSection({ kind }: { kind: 'income' | 'expense' }) {
               >
                 <Trash2 aria-hidden="true" />
               </Button>
-            ) : (
-              <span />
-            )}
-          </div>
-        ))}
+            </div>
+          ) : (
+            <div
+              key={field.fieldKey}
+              className="flex min-h-14 items-center justify-between gap-4 border-b border-border/60 py-3"
+            >
+              <span className="min-w-0 text-text-heading">{field.description}</span>
+              <span className="shrink-0 text-right font-medium tabular-nums text-text-heading">
+                {formatMoney(field.amount)}
+              </span>
+            </div>
+          ),
+        )}
         {fields.length === 0 && (
           <p className="py-4 text-sm text-text-tertiary">No {kind} entries.</p>
         )}
@@ -169,25 +174,36 @@ export function SummaryCard({ compact = false }: { compact?: boolean }) {
   const label = difference.isZero() ? 'Balanced' : difference.isPositive() ? 'Over' : 'Short';
 
   return (
-    <section className="overflow-hidden rounded-md bg-card shadow-card">
+    <section className={cn('overflow-hidden rounded-md bg-card', !compact && 'shadow-card')}>
       <div className={compact ? 'p-3' : 'p-4'}>
-        <div className="flex items-center justify-between gap-3">
-          <h2 className="text-lg font-semibold text-text-heading">Summary</h2>
-          {!compact && <ReportStatusBadge status={report.status} />}
-        </div>
-        <div className="mt-3 divide-y divide-border/60">
-          <SummaryRow label="Income" value={formatMoney(preview.income)} />
-          <SummaryRow label="Expenses" value={formatMoney(preview.expenses)} />
-          <SummaryRow label="Cash fuel sales" value={formatMoney(preview.cashFuelSales)} strong />
-          <div className="my-2" />
-          <SummaryRow
-            label="Pump sales"
-            value={preview.pumpSales ? formatMoney(preview.pumpSales) : '—'}
-          />
+        {!compact && (
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-lg font-semibold text-text-heading">Summary</h2>
+            <ReportStatusBadge status={report.status} />
+          </div>
+        )}
+        <div className={!compact ? 'mt-3' : undefined}>
+          <SummaryRow label="Cash fuel sales" value={formatMoney(preview.cashFuelSales)} />
+          <SummaryRow label="Income" value={formatMoney(preview.income)} nested />
+          <SummaryRow label="Expenses" value={formatMoney(preview.expenses)} nested />
+          <div className="my-2 border-y border-border/60">
+            <SummaryRow
+              label="Pump sales"
+              value={preview.pumpSales ? formatMoney(preview.pumpSales) : '—'}
+            />
+          </div>
           <SummaryRow
             label={preview.pumpSales ? label : 'Over / Short'}
             value={preview.overShort ? formatMoney(difference.abs().toFixed(2)) : '—'}
-            strong
+            tone={
+              preview.overShort
+                ? difference.isNegative()
+                  ? 'danger'
+                  : difference.isPositive()
+                    ? 'success'
+                    : undefined
+                : undefined
+            }
           />
         </div>
       </div>
@@ -224,15 +240,22 @@ function ReportStatusBadge({ status }: { status: ReportDetailRecord['status'] })
 function SummaryRow({
   label,
   value,
-  strong = false,
+  nested = false,
+  tone,
 }: {
   label: string;
   value: string;
-  strong?: boolean;
+  nested?: boolean;
+  tone?: 'danger' | 'success';
 }) {
   return (
     <div
-      className={cn('flex min-h-10 items-center justify-between gap-4', strong && 'font-semibold')}
+      className={cn(
+        'flex min-h-10 items-center justify-between gap-4',
+        nested && 'min-h-9 pl-4 text-sm text-text-secondary',
+        tone === 'danger' && 'text-destructive',
+        tone === 'success' && 'text-status-success',
+      )}
     >
       <span>{label}</span>
       <span className="tabular-nums">{value}</span>

@@ -130,10 +130,10 @@ function useReportEditorState({
   const save = useCallback(
     async () => {
       const valid = await form.trigger();
-      if (!valid) return;
+      if (!valid) return undefined;
       const result = reportDetailFormSchema.safeParse(form.getValues());
-      if (!result.success) return;
-      await persistDraft(result.data);
+      if (!result.success) return undefined;
+      return persistDraft(result.data);
     },
     [form, persistDraft],
   );
@@ -234,6 +234,7 @@ function useReportEditorState({
     submitReportPending: submitReport.isPending,
     deleteReportPending: deleteReport.isPending,
     actionError,
+    save,
     submit,
     remove,
     submitConfirmation,
