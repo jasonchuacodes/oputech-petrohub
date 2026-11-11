@@ -72,7 +72,10 @@ function createReport(): ReportDetailRecord {
 describe('report detail formatting', () => {
   it('formats currency and readings', () => {
     expect(formatMoney('1234.1')).toBe('₱1,234.10');
+    expect(formatMoney('0')).toBe('₱0.00');
+    expect(formatMoney('')).toBe('₱0.00');
     expect(formatReading('0')).toBe('0.000');
+    expect(formatCurrentReading('0')).toBe('0.000');
     expect(formatCurrentReading('110.5')).toBe('110.500');
   });
 
@@ -106,6 +109,21 @@ describe('disposal preview', () => {
     expect(preview.pumpSales).toBe('752.80');
   });
 
+  it('treats a zero closing reading as complete when the meter opens at zero', () => {
+    const report = createReport();
+    if (!report.disposals) throw new Error('Expected disposal readings');
+    report.disposals.readings[0].openingReading = '0';
+
+    const preview = calculatePreview(report, {
+      disposalReadings: [{ closingReading: '0', calibration: '0' }],
+    });
+
+    expect(preview.complete).toBe(true);
+    expect(preview.readings[0]).toEqual({ net: '0.000', sales: '0.00' });
+    expect(preview.pumpSales).toBe('0.00');
+    expect(preview.overShort).toBe('0.00');
+  });
+
   it('keeps invalid disposal values incomplete', () => {
     const preview = calculatePreview(createReport(), {
       disposalReadings: [
@@ -135,6 +153,17 @@ describe('disposal form mapping', () => {
       closingReading: null,
       calibration: '2.000',
     });
+  });
+
+  it('preserves a zero current reading in form and save values', () => {
+    const report = createReport();
+    if (!report.disposals) throw new Error('Expected disposal readings');
+    report.disposals.readings[0].closingReading = '0';
+    report.disposals.readings[0].calibration = '0';
+
+    const values = toFormValues(report);
+    expect(values.disposalReadings[0]?.closingReading).toBe('0');
+    expect(toSaveInput(report, values).disposalReadings[0]?.closingReading).toBe('0');
   });
 
   it('preserves recurring income provenance locally but excludes it from save input', () => {

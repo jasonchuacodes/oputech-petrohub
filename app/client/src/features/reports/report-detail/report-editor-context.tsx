@@ -53,6 +53,7 @@ function useReportEditorState({
   const reportRef = useRef(report);
   const [tab, setTab] = useState<'detail' | 'disposals'>('detail');
   const submitConfirmation = useDisclosure();
+  const reportActions = useDisclosure();
   const deleteConfirmation = useDisclosure();
   const financialEntryEditor = useDisclosure();
   const [financialEntryTarget, setFinancialEntryTarget] = useState<FinancialEntryTarget>();
@@ -61,10 +62,11 @@ function useReportEditorState({
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [failedSaveSignature, setFailedSaveSignature] = useState<string>();
   const administrator = role === 'admin' || role === 'superadmin';
+  const reportOwner = report.creatorId === userId;
   const canEdit =
-    report.status === 'draft' && !report.legacy && (administrator || report.creatorId === userId);
+    report.status === 'draft' && !report.legacy && (administrator || reportOwner);
   const canDelete =
-    administrator &&
+    (administrator || reportOwner) &&
     report.status !== 'revoked' &&
     !report.legacy &&
     !report.disposals?.successorBatchId;
@@ -242,6 +244,7 @@ function useReportEditorState({
     save,
     submit,
     remove,
+    reportActions,
     submitConfirmation,
     deleteConfirmation,
     financialEntryEditor,

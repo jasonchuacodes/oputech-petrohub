@@ -103,8 +103,7 @@ export class ReportsResolver {
   }
 
   @Mutation('deleteReport')
-  @UseGuards(...roleGuards)
-  @RequireRoles(UserRole.SUPERADMIN, UserRole.ADMIN)
+  @UseGuards(...tenantGuards)
   async delete(
     @CurrentActor() actor: AuthenticatedActor,
     @CurrentTenant() tenant: AuthorizedTenant,

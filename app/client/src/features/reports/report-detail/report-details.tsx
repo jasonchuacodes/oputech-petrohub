@@ -83,10 +83,22 @@ type EntryField = {
 };
 
 function FinancialSection({ kind }: { kind: 'income' | 'expense' }) {
-  const { canEdit, form, income, expenses, preview, openFinancialEntry } = useReportEditor();
+  const { canEdit, form, income, expenses, preview, report, openFinancialEntry } =
+    useReportEditor();
   const title = kind === 'income' ? 'Income' : 'Expense';
   const fieldArray = kind === 'income' ? income : expenses;
   const fields: EntryField[] = fieldArray.fields;
+  const visibleFields = fields
+    .map((field, index) => ({ field, index }))
+    .filter(
+      ({ field }) =>
+        !(
+          report.status === 'submitted' &&
+          kind === 'income' &&
+          field.recurringIncomeFieldId &&
+          isZeroAmount(field.amount)
+        ),
+    );
   const total = kind === 'income' ? preview.income : preview.expenses;
 
   return (
@@ -97,7 +109,7 @@ function FinancialSection({ kind }: { kind: 'income' | 'expense' }) {
         </h2>
       </div>
       <div className="overflow-hidden rounded-md bg-card px-4 shadow-card">
-        {fields.map((field, index) => {
+        {visibleFields.map(({ field, index }) => {
           const recurring = kind === 'income' && Boolean(field.recurringIncomeFieldId);
           return canEdit ? (
             <div
@@ -168,7 +180,7 @@ function FinancialSection({ kind }: { kind: 'income' | 'expense' }) {
             </div>
           );
         })}
-        {fields.length === 0 && (
+        {visibleFields.length === 0 && (
           <p className="py-4 text-sm text-text-tertiary">No {kind} entries.</p>
         )}
         {canEdit && (
@@ -188,6 +200,15 @@ function FinancialSection({ kind }: { kind: 'income' | 'expense' }) {
       </div>
     </section>
   );
+}
+
+function isZeroAmount(value: string) {
+  if (value === '') return true;
+  try {
+    return new Decimal(value).isZero();
+  } catch {
+    return false;
+  }
 }
 
 export function SummaryCard({ compact = false }: { compact?: boolean }) {

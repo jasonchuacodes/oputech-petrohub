@@ -87,7 +87,7 @@ export function calculatePreview(
   const readings = (report.disposals?.readings ?? []).map((reading, index) => {
     try {
       const value = values.disposalReadings?.[index];
-      if (!value?.closingReading) {
+      if (value?.closingReading === undefined || value.closingReading === '') {
         complete = false;
         return {};
       }
@@ -131,7 +131,7 @@ function addAmounts(entries?: Array<{ amount?: string }>) {
 }
 
 export function formatMoney(value: string) {
-  const [whole, fraction = '00'] = new Decimal(value).toFixed(2).split('.');
+  const [whole, fraction = '00'] = new Decimal(value === '' ? 0 : value).toFixed(2).split('.');
   return `₱${whole.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}.${fraction}`;
 }
 
@@ -140,7 +140,7 @@ export function formatReading(value: string) {
 }
 
 export function formatCurrentReading(value?: string | null) {
-  if (!value) return '—';
+  if (value === undefined || value === null || value === '') return '—';
   try {
     return formatReading(value);
   } catch {

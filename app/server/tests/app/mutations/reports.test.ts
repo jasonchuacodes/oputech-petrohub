@@ -39,6 +39,7 @@ describe('report disposal lifecycle', () => {
     tenantId = tenant._id.toHexString()
     await users.create({ username: 'report-admin', passwordHash: await hash('AdminPassword123'), role: UserRole.ADMIN, accountHolderId: owner._id, tenantIds: [tenant._id] })
     await users.create({ username: 'report-member', passwordHash: await hash('MemberPassword123'), role: UserRole.MEMBER, accountHolderId: owner._id, tenantIds: [tenant._id] })
+    await users.create({ username: 'report-other-member', passwordHash: await hash('OtherMemberPassword123'), role: UserRole.MEMBER, accountHolderId: owner._id, tenantIds: [tenant._id] })
     const first = await tenants.createShift(tenant._id, { startTime: '05:00', endTime: '13:00' })
     const second = await tenants.createShift(tenant._id, { startTime: '13:00', endTime: '21:00' })
     firstShiftId = first.id.toHexString()
@@ -54,7 +55,9 @@ describe('report disposal lifecycle', () => {
 
   it('blocks predecessor deletion, then rolls the latest submitted reading back for normal recreation', async () => {
     const memberToken = await login('report-member', 'MemberPassword123')
+    const otherMemberToken = await login('report-other-member', 'OtherMemberPassword123')
     const adminToken = await login('report-admin', 'AdminPassword123')
+    const superadminToken = await login('report-owner', 'OwnerPassword123')
     const context = await graphql(memberToken, `query { reportCreationContext { businessDate } }`)
     const businessDate = context.body.data.reportCreationContext.businessDate as string
 
@@ -69,7 +72,10 @@ describe('report disposal lifecycle', () => {
     const blocked = await deleteReport(adminToken, firstSubmitted, 'Incorrect first report')
     expect(blocked.body.errors?.[0]?.extensions?.originalError).toMatchObject({ code: 'CONFLICT' })
 
-    const secondDeleted = await deleteReport(adminToken, second, 'Remove dependent draft')
+    const forbidden = await deleteReport(otherMemberToken, second, 'Remove another user report')
+    expect(forbidden.body.errors?.[0]?.extensions?.originalError).toMatchObject({ code: 'FORBIDDEN' })
+
+    const secondDeleted = await deleteReport(memberToken, second, 'Remove dependent draft')
     expect(secondDeleted.body.errors).toBeUndefined()
     expect(secondDeleted.body.data.deleteReport.status).toBe('revoked')
 
@@ -137,6 +143,10 @@ describe('report disposal lifecycle', () => {
     expect(archived.body.errors).toBeUndefined()
     expect(archived.body.data.updateRecurringIncomeConfiguration.fields[0]).toMatchObject({ id: recurringEntry.recurringIncomeFieldId, active: false })
     expect((await reportDetail(memberToken, recreated.id)).incomeEntries[0]).toMatchObject({ recurringIncomeFieldId: recurringEntry.recurringIncomeFieldId, description: 'PayMaya' })
+
+    const superadminDeleted = await deleteReport(superadminToken, recurringSaved.body.data.saveReportDraft, 'Superadmin correction')
+    expect(superadminDeleted.body.errors).toBeUndefined()
+    expect(superadminDeleted.body.data.deleteReport.status).toBe('revoked')
   })
 
   async function login(username: string, password: string): Promise<string> {

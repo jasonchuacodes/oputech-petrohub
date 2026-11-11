@@ -4,8 +4,8 @@ import { CheckCircle2, Trash2 } from 'lucide-react';
 import { Button } from '~/components/ui/button';
 import { ConfirmationDialog } from '~/components/ui/confirmation-dialog';
 import { Input } from '~/components/ui/input';
+import { Sheet } from '~/components/ui/sheet';
 import { Spinner } from '~/components/ui/spinner';
-import { cn } from '~/utils/cn';
 import { formatBusinessDate, formatShiftTime } from '../create-report-sheet';
 import { SummaryCard } from './report-details';
 import { useReportEditor } from './report-editor-context';
@@ -13,47 +13,26 @@ import { useReportEditor } from './report-editor-context';
 export function ReportEditorFooter() {
   const {
     canEdit,
-    canDelete,
     pending,
     isValid,
     saveReportPending,
     submitConfirmation,
-    deleteConfirmation,
   } = useReportEditor();
 
-  if (!canEdit && !canDelete) return null;
+  if (!canEdit) return null;
 
   return (
     <footer className="sticky bottom-0 z-20 -mx-5 mt-auto flex shrink-0 flex-wrap gap-3 bg-background px-5 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-[0_-6px_16px_rgba(16,16,16,0.08)] md:-mx-6 md:px-6">
-      <div className="flex flex-1 gap-3">
-        {canEdit && (
-          <Button
-            type="button"
-            size="lg"
-            className="flex-1 rounded-md shadow-[0_4px_14px_rgba(16,16,16,0.14)]"
-            disabled={pending || !isValid}
-            onClick={submitConfirmation.onOpen}
-          >
-            {saveReportPending ? <Spinner className="size-4" /> : <CheckCircle2 aria-hidden="true" />}
-            {saveReportPending ? 'Saving draft…' : 'Review and submit'}
-          </Button>
-        )}
-        {canDelete && (
-          <Button
-            type="button"
-            variant="destructive"
-            className={cn(
-              'rounded-md shadow-[0_4px_14px_rgba(16,16,16,0.14)]',
-              !canEdit && 'ml-auto',
-            )}
-            disabled={pending}
-            onClick={deleteConfirmation.onOpen}
-          >
-            <Trash2 aria-hidden="true" />
-            Delete report
-          </Button>
-        )}
-      </div>
+      <Button
+        type="button"
+        size="lg"
+        className="flex-1 rounded-md shadow-[0_4px_14px_rgba(16,16,16,0.14)]"
+        disabled={pending || !isValid}
+        onClick={submitConfirmation.onOpen}
+      >
+        {saveReportPending ? <Spinner className="size-4" /> : <CheckCircle2 aria-hidden="true" />}
+        {saveReportPending ? 'Saving draft…' : 'Review and submit'}
+      </Button>
     </footer>
   );
 }
@@ -62,6 +41,7 @@ export function ReportEditorDialogs() {
   const {
     preview,
     report,
+    reportActions,
     submitConfirmation,
     deleteConfirmation,
     submitReportPending,
@@ -75,6 +55,29 @@ export function ReportEditorDialogs() {
 
   return (
     <>
+      <Sheet
+        open={reportActions.open}
+        title="Report actions"
+        description={`${formatBusinessDate(report.businessDate)} · ${formatShiftTime(report.interval)}`}
+        manageFocus
+        onClose={reportActions.onClose}
+      >
+        <div className="px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
+          <Button
+            type="button"
+            variant="destructive"
+            className="w-full"
+            disabled={deleteReportPending}
+            onClick={() => {
+              reportActions.onClose();
+              deleteConfirmation.onOpen();
+            }}
+          >
+            <Trash2 aria-hidden="true" />
+            Delete report
+          </Button>
+        </div>
+      </Sheet>
       <ConfirmationDialog
         open={submitConfirmation.open}
         title="Submit report summary?"

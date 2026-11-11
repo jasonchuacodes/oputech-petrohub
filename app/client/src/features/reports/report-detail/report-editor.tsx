@@ -1,6 +1,7 @@
 'use client';
 
-import { CircleAlert } from 'lucide-react';
+import { CircleAlert, MoreVertical } from 'lucide-react';
+import { Button } from '~/components/ui/button';
 import { PageHeader } from '~/components/ui/page-header';
 import { PageIntro } from '~/components/ui/page-intro';
 import { cn } from '~/utils/cn';
@@ -27,7 +28,8 @@ export function ReportEditor(props: ReportEditorProps) {
 }
 
 function ReportEditorLayout() {
-  const { report, tab, setTab, actionError } = useReportEditor();
+  const { report, tab, setTab, actionError, canDelete, pending, reportActions } =
+    useReportEditor();
 
   return (
     <form
@@ -38,6 +40,21 @@ function ReportEditorLayout() {
         title="Shift report"
         backHref="/report"
         backLabel="Back to reports"
+        action={
+          canDelete ? (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              aria-label="Report actions"
+              title="Report actions"
+              disabled={pending}
+              onClick={reportActions.onOpen}
+            >
+              <MoreVertical aria-hidden="true" className="size-5" />
+            </Button>
+          ) : undefined
+        }
       />
 
       <div className="mt-5">

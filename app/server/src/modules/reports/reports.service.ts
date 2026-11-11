@@ -190,7 +190,7 @@ export class ReportsService {
       await databaseSession.withTransaction(async () => {
         const current = await this.reports.findOne({ _id: input.reportId, tenantId, effective: true }).session(databaseSession).lean<ReportRecord>().exec()
         if (!current) throw new NotFoundException('Report not found.')
-        this.assertEditor(current, actor)
+        this.assertAuthorized(current, actor, 'edit')
         if (current.status !== ReportStatus.DRAFT) throw new ConflictException('Only draft reports can be changed.')
         if (current.revision !== input.expectedReportRevision) throw new ConflictException('This report changed. Refresh and try again.')
 
@@ -241,7 +241,7 @@ export class ReportsService {
       await databaseSession.withTransaction(async () => {
         const current = await this.reports.findOne({ _id: input.reportId, tenantId, effective: true }).session(databaseSession).lean<ReportRecord>().exec()
         if (!current) throw new NotFoundException('Report not found.')
-        this.assertEditor(current, actor)
+        this.assertAuthorized(current, actor, 'edit')
         if (current.status !== ReportStatus.DRAFT || current.revision !== input.expectedReportRevision) throw new ConflictException('This report changed or has already been submitted.')
         const now = new Date()
         const disposalBatch = await this.disposals.submitBatch(tenantId, input.reportId, input.expectedDisposalRevision, now, databaseSession)
@@ -280,6 +280,7 @@ export class ReportsService {
       await databaseSession.withTransaction(async () => {
         const current = await this.reports.findOne({ _id: input.reportId, tenantId, effective: true }).session(databaseSession).lean<ReportRecord>().exec()
         if (!current) throw new NotFoundException('Report not found.')
+        this.assertAuthorized(current, actor, 'delete')
         if (current.revision !== input.expectedReportRevision) throw new ConflictException('This report changed. Refresh and try again.')
         if (![ReportStatus.DRAFT, ReportStatus.SUBMITTED].includes(current.status)) throw new ConflictException('This report is already revoked.')
         const now = new Date()
@@ -324,9 +325,11 @@ export class ReportsService {
     return { reports: reports.deletedCount, disposalBatches: disposals.batches, meterHeads: disposals.heads }
   }
 
-  private assertEditor(report: ReportRecord, actor: ReportActor) {
+  private assertAuthorized(report: ReportRecord, actor: ReportActor, action: 'edit' | 'delete') {
     const administrator = actor.role === UserRole.ADMIN || actor.role === UserRole.SUPERADMIN
-    if (!administrator && !report.creatorId.equals(actor.userId)) throw new ForbiddenException('Only the report creator or an administrator can edit this report.')
+    if (!administrator && !report.creatorId.equals(actor.userId)) {
+      throw new ForbiddenException(`Only the report creator or an administrator can ${action} this report.`)
+    }
   }
 
   private assertUniqueEntryIds(input: SaveReportDraftInput) {
