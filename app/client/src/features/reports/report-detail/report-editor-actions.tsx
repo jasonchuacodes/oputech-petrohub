@@ -85,14 +85,12 @@ export function ReportEditorDialogs() {
         description={`${report.shiftName} · ${formatBusinessDate(report.businessDate)} · ${formatShiftTime(report.interval)}`}
         icon={CheckCircle2}
         confirmText="Submit report"
+        disabled={!preview.complete}
         loading={submitReportPending || saveReportPending}
         onClose={submitConfirmation.onClose}
         onConfirm={() => void submit()}
       >
         <SummaryCard compact />
-        <p className="mt-3 text-sm text-text-secondary">
-          Lubricant sales will update inventory when this report is submitted.
-        </p>
         {!preview.complete && (
           <p className="mt-3 text-sm text-destructive">
             Complete every disposal reading before submitting.
