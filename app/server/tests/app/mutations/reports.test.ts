@@ -71,6 +71,31 @@ describe('report disposal lifecycle', () => {
     const businessDate = context.body.data.reportCreationContext.businessDate as string
 
     const first = await createReport(memberToken, firstShiftId, businessDate)
+    const reportsInRange = await graphql(adminToken, `query ($input: ReportsInput!) { reports(input: $input) { items { id businessDate } totalCount } }`, {
+      input: { startDate: businessDate, endDate: businessDate, offset: 0, limit: 20 },
+    })
+    expect(reportsInRange.body.errors).toBeUndefined()
+    expect(reportsInRange.body.data.reports).toEqual({
+      items: [{ id: first.id, businessDate }],
+      totalCount: 1,
+    })
+
+    const reportsOutsideRange = await graphql(adminToken, `query ($input: ReportsInput!) { reports(input: $input) { items { id } totalCount } }`, {
+      input: { startDate: '1900-01-01', endDate: '1900-01-31', offset: 0, limit: 20 },
+    })
+    expect(reportsOutsideRange.body.errors).toBeUndefined()
+    expect(reportsOutsideRange.body.data.reports).toEqual({ items: [], totalCount: 0 })
+
+    const incompleteRange = await graphql(adminToken, `query ($input: ReportsInput!) { reports(input: $input) { totalCount } }`, {
+      input: { startDate: businessDate, offset: 0, limit: 20 },
+    })
+    expect(incompleteRange.body.errors?.[0]?.extensions?.originalError).toMatchObject({ code: 'INVALID_INPUT' })
+
+    const reversedRange = await graphql(adminToken, `query ($input: ReportsInput!) { reports(input: $input) { totalCount } }`, {
+      input: { startDate: '2026-02-01', endDate: '2026-01-01', offset: 0, limit: 20 },
+    })
+    expect(reversedRange.body.errors?.[0]?.extensions?.originalError).toMatchObject({ code: 'INVALID_INPUT' })
+
     const firstSaved = await saveReport(memberToken, first.id, first.revision, first.disposals.revision, '110.000')
     const firstSubmitted = await transition(memberToken, 'submitReport', firstSaved.id, firstSaved.revision, firstSaved.disposals.revision)
     expect(firstSubmitted.totals).toMatchObject({ cashFuelSales: '1100', pumpSales: '80', overShort: '1020' })

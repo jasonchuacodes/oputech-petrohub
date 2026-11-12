@@ -7,6 +7,7 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 import { Button } from '~/components/ui/button'
+import { DateRangePicker } from '~/components/ui/date-range-picker'
 import { NumberInput } from '~/components/ui/number-input'
 import { PageHeader } from '~/components/ui/page-header'
 import { Sheet } from '~/components/ui/sheet'
@@ -19,7 +20,6 @@ import {
   useTimesheetsQuery,
 } from './attendance.queries'
 import { formatDuration, formatHours, formatTimesheetDate, localDateAt } from './attendance.utils'
-import { DateRangePicker } from './date-range-picker'
 
 const pageSize = 20
 

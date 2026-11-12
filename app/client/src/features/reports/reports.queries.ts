@@ -22,7 +22,9 @@ export type ReportDetailRecord = ReportDetailFieldsFragment
 export const reportKeys = {
   all: (tenantId: string) => ['reports', tenantId] as const,
   context: (tenantId: string) => ['reports', tenantId, 'creation-context'] as const,
-  list: (tenantId: string) => ['reports', tenantId, 'list'] as const,
+  lists: (tenantId: string) => ['reports', tenantId, 'list'] as const,
+  list: (tenantId: string, startDate?: string, endDate?: string) =>
+    [...reportKeys.lists(tenantId), { startDate, endDate }] as const,
   detail: (tenantId: string, reportId: string) => ['reports', tenantId, reportId] as const,
 }
 
@@ -35,11 +37,13 @@ export function useReportCreationContextQuery(tenantId: string) {
   })
 }
 
-export function useReportsQuery(tenantId: string) {
+export function useReportsQuery(tenantId: string, startDate?: string, endDate?: string) {
   return useQuery({
-    queryKey: reportKeys.list(tenantId),
+    queryKey: reportKeys.list(tenantId, startDate, endDate),
     queryFn: async () =>
-      (await graphqlClient.request(ReportsDocument, { input: { offset: 0, limit: 100 } }, { tenantId }))
+      (await graphqlClient.request(ReportsDocument, {
+        input: { startDate, endDate, offset: 0, limit: 100 },
+      }, { tenantId }))
         .reports,
   })
 }
@@ -61,7 +65,7 @@ export function useCreateReportMutation(tenantId: string) {
       queryClient.setQueryData(reportKeys.detail(tenantId, report.id), report)
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: reportKeys.context(tenantId) }),
-        queryClient.invalidateQueries({ queryKey: reportKeys.list(tenantId) }),
+        queryClient.invalidateQueries({ queryKey: reportKeys.lists(tenantId) }),
       ])
     },
   })
@@ -87,7 +91,7 @@ export function useSaveReportDraftMutation(tenantId: string) {
       (await graphqlClient.request(SaveReportDraftDocument, { input }, { tenantId })).saveReportDraft,
     onSuccess: async (report) => {
       queryClient.setQueryData(reportKeys.detail(tenantId, report.id), report)
-      await queryClient.invalidateQueries({ queryKey: reportKeys.list(tenantId) })
+      await queryClient.invalidateQueries({ queryKey: reportKeys.lists(tenantId) })
     },
   })
 }

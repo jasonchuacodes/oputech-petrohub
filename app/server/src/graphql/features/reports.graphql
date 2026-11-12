@@ -21,6 +21,8 @@ input ReportInput {
 }
 
 input ReportsInput {
+  startDate: String
+  endDate: String
   offset: Int = 0
   limit: Int = 20
 }

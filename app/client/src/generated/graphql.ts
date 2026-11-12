@@ -156,8 +156,10 @@ export type ReportTransitionInput = {
 };
 
 export type ReportsInput = {
+  endDate?: string | null | undefined;
   limit?: number | null | undefined;
   offset?: number | null | undefined;
+  startDate?: string | null | undefined;
 };
 
 export type ResetUserPasswordInput = {

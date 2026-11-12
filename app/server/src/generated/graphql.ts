@@ -586,8 +586,10 @@ export type ReportTransitionInput = {
 };
 
 export type ReportsInput = {
+  endDate?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
+  startDate?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type ResetUserPasswordInput = {

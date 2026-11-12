@@ -3,7 +3,11 @@ import { z } from 'zod'
 import { editableDisposalInputSchema } from '../disposals/disposals.schemas'
 import { lubricantSaleInputSchema } from '../inventory/inventory.schemas'
 
-const businessDateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/)
+const businessDateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine((value) => {
+  const [year, month, day] = value.split('-').map(Number) as [number, number, number]
+  const date = new Date(Date.UTC(year, month - 1, day))
+  return date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day
+}, 'Use a valid date.')
 
 export const createReportInputSchema = z
   .object({
@@ -18,10 +22,18 @@ export type ReportInput = z.infer<typeof reportInputSchema>
 
 export const reportsInputSchema = z
   .object({
+    startDate: businessDateSchema.nullish(),
+    endDate: businessDateSchema.nullish(),
     offset: z.number().int().min(0).default(0),
     limit: z.number().int().min(1).max(100).default(20),
   })
   .strict()
+  .refine((input) => Boolean(input.startDate) === Boolean(input.endDate), {
+    message: 'Provide both start and end dates.',
+  })
+  .refine((input) => !input.startDate || !input.endDate || input.startDate <= input.endDate, {
+    message: 'Start date must be on or before end date.',
+  })
 export type ReportsInput = z.infer<typeof reportsInputSchema>
 
 const nonnegativeMoneySchema = z.string().regex(/^(?:0|[1-9]\d*)(?:\.\d{1,2})?$/)

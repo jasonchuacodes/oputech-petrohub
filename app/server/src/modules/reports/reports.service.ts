@@ -178,7 +178,12 @@ export class ReportsService {
   }
 
   async list(tenantId: Types.ObjectId, input: ReportsInput) {
-    const filter = { tenantId }
+    const filter = {
+      tenantId,
+      ...(input.startDate && input.endDate
+        ? { businessDate: { $gte: input.startDate, $lte: input.endDate } }
+        : {}),
+    }
     const [items, totalCount] = await Promise.all([
       this.reports.find(filter).sort({ businessDate: -1, createdAt: -1, _id: -1 }).skip(input.offset).limit(input.limit).lean<ReportRecord[]>().exec(),
       this.reports.countDocuments(filter).exec(),
