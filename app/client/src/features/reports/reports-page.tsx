@@ -113,7 +113,7 @@ function TenantReportsPage({ access }: { access: TenantAccess }) {
   ]
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-5 px-5 py-5 md:p-6">
+    <div className="mx-auto flex w-full max-w-4xl flex-col gap-5 px-5 py-5 md:p-6">
       <PageHeader
         title="Reports"
         description={`Review ${access.tenant.name} shift reports.`}

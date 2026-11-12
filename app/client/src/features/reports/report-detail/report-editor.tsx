@@ -3,7 +3,6 @@
 import { CircleAlert, MoreVertical } from 'lucide-react';
 import { Button } from '~/components/ui/button';
 import { PageHeader } from '~/components/ui/page-header';
-import { PageIntro } from '~/components/ui/page-intro';
 import { cn } from '~/utils/cn';
 import { formatBusinessDate, formatShiftTime } from '../create-report-sheet';
 import type { ReportDetailRecord } from '../reports.queries';
@@ -40,6 +39,14 @@ function ReportEditorLayout() {
     >
       <PageHeader
         title="Shift report"
+        description={
+          <>
+            Review the report details for:
+            <span className="mt-1 block font-medium text-status-warning">
+              {report.shiftName} · {formatBusinessDate(report.businessDate)} · {formatShiftTime(report.interval)}.
+            </span>
+          </>
+        }
         backHref="/report"
         backLabel="Back to reports"
         action={
@@ -58,15 +65,6 @@ function ReportEditorLayout() {
           ) : undefined
         }
       />
-
-      <div className="mt-5">
-        <PageIntro>
-          Review the report details for:
-          <span className="mt-1 block font-medium text-status-warning">
-            {report.shiftName} · {formatBusinessDate(report.businessDate)} · {formatShiftTime(report.interval)}.
-          </span>
-        </PageIntro>
-      </div>
 
       <ReportNotices />
 

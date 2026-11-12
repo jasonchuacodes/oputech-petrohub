@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Button } from '~/components/ui/button'
 import { PageHeader } from '~/components/ui/page-header'
-import { PageIntro } from '~/components/ui/page-intro'
 import { Spinner } from '~/components/ui/spinner'
 import { useAuth } from '../auth/auth-context'
 import { useSessionQuery } from '../auth/auth.queries'
@@ -60,11 +59,11 @@ export function TenantsPage() {
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-5 px-5 py-5 md:p-6">
       <PageHeader
         title="Tenants"
+        description="Manage workspaces and choose where reports are recorded."
         backHref="/me"
         backLabel="Back to Me"
+        backVisibility="mobile"
       />
-
-      <PageIntro>Manage workspaces and choose where reports are recorded.</PageIntro>
 
       <AddTenantSheet
         open={creating}

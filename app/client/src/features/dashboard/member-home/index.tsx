@@ -27,7 +27,7 @@ export function MemberHomePage() {
   )
 
   return (
-    <div className="mx-auto flex min-h-full w-full max-w-5xl flex-col gap-5 px-5 py-5 md:p-6">
+    <div className="mx-auto flex min-h-full w-full max-w-4xl flex-col gap-5 px-5 py-5 md:p-6">
       <HomeGreeting />
 
       <AttendanceCard tenantId={tenant.id} />

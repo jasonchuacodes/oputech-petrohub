@@ -8,7 +8,6 @@ import { toast } from 'sonner'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { PageHeader } from '~/components/ui/page-header'
-import { PageIntro } from '~/components/ui/page-intro'
 import { Spinner } from '~/components/ui/spinner'
 import { useDisclosure } from '~/hooks/useDisclosure'
 import { useActiveTenant } from '../../layout/use-active-tenant'
@@ -106,8 +105,13 @@ function TenantIncomeSetup({ tenantId }: { tenantId: string }) {
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-5 px-5 py-5 md:p-6">
-      <PageHeader title="Recurring income" backHref="/me" backLabel="Back to Me" />
-      <PageIntro>Configure fields that start at zero in new reports. Changes save immediately and do not affect existing reports.</PageIntro>
+      <PageHeader
+        title="Recurring income"
+        description="Configure fields that start at zero in new reports. Changes save immediately and do not affect existing reports."
+        backHref="/me"
+        backLabel="Back to Me"
+        backVisibility="mobile"
+      />
 
       <IncomeFieldSheet
         open={addField.open}

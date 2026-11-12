@@ -4,6 +4,7 @@ import { ChevronRight, LogOut } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '~/components/ui/button'
 import { ContentSection } from '~/components/ui/content-section'
+import { PageHeader } from '~/components/ui/page-header'
 import { useLogoutMutation, useSessionQuery } from '../auth/auth.queries'
 import { managementNavigation } from '../layout/navigation'
 import { clearActiveTenant } from '../tenants/active-tenant'
@@ -17,7 +18,7 @@ export function MePage() {
 
   return (
     <div className="mx-auto flex min-h-full w-full max-w-3xl flex-col gap-5 px-5 py-5 md:p-6">
-      <h1 className="sr-only">Me</h1>
+      <PageHeader title="Me" description="Manage your account and station settings." />
 
       <Link
         href="/account"

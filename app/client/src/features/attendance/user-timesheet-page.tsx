@@ -7,7 +7,6 @@ import { Button } from '~/components/ui/button'
 import { DataTable, type DataTableColumn } from '~/components/ui/data-table'
 import { DateRangePicker } from '~/components/ui/date-range-picker'
 import { PageHeader } from '~/components/ui/page-header'
-import { PageIntro } from '~/components/ui/page-intro'
 import { Spinner } from '~/components/ui/spinner'
 import type { TimesheetDayFieldsFragment } from '~/generated/graphql'
 import { useActiveTenant } from '../layout/use-active-tenant'
@@ -118,12 +117,11 @@ function AdminUserTimesheetPage({
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-5 px-5 py-5 md:p-6">
       <PageHeader
-        title="Timesheet Details"
+        title="Timesheet details"
+        description="Review and adjust logged hours for the selected period."
         backHref={timesheetListHref(range)}
         backLabel="Back to timesheets"
       />
-
-      <PageIntro>Review and adjust logged hours for the selected period.</PageIntro>
 
       {member && (
         <MemberSummary

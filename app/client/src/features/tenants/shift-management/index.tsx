@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Button } from '~/components/ui/button'
 import { PageHeader } from '~/components/ui/page-header'
-import { PageIntro } from '~/components/ui/page-intro'
 import { Spinner } from '~/components/ui/spinner'
 import { formatShiftTime } from '~/utils/time'
 import { useSessionQuery } from '../../auth/auth.queries'
@@ -53,9 +52,13 @@ function TenantShiftManagementPage({
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-5 px-5 py-5 md:p-6">
-      <PageHeader title="Shift management" backHref="/me" backLabel="Back to Me" />
-
-      <PageIntro>Configure the daily shift schedule for this tenant.</PageIntro>
+      <PageHeader
+        title="Shift management"
+        description="Configure the daily shift schedule for this tenant."
+        backHref="/me"
+        backLabel="Back to Me"
+        backVisibility="mobile"
+      />
 
       {editor && (
         <ShiftSheet

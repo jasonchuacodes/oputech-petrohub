@@ -6,7 +6,6 @@ import { toast } from 'sonner'
 import { Button } from '~/components/ui/button'
 import { ConfirmationDialog } from '~/components/ui/confirmation-dialog'
 import { PageHeader } from '~/components/ui/page-header'
-import { PageIntro } from '~/components/ui/page-intro'
 import { Spinner } from '~/components/ui/spinner'
 import type { FuelProductFieldsFragment, PumpMeterFieldsFragment } from '~/generated/graphql'
 import { cn } from '~/utils/cn'
@@ -75,11 +74,11 @@ function TenantFuelSetup({ tenantId, timezone }: { tenantId: string; timezone: s
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-5 px-5 py-5 md:p-6">
       <PageHeader
         title="Fuel setup"
+        description="Configure your products and view pump readings."
         backHref="/me"
         backLabel="Back to Me"
+        backVisibility="mobile"
       />
-
-      <PageIntro>Configure your products and view pump readings.</PageIntro>
 
       <div role="tablist" aria-label="Fuel setup sections" className="flex rounded-md bg-muted p-1">
         <button type="button" role="tab" aria-selected={tab === 'products'} className={cn('min-h-11 flex-1 rounded-sm px-3 text-sm font-medium', tab === 'products' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-text-secondary')} onClick={() => setTab('products')}>Products</button>

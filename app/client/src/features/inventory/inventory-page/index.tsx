@@ -7,7 +7,6 @@ import { Button } from '~/components/ui/button';
 import { ConfirmationDialog } from '~/components/ui/confirmation-dialog';
 import { Input } from '~/components/ui/input';
 import { PageHeader } from '~/components/ui/page-header';
-import { PageIntro } from '~/components/ui/page-intro';
 import { Sheet } from '~/components/ui/sheet';
 import { Spinner } from '~/components/ui/spinner';
 import type { InventoryProductFieldsFragment } from '~/generated/graphql';
@@ -71,15 +70,16 @@ function TenantInventory({ tenantId }: { tenantId: string }) {
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-5 px-5 py-5 md:p-6">
       <PageHeader
         title="Inventory"
+        description="Manage lubricant products, stock balances, and movement history."
         backHref="/me"
         backLabel="Back to Me"
+        backVisibility="mobile"
         action={
           <Button type="button" size="sm" onClick={() => setEditor('new')}>
             + Add product
           </Button>
         }
       />
-      <PageIntro>Manage lubricant products, stock balances, and movement history.</PageIntro>
       <label className="relative">
         <span className="sr-only">Search lubricant products</span>
         <Search
