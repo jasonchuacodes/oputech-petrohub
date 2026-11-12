@@ -23,6 +23,7 @@ input ReportInput {
 input ReportsInput {
   startDate: String
   endDate: String
+  submittedOnly: Boolean = false
   offset: Int = 0
   limit: Int = 20
 }

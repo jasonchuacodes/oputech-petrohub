@@ -1,25 +1,20 @@
 'use client'
 
-import { Bell, ChevronRight, FilePlus2 } from 'lucide-react'
+import { ChevronRight, FilePlus2 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback, useState } from 'react'
-import { Button } from '~/components/ui/button'
-import { PageHeader } from '~/components/ui/page-header'
-import { useSessionQuery } from '../../auth/auth.queries'
 import { CreateReportSheet } from '../../reports/create-report-sheet'
 import { useReportCreationContextQuery } from '../../reports/reports.queries'
 import { useActiveTenant } from '../../layout/use-active-tenant'
 import { AttendanceCard } from './attendance-card'
+import { HomeGreeting } from '../home-greeting'
 
 export function MemberHomePage() {
   const router = useRouter()
-  const session = useSessionQuery()
   const { tenant } = useActiveTenant()
   const reports = useReportCreationContextQuery(tenant.id)
   const [showCreateReport, setShowCreateReport] = useState(false)
-  const user = session.data?.user
-  const greetingName = user?.firstName?.trim() || user?.username || 'there'
 
   const closeCreateReport = useCallback(() => setShowCreateReport(false), [])
   const openReport = useCallback(
@@ -32,22 +27,7 @@ export function MemberHomePage() {
 
   return (
     <div className="mx-auto flex min-h-full w-full max-w-5xl flex-col gap-5 px-5 py-5 md:p-6">
-      <PageHeader
-        title={`Good morning, ${greetingName}`}
-        description={user?.username ? `@${user.username}` : undefined}
-        action={
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            aria-label="Notifications are not available"
-            className="wide:size-11"
-            disabled
-          >
-            <Bell aria-hidden="true" />
-          </Button>
-        }
-      />
+      <HomeGreeting />
 
       <AttendanceCard tenantId={tenant.id} />
 

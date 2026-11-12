@@ -590,6 +590,7 @@ export type ReportsInput = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
   startDate?: InputMaybe<Scalars['String']['input']>;
+  submittedOnly?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type ResetUserPasswordInput = {

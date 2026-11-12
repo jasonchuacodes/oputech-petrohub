@@ -24,6 +24,7 @@ export const reportsInputSchema = z
   .object({
     startDate: businessDateSchema.nullish(),
     endDate: businessDateSchema.nullish(),
+    submittedOnly: z.boolean().default(false),
     offset: z.number().int().min(0).default(0),
     limit: z.number().int().min(1).max(100).default(20),
   })

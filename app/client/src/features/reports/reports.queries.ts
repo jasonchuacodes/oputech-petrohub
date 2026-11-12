@@ -10,6 +10,7 @@ import {
   type DeleteReportInput,
   type ReportFieldsFragment,
   type ReportDetailFieldsFragment,
+  type ReportsInput,
   type ReportTransitionInput,
   type SaveReportDraftInput,
 } from '~/generated/graphql'
@@ -23,8 +24,8 @@ export const reportKeys = {
   all: (tenantId: string) => ['reports', tenantId] as const,
   context: (tenantId: string) => ['reports', tenantId, 'creation-context'] as const,
   lists: (tenantId: string) => ['reports', tenantId, 'list'] as const,
-  list: (tenantId: string, startDate?: string, endDate?: string) =>
-    [...reportKeys.lists(tenantId), { startDate, endDate }] as const,
+  list: (tenantId: string, input: ReportsInput) =>
+    [...reportKeys.lists(tenantId), input] as const,
   detail: (tenantId: string, reportId: string) => ['reports', tenantId, reportId] as const,
 }
 
@@ -37,13 +38,11 @@ export function useReportCreationContextQuery(tenantId: string) {
   })
 }
 
-export function useReportsQuery(tenantId: string, startDate?: string, endDate?: string) {
+export function useReportsQuery(tenantId: string, input: ReportsInput = {}) {
   return useQuery({
-    queryKey: reportKeys.list(tenantId, startDate, endDate),
+    queryKey: reportKeys.list(tenantId, input),
     queryFn: async () =>
-      (await graphqlClient.request(ReportsDocument, {
-        input: { startDate, endDate, offset: 0, limit: 100 },
-      }, { tenantId }))
+      (await graphqlClient.request(ReportsDocument, { input }, { tenantId }))
         .reports,
   })
 }

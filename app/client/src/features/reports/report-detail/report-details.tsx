@@ -8,6 +8,7 @@ import { cn } from '~/utils/cn';
 import type { ReportDetailRecord } from '../reports.queries';
 import { FinancialEntrySheet } from './financial-entry-sheet';
 import { useReportEditor } from './report-editor-context';
+import { ReportSummaryRows } from './report-summary-rows';
 import { formatMoney } from './utils';
 
 export function ReportDetailsPanel() {
@@ -213,8 +214,6 @@ function isZeroAmount(value: string) {
 
 export function SummaryCard({ compact = false }: { compact?: boolean }) {
   const { preview, report } = useReportEditor();
-  const difference = new Decimal(preview.overShort ?? 0);
-  const label = difference.isZero() ? 'Balanced' : difference.isPositive() ? 'Over' : 'Short';
 
   return (
     <section className={cn('overflow-hidden rounded-md bg-card', !compact && 'shadow-card')}>
@@ -225,31 +224,7 @@ export function SummaryCard({ compact = false }: { compact?: boolean }) {
             <ReportStatusBadge status={report.status} />
           </div>
         )}
-        <div className={!compact ? 'mt-3' : undefined}>
-          <SummaryRow label="Cash fuel sales" value={formatMoney(preview.cashFuelSales)} />
-          <SummaryRow label="Income" value={formatMoney(preview.income)} nested />
-          <SummaryRow label="Expenses" value={formatMoney(preview.expenses)} nested />
-          <SummaryRow label="Lubricant sales" value={formatMoney(preview.lubricantSales)} />
-          <div className="my-2 border-y border-border/60">
-            <SummaryRow
-              label="Pump sales"
-              value={preview.pumpSales ? formatMoney(preview.pumpSales) : '—'}
-            />
-          </div>
-          <SummaryRow
-            label={preview.pumpSales ? label : 'Over / Short'}
-            value={preview.overShort ? formatMoney(difference.abs().toFixed(2)) : '—'}
-            tone={
-              preview.overShort
-                ? difference.isNegative()
-                  ? 'danger'
-                  : difference.isPositive()
-                    ? 'success'
-                    : undefined
-                : undefined
-            }
-          />
-        </div>
+        <ReportSummaryRows summary={preview} className={!compact ? 'mt-3' : undefined} />
       </div>
       {!compact && (
         <footer className="border-t border-border/60 px-4 py-3">
@@ -278,31 +253,5 @@ function ReportStatusBadge({ status }: { status: ReportDetailRecord['status'] })
     >
       {label}
     </span>
-  );
-}
-
-function SummaryRow({
-  label,
-  value,
-  nested = false,
-  tone,
-}: {
-  label: string;
-  value: string;
-  nested?: boolean;
-  tone?: 'danger' | 'success';
-}) {
-  return (
-    <div
-      className={cn(
-        'flex min-h-10 items-center justify-between gap-4',
-        nested && 'min-h-9 pl-4 text-sm text-text-secondary',
-        tone === 'danger' && 'text-destructive',
-        tone === 'success' && 'text-status-success',
-      )}
-    >
-      <span>{label}</span>
-      <span className="tabular-nums">{value}</span>
-    </div>
   );
 }

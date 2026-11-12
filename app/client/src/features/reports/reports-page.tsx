@@ -25,8 +25,12 @@ function TenantReportsPage({ access }: { access: TenantAccess }) {
   const [range, setRange] = useState(() => currentReportMonth(access.tenant.timezone));
   const reports = useReportsQuery(
     access.tenant.id,
-    administrator ? range.startDate : undefined,
-    administrator ? range.endDate : undefined,
+    {
+      startDate: administrator ? range.startDate : undefined,
+      endDate: administrator ? range.endDate : undefined,
+      offset: 0,
+      limit: 100,
+    },
   );
   const [creating, setCreating] = useState(false);
   return (

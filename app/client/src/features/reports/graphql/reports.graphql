@@ -67,7 +67,12 @@ query ReportCreationContext {
 
 query Reports($input: ReportsInput!) {
   reports(input: $input) {
-    items { ...ReportFields }
+    items {
+      ...ReportFields
+      currency
+      effective
+      totals { income expenses cashFuelSales pumpSales overShort lubricantSales }
+    }
     totalCount
   }
 }

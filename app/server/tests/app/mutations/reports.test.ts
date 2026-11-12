@@ -80,6 +80,12 @@ describe('report disposal lifecycle', () => {
       totalCount: 1,
     })
 
+    const submittedDraftsExcluded = await graphql(adminToken, `query ($input: ReportsInput!) { reports(input: $input) { items { id } totalCount } }`, {
+      input: { startDate: businessDate, endDate: businessDate, submittedOnly: true, offset: 0 },
+    })
+    expect(submittedDraftsExcluded.body.errors).toBeUndefined()
+    expect(submittedDraftsExcluded.body.data.reports).toEqual({ items: [], totalCount: 0 })
+
     const reportsOutsideRange = await graphql(adminToken, `query ($input: ReportsInput!) { reports(input: $input) { items { id } totalCount } }`, {
       input: { startDate: '1900-01-01', endDate: '1900-01-31', offset: 0, limit: 20 },
     })
@@ -100,6 +106,20 @@ describe('report disposal lifecycle', () => {
     const firstSubmitted = await transition(memberToken, 'submitReport', firstSaved.id, firstSaved.revision, firstSaved.disposals.revision)
     expect(firstSubmitted.totals).toMatchObject({ cashFuelSales: '1100', pumpSales: '80', overShort: '1020' })
     expect(firstSubmitted.totals.lubricantSales).toBe('375')
+
+    const submittedReports = await graphql(adminToken, `query ($input: ReportsInput!) { reports(input: $input) { items { id effective status totals { cashFuelSales pumpSales overShort lubricantSales } } totalCount } }`, {
+      input: { startDate: businessDate, endDate: businessDate, submittedOnly: true, offset: 0 },
+    })
+    expect(submittedReports.body.errors).toBeUndefined()
+    expect(submittedReports.body.data.reports).toEqual({
+      items: [{
+        id: first.id,
+        effective: true,
+        status: 'submitted',
+        totals: { cashFuelSales: '1100', pumpSales: '80', overShort: '1020', lubricantSales: '375' },
+      }],
+      totalCount: 1,
+    })
     expect((await inventoryProducts(memberToken)).items.find((item: { id: string }) => item.id === lubricantProductId)).toMatchObject({ id: lubricantProductId, stockCount: '-2' })
 
     const second = await createReport(memberToken, secondShiftId, businessDate)

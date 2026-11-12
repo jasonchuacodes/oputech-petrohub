@@ -1,7 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
+import { X } from 'lucide-react'
+import { useRef, useState, type RefObject } from 'react'
+import { useForm, useWatch } from 'react-hook-form'
 import { toast } from 'sonner'
 import { Button } from '~/components/ui/button'
+import { DateTimePicker, formatDateTimeValue } from '~/components/ui/date-time-picker'
 import { Input } from '~/components/ui/input'
 import { Spinner } from '~/components/ui/spinner'
 import type { FuelProductFieldsFragment } from '~/generated/graphql'
@@ -9,25 +12,186 @@ import { useCreateFuelProductMutation, useUpdateFuelProductMutation } from '../f
 import { fuelProductFormSchema, type FuelProductFormValues } from './fuel-setup.schema'
 import { SetupSheet } from './setup-sheet'
 
-export function FuelProductSheet({ tenantId, product, onClose }: { tenantId: string; product?: FuelProductFieldsFragment; onClose: () => void }) {
+type FuelProductSheetProps = {
+  tenantId: string
+  product?: FuelProductFieldsFragment
+  mode?: 'full' | 'price'
+  timezone?: string
+  returnFocusRef?: RefObject<HTMLElement | null>
+  onClose: () => void
+}
+
+export function FuelProductSheet({
+  tenantId,
+  product,
+  mode = 'full',
+  timezone,
+  returnFocusRef,
+  onClose,
+}: FuelProductSheetProps) {
   const createProduct = useCreateFuelProductMutation(tenantId)
   const updateProduct = useUpdateFuelProductMutation(tenantId)
+  const nameInputRef = useRef<HTMLInputElement>(null)
+  const priceInputRef = useRef<HTMLInputElement>(null)
+  const priceOnly = mode === 'price' && Boolean(product)
+  const [scheduleEnabled, setScheduleEnabled] = useState(false)
+  const [scheduledAt, setScheduledAt] = useState('')
   const form = useForm<FuelProductFormValues>({
     resolver: zodResolver(fuelProductFormSchema),
     defaultValues: product ? { name: product.name, unitPrice: product.unitPrice } : { name: '', unitPrice: '' },
     mode: 'onChange',
   })
+  const nameField = form.register('name')
+  const priceField = form.register('unitPrice')
+  const unitPrice = useWatch({ control: form.control, name: 'unitPrice' })
   const pending = createProduct.isPending || updateProduct.isPending
+  const close = () => {
+    if (!pending) onClose()
+  }
   const submit = form.handleSubmit(async (values) => {
+    if (priceOnly && scheduleEnabled) {
+      form.setError('root', { message: 'Scheduled price changes are not connected yet.' })
+      return
+    }
     try {
-      if (product) await updateProduct.mutateAsync({ productId: product.id, expectedRevision: product.revision, ...values })
-      else await createProduct.mutateAsync(values)
-      toast.success(product ? 'Fuel product updated' : 'Fuel product created')
+      if (product) {
+        await updateProduct.mutateAsync({
+          productId: product.id,
+          expectedRevision: product.revision,
+          ...values,
+        })
+      } else {
+        await createProduct.mutateAsync(values)
+      }
+      toast.success(priceOnly ? 'Fuel price updated' : product ? 'Fuel product updated' : 'Fuel product created')
       onClose()
     } catch {
       form.setError('root', { message: 'Unable to save the fuel product. Refresh and try again.' })
     }
   })
 
-  return <SetupSheet open title={product ? 'Edit fuel product' : 'Add fuel product'} description="Set the product name and selling price used by new reports." onClose={onClose}><form className="flex min-h-0 flex-1 flex-col" onSubmit={submit}><div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-5 pb-5"><label className="flex flex-col gap-1.5"><span className="text-sm font-medium">Product name</span><Input autoFocus placeholder="ADO" disabled={pending} aria-invalid={Boolean(form.formState.errors.name)} {...form.register('name')} />{form.formState.errors.name?.message && <p className="text-sm text-destructive">{form.formState.errors.name.message}</p>}</label><label className="flex flex-col gap-1.5"><span className="text-sm font-medium">Unit price</span><Input inputMode="decimal" placeholder="0.00" disabled={pending} aria-invalid={Boolean(form.formState.errors.unitPrice)} {...form.register('unitPrice')} />{form.formState.errors.unitPrice?.message && <p className="text-sm text-destructive">{form.formState.errors.unitPrice.message}</p>}</label>{form.formState.errors.root?.message && <p role="alert" className="text-sm text-destructive">{form.formState.errors.root.message}</p>}</div><footer className="flex shrink-0 gap-3 border-t border-border p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]"><Button type="button" variant="outline" className="flex-1" disabled={pending} onClick={onClose}>Cancel</Button><Button type="submit" className="flex-1" disabled={!form.formState.isValid || pending}>{pending && <Spinner className="size-4" />}{pending ? 'Saving…' : product ? 'Save changes' : 'Add product'}</Button></footer></form></SetupSheet>
+  return (
+    <SetupSheet
+      open
+      title={priceOnly ? 'Product details' : product ? 'Edit fuel product' : 'Add fuel product'}
+      description={priceOnly ? 'Update the price now or plan a future change.' : 'Set the product name and selling price used by new reports.'}
+      onClose={close}
+      escapeDisabled={pending}
+      manageFocus
+      initialFocusRef={priceOnly ? priceInputRef : nameInputRef}
+      returnFocusRef={returnFocusRef}
+    >
+      <form className="flex min-h-0 flex-1 flex-col" onSubmit={submit}>
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-5 pb-5">
+          {priceOnly && scheduledAt && (
+            <div className="flex items-center gap-3 rounded-md border border-status-warning/25 bg-status-warning/10 px-3 py-2.5 text-sm text-text-secondary">
+              <p className="min-w-0 flex-1">
+                Scheduled price update to{' '}
+                <span className="font-medium text-text-heading">₱{unitPrice || '0.00'}</span> on{' '}
+                <span className="font-medium text-text-heading">{formatDateTimeValue(scheduledAt)}</span>
+              </p>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="-mr-2 size-9 shrink-0 text-status-warning hover:text-status-warning"
+                aria-label="Cancel scheduled price change"
+                onClick={() => {
+                  setScheduleEnabled(false)
+                  setScheduledAt('')
+                  form.clearErrors('root')
+                }}
+              >
+                <X aria-hidden="true" />
+              </Button>
+            </div>
+          )}
+          {priceOnly ? (
+            <label className="flex flex-col gap-1.5">
+              <span className="text-sm font-medium">Product name</span>
+              <Input value={product?.name ?? ''} readOnly aria-readonly="true" className="bg-muted text-text-secondary" />
+            </label>
+          ) : (
+            <label className="flex flex-col gap-1.5">
+              <span className="text-sm font-medium">Product name</span>
+              <Input
+                {...nameField}
+                ref={(element) => {
+                  nameField.ref(element)
+                  nameInputRef.current = element
+                }}
+                placeholder="ADO"
+                disabled={pending}
+                aria-invalid={Boolean(form.formState.errors.name)}
+              />
+              {form.formState.errors.name?.message && (
+                <p className="text-sm text-destructive">{form.formState.errors.name.message}</p>
+              )}
+            </label>
+          )}
+          <label className="flex flex-col gap-1.5">
+            <span className="text-sm font-medium">Unit price</span>
+            <Input
+              {...priceField}
+              ref={(element) => {
+                priceField.ref(element)
+                priceInputRef.current = element
+              }}
+              inputMode="decimal"
+              placeholder="0.00"
+              disabled={pending}
+              aria-invalid={Boolean(form.formState.errors.unitPrice)}
+            />
+            {form.formState.errors.unitPrice?.message && (
+              <p className="text-sm text-destructive">{form.formState.errors.unitPrice.message}</p>
+            )}
+          </label>
+          {priceOnly && (
+            <div className="space-y-3">
+              <label className="flex cursor-pointer items-center gap-3">
+                <input
+                  type="checkbox"
+                  checked={scheduleEnabled}
+                  className="size-5 shrink-0 accent-primary"
+                  onChange={(event) => {
+                    setScheduleEnabled(event.target.checked)
+                    form.clearErrors('root')
+                    if (!event.target.checked) setScheduledAt('')
+                  }}
+                />
+                <span className="text-sm font-medium text-text-heading">Schedule price change</span>
+              </label>
+              {scheduleEnabled && (
+                <DateTimePicker
+                  value={scheduledAt}
+                  timezone={timezone ?? 'UTC'}
+                  disabled={pending}
+                  onChange={(value) => {
+                    setScheduledAt(value)
+                    form.clearErrors('root')
+                  }}
+                />
+              )}
+            </div>
+          )}
+          {form.formState.errors.root?.message && (
+            <p role="alert" className="text-sm text-destructive">{form.formState.errors.root.message}</p>
+          )}
+        </div>
+        <footer className="flex shrink-0 gap-3 border-t border-border p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
+          <Button type="button" variant="outline" className="flex-1" disabled={pending} onClick={close}>
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            className="flex-1"
+            disabled={!form.formState.isValid || pending || (scheduleEnabled && !scheduledAt)}
+          >
+            {pending && <Spinner className="size-4" />}
+            {pending ? 'Saving…' : scheduleEnabled ? 'Schedule change' : product ? 'Save changes' : 'Add product'}
+          </Button>
+        </footer>
+      </form>
+    </SetupSheet>
+  )
 }

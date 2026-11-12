@@ -183,6 +183,9 @@ export class ReportsService {
       ...(input.startDate && input.endDate
         ? { businessDate: { $gte: input.startDate, $lte: input.endDate } }
         : {}),
+      ...(input.submittedOnly
+        ? { status: ReportStatus.SUBMITTED, effective: { $ne: false } }
+        : {}),
     }
     const [items, totalCount] = await Promise.all([
       this.reports.find(filter).sort({ businessDate: -1, createdAt: -1, _id: -1 }).skip(input.offset).limit(input.limit).lean<ReportRecord[]>().exec(),
