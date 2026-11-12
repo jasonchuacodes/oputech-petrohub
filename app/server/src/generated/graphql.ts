@@ -266,6 +266,7 @@ export type Mutation = {
   updateFuelProduct: FuelProduct;
   updateInventoryProduct: InventoryProduct;
   updateMyProfile: User;
+  updatePumpMeter: PumpMeter;
   updateRecurringIncomeConfiguration: RecurringIncomeConfiguration;
   updateShift: Shift;
   updateTenant: TenantSummary;
@@ -390,6 +391,11 @@ export type MutationUpdateInventoryProductArgs = {
 
 export type MutationUpdateMyProfileArgs = {
   input: UpdateMyProfileInput;
+};
+
+
+export type MutationUpdatePumpMeterArgs = {
+  input: UpdatePumpMeterInput;
 };
 
 
@@ -733,6 +739,12 @@ export type UpdateMyProfileInput = {
   lastName?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type UpdatePumpMeterInput = {
+  expectedRevision: Scalars['Int']['input'];
+  label: Scalars['String']['input'];
+  meterId: Scalars['ObjectId']['input'];
+};
+
 export type UpdateRecurringIncomeConfigurationInput = {
   expectedRevision: Scalars['Int']['input'];
   fields: Array<RecurringIncomeFieldInput>;
@@ -944,6 +956,7 @@ export type ResolversTypes = {
   UpdateFuelProductInput: UpdateFuelProductInput;
   UpdateInventoryProductInput: UpdateInventoryProductInput;
   UpdateMyProfileInput: UpdateMyProfileInput;
+  UpdatePumpMeterInput: UpdatePumpMeterInput;
   UpdateRecurringIncomeConfigurationInput: UpdateRecurringIncomeConfigurationInput;
   UpdateShiftInput: UpdateShiftInput;
   UpdateTenantInput: UpdateTenantInput;
@@ -1026,6 +1039,7 @@ export type ResolversParentTypes = {
   UpdateFuelProductInput: UpdateFuelProductInput;
   UpdateInventoryProductInput: UpdateInventoryProductInput;
   UpdateMyProfileInput: UpdateMyProfileInput;
+  UpdatePumpMeterInput: UpdatePumpMeterInput;
   UpdateRecurringIncomeConfigurationInput: UpdateRecurringIncomeConfigurationInput;
   UpdateShiftInput: UpdateShiftInput;
   UpdateTenantInput: UpdateTenantInput;
@@ -1156,6 +1170,7 @@ export type MutationResolvers<ContextType = GraphqlContext, ParentType extends R
   updateFuelProduct?: Resolver<ResolversTypes['FuelProduct'], ParentType, ContextType, RequireFields<MutationUpdateFuelProductArgs, 'input'>>;
   updateInventoryProduct?: Resolver<ResolversTypes['InventoryProduct'], ParentType, ContextType, RequireFields<MutationUpdateInventoryProductArgs, 'input'>>;
   updateMyProfile?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationUpdateMyProfileArgs, 'input'>>;
+  updatePumpMeter?: Resolver<ResolversTypes['PumpMeter'], ParentType, ContextType, RequireFields<MutationUpdatePumpMeterArgs, 'input'>>;
   updateRecurringIncomeConfiguration?: Resolver<ResolversTypes['RecurringIncomeConfiguration'], ParentType, ContextType, RequireFields<MutationUpdateRecurringIncomeConfigurationArgs, 'input'>>;
   updateShift?: Resolver<ResolversTypes['Shift'], ParentType, ContextType, RequireFields<MutationUpdateShiftArgs, 'input'>>;
   updateTenant?: Resolver<ResolversTypes['TenantSummary'], ParentType, ContextType, RequireFields<MutationUpdateTenantArgs, 'input'>>;

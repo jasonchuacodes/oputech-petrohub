@@ -6,10 +6,12 @@ import {
   DeactivatePumpMeterDocument,
   FuelSetupDocument,
   UpdateFuelProductDocument,
+  UpdatePumpMeterDocument,
   type CreateFuelProductInput,
   type CreatePumpMeterInput,
   type DeactivateFuelSetupInput,
   type UpdateFuelProductInput,
+  type UpdatePumpMeterInput,
 } from '~/generated/graphql'
 import { graphqlClient } from '~/lib/graphql'
 
@@ -48,6 +50,12 @@ export function useDeactivateFuelProductMutation(tenantId: string) {
 export function useCreatePumpMeterMutation(tenantId: string) {
   return useFuelSetupMutation(tenantId, async (input: CreatePumpMeterInput) =>
     (await graphqlClient.request(CreatePumpMeterDocument, { input }, { tenantId })).createPumpMeter,
+  )
+}
+
+export function useUpdatePumpMeterMutation(tenantId: string) {
+  return useFuelSetupMutation(tenantId, async (input: UpdatePumpMeterInput) =>
+    (await graphqlClient.request(UpdatePumpMeterDocument, { input }, { tenantId })).updatePumpMeter,
   )
 }
 

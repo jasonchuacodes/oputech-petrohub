@@ -9,6 +9,7 @@ import {
   CreatePumpMeterInput,
   DeactivateFuelSetupInput,
   UpdateFuelProductInput,
+  UpdatePumpMeterInput,
 } from './fuel-setup.schemas'
 import { FuelProduct, FuelSetupStatus } from './schemas/fuel-product.schema'
 import { PumpMeter } from './schemas/pump-meter.schema'
@@ -81,6 +82,17 @@ export class FuelSetupService {
       initialReading: decimal128(input.initialReading),
     })
     return meter.toObject<PumpMeterRecord>()
+  }
+
+  async updateMeter(tenantId: Types.ObjectId, input: UpdatePumpMeterInput) {
+    const meter = await this.meters.findOneAndUpdate(
+      { _id: input.meterId, tenantId, revision: input.expectedRevision, status: FuelSetupStatus.ACTIVE },
+      { $set: { label: input.label }, $inc: { revision: 1 } },
+      { new: true, runValidators: true },
+    ).lean<PumpMeterRecord>().exec()
+    if (meter) return meter
+    if (!await this.meters.exists({ _id: input.meterId, tenantId })) throw new NotFoundException('Pump meter not found.')
+    throw new ConflictException('Pump meter changed. Refresh and try again.')
   }
 
   async deactivateProduct(tenantId: Types.ObjectId, input: DeactivateFuelSetupInput) {

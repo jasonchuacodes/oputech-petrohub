@@ -7,12 +7,14 @@ extend type Mutation {
   updateFuelProduct(input: UpdateFuelProductInput!): FuelProduct!
   deactivateFuelProduct(input: DeactivateFuelSetupInput!): FuelProduct!
   createPumpMeter(input: CreatePumpMeterInput!): PumpMeter!
+  updatePumpMeter(input: UpdatePumpMeterInput!): PumpMeter!
   deactivatePumpMeter(input: DeactivateFuelSetupInput!): PumpMeter!
 }
 
 input CreateFuelProductInput { name: String!, unitPrice: Decimal! }
 input UpdateFuelProductInput { productId: ObjectId!, expectedRevision: Int!, name: String!, unitPrice: Decimal! }
 input CreatePumpMeterInput { label: String!, productId: ObjectId!, initialReading: Decimal! }
+input UpdatePumpMeterInput { meterId: ObjectId!, expectedRevision: Int!, label: String! }
 input DeactivateFuelSetupInput { id: ObjectId!, expectedRevision: Int! }
 
 type FuelSetup { products: [FuelProduct!]!, meters: [PumpMeter!]! }

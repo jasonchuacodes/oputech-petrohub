@@ -23,6 +23,12 @@ export const createPumpMeterInputSchema = z.object({
 }).strict()
 export type CreatePumpMeterInput = z.infer<typeof createPumpMeterInputSchema>
 
+export const updatePumpMeterInputSchema = createPumpMeterInputSchema.extend({
+  meterId: z.instanceof(Types.ObjectId),
+  expectedRevision: z.number().int().min(0),
+}).omit({ productId: true, initialReading: true }).strict()
+export type UpdatePumpMeterInput = z.infer<typeof updatePumpMeterInputSchema>
+
 export const deactivateFuelSetupInputSchema = z.object({
   id: z.instanceof(Types.ObjectId),
   expectedRevision: z.number().int().min(0),

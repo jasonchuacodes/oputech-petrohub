@@ -17,6 +17,8 @@ import {
   DeactivateFuelSetupInput,
   updateFuelProductInputSchema,
   UpdateFuelProductInput,
+  updatePumpMeterInputSchema,
+  UpdatePumpMeterInput,
 } from './fuel-setup.schemas'
 import { FuelProductRecord, FuelSetupService, PumpMeterRecord, PumpMeterWithCurrentReading } from './fuel-setup.service'
 
@@ -75,6 +77,17 @@ export class FuelSetupResolver {
     @Args('input', new ZodValidationPipe(createPumpMeterInputSchema)) input: CreatePumpMeterInput,
   ): Promise<GraphqlMutation['createPumpMeter']> {
     const meter = await this.fuelSetup.createMeter(tenant.tenantId, input)
+    return this.meter(meter, await this.fuelSetup.currentReading(tenant.tenantId, meter))
+  }
+
+  @Mutation('updatePumpMeter')
+  @UseGuards(...adminGuards)
+  @RequireRoles(UserRole.SUPERADMIN, UserRole.ADMIN)
+  async updateMeter(
+    @CurrentTenant() tenant: AuthorizedTenant,
+    @Args('input', new ZodValidationPipe(updatePumpMeterInputSchema)) input: UpdatePumpMeterInput,
+  ): Promise<GraphqlMutation['updatePumpMeter']> {
+    const meter = await this.fuelSetup.updateMeter(tenant.tenantId, input)
     return this.meter(meter, await this.fuelSetup.currentReading(tenant.tenantId, meter))
   }
 

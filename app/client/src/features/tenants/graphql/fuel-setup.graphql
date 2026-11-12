@@ -24,6 +24,10 @@ mutation CreatePumpMeter($input: CreatePumpMeterInput!) {
   createPumpMeter(input: $input) { ...PumpMeterFields }
 }
 
+mutation UpdatePumpMeter($input: UpdatePumpMeterInput!) {
+  updatePumpMeter(input: $input) { ...PumpMeterFields }
+}
+
 mutation DeactivatePumpMeter($input: DeactivateFuelSetupInput!) {
   deactivatePumpMeter(input: $input) { ...PumpMeterFields }
 }

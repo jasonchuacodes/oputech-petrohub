@@ -40,6 +40,7 @@ function TenantFuelSetup({ tenantId }: { tenantId: string }) {
   const [tab, setTab] = useState<SetupTab>('products')
   const [productEditor, setProductEditor] = useState<ProductEditor>(null)
   const [addingMeter, setAddingMeter] = useState(false)
+  const [meterEditor, setMeterEditor] = useState<PumpMeterFieldsFragment>()
   const [productActions, setProductActions] = useState<FuelProductFieldsFragment>()
   const [meterActions, setMeterActions] = useState<PumpMeterFieldsFragment>()
   const [deactivation, setDeactivation] = useState<DeactivationTarget>()
@@ -99,9 +100,10 @@ function TenantFuelSetup({ tenantId }: { tenantId: string }) {
 
       {productEditor && <FuelProductSheet key={selectedProduct?.id ?? 'new'} tenantId={tenantId} product={selectedProduct} onClose={() => setProductEditor(null)} />}
       {addingMeter && <PumpMeterSheet tenantId={tenantId} products={setup.data.products} onClose={() => setAddingMeter(false)} />}
+      {meterEditor && <PumpMeterSheet key={meterEditor.id} tenantId={tenantId} products={setup.data.products} meter={meterEditor} onClose={() => setMeterEditor(undefined)} />}
 
       {productActions && <SetupSheet open title="Fuel product actions" description={`${productActions.name} · ₱${formatPrice(productActions.unitPrice)}`} onClose={() => setProductActions(undefined)}><div className="flex flex-col gap-2 px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]"><Button type="button" variant="outline" className="w-full" disabled={productActions.status !== 'active'} onClick={() => { setProductEditor(productActions); setProductActions(undefined) }}><Pencil aria-hidden="true" />Edit product</Button><Button type="button" variant="destructive" className="w-full" disabled={productActions.status !== 'active'} onClick={() => { setDeactivation({ kind: 'product', item: productActions }); setProductActions(undefined) }}><Trash2 aria-hidden="true" />Deactivate product</Button></div></SetupSheet>}
-      {meterActions && <SetupSheet open title="Pump meter actions" description={meterActions.label} onClose={() => setMeterActions(undefined)}><div className="px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]"><Button type="button" variant="destructive" className="w-full" disabled={meterActions.status !== 'active'} onClick={() => { setDeactivation({ kind: 'meter', item: meterActions }); setMeterActions(undefined) }}><Trash2 aria-hidden="true" />Deactivate meter</Button></div></SetupSheet>}
+      {meterActions && <SetupSheet open title="Pump meter actions" description={meterActions.label} onClose={() => setMeterActions(undefined)}><div className="flex flex-col gap-2 px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]"><Button type="button" variant="outline" className="w-full" disabled={meterActions.status !== 'active'} onClick={() => { setMeterEditor(meterActions); setMeterActions(undefined) }}><Pencil aria-hidden="true" />Edit pump</Button><Button type="button" variant="destructive" className="w-full" disabled={meterActions.status !== 'active'} onClick={() => { setDeactivation({ kind: 'meter', item: meterActions }); setMeterActions(undefined) }}><Trash2 aria-hidden="true" />Deactivate meter</Button></div></SetupSheet>}
 
       <ConfirmationDialog open={Boolean(deactivation)} title={`Deactivate ${deactivation?.kind === 'product' ? 'fuel product' : 'pump meter'}?`} description={deactivationDescription} icon={Trash2} variant="danger" confirmText="Deactivate" loading={pending} onClose={() => setDeactivation(undefined)} onConfirm={() => void deactivate()}><p className="text-sm text-text-secondary">Existing reports keep their saved product and meter details. Inactive setup is not included in new reports.</p></ConfirmationDialog>
     </div>
