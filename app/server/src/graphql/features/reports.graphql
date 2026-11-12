@@ -2,6 +2,7 @@ extend type Query {
   reportCreationContext: ReportCreationContext!
   report(input: ReportInput!): Report!
   reports(input: ReportsInput!): ReportPage!
+  financialSummary(input: FinancialSummaryInput!): FinancialSummary!
 }
 
 extend type Mutation {
@@ -26,6 +27,11 @@ input ReportsInput {
   submittedOnly: Boolean = false
   offset: Int = 0
   limit: Int = 20
+}
+
+input FinancialSummaryInput {
+  startDate: String!
+  endDate: String!
 }
 
 input FinancialEntryInput {
@@ -86,6 +92,35 @@ type ReportSlot {
 type ReportPage {
   items: [Report!]!
   totalCount: Int!
+}
+
+enum FinancialBucketInterval {
+  day
+  week
+  month
+}
+
+type FinancialSummary {
+  startDate: String!
+  endDate: String!
+  timezone: String!
+  currency: String!
+  bucketInterval: FinancialBucketInterval!
+  includedReportCount: Int!
+  totals: FinancialAmounts!
+  buckets: [FinancialBucket!]!
+}
+
+type FinancialAmounts {
+  income: Decimal!
+  expenses: Decimal!
+  lubricantSales: Decimal!
+}
+
+type FinancialBucket {
+  startDate: String!
+  endDate: String!
+  amounts: FinancialAmounts!
 }
 
 type Report {

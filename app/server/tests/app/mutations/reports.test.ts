@@ -73,6 +73,9 @@ describe('report disposal lifecycle', () => {
     const context = await graphql(memberToken, `query { reportCreationContext { businessDate } }`)
     const businessDate = context.body.data.reportCreationContext.businessDate as string
 
+    const memberFinancialSummary = await financialSummary(memberToken, businessDate, businessDate)
+    expect(memberFinancialSummary.body.errors?.[0]?.extensions?.originalError).toMatchObject({ code: 'FORBIDDEN' })
+
     const first = await createReport(memberToken, firstShiftId, businessDate)
     const reportsInRange = await graphql(adminToken, `query ($input: ReportsInput!) { reports(input: $input) { items { id businessDate } totalCount } }`, {
       input: { startDate: businessDate, endDate: businessDate, offset: 0, limit: 20 },
@@ -110,6 +113,45 @@ describe('report disposal lifecycle', () => {
     expect(firstSubmitted.totals).toMatchObject({ cashFuelSales: '1100', pumpSales: '80', overShort: '1020' })
     expect(firstSubmitted.totals.lubricantSales).toBe('375')
 
+    const submittedFinancialSummary = await financialSummary(adminToken, businessDate, businessDate)
+    expect(submittedFinancialSummary.body.errors).toBeUndefined()
+    expect(submittedFinancialSummary.body.data.financialSummary).toEqual({
+      startDate: businessDate,
+      endDate: businessDate,
+      bucketInterval: 'day',
+      includedReportCount: 1,
+      totals: { income: '1000', expenses: '100', lubricantSales: '375' },
+      buckets: [{
+        startDate: businessDate,
+        endDate: businessDate,
+        amounts: { income: '1000', expenses: '100', lubricantSales: '375' },
+      }],
+    })
+
+    const paddedFinancialSummary = await financialSummary(
+      adminToken,
+      offsetDate(businessDate, -1),
+      offsetDate(businessDate, 1),
+    )
+    expect(paddedFinancialSummary.body.errors).toBeUndefined()
+    expect(paddedFinancialSummary.body.data.financialSummary).toMatchObject({
+      bucketInterval: 'day',
+      totals: { income: '1000', expenses: '100', lubricantSales: '375' },
+      buckets: [
+        { amounts: { income: '0', expenses: '0', lubricantSales: '0' } },
+        { amounts: { income: '1000', expenses: '100', lubricantSales: '375' } },
+        { amounts: { income: '0', expenses: '0', lubricantSales: '0' } },
+      ],
+    })
+
+    const weeklyBuckets = await financialSummary(adminToken, offsetDate(businessDate, -31), businessDate)
+    expect(weeklyBuckets.body.errors).toBeUndefined()
+    expect(weeklyBuckets.body.data.financialSummary).toMatchObject({
+      bucketInterval: 'week',
+      includedReportCount: 1,
+      totals: { income: '1000', expenses: '100', lubricantSales: '375' },
+    })
+
     const submittedReports = await graphql(adminToken, `query ($input: ReportsInput!) { reports(input: $input) { items { id effective status totals { cashFuelSales pumpSales overShort lubricantSales } } totalCount } }`, {
       input: { startDate: businessDate, endDate: businessDate, submittedOnly: true, offset: 0 },
     })
@@ -142,6 +184,13 @@ describe('report disposal lifecycle', () => {
     const firstDeleted = await deleteReport(adminToken, latestFirst, 'Incorrect submitted readings')
     expect(firstDeleted.body.errors).toBeUndefined()
     expect(firstDeleted.body.data.deleteReport).toMatchObject({ status: 'revoked', effective: false, revokedFromStatus: 'submitted' })
+    const revokedFinancialSummary = await financialSummary(adminToken, businessDate, businessDate)
+    expect(revokedFinancialSummary.body.errors).toBeUndefined()
+    expect(revokedFinancialSummary.body.data.financialSummary).toMatchObject({
+      includedReportCount: 0,
+      totals: { income: '0', expenses: '0', lubricantSales: '0' },
+      buckets: [{ amounts: { income: '0', expenses: '0', lubricantSales: '0' } }],
+    })
     expect((await inventoryProducts(memberToken)).items.find((item: { id: string }) => item.id === lubricantProductId)?.stockCount).toBe('1')
     const stockHistory = await graphql(memberToken, `query ($input: StockMovementsInput!) { stockMovements(input: $input) { items { type quantityChange balanceBefore balanceAfter } } }`, { input: { productId: lubricantProductId, offset: 0, limit: 20 } })
     expect(stockHistory.body.errors).toBeUndefined()
@@ -359,6 +408,16 @@ describe('report disposal lifecycle', () => {
     return request(app.getHttpServer()).post('/graphql').set('origin', 'http://localhost:5173').set('authorization', `Bearer ${token}`).set('x-tenant-id', tenantId).send({ query, variables })
   }
 
+  async function financialSummary(token: string, startDate: string, endDate: string) {
+    return graphql(token, `query ($input: FinancialSummaryInput!) {
+      financialSummary(input: $input) {
+        startDate endDate bucketInterval includedReportCount
+        totals { income expenses lubricantSales }
+        buckets { startDate endDate amounts { income expenses lubricantSales } }
+      }
+    }`, { input: { startDate, endDate } })
+  }
+
   async function createReport(token: string, shiftId: string, businessDate: string, startTime?: string) {
     const context = await graphql(token, `query { reportCreationContext { slots { id shift { id } interval { startTime } report { id } } } }`)
     expect(context.body.errors).toBeUndefined()
@@ -420,3 +479,11 @@ const detailFields = `
     readings { meterId unitPrice openingReading openingSource closingReading calibration netVolume sales }
   }
 `
+
+function offsetDate(value: string, days: number): string {
+  const [year, month, day] = value.split('-').map(Number) as [number, number, number]
+  const result = new Date(Date.UTC(year, month - 1, day + days))
+  return [result.getUTCFullYear(), result.getUTCMonth() + 1, result.getUTCDate()]
+    .map((part, index) => String(part).padStart(index === 0 ? 4 : 2, '0'))
+    .join('-')
+}

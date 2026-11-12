@@ -81,6 +81,23 @@ query Reports($input: ReportsInput!) {
   }
 }
 
+query FinancialSummary($input: FinancialSummaryInput!) {
+  financialSummary(input: $input) {
+    startDate
+    endDate
+    timezone
+    currency
+    bucketInterval
+    includedReportCount
+    totals { income expenses lubricantSales }
+    buckets {
+      startDate
+      endDate
+      amounts { income expenses lubricantSales }
+    }
+  }
+}
+
 query Report($input: ReportInput!) {
   report(input: $input) { ...ReportDetailFields }
 }

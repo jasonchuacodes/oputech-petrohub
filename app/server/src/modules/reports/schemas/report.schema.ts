@@ -160,3 +160,7 @@ ReportSchema.index(
   { name: 'report_effective_segment_unique', unique: true, partialFilterExpression: { effective: true } },
 )
 ReportSchema.index({ tenantId: 1, businessDate: -1, createdAt: -1, _id: -1 })
+ReportSchema.index(
+  { tenantId: 1, status: 1, businessDate: 1, effective: 1 },
+  { name: 'report_financial_summary' },
+)

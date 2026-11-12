@@ -17,6 +17,8 @@ import {
   CreateReportInput,
   deleteReportInputSchema,
   DeleteReportInput,
+  financialSummaryInputSchema,
+  FinancialSummaryInput,
   reportInputSchema,
   ReportInput,
   reportsInputSchema,
@@ -69,6 +71,26 @@ export class ReportsResolver {
   ): Promise<GraphqlQuery['reports']> {
     const page = await this.reports.list(tenant.tenantId, input)
     return { items: page.items.map((report) => this.serialize(report)), totalCount: page.totalCount }
+  }
+
+  @Query('financialSummary')
+  @UseGuards(...roleGuards)
+  @RequireRoles(UserRole.SUPERADMIN, UserRole.ADMIN)
+  async financialSummary(
+    @CurrentTenant() tenant: AuthorizedTenant,
+    @Args('input', new ZodValidationPipe(financialSummaryInputSchema)) input: FinancialSummaryInput,
+  ): Promise<GraphqlQuery['financialSummary']> {
+    const summary = await this.reports.financialSummary(tenant.tenantId, input)
+    return {
+      ...summary,
+      timezone: tenant.tenant.timezone,
+      currency: tenant.tenant.currency,
+      totals: this.serializeFinancialAmounts(summary.totals),
+      buckets: summary.buckets.map((bucket) => ({
+        ...bucket,
+        amounts: this.serializeFinancialAmounts(bucket.amounts),
+      })),
+    }
   }
 
   @Mutation('createReport')
@@ -213,6 +235,18 @@ export class ReportsResolver {
       pumpSales: decimalString(batch.pumpSales),
       complete: batch.complete,
       blockingIssues: batch.blockingIssues,
+    }
+  }
+
+  private serializeFinancialAmounts(amounts: {
+    income: { toString(): string }
+    expenses: { toString(): string }
+    lubricantSales: { toString(): string }
+  }) {
+    return {
+      income: amounts.income.toString(),
+      expenses: amounts.expenses.toString(),
+      lubricantSales: amounts.lubricantSales.toString(),
     }
   }
 

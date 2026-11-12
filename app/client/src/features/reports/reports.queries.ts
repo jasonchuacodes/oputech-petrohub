@@ -2,12 +2,14 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   CreateReportDocument,
   DeleteReportDocument,
+  FinancialSummaryDocument,
   ReportCreationContextDocument,
   ReportDocument,
   ReportsDocument,
   SaveReportDraftDocument,
   SubmitReportDocument,
   type DeleteReportInput,
+  type FinancialSummaryInput,
   type ReportFieldsFragment,
   type ReportDetailFieldsFragment,
   type ReportsInput,
@@ -27,6 +29,8 @@ export const reportKeys = {
   list: (tenantId: string, input: ReportsInput) =>
     [...reportKeys.lists(tenantId), input] as const,
   detail: (tenantId: string, reportId: string) => ['reports', tenantId, reportId] as const,
+  financialSummary: (tenantId: string, input: FinancialSummaryInput) =>
+    [...reportKeys.all(tenantId), 'financial-summary', input] as const,
 }
 
 export function useReportCreationContextQuery(tenantId: string) {
@@ -44,6 +48,15 @@ export function useReportsQuery(tenantId: string, input: ReportsInput = {}) {
     queryFn: async () =>
       (await graphqlClient.request(ReportsDocument, { input }, { tenantId }))
         .reports,
+  })
+}
+
+export function useFinancialSummaryQuery(tenantId: string, input: FinancialSummaryInput) {
+  return useQuery({
+    queryKey: reportKeys.financialSummary(tenantId, input),
+    queryFn: async () =>
+      (await graphqlClient.request(FinancialSummaryDocument, { input }, { tenantId }))
+        .financialSummary,
   })
 }
 

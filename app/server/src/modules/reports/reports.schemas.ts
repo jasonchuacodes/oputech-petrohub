@@ -37,6 +37,20 @@ export const reportsInputSchema = z
   })
 export type ReportsInput = z.infer<typeof reportsInputSchema>
 
+export const financialSummaryInputSchema = z
+  .object({
+    startDate: businessDateSchema,
+    endDate: businessDateSchema,
+  })
+  .strict()
+  .refine((input) => input.startDate <= input.endDate, {
+    message: 'Start date must be on or before end date.',
+  })
+  .refine((input) => inclusiveDayCount(input.startDate, input.endDate) <= 3660, {
+    message: 'Date range cannot exceed 3660 days.',
+  })
+export type FinancialSummaryInput = z.infer<typeof financialSummaryInputSchema>
+
 const nonnegativeMoneySchema = z.string().regex(/^(?:0|[1-9]\d*)(?:\.\d{1,2})?$/)
 const positiveMoneySchema = nonnegativeMoneySchema.refine((value) => !/^0(?:\.0{1,2})?$/.test(value))
 const financialEntrySchema = z.object({
@@ -70,3 +84,12 @@ export const deleteReportInputSchema = reportTransitionInputSchema.extend({
   reason: z.string().trim().min(3).max(240),
 }).strict()
 export type DeleteReportInput = z.infer<typeof deleteReportInputSchema>
+
+function inclusiveDayCount(startDate: string, endDate: string): number {
+  const [startYear, startMonth, startDay] = startDate.split('-').map(Number) as [number, number, number]
+  const [endYear, endMonth, endDay] = endDate.split('-').map(Number) as [number, number, number]
+  return Math.floor(
+    (Date.UTC(endYear, endMonth - 1, endDay) - Date.UTC(startYear, startMonth - 1, startDay)) /
+    86_400_000,
+  ) + 1
+}

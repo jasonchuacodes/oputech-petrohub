@@ -165,6 +165,25 @@ export type EditableDisposalInput = {
   meterId: Scalars['ObjectId']['input'];
 };
 
+export type FinancialAmounts = {
+  __typename?: 'FinancialAmounts';
+  expenses: Scalars['Decimal']['output'];
+  income: Scalars['Decimal']['output'];
+  lubricantSales: Scalars['Decimal']['output'];
+};
+
+export type FinancialBucket = {
+  __typename?: 'FinancialBucket';
+  amounts: FinancialAmounts;
+  endDate: Scalars['String']['output'];
+  startDate: Scalars['String']['output'];
+};
+
+export type FinancialBucketInterval =
+  | 'day'
+  | 'month'
+  | 'week';
+
 export type FinancialEntry = {
   __typename?: 'FinancialEntry';
   amount: Scalars['Decimal']['output'];
@@ -179,6 +198,23 @@ export type FinancialEntryInput = {
   description: Scalars['String']['input'];
   id: Scalars['String']['input'];
   notes?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type FinancialSummary = {
+  __typename?: 'FinancialSummary';
+  bucketInterval: FinancialBucketInterval;
+  buckets: Array<FinancialBucket>;
+  currency: Scalars['String']['output'];
+  endDate: Scalars['String']['output'];
+  includedReportCount: Scalars['Int']['output'];
+  startDate: Scalars['String']['output'];
+  timezone: Scalars['String']['output'];
+  totals: FinancialAmounts;
+};
+
+export type FinancialSummaryInput = {
+  endDate: Scalars['String']['input'];
+  startDate: Scalars['String']['input'];
 };
 
 export type FuelPriceChange = {
@@ -455,6 +491,7 @@ export type PumpMeter = {
 export type Query = {
   __typename?: 'Query';
   activeTenant?: Maybe<TenantSummary>;
+  financialSummary: FinancialSummary;
   fuelSetup: FuelSetup;
   inventoryProducts: InventoryProductPage;
   myAttendance: AttendanceStatus;
@@ -468,6 +505,11 @@ export type Query = {
   timesheetDays: UserTimesheet;
   timesheets: TimesheetPage;
   users: UserPage;
+};
+
+
+export type QueryFinancialSummaryArgs = {
+  input: FinancialSummaryInput;
 };
 
 
@@ -940,8 +982,13 @@ export type ResolversTypes = {
   DisposalOpeningSource: DisposalOpeningSource;
   DisposalReading: ResolverTypeWrapper<DisposalReading>;
   EditableDisposalInput: EditableDisposalInput;
+  FinancialAmounts: ResolverTypeWrapper<FinancialAmounts>;
+  FinancialBucket: ResolverTypeWrapper<FinancialBucket>;
+  FinancialBucketInterval: FinancialBucketInterval;
   FinancialEntry: ResolverTypeWrapper<FinancialEntry>;
   FinancialEntryInput: FinancialEntryInput;
+  FinancialSummary: ResolverTypeWrapper<FinancialSummary>;
+  FinancialSummaryInput: FinancialSummaryInput;
   FuelPriceChange: ResolverTypeWrapper<FuelPriceChange>;
   FuelProduct: ResolverTypeWrapper<FuelProduct>;
   FuelSetup: ResolverTypeWrapper<FuelSetup>;
@@ -1030,8 +1077,12 @@ export type ResolversParentTypes = {
   DisposalBatch: DisposalBatch;
   DisposalReading: DisposalReading;
   EditableDisposalInput: EditableDisposalInput;
+  FinancialAmounts: FinancialAmounts;
+  FinancialBucket: FinancialBucket;
   FinancialEntry: FinancialEntry;
   FinancialEntryInput: FinancialEntryInput;
+  FinancialSummary: FinancialSummary;
+  FinancialSummaryInput: FinancialSummaryInput;
   FuelPriceChange: FuelPriceChange;
   FuelProduct: FuelProduct;
   FuelSetup: FuelSetup;
@@ -1136,12 +1187,35 @@ export type DisposalReadingResolvers<ContextType = GraphqlContext, ParentType ex
   unitPrice?: Resolver<ResolversTypes['Decimal'], ParentType, ContextType>;
 };
 
+export type FinancialAmountsResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['FinancialAmounts'] = ResolversParentTypes['FinancialAmounts']> = {
+  expenses?: Resolver<ResolversTypes['Decimal'], ParentType, ContextType>;
+  income?: Resolver<ResolversTypes['Decimal'], ParentType, ContextType>;
+  lubricantSales?: Resolver<ResolversTypes['Decimal'], ParentType, ContextType>;
+};
+
+export type FinancialBucketResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['FinancialBucket'] = ResolversParentTypes['FinancialBucket']> = {
+  amounts?: Resolver<ResolversTypes['FinancialAmounts'], ParentType, ContextType>;
+  endDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  startDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
 export type FinancialEntryResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['FinancialEntry'] = ResolversParentTypes['FinancialEntry']> = {
   amount?: Resolver<ResolversTypes['Decimal'], ParentType, ContextType>;
   description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   notes?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   recurringIncomeFieldId?: Resolver<Maybe<ResolversTypes['ObjectId']>, ParentType, ContextType>;
+};
+
+export type FinancialSummaryResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['FinancialSummary'] = ResolversParentTypes['FinancialSummary']> = {
+  bucketInterval?: Resolver<ResolversTypes['FinancialBucketInterval'], ParentType, ContextType>;
+  buckets?: Resolver<Array<ResolversTypes['FinancialBucket']>, ParentType, ContextType>;
+  currency?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  endDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  includedReportCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  startDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  timezone?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  totals?: Resolver<ResolversTypes['FinancialAmounts'], ParentType, ContextType>;
 };
 
 export type FuelPriceChangeResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['FuelPriceChange'] = ResolversParentTypes['FuelPriceChange']> = {
@@ -1238,6 +1312,7 @@ export type PumpMeterResolvers<ContextType = GraphqlContext, ParentType extends 
 
 export type QueryResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   activeTenant?: Resolver<Maybe<ResolversTypes['TenantSummary']>, ParentType, ContextType>;
+  financialSummary?: Resolver<ResolversTypes['FinancialSummary'], ParentType, ContextType, RequireFields<QueryFinancialSummaryArgs, 'input'>>;
   fuelSetup?: Resolver<ResolversTypes['FuelSetup'], ParentType, ContextType>;
   inventoryProducts?: Resolver<ResolversTypes['InventoryProductPage'], ParentType, ContextType, RequireFields<QueryInventoryProductsArgs, 'input'>>;
   myAttendance?: Resolver<ResolversTypes['AttendanceStatus'], ParentType, ContextType>;
@@ -1427,7 +1502,10 @@ export type Resolvers<ContextType = GraphqlContext> = {
   Decimal?: GraphQLScalarType;
   DisposalBatch?: DisposalBatchResolvers<ContextType>;
   DisposalReading?: DisposalReadingResolvers<ContextType>;
+  FinancialAmounts?: FinancialAmountsResolvers<ContextType>;
+  FinancialBucket?: FinancialBucketResolvers<ContextType>;
   FinancialEntry?: FinancialEntryResolvers<ContextType>;
+  FinancialSummary?: FinancialSummaryResolvers<ContextType>;
   FuelPriceChange?: FuelPriceChangeResolvers<ContextType>;
   FuelProduct?: FuelProductResolvers<ContextType>;
   FuelSetup?: FuelSetupResolvers<ContextType>;

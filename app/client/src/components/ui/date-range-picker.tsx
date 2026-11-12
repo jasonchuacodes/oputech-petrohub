@@ -2,7 +2,7 @@
 
 import * as Popover from '@radix-ui/react-popover'
 import { ChevronDown } from 'lucide-react'
-import { useState } from 'react'
+import { useState, type RefObject } from 'react'
 import type { DateRange } from 'react-day-picker'
 import { useMediaQuery } from '~/hooks/useMediaQuery'
 import { Button } from './button'
@@ -17,6 +17,11 @@ type DateRangePickerProps = {
   timezone: string
   maxDate?: string
   disabled?: boolean
+  label?: string
+  open?: boolean
+  hideTrigger?: boolean
+  anchorRef?: RefObject<HTMLElement | null>
+  onOpenChange?: (open: boolean) => void
   onApply: (startDate: string, endDate: string) => void
 }
 
@@ -26,20 +31,30 @@ export function DateRangePicker({
   timezone,
   maxDate,
   disabled,
+  label = 'Period',
+  open: controlledOpen,
+  hideTrigger = false,
+  anchorRef,
+  onOpenChange,
   onApply,
 }: DateRangePickerProps) {
-  const [open, setOpen] = useState(false)
+  const [internalOpen, setInternalOpen] = useState(false)
+  const open = controlledOpen ?? internalOpen
   const desktop = useMediaQuery(wideMediaQuery)
+  const changeOpen = (nextOpen: boolean) => {
+    if (controlledOpen === undefined) setInternalOpen(nextOpen)
+    onOpenChange?.(nextOpen)
+  }
   const trigger = (
     <button
       type="button"
       disabled={disabled || !startDate || !endDate}
       className="inline-flex min-h-11 items-center gap-1.5 rounded-sm px-1 whitespace-nowrap outline-none focus-visible:ring-3 focus-visible:ring-ring/30 disabled:opacity-50"
       onClick={() => {
-        if (!desktop) setOpen(true)
+        if (!desktop) changeOpen(true)
       }}
     >
-      <span className="text-xs text-text-tertiary">Period</span>
+      <span className="text-xs text-text-tertiary">{label}</span>
       <span className="text-sm font-medium text-text-heading tabular-nums">
         {formatIndicatorDate(startDate)} - {formatIndicatorDate(endDate)}
       </span>
@@ -49,8 +64,12 @@ export function DateRangePicker({
 
   if (desktop) {
     return (
-      <Popover.Root open={open} onOpenChange={setOpen}>
-        <Popover.Trigger asChild>{trigger}</Popover.Trigger>
+      <Popover.Root open={open} onOpenChange={changeOpen}>
+        {hideTrigger
+          ? anchorRef
+            ? <Popover.Anchor virtualRef={anchorRef} />
+            : <Popover.Anchor asChild><span aria-hidden="true" className="block size-0" /></Popover.Anchor>
+          : <Popover.Trigger asChild>{trigger}</Popover.Trigger>}
         <Popover.Portal>
           <Popover.Content
             align="end"
@@ -64,10 +83,10 @@ export function DateRangePicker({
               endDate={endDate}
               timezone={timezone}
               maxDate={maxDate}
-              onClose={() => setOpen(false)}
+              onClose={() => changeOpen(false)}
               onApply={(nextStart, nextEnd) => {
                 onApply(nextStart, nextEnd)
-                setOpen(false)
+                changeOpen(false)
               }}
             />
           </Popover.Content>
@@ -78,7 +97,7 @@ export function DateRangePicker({
 
   return (
     <>
-      {trigger}
+      {!hideTrigger && trigger}
 
       {open && (
         <DateRangeSheet
@@ -87,10 +106,10 @@ export function DateRangePicker({
           endDate={endDate}
           timezone={timezone}
           maxDate={maxDate}
-          onClose={() => setOpen(false)}
+          onClose={() => changeOpen(false)}
           onApply={(nextStart, nextEnd) => {
             onApply(nextStart, nextEnd)
-            setOpen(false)
+            changeOpen(false)
           }}
         />
       )}

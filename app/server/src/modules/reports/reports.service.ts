@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { randomUUID } from 'node:crypto'
+import Decimal from 'decimal.js'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { InjectConnection, InjectModel } from '@nestjs/mongoose'
 import { ClientSession, Connection, Model, Types } from 'mongoose'
@@ -19,6 +20,7 @@ import { displayTime, localHourToInstant, ReportInterval, shiftInterval } from '
 import {
   CreateReportInput,
   DeleteReportInput,
+  FinancialSummaryInput,
   ReportsInput,
   ReportTransitionInput,
   SaveReportDraftInput,
@@ -42,6 +44,35 @@ type ReportActor = {
 }
 
 export type ReportDetailRecord = { report: ReportRecord; disposals?: DisposalBatchRecord }
+
+export type FinancialBucketInterval = 'day' | 'week' | 'month'
+
+type FinancialAmounts = {
+  income: Decimal
+  expenses: Decimal
+  lubricantSales: Decimal
+}
+
+export type FinancialSummaryResult = {
+  startDate: string
+  endDate: string
+  bucketInterval: FinancialBucketInterval
+  includedReportCount: number
+  totals: FinancialAmounts
+  buckets: Array<{
+    startDate: string
+    endDate: string
+    amounts: FinancialAmounts
+  }>
+}
+
+type FinancialDayAggregate = {
+  _id: string
+  income: Types.Decimal128
+  expenses: Types.Decimal128
+  lubricantSales: Types.Decimal128
+  reportCount: number
+}
 
 type DynamicReportSlot = {
   id: string
@@ -267,6 +298,48 @@ export class ReportsService {
       this.reports.countDocuments(filter).exec(),
     ])
     return { items, totalCount }
+  }
+
+  async financialSummary(
+    tenantId: Types.ObjectId,
+    input: FinancialSummaryInput,
+  ): Promise<FinancialSummaryResult> {
+    const zero = Types.Decimal128.fromString('0')
+    const days = await this.reports.aggregate<FinancialDayAggregate>([
+      {
+        $match: {
+          tenantId,
+          status: ReportStatus.SUBMITTED,
+          effective: { $ne: false },
+          businessDate: { $gte: input.startDate, $lte: input.endDate },
+        },
+      },
+      {
+        $group: {
+          _id: '$businessDate',
+          income: { $sum: { $ifNull: ['$totals.income', zero] } },
+          expenses: { $sum: { $ifNull: ['$totals.expenses', zero] } },
+          lubricantSales: { $sum: { $ifNull: ['$totals.lubricantSales', zero] } },
+          reportCount: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]).exec()
+
+    const bucketInterval = financialBucketInterval(input.startDate, input.endDate)
+    const buckets = buildFinancialBuckets(input.startDate, input.endDate, bucketInterval, days)
+    const totals = buckets.reduce(
+      (result, bucket) => addFinancialAmounts(result, bucket.amounts),
+      emptyFinancialAmounts(),
+    )
+
+    return {
+      ...input,
+      bucketInterval,
+      includedReportCount: days.reduce((total, day) => total + day.reportCount, 0),
+      totals,
+      buckets,
+    }
   }
 
   async saveDraft(tenantId: Types.ObjectId, actor: ReportActor, input: SaveReportDraftInput): Promise<ReportDetailRecord> {
@@ -546,4 +619,91 @@ function toIncomeEntries(
 
 function isDuplicateKeyError(error: unknown): error is { code: number } {
   return typeof error === 'object' && error !== null && 'code' in error && error.code === 11000
+}
+
+function financialBucketInterval(startDate: string, endDate: string): FinancialBucketInterval {
+  const days = inclusiveDayCount(startDate, endDate)
+  if (days <= 31) return 'day'
+  if (days <= 180) return 'week'
+  return 'month'
+}
+
+function buildFinancialBuckets(
+  startDate: string,
+  endDate: string,
+  interval: FinancialBucketInterval,
+  days: FinancialDayAggregate[],
+): FinancialSummaryResult['buckets'] {
+  const amountsByDate = new Map(
+    days.map((day) => [day._id, {
+      income: decimal(day.income),
+      expenses: decimal(day.expenses),
+      lubricantSales: decimal(day.lubricantSales),
+    }]),
+  )
+  const buckets: FinancialSummaryResult['buckets'] = []
+  let bucketStart = startDate
+
+  while (bucketStart <= endDate) {
+    const naturalEnd = interval === 'day'
+      ? bucketStart
+      : interval === 'week'
+        ? endOfWeek(bucketStart)
+        : endOfMonth(bucketStart)
+    const bucketEnd = naturalEnd < endDate ? naturalEnd : endDate
+    let amounts = emptyFinancialAmounts()
+    for (let date = bucketStart; date <= bucketEnd; date = addDays(date, 1)) {
+      amounts = addFinancialAmounts(amounts, amountsByDate.get(date) ?? emptyFinancialAmounts())
+    }
+    buckets.push({ startDate: bucketStart, endDate: bucketEnd, amounts })
+    bucketStart = addDays(bucketEnd, 1)
+  }
+
+  return buckets
+}
+
+function emptyFinancialAmounts(): FinancialAmounts {
+  return { income: new Decimal(0), expenses: new Decimal(0), lubricantSales: new Decimal(0) }
+}
+
+function addFinancialAmounts(left: FinancialAmounts, right: FinancialAmounts): FinancialAmounts {
+  return {
+    income: left.income.plus(right.income),
+    expenses: left.expenses.plus(right.expenses),
+    lubricantSales: left.lubricantSales.plus(right.lubricantSales),
+  }
+}
+
+function inclusiveDayCount(startDate: string, endDate: string): number {
+  return Math.floor((dateValue(endDate) - dateValue(startDate)) / 86_400_000) + 1
+}
+
+function endOfWeek(date: string): string {
+  const weekday = new Date(dateValue(date)).getUTCDay()
+  const daysSinceMonday = (weekday + 6) % 7
+  return addDays(date, 6 - daysSinceMonday)
+}
+
+function endOfMonth(date: string): string {
+  const [year, month] = parseDate(date)
+  const end = new Date(Date.UTC(year, month, 0))
+  return formatDate(end.getUTCFullYear(), end.getUTCMonth() + 1, end.getUTCDate())
+}
+
+function addDays(date: string, amount: number): string {
+  const next = new Date(dateValue(date) + amount * 86_400_000)
+  return formatDate(next.getUTCFullYear(), next.getUTCMonth() + 1, next.getUTCDate())
+}
+
+function dateValue(date: string): number {
+  const [year, month, day] = parseDate(date)
+  return Date.UTC(year, month - 1, day)
+}
+
+function parseDate(date: string): [number, number, number] {
+  return date.split('-').map(Number) as [number, number, number]
+}
+
+function formatDate(year: number, month: number, day: number): string {
+  return `${String(year).padStart(4, '0')}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
 }
