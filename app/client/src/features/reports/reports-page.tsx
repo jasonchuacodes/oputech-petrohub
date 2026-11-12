@@ -91,9 +91,7 @@ function TenantReportsPage({ access }: { access: TenantAccess }) {
     {
       id: 'status',
       heading: 'Status',
-      cell: (report) => (
-        <span className={reportStatusClass(report.status)}>{report.status}</span>
-      ),
+      cell: (report) => <ReportStatusPill status={report.status} />,
     },
     {
       id: 'actions',
@@ -172,8 +170,8 @@ function TenantReportsPage({ access }: { access: TenantAccess }) {
                     </span>
                     <ChevronRight aria-hidden="true" className="size-5 shrink-0 text-primary" />
                   </span>
-                  <span className={cn('mt-1 block', reportStatusClass(report.status))}>
-                    status: {report.status}
+                  <span className="mt-2 block">
+                    <ReportStatusPill status={report.status} />
                   </span>
                 </Link>
               ))}
@@ -362,13 +360,21 @@ function formatReportCardDate(value: string): string {
   }).format(new Date(year, month - 1, day))
 }
 
-function reportStatusClass(status: ReportListItem['status']): string {
-  return cn(
-    'text-xs font-medium',
-    status === 'submitted'
-      ? 'text-status-success'
-      : status === 'revoked'
-        ? 'text-status-error'
-        : 'text-status-warning',
+function ReportStatusPill({ status }: { status: ReportListItem['status'] }) {
+  const label = status === 'submitted' ? 'Submitted' : status === 'revoked' ? 'Revoked' : 'Draft'
+
+  return (
+    <span
+      className={cn(
+        'inline-flex rounded-full px-2.5 py-1 text-xs font-medium',
+        status === 'submitted'
+          ? 'bg-status-success/12 text-status-success'
+          : status === 'revoked'
+            ? 'bg-status-error/12 text-status-error'
+            : 'bg-status-warning/12 text-status-warning',
+      )}
+    >
+      {label}
+    </span>
   )
 }
