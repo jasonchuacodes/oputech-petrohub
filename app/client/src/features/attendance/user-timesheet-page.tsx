@@ -83,7 +83,7 @@ function AdminUserTimesheetPage({
           className="font-bold text-text-heading outline-none hover:underline focus-visible:underline"
           onClick={() => setSelectedDay(day)}
         >
-          {formatTimesheetDate(day.localDate)}
+          {day.localDate}
         </button>
       ),
     },
