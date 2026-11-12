@@ -1,9 +1,11 @@
 'use client'
 
 import { CalendarClock, ChevronDown, Clock3 } from 'lucide-react'
-import { useRef, useState, type RefObject } from 'react'
+import { useEffect, useId, useRef, useState, type KeyboardEvent, type RefObject } from 'react'
+import { cn } from '~/utils/cn'
 import { Button } from './button'
 import { Calendar } from './calendar'
+import { parseHourOnlyTime, toHourOnlyTime, type TimePeriod } from './date-time-picker.utils'
 import { Input } from './input'
 import { Sheet } from './sheet'
 
@@ -69,15 +71,22 @@ function DateTimeSheet({
   onApply: (value: string) => void
 }) {
   const initial = parseDateTimeValue(value)
+  const initialHourOnlyTime = hourOnly ? parseHourOnlyTime(initial.time) : null
   const [date, setDate] = useState<Date | undefined>(initial.date ?? todayInTimezone(timezone))
-  const [time, setTime] = useState(initial.time)
+  const [time, setTime] = useState(hourOnly ? '' : initial.time)
+  const [hour, setHour] = useState(initialHourOnlyTime?.hour ?? 1)
+  const [period, setPeriod] = useState<TimePeriod>(initialHourOnlyTime?.period ?? 'AM')
   const [step, setStep] = useState<'date' | 'time'>('date')
+  const selectedTime = hourOnly ? toHourOnlyTime(hour, period) : time
 
   return (
     <Sheet
       open
       layer="nested"
-      title={step === 'date' ? 'Select date' : hourOnly ? 'Select hour' : 'Select time'}
+      title={step === 'date' ? 'Select date' : hourOnly ? 'Select effective time' : 'Select time'}
+      description={step === 'time' && hourOnly
+        ? 'Choose any hour, including an earlier hour today. Minutes are fixed at 00.'
+        : undefined}
       manageFocus
       showCloseButton={false}
       returnFocusRef={returnFocusRef}
@@ -95,44 +104,28 @@ function DateTimeSheet({
           </div>
         ) : (
           <div className="flex flex-1 flex-col items-center py-8">
-            <span className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
-              <Clock3 aria-hidden="true" className="size-5" />
-            </span>
-            {date && (
-              <p className="mt-3 text-sm font-medium text-text-heading">{formatCalendarDate(date)}</p>
-            )}
             {hourOnly ? (
-              <div className="mt-6 w-full">
-                <p className="text-sm font-medium">Effective hour</p>
-                <p className="mt-1 text-sm text-text-secondary">Choose any hour, including an earlier hour today.</p>
-                <div
-                  role="radiogroup"
-                  aria-label="Effective hour"
-                  className="mt-3 max-h-64 snap-y snap-mandatory overflow-y-auto rounded-md border border-input bg-card p-2"
-                >
-                  {Array.from({ length: 24 }, (_, hour) => {
-                    const value = `${String(hour).padStart(2, '0')}:00`
-                    const selected = time === value
-                    return (
-                      <button
-                        key={value}
-                        type="button"
-                        role="radio"
-                        aria-checked={selected}
-                        className={`flex min-h-11 w-full snap-center items-center justify-center rounded-sm px-3 text-sm font-medium outline-none focus-visible:ring-3 focus-visible:ring-ring/30 ${selected ? 'bg-primary text-primary-foreground' : 'text-text-heading hover:bg-surface-hover'}`}
-                        onClick={() => setTime(value)}
-                      >
-                        {formatHour(hour)}
-                      </button>
-                    )
-                  })}
-                </div>
+              <div className="w-full">
+                <HourOnlyPicker
+                  hour={hour}
+                  period={period}
+                  onHourChange={setHour}
+                  onPeriodChange={setPeriod}
+                />
               </div>
             ) : (
-              <label className="mt-6 flex w-full max-w-xs flex-col gap-1.5">
-                <span className="text-sm font-medium">Time</span>
-                <Input autoFocus type="time" value={time} onChange={(event) => setTime(event.target.value)} />
-              </label>
+              <>
+                <span className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <Clock3 aria-hidden="true" className="size-5" />
+                </span>
+                {date && (
+                  <p className="mt-3 text-sm font-medium text-text-heading">{formatCalendarDate(date)}</p>
+                )}
+                <label className="mt-6 flex w-full max-w-xs flex-col gap-1.5">
+                  <span className="text-sm font-medium">Time</span>
+                  <Input autoFocus type="time" value={time} onChange={(event) => setTime(event.target.value)} />
+                </label>
+              </>
             )}
           </div>
         )}
@@ -162,14 +155,230 @@ function DateTimeSheet({
             type="button"
             size="lg"
             className="flex-1"
-            disabled={!date || !time}
-            onClick={() => date && time && onApply(`${fromCalendarDate(date)}T${time}`)}
+            disabled={!date || !selectedTime}
+            onClick={() => date && selectedTime && onApply(`${fromCalendarDate(date)}T${selectedTime}`)}
           >
             Apply
           </Button>
         )}
       </footer>
     </Sheet>
+  )
+}
+
+const wheelRowHeight = 48
+const hourOptions = Array.from({ length: 12 }, (_, index) => index + 1)
+
+function HourOnlyPicker({
+  hour,
+  period,
+  onHourChange,
+  onPeriodChange,
+}: {
+  hour: number
+  period: TimePeriod
+  onHourChange: (hour: number) => void
+  onPeriodChange: (period: TimePeriod) => void
+}) {
+  return (
+    <div className="w-full">
+      <div aria-hidden="true" className="mb-2 grid grid-cols-3 text-center text-xs font-semibold tracking-wider text-text-secondary">
+        <span>HH</span>
+        <span>MM</span>
+        <span>AM/PM</span>
+      </div>
+      <div className="relative grid h-60 grid-cols-3 overflow-hidden rounded-md border border-input bg-card">
+        <div aria-hidden="true" className="pointer-events-none absolute inset-x-2 top-24 z-0 h-12 rounded-sm border-y border-primary/15 bg-primary/10" />
+        <HourWheel value={hour} onChange={onHourChange} />
+        <LockedMinuteWheel />
+        <PeriodWheel value={period} onChange={onPeriodChange} />
+      </div>
+    </div>
+  )
+}
+
+function HourWheel({ value, onChange }: { value: number; onChange: (hour: number) => void }) {
+  const listId = useId()
+  const listRef = useRef<HTMLDivElement>(null)
+  const initialIndexRef = useRef(hourOptions.indexOf(value))
+  const selectedIndexRef = useRef(hourOptions.indexOf(value))
+
+  useEffect(() => {
+    const list = listRef.current
+    if (!list) return
+    list.scrollTop = initialIndexRef.current * wheelRowHeight
+    list.focus({ preventScroll: true })
+  }, [])
+
+  const selectIndex = (index: number, scroll = false) => {
+    const nextIndex = Math.max(0, Math.min(hourOptions.length - 1, index))
+    selectedIndexRef.current = nextIndex
+    onChange(hourOptions[nextIndex])
+    if (scroll) {
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      listRef.current?.scrollTo({
+        top: nextIndex * wheelRowHeight,
+        behavior: reduceMotion ? 'auto' : 'smooth',
+      })
+    }
+  }
+
+  const handleScroll = () => {
+    const list = listRef.current
+    if (!list) return
+    const nextIndex = Math.max(0, Math.min(hourOptions.length - 1, Math.round(list.scrollTop / wheelRowHeight)))
+    if (nextIndex !== selectedIndexRef.current) selectIndex(nextIndex)
+  }
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    let nextIndex: number | undefined
+    if (event.key === 'ArrowDown') nextIndex = selectedIndexRef.current + 1
+    if (event.key === 'ArrowUp') nextIndex = selectedIndexRef.current - 1
+    if (event.key === 'Home') nextIndex = 0
+    if (event.key === 'End') nextIndex = hourOptions.length - 1
+    if (nextIndex === undefined) return
+    event.preventDefault()
+    selectIndex(nextIndex, true)
+  }
+
+  return (
+    <div
+      ref={listRef}
+      role="listbox"
+      tabIndex={0}
+      aria-label="Hour"
+      aria-activedescendant={`${listId}-${value}`}
+      className="relative z-10 snap-y snap-mandatory overflow-y-auto overscroll-contain py-24 outline-none [scrollbar-width:none] focus-visible:ring-3 focus-visible:ring-inset focus-visible:ring-ring/30 [&::-webkit-scrollbar]:hidden"
+      onKeyDown={handleKeyDown}
+      onScroll={handleScroll}
+    >
+      {hourOptions.map((option) => {
+        const selected = value === option
+        return (
+          <button
+            id={`${listId}-${option}`}
+            key={option}
+            type="button"
+            role="option"
+            tabIndex={-1}
+            aria-selected={selected}
+            className={cn(
+              'flex h-12 w-full snap-center snap-always items-center justify-center text-lg outline-none transition-colors',
+              selected ? 'font-semibold text-text-heading' : 'text-text-tertiary',
+            )}
+            onClick={() => selectIndex(hourOptions.indexOf(option), true)}
+          >
+            {String(option).padStart(2, '0')}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+function LockedMinuteWheel() {
+  const minutes = ['58', '59', '00', '01', '02']
+
+  return (
+    <div role="group" aria-label="Minutes, fixed at 00" className="relative z-10 border-x border-border/60 bg-muted/25">
+      <div aria-hidden="true" className="flex h-full flex-col justify-center">
+        {minutes.map((minute) => (
+          <span
+            key={minute}
+            className={cn(
+              'flex h-12 shrink-0 items-center justify-center text-lg',
+              minute === '00' ? 'font-semibold text-text-heading' : 'text-text-tertiary/45',
+            )}
+          >
+            {minute}
+          </span>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+const periodOptions: TimePeriod[] = ['AM', 'PM']
+
+function PeriodWheel({
+  value,
+  onChange,
+}: {
+  value: TimePeriod
+  onChange: (period: TimePeriod) => void
+}) {
+  const listId = useId()
+  const listRef = useRef<HTMLDivElement>(null)
+  const initialIndexRef = useRef(periodOptions.indexOf(value))
+  const selectedIndexRef = useRef(periodOptions.indexOf(value))
+
+  useEffect(() => {
+    if (listRef.current) listRef.current.scrollTop = initialIndexRef.current * wheelRowHeight
+  }, [])
+
+  const selectIndex = (index: number, scroll = false) => {
+    const nextIndex = Math.max(0, Math.min(periodOptions.length - 1, index))
+    selectedIndexRef.current = nextIndex
+    onChange(periodOptions[nextIndex])
+    if (scroll) {
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      listRef.current?.scrollTo({
+        top: nextIndex * wheelRowHeight,
+        behavior: reduceMotion ? 'auto' : 'smooth',
+      })
+    }
+  }
+
+  const handleScroll = () => {
+    const list = listRef.current
+    if (!list) return
+    const nextIndex = Math.max(0, Math.min(periodOptions.length - 1, Math.round(list.scrollTop / wheelRowHeight)))
+    if (nextIndex !== selectedIndexRef.current) selectIndex(nextIndex)
+  }
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    let nextIndex: number | undefined
+    if (event.key === 'ArrowDown') nextIndex = selectedIndexRef.current + 1
+    if (event.key === 'ArrowUp') nextIndex = selectedIndexRef.current - 1
+    if (event.key === 'Home') nextIndex = 1
+    if (event.key === 'End') nextIndex = periodOptions.length - 1
+    if (nextIndex === undefined) return
+    event.preventDefault()
+    selectIndex(nextIndex, true)
+  }
+
+  return (
+    <div
+      ref={listRef}
+      role="listbox"
+      tabIndex={0}
+      aria-label="AM or PM"
+      aria-activedescendant={`${listId}-${value}`}
+      className="relative z-10 snap-y snap-mandatory overflow-y-auto overscroll-contain py-24 outline-none [scrollbar-width:none] focus-visible:ring-3 focus-visible:ring-inset focus-visible:ring-ring/30 [&::-webkit-scrollbar]:hidden"
+      onKeyDown={handleKeyDown}
+      onScroll={handleScroll}
+    >
+      {periodOptions.map((option) => {
+        const selected = value === option
+        return (
+          <button
+            id={`${listId}-${option}`}
+            key={option}
+            type="button"
+            role="option"
+            tabIndex={-1}
+            aria-selected={selected}
+            className={cn(
+              'flex h-12 w-full snap-center snap-always items-center justify-center text-lg outline-none transition-colors',
+              selected ? 'font-semibold text-text-heading' : 'text-text-tertiary',
+            )}
+            onClick={() => selectIndex(periodOptions.indexOf(option), true)}
+          >
+            {option}
+          </button>
+        )
+      })}
+    </div>
   )
 }
 
@@ -229,9 +438,4 @@ export function formatDateTimeValue(value: string, hourOnly = false): string {
     ...(hourOnly ? {} : { minute: '2-digit' as const }),
   }).format(date)
   return `${datePart} - ${timePart}`
-}
-
-function formatHour(hour: number): string {
-  const period = hour >= 12 ? 'PM' : 'AM'
-  return `${hour % 12 || 12} ${period}`
 }
