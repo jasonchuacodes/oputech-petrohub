@@ -15,7 +15,7 @@ export function AdminHomePage({ access }: { access: TenantAccess }) {
         <FinancialSummary tenantId={access.tenant.id} timezone={access.tenant.timezone} />
       </Suspense>
       <FuelProducts tenantId={access.tenant.id} timezone={access.tenant.timezone} />
-      <SubmittedReports tenantId={access.tenant.id} />
+      <SubmittedReports tenantId={access.tenant.id} timezone={access.tenant.timezone} />
     </div>
   )
 }

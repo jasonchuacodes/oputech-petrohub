@@ -9,11 +9,15 @@ import type { ReportsQuery } from '~/generated/graphql'
 import { formatShiftTime } from '../../reports/create-report-sheet'
 import { ReportSummaryRows } from '../../reports/report-detail/report-summary-rows'
 import { useReportsQuery } from '../../reports/reports.queries'
+import { localDateFor } from './financial-range'
 
 type SummaryReport = ReportsQuery['reports']['items'][number]
 
-export function SubmittedReports({ tenantId }: { tenantId: string }) {
+export function SubmittedReports({ tenantId, timezone }: { tenantId: string; timezone: string }) {
+  const today = localDateFor(timezone)
   const reports = useReportsQuery(tenantId, {
+    startDate: today,
+    endDate: today,
     submittedOnly: true,
     offset: 0,
     limit: 5,
@@ -21,7 +25,7 @@ export function SubmittedReports({ tenantId }: { tenantId: string }) {
 
   return (
     <ContentSection
-      label="Submitted reports"
+      label="Reports today"
       headingClassName="font-sans text-sm font-semibold tracking-[0.14em] uppercase"
       rightContent={
         <Link
@@ -115,6 +119,7 @@ function ReportSummaryCarousel({
               cardRefs.current[index] = element
             }}
             report={report}
+            fullWidth={reports.length === 1}
           />
         ))}
       </div>
@@ -138,15 +143,17 @@ function ReportSummaryCarousel({
 function ReportSummaryCard({
   report,
   ref,
+  fullWidth,
 }: {
   report: SummaryReport
   ref?: Ref<HTMLElement>
+  fullWidth: boolean
 }) {
   return (
     <article
       ref={ref}
       role="listitem"
-      className="w-[min(85vw,22rem)] shrink-0 snap-start overflow-hidden rounded-md bg-card shadow-card wide:w-4/5"
+      className={`${fullWidth ? 'w-full' : 'w-[min(85vw,22rem)] wide:w-4/5'} shrink-0 snap-start overflow-hidden rounded-md bg-card shadow-card`}
     >
       <header className="flex items-start justify-between gap-3 border-b border-border/60 px-4 py-3">
         <div className="min-w-0">
