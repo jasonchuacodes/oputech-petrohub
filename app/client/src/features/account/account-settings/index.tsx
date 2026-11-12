@@ -40,7 +40,7 @@ export function AccountSettingsPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-xl flex-col gap-8 px-5 py-5 md:px-6 md:py-8">
+    <div className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-5 py-5 md:px-6 md:py-8">
       <PageHeader title="Account Settings" backHref="/me" backLabel="Back to Me" />
 
       <PageIntro>Manage your account information and security settings.</PageIntro>
