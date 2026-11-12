@@ -7,25 +7,16 @@ import { Button } from '~/components/ui/button'
 import { ContentSection } from '~/components/ui/content-section'
 import type { ReportsQuery } from '~/generated/graphql'
 import { formatShiftTime } from '../../reports/create-report-sheet'
-import { previousReportBusinessDate } from '../../reports/report-date-range'
 import { ReportSummaryRows } from '../../reports/report-detail/report-summary-rows'
 import { useReportsQuery } from '../../reports/reports.queries'
 
 type SummaryReport = ReportsQuery['reports']['items'][number]
 
-export function YesterdayReportSummary({
-  tenantId,
-  timezone,
-}: {
-  tenantId: string
-  timezone: string
-}) {
-  const yesterday = previousReportBusinessDate(timezone)
+export function SubmittedReports({ tenantId }: { tenantId: string }) {
   const reports = useReportsQuery(tenantId, {
-    startDate: yesterday,
-    endDate: yesterday,
     submittedOnly: true,
     offset: 0,
+    limit: 5,
   })
 
   return (
@@ -46,7 +37,7 @@ export function YesterdayReportSummary({
       ) : reports.isError && !reports.data ? (
         <div className="flex min-h-40 flex-col items-center justify-center gap-3 rounded-md bg-card p-6 text-center shadow-card">
           <AlertCircle aria-hidden="true" className="size-6 text-destructive" />
-          <p className="text-sm text-text-secondary">Unable to load yesterday&apos;s reports.</p>
+          <p className="text-sm text-text-secondary">Unable to load submitted reports.</p>
           <Button type="button" variant="outline" onClick={() => void reports.refetch()}>
             <RefreshCw aria-hidden="true" /> Try again
           </Button>
@@ -55,7 +46,7 @@ export function YesterdayReportSummary({
         <div className="flex min-h-40 items-center justify-center rounded-md bg-card p-6 text-center shadow-card">
           <div>
             <p className="font-medium text-text-heading">No submitted reports</p>
-            <p className="mt-1 text-sm text-text-secondary">No reports were submitted for this business date.</p>
+            <p className="mt-1 text-sm text-text-secondary">No reports have been submitted.</p>
           </div>
         </div>
       ) : reports.data ? (
@@ -155,7 +146,7 @@ function ReportSummaryCard({
     <article
       ref={ref}
       role="listitem"
-      className="w-[min(85vw,22rem)] shrink-0 snap-start overflow-hidden rounded-md bg-card shadow-card"
+      className="w-[min(85vw,22rem)] shrink-0 snap-start overflow-hidden rounded-md bg-card shadow-card wide:w-4/5"
     >
       <header className="flex items-start justify-between gap-3 border-b border-border/60 px-4 py-3">
         <div className="min-w-0">
@@ -183,7 +174,7 @@ function SummaryCarouselSkeleton() {
       {Array.from({ length: 2 }, (_, cardIndex) => (
         <div
           key={cardIndex}
-          className="w-[min(85vw,22rem)] shrink-0 overflow-hidden rounded-md bg-card shadow-card"
+          className="w-[min(85vw,22rem)] shrink-0 overflow-hidden rounded-md bg-card shadow-card wide:w-4/5"
         >
           <div className="border-b border-border/60 px-4 py-3">
             <div className="h-4 w-28 animate-pulse rounded bg-muted" />
