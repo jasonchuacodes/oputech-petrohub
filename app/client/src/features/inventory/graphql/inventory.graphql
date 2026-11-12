@@ -33,7 +33,10 @@ query InventoryProducts($input: InventoryProductsInput!) {
 query StockMovements($input: StockMovementsInput!) {
   stockMovements(input: $input) {
     items { ...StockMovementFields }
-    totalCount
+    pageInfo {
+      endCursor
+      hasNextPage
+    }
   }
 }
 

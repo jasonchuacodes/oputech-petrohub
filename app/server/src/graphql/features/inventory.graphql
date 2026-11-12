@@ -19,8 +19,8 @@ input InventoryProductsInput {
 
 input StockMovementsInput {
   productId: ObjectId!
-  offset: Int = 0
-  limit: Int = 20
+  first: Int = 20
+  after: String
 }
 
 input CreateInventoryProductInput {
@@ -59,7 +59,12 @@ type InventoryProductPage {
 
 type StockMovementPage {
   items: [StockMovement!]!
-  totalCount: Int!
+  pageInfo: StockMovementPageInfo!
+}
+
+type StockMovementPageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
 }
 
 type InventoryProduct {

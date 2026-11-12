@@ -726,7 +726,13 @@ export type StockMovement = {
 export type StockMovementPage = {
   __typename?: 'StockMovementPage';
   items: Array<StockMovement>;
-  totalCount: Scalars['Int']['output'];
+  pageInfo: StockMovementPageInfo;
+};
+
+export type StockMovementPageInfo = {
+  __typename?: 'StockMovementPageInfo';
+  endCursor?: Maybe<Scalars['String']['output']>;
+  hasNextPage: Scalars['Boolean']['output'];
 };
 
 export type StockMovementType =
@@ -737,8 +743,8 @@ export type StockMovementType =
   | 'stock_out';
 
 export type StockMovementsInput = {
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
   productId: Scalars['ObjectId']['input'];
 };
 
@@ -1038,6 +1044,7 @@ export type ResolversTypes = {
   Shift: ResolverTypeWrapper<Shift>;
   StockMovement: ResolverTypeWrapper<StockMovement>;
   StockMovementPage: ResolverTypeWrapper<StockMovementPage>;
+  StockMovementPageInfo: ResolverTypeWrapper<StockMovementPageInfo>;
   StockMovementType: StockMovementType;
   StockMovementsInput: StockMovementsInput;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
@@ -1129,6 +1136,7 @@ export type ResolversParentTypes = {
   Shift: Shift;
   StockMovement: StockMovement;
   StockMovementPage: StockMovementPage;
+  StockMovementPageInfo: StockMovementPageInfo;
   StockMovementsInput: StockMovementsInput;
   String: Scalars['String']['output'];
   TenantAccess: TenantAccess;
@@ -1447,7 +1455,12 @@ export type StockMovementResolvers<ContextType = GraphqlContext, ParentType exte
 
 export type StockMovementPageResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['StockMovementPage'] = ResolversParentTypes['StockMovementPage']> = {
   items?: Resolver<Array<ResolversTypes['StockMovement']>, ParentType, ContextType>;
-  totalCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  pageInfo?: Resolver<ResolversTypes['StockMovementPageInfo'], ParentType, ContextType>;
+};
+
+export type StockMovementPageInfoResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['StockMovementPageInfo'] = ResolversParentTypes['StockMovementPageInfo']> = {
+  endCursor?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  hasNextPage?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
 };
 
 export type TenantAccessResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['TenantAccess'] = ResolversParentTypes['TenantAccess']> = {
@@ -1544,6 +1557,7 @@ export type Resolvers<ContextType = GraphqlContext> = {
   Shift?: ShiftResolvers<ContextType>;
   StockMovement?: StockMovementResolvers<ContextType>;
   StockMovementPage?: StockMovementPageResolvers<ContextType>;
+  StockMovementPageInfo?: StockMovementPageInfoResolvers<ContextType>;
   TenantAccess?: TenantAccessResolvers<ContextType>;
   TenantSummary?: TenantSummaryResolvers<ContextType>;
   TimesheetDay?: TimesheetDayResolvers<ContextType>;

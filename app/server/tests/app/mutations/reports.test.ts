@@ -218,12 +218,25 @@ describe('report disposal lifecycle', () => {
       buckets: [{ amounts: { income: '0', expenses: '0', lubricantSales: '0' } }],
     })
     expect((await inventoryProducts(memberToken)).items.find((item: { id: string }) => item.id === lubricantProductId)?.stockCount).toBe('1')
-    const stockHistory = await graphql(memberToken, `query ($input: StockMovementsInput!) { stockMovements(input: $input) { items { type quantityChange balanceBefore balanceAfter } } }`, { input: { productId: lubricantProductId, offset: 0, limit: 20 } })
+    const stockHistory = await graphql(memberToken, `query ($input: StockMovementsInput!) { stockMovements(input: $input) { items { type quantityChange balanceBefore balanceAfter } pageInfo { endCursor hasNextPage } } }`, { input: { productId: lubricantProductId, first: 2 } })
     expect(stockHistory.body.errors).toBeUndefined()
     expect(stockHistory.body.data.stockMovements.items).toEqual(expect.arrayContaining([
       expect.objectContaining({ type: 'report_sale', quantityChange: '-3', balanceAfter: '-2' }),
       expect.objectContaining({ type: 'report_reversal', quantityChange: '3', balanceAfter: '1' }),
     ]))
+    expect(stockHistory.body.data.stockMovements.pageInfo).toMatchObject({ endCursor: expect.any(String), hasNextPage: true })
+    const olderStockHistory = await graphql(memberToken, `query ($input: StockMovementsInput!) { stockMovements(input: $input) { items { type quantityChange balanceBefore balanceAfter } pageInfo { endCursor hasNextPage } } }`, {
+      input: { productId: lubricantProductId, first: 2, after: stockHistory.body.data.stockMovements.pageInfo.endCursor },
+    })
+    expect(olderStockHistory.body.errors).toBeUndefined()
+    expect(olderStockHistory.body.data.stockMovements.items).toEqual([
+      expect.objectContaining({ type: 'opening', quantityChange: '1', balanceBefore: '0', balanceAfter: '1' }),
+    ])
+    expect(olderStockHistory.body.data.stockMovements.pageInfo.hasNextPage).toBe(false)
+    const invalidStockHistoryCursor = await graphql(memberToken, `query ($input: StockMovementsInput!) { stockMovements(input: $input) { items { type } } }`, {
+      input: { productId: lubricantProductId, first: 2, after: 'not-a-cursor' },
+    })
+    expect(invalidStockHistoryCursor.body.errors?.[0]?.extensions?.originalError).toMatchObject({ code: 'INVALID_INPUT' })
 
     const negativeManual = await graphql(adminToken, `mutation ($input: RecordStockMovementInput!) { recordStockMovement(input: $input) { type quantityChange balanceAfter } }`, { input: { productId: lubricantProductId, type: 'stock_out', quantity: '5', reason: 'Damaged stock correction', idempotencyKey: 'test-manual-negative-stock' } })
     expect(negativeManual.body.errors).toBeUndefined()

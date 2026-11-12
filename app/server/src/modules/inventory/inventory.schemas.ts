@@ -15,8 +15,8 @@ export type InventoryProductsInput = z.infer<typeof inventoryProductsInputSchema
 
 export const stockMovementsInputSchema = z.object({
   productId: z.instanceof(Types.ObjectId),
-  offset: z.number().int().min(0).default(0),
-  limit: z.number().int().min(1).max(100).default(20),
+  first: z.number().int().min(1).max(100).default(20),
+  after: z.string().trim().min(1).max(512).nullish(),
 }).strict()
 export type StockMovementsInput = z.infer<typeof stockMovementsInputSchema>
 

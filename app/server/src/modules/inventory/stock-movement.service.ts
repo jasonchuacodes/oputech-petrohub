@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common'
 import { InjectConnection, InjectModel } from '@nestjs/mongoose'
-import { ClientSession, Connection, Model, Types } from 'mongoose'
-import { ConflictException, NotFoundException } from '../../common/exceptions'
+import { ClientSession, Connection, FilterQuery, Model, Types } from 'mongoose'
+import { z } from 'zod'
+import { ConflictException, InvalidInputException, NotFoundException } from '../../common/exceptions'
 import { decimal, decimal128 } from '../../common/numeric/decimal'
-import { RecordStockMovementInput } from './inventory.schemas'
+import { RecordStockMovementInput, StockMovementsInput } from './inventory.schemas'
 import { InventoryProduct } from './schemas/inventory-product.schema'
 import { StockMovement, StockMovementType } from './schemas/stock-movement.schema'
 
@@ -11,6 +12,12 @@ export type InventoryActor = { userId: Types.ObjectId; name: string }
 export type StockMovementRecord = StockMovement & { _id: Types.ObjectId }
 type InventoryProductRecord = InventoryProduct & { _id: Types.ObjectId }
 type ReportInventorySale = { productId: Types.ObjectId; productName: string; unit: string; quantity: Types.Decimal128 }
+const objectIdStringSchema = z.string().regex(/^[0-9a-f]{24}$/i)
+const stockMovementCursorSchema = z.object({
+  productId: objectIdStringSchema,
+  movementId: objectIdStringSchema,
+  createdAt: z.string().refine((value) => !Number.isNaN(new Date(value).getTime())),
+}).strict()
 
 @Injectable()
 export class StockMovementService {
@@ -20,14 +27,32 @@ export class StockMovementService {
     @InjectConnection() private readonly connection: Connection,
   ) {}
 
-  async list(tenantId: Types.ObjectId, productId: Types.ObjectId, offset: number, limit: number) {
-    if (!await this.products.exists({ _id: productId, tenantId })) throw new NotFoundException('Inventory product not found.')
-    const filter = { tenantId, productId }
-    const [items, totalCount] = await Promise.all([
-      this.movements.find(filter).sort({ createdAt: -1, _id: -1 }).skip(offset).limit(limit).lean<StockMovementRecord[]>().exec(),
-      this.movements.countDocuments(filter).exec(),
-    ])
-    return { items, totalCount }
+  async list(input: StockMovementsInput & { tenantId: Types.ObjectId }) {
+    if (!await this.products.exists({ _id: input.productId, tenantId: input.tenantId })) throw new NotFoundException('Inventory product not found.')
+    const filter: FilterQuery<StockMovement> = { tenantId: input.tenantId, productId: input.productId }
+    if (input.after) {
+      const cursor = this.decodeCursor(input.after, input.productId)
+      filter.$or = [
+        { createdAt: { $lt: cursor.createdAt } },
+        { createdAt: cursor.createdAt, _id: { $lt: cursor.movementId } },
+      ]
+    }
+    const records = await this.movements
+      .find(filter)
+      .sort({ createdAt: -1, _id: -1 })
+      .limit(input.first + 1)
+      .lean<StockMovementRecord[]>()
+      .exec()
+    const hasNextPage = records.length > input.first
+    const items = hasNextPage ? records.slice(0, input.first) : records
+    const lastMovement = items.at(-1)
+    return {
+      items,
+      pageInfo: {
+        endCursor: lastMovement ? this.encodeCursor(lastMovement) : null,
+        hasNextPage,
+      },
+    }
   }
 
   async recordManual(tenantId: Types.ObjectId, actor: InventoryActor, input: RecordStockMovementInput) {
@@ -194,5 +219,30 @@ export class StockMovementService {
       existing.reason !== input.reason
     ) throw new ConflictException('This idempotency key was already used for another stock movement.')
     return existing
+  }
+
+  private encodeCursor(movement: StockMovementRecord) {
+    return Buffer.from(JSON.stringify({
+      productId: movement.productId.toHexString(),
+      movementId: movement._id.toHexString(),
+      createdAt: movement.createdAt.toISOString(),
+    })).toString('base64url')
+  }
+
+  private decodeCursor(cursor: string, productId: Types.ObjectId) {
+    try {
+      const payload = stockMovementCursorSchema.parse(
+        JSON.parse(Buffer.from(cursor, 'base64url').toString('utf8')) as unknown,
+      )
+      const cursorProductId = new Types.ObjectId(payload.productId)
+      if (!cursorProductId.equals(productId)) throw new InvalidInputException('The stock movement cursor does not match this product.')
+      return {
+        createdAt: new Date(payload.createdAt),
+        movementId: new Types.ObjectId(payload.movementId),
+      }
+    } catch (error) {
+      if (error instanceof InvalidInputException) throw error
+      throw new InvalidInputException('Invalid stock movement cursor.')
+    }
   }
 }

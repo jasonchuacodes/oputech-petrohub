@@ -52,8 +52,8 @@ export class InventoryResolver {
     @CurrentTenant() tenant: AuthorizedTenant,
     @Args('input', new ZodValidationPipe(stockMovementsInputSchema)) input: StockMovementsInput,
   ): Promise<GraphqlQuery['stockMovements']> {
-    const page = await this.stockMovements.list(tenant.tenantId, input.productId, input.offset, input.limit)
-    return { items: page.items.map((movement) => this.movement(movement)), totalCount: page.totalCount }
+    const page = await this.stockMovements.list({ tenantId: tenant.tenantId, ...input })
+    return { items: page.items.map((movement) => this.movement(movement)), pageInfo: page.pageInfo }
   }
 
   @Mutation('createInventoryProduct')
