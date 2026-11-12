@@ -1,11 +1,15 @@
 'use client'
 
+import * as Popover from '@radix-ui/react-popover'
 import { ChevronDown } from 'lucide-react'
 import { useState } from 'react'
 import type { DateRange } from 'react-day-picker'
+import { useMediaQuery } from '~/hooks/useMediaQuery'
 import { Button } from './button'
 import { Calendar } from './calendar'
 import { Sheet } from './sheet'
+
+const wideMediaQuery = '(min-width: 75rem)'
 
 type DateRangePickerProps = {
   startDate: string
@@ -25,21 +29,56 @@ export function DateRangePicker({
   onApply,
 }: DateRangePickerProps) {
   const [open, setOpen] = useState(false)
+  const desktop = useMediaQuery(wideMediaQuery)
+  const trigger = (
+    <button
+      type="button"
+      disabled={disabled || !startDate || !endDate}
+      className="inline-flex min-h-11 items-center gap-1.5 rounded-sm px-1 whitespace-nowrap outline-none focus-visible:ring-3 focus-visible:ring-ring/30 disabled:opacity-50"
+      onClick={() => {
+        if (!desktop) setOpen(true)
+      }}
+    >
+      <span className="text-xs text-text-tertiary">Period</span>
+      <span className="text-sm font-medium text-text-heading tabular-nums">
+        {formatIndicatorDate(startDate)} - {formatIndicatorDate(endDate)}
+      </span>
+      <ChevronDown aria-hidden="true" className="size-4 text-text-secondary" />
+    </button>
+  )
+
+  if (desktop) {
+    return (
+      <Popover.Root open={open} onOpenChange={setOpen}>
+        <Popover.Trigger asChild>{trigger}</Popover.Trigger>
+        <Popover.Portal>
+          <Popover.Content
+            align="end"
+            sideOffset={8}
+            aria-label="Custom date range"
+            className="z-50 overflow-hidden rounded-lg border border-border bg-popover p-3 text-popover-foreground shadow-lg outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95"
+          >
+            <DateRangePanel
+              key={`${startDate}:${endDate}`}
+              startDate={startDate}
+              endDate={endDate}
+              timezone={timezone}
+              maxDate={maxDate}
+              onClose={() => setOpen(false)}
+              onApply={(nextStart, nextEnd) => {
+                onApply(nextStart, nextEnd)
+                setOpen(false)
+              }}
+            />
+          </Popover.Content>
+        </Popover.Portal>
+      </Popover.Root>
+    )
+  }
 
   return (
     <>
-      <button
-        type="button"
-        disabled={disabled || !startDate || !endDate}
-        className="flex min-h-11 items-center gap-2 rounded-sm px-1 text-right whitespace-nowrap outline-none focus-visible:ring-3 focus-visible:ring-ring/30 disabled:opacity-50"
-        onClick={() => setOpen(true)}
-      >
-        <span className="text-xs text-text-tertiary">Period</span>
-        <span className="text-sm font-medium text-text-heading tabular-nums">
-          {formatIndicatorDate(startDate)} - {formatIndicatorDate(endDate)}
-        </span>
-        <ChevronDown aria-hidden="true" className="size-4 text-text-secondary" />
-      </button>
+      {trigger}
 
       {open && (
         <DateRangeSheet
@@ -111,6 +150,57 @@ function DateRangeSheet({
         </Button>
       </footer>
     </Sheet>
+  )
+}
+
+function DateRangePanel({
+  startDate,
+  endDate,
+  timezone,
+  maxDate,
+  onClose,
+  onApply,
+}: {
+  startDate: string
+  endDate: string
+  timezone: string
+  maxDate?: string
+  onClose: () => void
+  onApply: (startDate: string, endDate: string) => void
+}) {
+  const boundedEnd = maxDate && endDate > maxDate ? maxDate : endDate
+  const boundedStart = startDate > boundedEnd ? boundedEnd : startDate
+  const [draft, setDraft] = useState<DateRange | undefined>({
+    from: toCalendarDate(boundedStart),
+    to: toCalendarDate(boundedEnd),
+  })
+
+  return (
+    <div>
+      <Calendar
+        mode="range"
+        selected={draft}
+        onSelect={setDraft}
+        disabled={maxDate ? { after: toCalendarDate(maxDate) } : undefined}
+        timeZone={timezone}
+      />
+      <div className="mt-3 flex justify-end gap-2 border-t border-border pt-3">
+        <Button type="button" variant="outline" size="sm" onClick={onClose}>
+          Cancel
+        </Button>
+        <Button
+          type="button"
+          size="sm"
+          disabled={!draft?.from || !draft.to}
+          onClick={() => {
+            if (!draft?.from || !draft.to) return
+            onApply(fromCalendarDate(draft.from), fromCalendarDate(draft.to))
+          }}
+        >
+          Apply
+        </Button>
+      </div>
+    </div>
   )
 }
 

@@ -1,12 +1,13 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Clock3 } from 'lucide-react'
+import { Clock3, Eye } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 import { Button } from '~/components/ui/button'
+import { DataTable, type DataTableColumn } from '~/components/ui/data-table'
 import { DateRangePicker } from '~/components/ui/date-range-picker'
 import { NumberInput } from '~/components/ui/number-input'
 import { PageHeader } from '~/components/ui/page-header'
@@ -48,9 +49,39 @@ function MemberTimesheets({ tenantId, userId }: { tenantId: string; userId: stri
 
   const summary = timesheets.data?.items[0]
   const visibleDays = days.data?.days.filter((day) => Number(day.effectiveHours) > 0) ?? []
+  const dayColumns: DataTableColumn<(typeof visibleDays)[number]>[] = [
+    {
+      id: 'localDate',
+      heading: 'Date',
+      cell: (day) => <span className="font-medium text-text-heading">{formatTimesheetDate(day.localDate)}</span>,
+    },
+    {
+      id: 'trackedSeconds',
+      heading: 'Tracked',
+      align: 'right',
+      cell: (day) => <span className="tabular-nums">{formatDuration(day.trackedSeconds)}</span>,
+    },
+    {
+      id: 'automaticSeconds',
+      heading: 'Automatic',
+      align: 'right',
+      cell: (day) => <span className="tabular-nums">{formatDuration(day.automaticSeconds)}</span>,
+    },
+    {
+      id: 'effectiveHours',
+      heading: 'Credited hours',
+      align: 'right',
+      cell: (day) => <span className="font-semibold tabular-nums">{formatHours(day.effectiveHours)} hrs</span>,
+    },
+    {
+      id: 'status',
+      heading: 'Status',
+      cell: (day) => day.overrideHours === null ? 'Credited' : 'Adjusted',
+    },
+  ]
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-5 py-5 md:p-6">
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-5 py-5 md:p-6 wide:max-w-5xl">
       <PageHeader title="My timesheets" description="Review your credited hours by date." />
 
       <div className="flex flex-col gap-1">
@@ -91,22 +122,34 @@ function MemberTimesheets({ tenantId, userId }: { tenantId: string; userId: stri
                 <p className="text-sm text-text-secondary">There are no nonzero timesheets in this date range.</p>
               </div>
             ) : (
-              <ul className="overflow-hidden rounded-md bg-card shadow-card">
-                {visibleDays.map((day) => (
-                  <li key={day.localDate} className="flex min-h-20 items-center gap-3 border-b border-border/60 px-4 py-3 last:border-b-0">
-                    <span className="min-w-0 flex-1">
-                      <span className="block font-medium text-text-heading">{formatTimesheetDate(day.localDate)}</span>
-                      <span className="mt-1 block text-xs text-text-tertiary">
-                        Tracked {formatDuration(day.trackedSeconds)} · Automatic {formatDuration(day.automaticSeconds)}
+              <>
+                <ul className="overflow-hidden rounded-md bg-card shadow-card md:hidden">
+                  {visibleDays.map((day) => (
+                    <li key={day.localDate} className="flex min-h-20 items-center gap-3 border-b border-border/60 px-4 py-3 last:border-b-0">
+                      <span className="min-w-0 flex-1">
+                        <span className="block font-medium text-text-heading">{formatTimesheetDate(day.localDate)}</span>
+                        <span className="mt-1 block text-xs text-text-tertiary">
+                          Tracked {formatDuration(day.trackedSeconds)} · Automatic {formatDuration(day.automaticSeconds)}
+                        </span>
                       </span>
-                    </span>
-                    <span className="text-right">
-                      <span className="block font-semibold text-text-heading tabular-nums">{formatHours(day.effectiveHours)} hrs</span>
-                      <span className="text-xs text-text-tertiary">{day.overrideHours === null ? 'Credited' : 'Adjusted'}</span>
-                    </span>
-                  </li>
-                ))}
-              </ul>
+                      <span className="text-right">
+                        <span className="block font-semibold text-text-heading tabular-nums">{formatHours(day.effectiveHours)} hrs</span>
+                        <span className="text-xs text-text-tertiary">{day.overrideHours === null ? 'Credited' : 'Adjusted'}</span>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                <div className="hidden md:block">
+                  <DataTable
+                    collection={DataTable.collection({
+                      items: visibleDays,
+                      itemToValue: (day) => day.localDate,
+                      itemToString: (day) => `${formatTimesheetDate(day.localDate)} timesheet`,
+                    })}
+                    columns={dayColumns}
+                  />
+                </div>
+              </>
             )}
           </section>
           </div>
@@ -128,6 +171,36 @@ function TenantTimesheets({ tenantId }: { tenantId: string }) {
   const totalCount = timesheets.data?.totalCount ?? 0
   const pageStart = totalCount === 0 ? 0 : offset + 1
   const pageEnd = Math.min(offset + pageSize, totalCount)
+  const items = timesheets.data?.items ?? []
+  const columns: DataTableColumn<(typeof items)[number]>[] = [
+    {
+      id: 'fullName',
+      heading: 'Member',
+      cell: (item) => <span className="font-medium text-text-heading">{item.fullName}</span>,
+    },
+    {
+      id: 'username',
+      heading: 'Username',
+      cell: (item) => <span className="text-text-secondary">@{item.username}</span>,
+    },
+    {
+      id: 'totalHours',
+      heading: 'Total hours',
+      align: 'right',
+      cell: (item) => <span className="font-semibold tabular-nums">{formatHours(item.totalHours)} hrs</span>,
+    },
+    {
+      id: 'actions',
+      heading: '',
+      align: 'right',
+      width: 100,
+      cell: (item) => (
+        <Button type="button" variant="ghost" size="sm" onClick={() => setSelectedUserId(item.userId)}>
+          <Eye aria-hidden="true" /> View
+        </Button>
+      ),
+    },
+  ]
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-5 px-5 py-5 md:p-6">
@@ -163,7 +236,7 @@ function TenantTimesheets({ tenantId }: { tenantId: string }) {
           </div>
         ) : (
           <section aria-label="Member timesheets" className="flex flex-col gap-3">
-          <ul className="overflow-hidden rounded-md bg-card shadow-card">
+          <ul className="overflow-hidden rounded-md bg-card shadow-card md:hidden">
             {timesheets.data.items.map((item) => (
               <li key={item.userId} className="border-b border-border/60 last:border-b-0">
                 <button
@@ -183,6 +256,17 @@ function TenantTimesheets({ tenantId }: { tenantId: string }) {
               </li>
             ))}
           </ul>
+
+          <div className="hidden md:block">
+            <DataTable
+              collection={DataTable.collection({
+                items,
+                itemToValue: (item) => item.userId,
+                itemToString: (item) => `${item.fullName} timesheet`,
+              })}
+              columns={columns}
+            />
+          </div>
 
           {totalCount > pageSize && (
             <nav aria-label="Timesheet pagination" className="flex items-center justify-between gap-3">

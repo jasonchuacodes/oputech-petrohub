@@ -8,6 +8,7 @@ import { Button } from '~/components/ui/button'
 import { ConfirmationDialog } from '~/components/ui/confirmation-dialog'
 import { Input } from '~/components/ui/input'
 import { Spinner } from '~/components/ui/spinner'
+import { formatShiftTime } from '~/utils/time'
 import {
   type ShiftRecord,
   useCreateShiftMutation,
@@ -158,7 +159,7 @@ export function ShiftSheet({ open, tenantId, tenantName, shift, onClose }: Shift
             </h2>
             <p id={descriptionId} className="mt-0.5 text-sm text-text-secondary">
               {shift && !editing
-                ? `${shift.name} · ${shift.startTime}–${shift.endTime}`
+                ? `${shift.name} · ${formatShiftTime(shift)}`
                 : `${shift ? 'Update' : 'Add'} a daily shift for ${tenantName}.`}
             </p>
           </div>
@@ -249,7 +250,7 @@ export function ShiftSheet({ open, tenantId, tenantName, shift, onClose }: Shift
         <ConfirmationDialog
           open={deleteOpen}
           title="Delete shift?"
-          description={`${shift.name} · ${shift.startTime}–${shift.endTime} will be removed from the tenant schedule.`}
+          description={`${shift.name} · ${formatShiftTime(shift)} will be removed from the tenant schedule.`}
           icon={Trash2}
           variant="danger"
           confirmText="Delete shift"

@@ -4,6 +4,7 @@ import { ChevronRight, FilePlus2 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback, useState } from 'react'
+import { formatShiftTime } from '~/utils/time'
 import { CreateReportSheet } from '../../reports/create-report-sheet'
 import { useReportCreationContextQuery } from '../../reports/reports.queries'
 import { useActiveTenant } from '../../layout/use-active-tenant'
@@ -87,13 +88,13 @@ export function MemberHomePage() {
                     </span>
                   </div>
                   <p className="mt-1 truncate text-sm text-text-secondary">
-                    Report period {formatTime(interval.startTime)}-{formatTime(interval.endTime)}
+                    Report period {formatShiftTime(interval)}
                   </p>
                 </div>
                 {report && (
                   <Link
                     href={`/report/${report.id}`}
-                    aria-label={`View ${formatTime(interval.startTime)}-${formatTime(interval.endTime)} report`}
+                    aria-label={`View ${formatShiftTime(interval)} report`}
                     className="group flex size-9 items-center justify-center rounded-sm text-primary outline-none hover:bg-primary/10 focus-visible:ring-3 focus-visible:ring-ring/30"
                   >
                     <ChevronRight
@@ -122,12 +123,4 @@ export function MemberHomePage() {
       )}
     </div>
   )
-}
-
-function formatTime(value: string): string {
-  const [hours = 0, minutes = '00'] = value.split(':')
-  const hour = Number(hours)
-  const period = hour >= 12 ? 'PM' : 'AM'
-  const displayHour = hour % 12 || 12
-  return `${displayHour}:${minutes}${period}`
 }
