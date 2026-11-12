@@ -26,6 +26,7 @@ fragment ReportDetailFields on Report {
   effective
   revokedFromStatus
   revokedById
+  remarks
   incomeEntries { id recurringIncomeFieldId description notes amount }
   expenseEntries { id recurringIncomeFieldId description notes amount }
   lubricantSales { id productId productName unit quantity unitPrice amount }
@@ -111,6 +112,10 @@ mutation CreateReport($input: CreateReportInput!) {
 
 mutation SaveReportDraft($input: SaveReportDraftInput!) {
   saveReportDraft(input: $input) { ...ReportDetailFields }
+}
+
+mutation UpdateReportRemarks($input: UpdateReportRemarksInput!) {
+  updateReportRemarks(input: $input) { ...ReportDetailFields }
 }
 
 mutation SubmitReport($input: ReportTransitionInput!) {

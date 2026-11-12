@@ -322,6 +322,7 @@ export type Mutation = {
   updateMyProfile: User;
   updatePumpMeter: PumpMeter;
   updateRecurringIncomeConfiguration: RecurringIncomeConfiguration;
+  updateReportRemarks: Report;
   updateShift: Shift;
   updateTenant: TenantSummary;
   updateUser: User;
@@ -463,6 +464,11 @@ export type MutationUpdateRecurringIncomeConfigurationArgs = {
 };
 
 
+export type MutationUpdateReportRemarksArgs = {
+  input: UpdateReportRemarksInput;
+};
+
+
 export type MutationUpdateShiftArgs = {
   input: UpdateShiftInput;
 };
@@ -589,6 +595,7 @@ export type Report = {
   interval: ReportIntervalSnapshot;
   legacy: Scalars['Boolean']['output'];
   lubricantSales: Array<LubricantSale>;
+  remarks: Scalars['String']['output'];
   revision: Scalars['Int']['output'];
   revocationReason?: Maybe<Scalars['String']['output']>;
   revokedAt?: Maybe<Scalars['String']['output']>;
@@ -823,6 +830,12 @@ export type UpdateRecurringIncomeConfigurationInput = {
   fields: Array<RecurringIncomeFieldInput>;
 };
 
+export type UpdateReportRemarksInput = {
+  expectedRevision: Scalars['Int']['input'];
+  remarks: Scalars['String']['input'];
+  reportId: Scalars['ObjectId']['input'];
+};
+
 export type UpdateShiftInput = {
   endTime: Scalars['String']['input'];
   name: Scalars['String']['input'];
@@ -1040,6 +1053,7 @@ export type ResolversTypes = {
   UpdateMyProfileInput: UpdateMyProfileInput;
   UpdatePumpMeterInput: UpdatePumpMeterInput;
   UpdateRecurringIncomeConfigurationInput: UpdateRecurringIncomeConfigurationInput;
+  UpdateReportRemarksInput: UpdateReportRemarksInput;
   UpdateShiftInput: UpdateShiftInput;
   UpdateTenantInput: UpdateTenantInput;
   UpdateUserInput: UpdateUserInput;
@@ -1129,6 +1143,7 @@ export type ResolversParentTypes = {
   UpdateMyProfileInput: UpdateMyProfileInput;
   UpdatePumpMeterInput: UpdatePumpMeterInput;
   UpdateRecurringIncomeConfigurationInput: UpdateRecurringIncomeConfigurationInput;
+  UpdateReportRemarksInput: UpdateReportRemarksInput;
   UpdateShiftInput: UpdateShiftInput;
   UpdateTenantInput: UpdateTenantInput;
   UpdateUserInput: UpdateUserInput;
@@ -1291,6 +1306,7 @@ export type MutationResolvers<ContextType = GraphqlContext, ParentType extends R
   updateMyProfile?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationUpdateMyProfileArgs, 'input'>>;
   updatePumpMeter?: Resolver<ResolversTypes['PumpMeter'], ParentType, ContextType, RequireFields<MutationUpdatePumpMeterArgs, 'input'>>;
   updateRecurringIncomeConfiguration?: Resolver<ResolversTypes['RecurringIncomeConfiguration'], ParentType, ContextType, RequireFields<MutationUpdateRecurringIncomeConfigurationArgs, 'input'>>;
+  updateReportRemarks?: Resolver<ResolversTypes['Report'], ParentType, ContextType, RequireFields<MutationUpdateReportRemarksArgs, 'input'>>;
   updateShift?: Resolver<ResolversTypes['Shift'], ParentType, ContextType, RequireFields<MutationUpdateShiftArgs, 'input'>>;
   updateTenant?: Resolver<ResolversTypes['TenantSummary'], ParentType, ContextType, RequireFields<MutationUpdateTenantArgs, 'input'>>;
   updateUser?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationUpdateUserArgs, 'input'>>;
@@ -1353,6 +1369,7 @@ export type ReportResolvers<ContextType = GraphqlContext, ParentType extends Res
   interval?: Resolver<ResolversTypes['ReportIntervalSnapshot'], ParentType, ContextType>;
   legacy?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   lubricantSales?: Resolver<Array<ResolversTypes['LubricantSale']>, ParentType, ContextType>;
+  remarks?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   revision?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   revocationReason?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   revokedAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;

@@ -24,6 +24,7 @@ import {
   ReportsInput,
   ReportTransitionInput,
   SaveReportDraftInput,
+  UpdateReportRemarksInput,
 } from './reports.schemas'
 import { Report, ReportFinancialEntry, ReportStatus } from './schemas/report.schema'
 
@@ -403,6 +404,33 @@ export class ReportsService {
     }
     if (!result) throw new ConflictException('Unable to save this report.')
     return result
+  }
+
+  async updateRemarks(tenantId: Types.ObjectId, actor: ReportActor, input: UpdateReportRemarksInput): Promise<ReportDetailRecord> {
+    const current = await this.reports.findOne({ _id: input.reportId, tenantId }).lean<ReportRecord>().exec()
+    if (!current) throw new NotFoundException('Report not found.')
+
+    const administrator = actor.role === UserRole.ADMIN || actor.role === UserRole.SUPERADMIN
+    const creator = current.creatorId.equals(actor.userId)
+    if (current.status === ReportStatus.REVOKED) throw new ConflictException('Revoked reports cannot be changed.')
+    if (!administrator && (!creator || current.status !== ReportStatus.DRAFT)) {
+      throw new ForbiddenException('Only the report creator can edit draft remarks; administrators can also edit submitted remarks.')
+    }
+    if (current.revision !== input.expectedRevision) throw new ConflictException('This report changed. Refresh and try again.')
+
+    const updated = await this.reports.findOneAndUpdate(
+      {
+        _id: input.reportId,
+        tenantId,
+        revision: input.expectedRevision,
+        status: { $in: [ReportStatus.DRAFT, ReportStatus.SUBMITTED] },
+      },
+      { $set: { remarks: input.remarks }, $inc: { revision: 1 } },
+      { new: true, runValidators: true },
+    ).lean<ReportRecord>().exec()
+    if (!updated) throw new ConflictException('This report changed. Refresh and try again.')
+    const disposals = updated.disposalBatchId ? await this.disposals.getForReport(tenantId, updated._id) : undefined
+    return { report: updated, disposals: disposals ?? undefined }
   }
 
   async submit(tenantId: Types.ObjectId, actor: ReportActor, input: ReportTransitionInput): Promise<ReportDetailRecord> {

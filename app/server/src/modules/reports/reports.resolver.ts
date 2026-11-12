@@ -27,6 +27,8 @@ import {
   ReportTransitionInput,
   saveReportDraftInputSchema,
   SaveReportDraftInput,
+  updateReportRemarksInputSchema,
+  UpdateReportRemarksInput,
 } from './reports.schemas'
 import { ReportDetailRecord, ReportRecord, ReportsService } from './reports.service'
 
@@ -116,6 +118,16 @@ export class ReportsResolver {
     return this.serializeDetail(await this.reports.saveDraft(tenant.tenantId, this.toActor(actor), input))
   }
 
+  @Mutation('updateReportRemarks')
+  @UseGuards(...tenantGuards)
+  async updateRemarks(
+    @CurrentActor() actor: AuthenticatedActor,
+    @CurrentTenant() tenant: AuthorizedTenant,
+    @Args('input', new ZodValidationPipe(updateReportRemarksInputSchema)) input: UpdateReportRemarksInput,
+  ): Promise<GraphqlMutation['updateReportRemarks']> {
+    return this.serializeDetail(await this.reports.updateRemarks(tenant.tenantId, this.toActor(actor), input))
+  }
+
   @Mutation('submitReport')
   @UseGuards(...tenantGuards)
   async submit(
@@ -186,6 +198,7 @@ export class ReportsResolver {
         unitPrice: sale.unitPrice.toString(),
         amount: sale.amount.toString(),
       })),
+      remarks: report.remarks ?? '',
       totals: {
         income: totals.income.toString(),
         expenses: totals.expenses.toString(),

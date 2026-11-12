@@ -6,6 +6,8 @@ export const reportDetailParamsSchema = z.object({
 const moneyInputSchema = z.string().regex(/^(?:0|[1-9]\d*)(?:\.\d{1,2})?$/, 'Use up to 2 decimal places')
 const meterInputSchema = z.string().regex(/^(?:0|[1-9]\d*)(?:\.\d{1,3})?$/, 'Use up to 3 decimal places')
 
+export const reportRemarksSchema = z.string().trim().max(1000, 'Remarks must be 1,000 characters or fewer')
+
 const reportEntryBaseSchema = z.object({
   id: z.string().min(1),
   recurringIncomeFieldId: z.string().nullable(),

@@ -8,6 +8,7 @@ extend type Query {
 extend type Mutation {
   createReport(input: CreateReportInput!): CreateReportPayload!
   saveReportDraft(input: SaveReportDraftInput!): Report!
+  updateReportRemarks(input: UpdateReportRemarksInput!): Report!
   submitReport(input: ReportTransitionInput!): Report!
   deleteReport(input: DeleteReportInput!): Report!
 }
@@ -49,6 +50,12 @@ input SaveReportDraftInput {
   expenseEntries: [FinancialEntryInput!]!
   lubricantSales: [LubricantSaleInput!]
   disposalReadings: [EditableDisposalInput!]!
+}
+
+input UpdateReportRemarksInput {
+  reportId: ObjectId!
+  expectedRevision: Int!
+  remarks: String!
 }
 
 input LubricantSaleInput {
@@ -136,6 +143,7 @@ type Report {
   incomeEntries: [FinancialEntry!]!
   expenseEntries: [FinancialEntry!]!
   lubricantSales: [LubricantSale!]!
+  remarks: String!
   totals: ReportTotals!
   disposals: DisposalBatch
   creatorId: ObjectId!

@@ -101,6 +101,9 @@ export class Report {
   @Prop({ required: true, default: [], type: [ReportLubricantSaleSchema] })
   lubricantSales!: ReportLubricantSale[]
 
+  @Prop({ default: '', trim: true, type: String })
+  remarks!: string
+
   @Prop({
     required: true,
     default: () => ({ income: Types.Decimal128.fromString('0'), expenses: Types.Decimal128.fromString('0'), cashFuelSales: Types.Decimal128.fromString('0'), lubricantSales: Types.Decimal128.fromString('0') }),

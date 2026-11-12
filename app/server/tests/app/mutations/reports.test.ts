@@ -76,7 +76,20 @@ describe('report disposal lifecycle', () => {
     const memberFinancialSummary = await financialSummary(memberToken, businessDate, businessDate)
     expect(memberFinancialSummary.body.errors?.[0]?.extensions?.originalError).toMatchObject({ code: 'FORBIDDEN' })
 
-    const first = await createReport(memberToken, firstShiftId, businessDate)
+    let first = await createReport(memberToken, firstShiftId, businessDate)
+    expect(first.remarks).toBe('')
+    const initialRevision = first.revision
+    const creatorRemarks = await updateRemarks(memberToken, first, '  Opening shift reviewed.  ')
+    expect(creatorRemarks.body.errors).toBeUndefined()
+    first = creatorRemarks.body.data.updateReportRemarks
+    expect(first.remarks).toBe('Opening shift reviewed.')
+
+    const staleRemarks = await updateRemarks(adminToken, { ...first, revision: initialRevision }, 'Stale update')
+    expect(staleRemarks.body.errors?.[0]?.extensions?.originalError).toMatchObject({ code: 'CONFLICT' })
+    const otherMemberRemarks = await updateRemarks(otherMemberToken, first, 'Unauthorized update')
+    expect(otherMemberRemarks.body.errors?.[0]?.extensions?.originalError).toMatchObject({ code: 'FORBIDDEN' })
+    const oversizedRemarks = await updateRemarks(memberToken, first, 'x'.repeat(1001))
+    expect(oversizedRemarks.body.errors?.[0]?.extensions?.originalError).toMatchObject({ code: 'INVALID_INPUT' })
     const reportsInRange = await graphql(adminToken, `query ($input: ReportsInput!) { reports(input: $input) { items { id businessDate } totalCount } }`, {
       input: { startDate: businessDate, endDate: businessDate, offset: 0, limit: 20 },
     })
@@ -109,9 +122,20 @@ describe('report disposal lifecycle', () => {
     expect(reversedRange.body.errors?.[0]?.extensions?.originalError).toMatchObject({ code: 'INVALID_INPUT' })
 
     const firstSaved = await saveReport(memberToken, first.id, first.revision, first.disposals.revision, '110.000')
-    const firstSubmitted = await transition(memberToken, 'submitReport', firstSaved.id, firstSaved.revision, firstSaved.disposals.revision)
+    let firstSubmitted = await transition(memberToken, 'submitReport', firstSaved.id, firstSaved.revision, firstSaved.disposals.revision)
     expect(firstSubmitted.totals).toMatchObject({ cashFuelSales: '1100', pumpSales: '80', overShort: '1020' })
     expect(firstSubmitted.totals.lubricantSales).toBe('375')
+
+    const creatorSubmittedRemarks = await updateRemarks(memberToken, firstSubmitted, 'Creator post-submission update')
+    expect(creatorSubmittedRemarks.body.errors?.[0]?.extensions?.originalError).toMatchObject({ code: 'FORBIDDEN' })
+    const clearedRemarks = await updateRemarks(adminToken, firstSubmitted, '')
+    expect(clearedRemarks.body.errors).toBeUndefined()
+    firstSubmitted = clearedRemarks.body.data.updateReportRemarks
+    expect(firstSubmitted.remarks).toBe('')
+    const administratorRemarks = await updateRemarks(superadminToken, firstSubmitted, 'Reviewed after submission.')
+    expect(administratorRemarks.body.errors).toBeUndefined()
+    firstSubmitted = administratorRemarks.body.data.updateReportRemarks
+    expect(firstSubmitted.remarks).toBe('Reviewed after submission.')
 
     const submittedFinancialSummary = await financialSummary(adminToken, businessDate, businessDate)
     expect(submittedFinancialSummary.body.errors).toBeUndefined()
@@ -184,6 +208,8 @@ describe('report disposal lifecycle', () => {
     const firstDeleted = await deleteReport(adminToken, latestFirst, 'Incorrect submitted readings')
     expect(firstDeleted.body.errors).toBeUndefined()
     expect(firstDeleted.body.data.deleteReport).toMatchObject({ status: 'revoked', effective: false, revokedFromStatus: 'submitted' })
+    const revokedRemarks = await updateRemarks(adminToken, firstDeleted.body.data.deleteReport, 'Cannot annotate revoked report')
+    expect(revokedRemarks.body.errors?.[0]?.extensions?.originalError).toMatchObject({ code: 'CONFLICT' })
     const revokedFinancialSummary = await financialSummary(adminToken, businessDate, businessDate)
     expect(revokedFinancialSummary.body.errors).toBeUndefined()
     expect(revokedFinancialSummary.body.data.financialSummary).toMatchObject({
@@ -467,10 +493,16 @@ describe('report disposal lifecycle', () => {
   async function deleteReport(token: string, report: { id: string; revision: number; disposals: { revision: number } }, reason: string) {
     return graphql(token, `mutation ($input: DeleteReportInput!) { deleteReport(input: $input) { ${detailFields} } }`, { input: { reportId: report.id, expectedReportRevision: report.revision, expectedDisposalRevision: report.disposals.revision, reason } })
   }
+
+  async function updateRemarks(token: string, report: { id: string; revision: number }, remarks: string) {
+    return graphql(token, `mutation ($input: UpdateReportRemarksInput!) { updateReportRemarks(input: $input) { ${detailFields} } }`, {
+      input: { reportId: report.id, expectedRevision: report.revision, remarks },
+    })
+  }
 })
 
 const detailFields = `
-  id shiftName status effective stale revision revokedFromStatus
+  id shiftName status effective stale revision revokedFromStatus remarks
   incomeEntries { id recurringIncomeFieldId description notes amount }
   lubricantSales { id productId productName unit quantity unitPrice amount }
   totals { cashFuelSales pumpSales overShort lubricantSales }

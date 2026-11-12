@@ -8,6 +8,7 @@ import {
   ReportsDocument,
   SaveReportDraftDocument,
   SubmitReportDocument,
+  UpdateReportRemarksDocument,
   type DeleteReportInput,
   type FinancialSummaryInput,
   type ReportFieldsFragment,
@@ -15,6 +16,7 @@ import {
   type ReportsInput,
   type ReportTransitionInput,
   type SaveReportDraftInput,
+  type UpdateReportRemarksInput,
 } from '~/generated/graphql'
 import { graphqlClient } from '~/lib/graphql'
 import { inventoryKeys } from '../inventory/inventory.queries'
@@ -101,6 +103,18 @@ export function useSaveReportDraftMutation(tenantId: string) {
   return useMutation({
     mutationFn: async (input: SaveReportDraftInput) =>
       (await graphqlClient.request(SaveReportDraftDocument, { input }, { tenantId })).saveReportDraft,
+    onSuccess: async (report) => {
+      queryClient.setQueryData(reportKeys.detail(tenantId, report.id), report)
+      await queryClient.invalidateQueries({ queryKey: reportKeys.lists(tenantId) })
+    },
+  })
+}
+
+export function useUpdateReportRemarksMutation(tenantId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (input: UpdateReportRemarksInput) =>
+      (await graphqlClient.request(UpdateReportRemarksDocument, { input }, { tenantId })).updateReportRemarks,
     onSuccess: async (report) => {
       queryClient.setQueryData(reportKeys.detail(tenantId, report.id), report)
       await queryClient.invalidateQueries({ queryKey: reportKeys.lists(tenantId) })

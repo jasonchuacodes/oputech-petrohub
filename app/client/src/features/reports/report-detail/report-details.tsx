@@ -4,6 +4,8 @@ import Decimal from 'decimal.js';
 import { CirclePlus, Droplet, Minus, Plus, Trash2 } from 'lucide-react';
 import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
+import { Spinner } from '~/components/ui/spinner';
+import { Textarea } from '~/components/ui/textarea';
 import { cn } from '~/utils/cn';
 import type { ReportDetailRecord } from '../reports.queries';
 import { FinancialEntrySheet } from './financial-entry-sheet';
@@ -21,6 +23,7 @@ export function ReportDetailsPanel() {
       {canEdit && <FinancialShortcuts />}
       <FinancialSection kind="income" />
       <FinancialSection kind="expense" />
+      <RemarksSection />
       {financialEntryEditor.open && financialEntryTarget && (
         <FinancialEntrySheet
           key={`${financialEntryTarget.kind}:${financialEntryTarget.index ?? 'new'}`}
@@ -30,6 +33,64 @@ export function ReportDetailsPanel() {
         />
       )}
     </div>
+  );
+}
+
+function RemarksSection() {
+  const {
+    report,
+    canEditRemarks,
+    remarks,
+    setRemarks,
+    remarksDirty,
+    remarksValid,
+    remarksError,
+    remarksPending,
+    pending,
+    saveRemarks,
+  } = useReportEditor();
+
+  return (
+    <section>
+      <div className="flex min-h-10 items-center">
+        <h2 className="font-sans text-sm font-semibold tracking-[0.14em] text-text-heading uppercase">
+          Remarks
+        </h2>
+      </div>
+      <div className="rounded-md bg-card p-4 shadow-card">
+        {canEditRemarks ? (
+          <>
+            <Textarea
+              aria-label="Report remarks"
+              value={remarks}
+              maxLength={1000}
+              placeholder="Add report remarks."
+              aria-invalid={!remarksValid}
+              disabled={remarksPending}
+              onChange={(event) => setRemarks(event.target.value)}
+            />
+            <div className="mt-3 flex items-center justify-between gap-3">
+              <span className={cn('text-xs text-text-tertiary', !remarksValid && 'text-destructive')}>
+                {remarksError ?? `${remarks.length}/1,000 characters`}
+              </span>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={!remarksDirty || !remarksValid || pending}
+                onClick={() => void saveRemarks()}
+              >
+                {remarksPending && <Spinner className="size-4" />}
+                {remarksPending ? 'Saving…' : 'Save remarks'}
+              </Button>
+            </div>
+          </>
+        ) : (
+          <p className={cn('whitespace-pre-wrap text-sm', !report.remarks && 'text-text-tertiary')}>
+            {report.remarks || 'No remarks added.'}
+          </p>
+        )}
+      </div>
+    </section>
   );
 }
 

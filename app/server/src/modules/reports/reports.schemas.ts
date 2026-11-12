@@ -73,6 +73,13 @@ export const saveReportDraftInputSchema = z.object({
 }).strict()
 export type SaveReportDraftInput = z.infer<typeof saveReportDraftInputSchema>
 
+export const updateReportRemarksInputSchema = z.object({
+  reportId: z.instanceof(Types.ObjectId),
+  expectedRevision: z.number().int().min(0),
+  remarks: z.string().trim().max(1000),
+}).strict()
+export type UpdateReportRemarksInput = z.infer<typeof updateReportRemarksInputSchema>
+
 export const reportTransitionInputSchema = z.object({
   reportId: z.instanceof(Types.ObjectId),
   expectedReportRevision: z.number().int().min(0),

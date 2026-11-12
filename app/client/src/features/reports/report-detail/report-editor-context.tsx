@@ -18,8 +18,13 @@ import {
   useDeleteReportMutation,
   useSaveReportDraftMutation,
   useSubmitReportMutation,
+  useUpdateReportRemarksMutation,
 } from '../reports.queries';
-import { reportDetailFormSchema, type ReportDetailFormValues } from './report-detail.schema';
+import {
+  reportDetailFormSchema,
+  reportRemarksSchema,
+  type ReportDetailFormValues,
+} from './report-detail.schema';
 import {
   calculatePreview,
   cloneFormValues,
@@ -50,7 +55,9 @@ function useReportEditorState({
   const saveReport = useSaveReportDraftMutation(tenantId);
   const submitReport = useSubmitReportMutation(tenantId);
   const deleteReport = useDeleteReportMutation(tenantId);
+  const updateRemarks = useUpdateReportRemarksMutation(tenantId);
   const reportRef = useRef(report);
+  const savedRemarksRef = useRef(report.remarks);
   const [tab, setTab] = useState<'detail' | 'lubricants' | 'disposals'>('detail');
   const submitConfirmation = useDisclosure();
   const reportActions = useDisclosure();
@@ -61,12 +68,17 @@ function useReportEditorState({
   const [financialEntryTarget, setFinancialEntryTarget] = useState<FinancialEntryTarget>();
   const [deleteReason, setDeleteReason] = useState('');
   const [actionError, setActionError] = useState<string>();
+  const [remarks, setRemarks] = useState(report.remarks);
+  const [savedRemarks, setSavedRemarks] = useState(report.remarks);
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [failedSaveSignature, setFailedSaveSignature] = useState<string>();
   const administrator = role === 'admin' || role === 'superadmin';
   const reportOwner = report.creatorId === userId;
   const canEdit =
     report.status === 'draft' && !report.legacy && (administrator || reportOwner);
+  const canEditRemarks =
+    (report.status === 'draft' && (administrator || reportOwner)) ||
+    (report.status === 'submitted' && administrator);
   const canDelete =
     (administrator || reportOwner) &&
     report.status !== 'revoked' &&
@@ -97,7 +109,13 @@ function useReportEditorState({
   const { isDirty, isValid } = form.formState;
   const valuesSignature = JSON.stringify(values);
   const saveFailed = saveState === 'error' && failedSaveSignature === valuesSignature;
-  const pending = saveReport.isPending || submitReport.isPending || deleteReport.isPending;
+  const remarksDirty = remarks !== savedRemarks;
+  const remarksValidation = reportRemarksSchema.safeParse(remarks);
+  const pending =
+    saveReport.isPending ||
+    submitReport.isPending ||
+    deleteReport.isPending ||
+    updateRemarks.isPending;
 
   const openFinancialEntry = (kind: FinancialEntryTarget['kind'], index?: number) => {
     if (
@@ -171,7 +189,8 @@ function useReportEditorState({
       saveReport.isPending ||
       saveFailed ||
       submitReport.isPending ||
-      deleteReport.isPending
+      deleteReport.isPending ||
+      updateRemarks.isPending
     )
       return;
     const timer = window.setTimeout(() => {
@@ -187,8 +206,38 @@ function useReportEditorState({
     saveFailed,
     saveReport.isPending,
     submitReport.isPending,
+    updateRemarks.isPending,
     valuesSignature,
   ]);
+
+  const persistRemarks = async (current: ReportDetailRecord) => {
+    const result = reportRemarksSchema.safeParse(remarks);
+    if (!result.success) {
+      setActionError(result.error.issues[0]?.message ?? 'Review the remarks and try again.');
+      return undefined;
+    }
+    const updated = await updateRemarks.mutateAsync({
+      reportId: current.id,
+      expectedRevision: current.revision,
+      remarks: result.data,
+    });
+    reportRef.current = updated;
+    savedRemarksRef.current = updated.remarks;
+    setSavedRemarks(updated.remarks);
+    setRemarks(updated.remarks);
+    return updated;
+  };
+
+  const saveRemarks = async () => {
+    if (!canEditRemarks || !remarksDirty) return;
+    setActionError(undefined);
+    try {
+      const updated = await persistRemarks(reportRef.current);
+      if (updated) toast.success('Remarks saved');
+    } catch {
+      setActionError('Unable to save remarks. The report may have changed; reload before trying again.');
+    }
+  };
 
   const submit = async () => {
     setActionError(undefined);
@@ -204,6 +253,14 @@ function useReportEditorState({
         reportRef.current = current;
         form.reset(toFormValues(current));
         setSaveState('saved');
+      }
+      if (remarks !== savedRemarksRef.current) {
+        const updated = await persistRemarks(current);
+        if (!updated) {
+          submitConfirmation.onClose();
+          return;
+        }
+        current = updated;
       }
       if (!current.disposals?.complete) {
         submitConfirmation.onClose();
@@ -224,13 +281,14 @@ function useReportEditorState({
   };
 
   const remove = async () => {
-    if (!report.disposals || deleteReason.trim().length < 3) return;
+    const current = reportRef.current;
+    if (!current.disposals || deleteReason.trim().length < 3) return;
     setActionError(undefined);
     try {
       await deleteReport.mutateAsync({
-        reportId: report.id,
-        expectedReportRevision: report.revision,
-        expectedDisposalRevision: report.disposals.revision,
+        reportId: current.id,
+        expectedReportRevision: current.revision,
+        expectedDisposalRevision: current.disposals.revision,
         reason: deleteReason.trim(),
       });
       deleteConfirmation.onClose();
@@ -254,14 +312,22 @@ function useReportEditorState({
     tab,
     setTab,
     canEdit,
+    canEditRemarks,
     canDelete,
     isValid,
     pending,
+    remarks,
+    setRemarks,
+    remarksDirty,
+    remarksValid: remarksValidation.success,
+    remarksError: remarksValidation.success ? undefined : remarksValidation.error.issues[0]?.message,
+    remarksPending: updateRemarks.isPending,
     saveReportPending: saveReport.isPending,
     submitReportPending: submitReport.isPending,
     deleteReportPending: deleteReport.isPending,
     actionError,
     save,
+    saveRemarks,
     submit,
     remove,
     reportActions,
