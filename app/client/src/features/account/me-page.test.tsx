@@ -53,17 +53,17 @@ describe('MePage', () => {
       const html = renderPage(role)
       const expectedContent = [
         'Station',
-        'Inventory',
         'Fuel setup',
-        'Shift management',
-        'Recurring income',
+        'Inventory',
+        'Shifts',
+        'Report setup',
         'Administration',
-        'User management',
-        'Tenant management',
+        'Users',
+        'Tenants',
       ]
       const expectedLinks = [
-        '/inventory',
         '/fuel-setup',
+        '/inventory',
         '/shifts',
         '/income-setup',
         '/users',

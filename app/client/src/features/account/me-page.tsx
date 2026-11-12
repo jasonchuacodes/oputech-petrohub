@@ -4,52 +4,10 @@ import { ChevronRight, LogOut } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '~/components/ui/button'
 import { ContentSection } from '~/components/ui/content-section'
-import type { AuthUser, UserRole } from '../auth/auth.types'
 import { useLogoutMutation, useSessionQuery } from '../auth/auth.queries'
+import { managementNavigation } from '../layout/navigation'
 import { clearActiveTenant } from '../tenants/active-tenant'
-
-const actionSections = [
-  {
-    label: 'Station',
-    actions: [
-      {
-        title: 'Inventory',
-        description: 'Manage lubricant products and stock movements',
-        href: '/inventory',
-      },
-      {
-        title: 'Fuel setup',
-        description: 'Configure fuel prices and pump meter baselines',
-        href: '/fuel-setup',
-      },
-      {
-        title: 'Shift management',
-        description: 'Configure the daily shift schedule',
-        href: '/shifts',
-      },
-      {
-        title: 'Recurring income',
-        description: 'Configure income fields for new reports',
-        href: '/income-setup',
-      },
-    ],
-  },
-  {
-    label: 'Administration',
-    actions: [
-      {
-        title: 'User management',
-        description: 'Manage users, roles, and station access',
-        href: '/users',
-      },
-      {
-        title: 'Tenant management',
-        description: 'Manage workspaces and choose the active station',
-        href: '/tenants',
-      },
-    ],
-  },
-] as const
+import { getUserInitials, getUserRoleLabel } from './account-display'
 
 export function MePage() {
   const session = useSessionQuery()
@@ -70,28 +28,28 @@ export function MePage() {
           aria-hidden="true"
           className="flex size-14 shrink-0 items-center justify-center rounded-full bg-primary text-lg font-medium text-primary-foreground sm:size-16 sm:text-xl"
         >
-          {getInitials(user)}
+          {getUserInitials(user)}
         </span>
         <div className="min-w-0 flex-1">
           <p className="truncate text-card-title font-medium text-text-heading">
             {user?.fullName || user?.username || 'Account'}
           </p>
-          <p className="text-sm text-text-tertiary">{getRoleLabel(user?.role)}</p>
+          <p className="text-sm text-text-tertiary">{getUserRoleLabel(user?.role)}</p>
         </div>
         <ChevronRight aria-hidden="true" className="size-5 shrink-0 text-text-tertiary" />
       </Link>
 
       {isAdmin &&
-        actionSections.map((section) => (
+        managementNavigation.map((section) => (
           <ContentSection key={section.label} label={section.label}>
             <ul className="overflow-hidden rounded-md bg-card shadow-card">
-              {section.actions.map((action) => (
-                <li key={action.href} className="border-b border-border/60 last:border-b-0">
+              {section.items.map((item) => (
+                <li key={item.href} className="border-b border-border/60 last:border-b-0">
                   <Link
-                    href={action.href}
+                    href={item.href}
                     className="flex min-h-18 items-center gap-3 px-4 py-3 outline-none transition-colors hover:bg-surface-hover focus-visible:ring-3 focus-visible:ring-inset focus-visible:ring-ring/30"
                   >
-                    <ActionContent title={action.title} description={action.description} />
+                    <ActionContent title={item.label} description={item.description} />
                   </Link>
                 </li>
               ))}
@@ -128,21 +86,4 @@ function ActionContent({ title, description }: { title: string; description: str
       <ChevronRight aria-hidden="true" className="size-5 shrink-0 text-text-tertiary" />
     </>
   )
-}
-
-function getInitials(user?: AuthUser): string {
-  const name = user?.fullName?.trim() || user?.username || ''
-  const parts = name.split(/\s+/).filter(Boolean)
-
-  if (parts.length > 1) return `${parts[0][0]}${parts.at(-1)?.[0] ?? ''}`.toUpperCase()
-
-  const source = parts[0] || user?.username || 'A'
-  return source.slice(0, 2).toUpperCase()
-}
-
-function getRoleLabel(role?: UserRole): string {
-  if (role === 'superadmin') return 'Super administrator'
-  if (role === 'admin') return 'Administrator'
-  if (role === 'member') return 'Member'
-  return 'Account'
 }

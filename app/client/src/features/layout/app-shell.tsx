@@ -1,31 +1,98 @@
 'use client'
 
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useEffect, type ReactNode } from 'react'
+import { useCallback, useEffect, useSyncExternalStore, type ReactNode } from 'react'
+import { OputechPetrohubLogo } from '~/components/brand/oputech-petrohub-logo'
+import { Button } from '~/components/ui/button'
 import { Spinner } from '~/components/ui/spinner'
 import { cn } from '~/utils/cn'
+import { getUserInitials, getUserRoleLabel } from '../account/account-display'
+import { useSessionQuery } from '../auth/auth.queries'
+import type { AuthUser } from '../auth/auth.types'
 import { setActiveTenant, useActiveTenantId } from '../tenants/active-tenant'
 import { useTenantsQuery } from '../tenants/tenants.queries'
-import { navigation, type NavigationItem } from './navigation'
+import {
+  desktopNavigation,
+  managementNavigation,
+  navigation,
+  type NavigationItem,
+} from './navigation'
+import { SidebarTenantSwitcher } from './sidebar-tenant-switcher'
 import { AppShellContext } from './use-active-tenant'
 
-function NavigationLink({ item, compact = false }: { item: NavigationItem; compact?: boolean }) {
+const SIDEBAR_COLLAPSED_STORAGE_KEY = 'petromate:sidebar-collapsed'
+let sidebarCollapsedFallback = false
+const sidebarPreferenceListeners = new Set<() => void>()
+
+function getSidebarCollapsedSnapshot() {
+  try {
+    const storedPreference = window.localStorage.getItem(SIDEBAR_COLLAPSED_STORAGE_KEY)
+    return storedPreference === null ? sidebarCollapsedFallback : storedPreference === 'true'
+  } catch {
+    return sidebarCollapsedFallback
+  }
+}
+
+function getServerSidebarCollapsedSnapshot() {
+  return false
+}
+
+function subscribeToSidebarPreference(onChange: () => void) {
+  sidebarPreferenceListeners.add(onChange)
+
+  const handleStorage = (event: StorageEvent) => {
+    if (event.key === SIDEBAR_COLLAPSED_STORAGE_KEY) onChange()
+  }
+
+  window.addEventListener('storage', handleStorage)
+  return () => {
+    sidebarPreferenceListeners.delete(onChange)
+    window.removeEventListener('storage', handleStorage)
+  }
+}
+
+function setSidebarCollapsedPreference(collapsed: boolean) {
+  sidebarCollapsedFallback = collapsed
+
+  try {
+    window.localStorage.setItem(SIDEBAR_COLLAPSED_STORAGE_KEY, String(collapsed))
+  } catch {
+    // Keep the preference in memory when browser storage is unavailable.
+  }
+
+  sidebarPreferenceListeners.forEach((listener) => listener())
+}
+
+function isRouteActive(pathname: string, href: string) {
+  return pathname === href || pathname.startsWith(`${href}/`)
+}
+
+function NavigationLink({
+  item,
+  compact = false,
+  collapsed = false,
+}: {
+  item: NavigationItem
+  compact?: boolean
+  collapsed?: boolean
+}) {
   const Icon = item.icon
   const pathname = usePathname()
-  const relatedActive = item.activePaths?.some(
-    (path) => pathname === path || pathname.startsWith(`${path}/`),
-  )
-  const active = pathname === item.href || pathname.startsWith(`${item.href}/`)
+  const relatedActive = item.activePaths?.some((path) => isRouteActive(pathname, path))
+  const active = isRouteActive(pathname, item.href)
   return (
     <Link
       href={item.href}
       aria-current={active || relatedActive ? 'page' : undefined}
+      title={collapsed && !compact ? item.label : undefined}
       className={cn(
         'flex items-center font-medium outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/30',
         compact
           ? 'min-h-16 flex-col justify-center gap-1 px-1 py-2 text-xs'
-          : 'min-h-11 gap-3 rounded-sm px-3 text-sm',
+          : 'min-h-10 gap-2 rounded-sm px-2.5 py-1 text-sm',
+        collapsed && !compact && 'justify-center gap-0 px-0',
         active || relatedActive
           ? compact
             ? 'text-primary'
@@ -35,20 +102,74 @@ function NavigationLink({ item, compact = false }: { item: NavigationItem; compa
             : 'text-text-secondary hover:bg-surface-hover',
       )}
     >
-      <Icon
+      <span
+        className={cn(
+          'flex shrink-0 items-center justify-center',
+          compact ? 'size-6' : 'size-8',
+        )}
+      >
+        <Icon
+          aria-hidden="true"
+          strokeWidth={compact ? (active || relatedActive ? 2 : 1.75) : 2}
+          className={compact ? 'size-6' : 'size-4'}
+        />
+      </span>
+      <span className={cn(collapsed && !compact && 'sr-only')}>{item.label}</span>
+    </Link>
+  )
+}
+
+function AccountProfileLink({ user, collapsed }: { user: AuthUser; collapsed: boolean }) {
+  const pathname = usePathname()
+  const active = isRouteActive(pathname, '/me') || isRouteActive(pathname, '/account')
+
+  return (
+    <Link
+      href="/me"
+      aria-current={active ? 'page' : undefined}
+      aria-label={collapsed ? 'Me' : undefined}
+      title={collapsed ? 'Me' : undefined}
+      className={cn(
+        'flex items-center rounded-sm outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/30',
+        collapsed ? 'min-h-10 justify-center px-0 py-1' : 'min-h-12 gap-2 px-1.5 py-1',
+        active
+          ? 'bg-primary/10 text-primary'
+          : 'text-text-secondary hover:bg-surface-hover hover:text-foreground',
+      )}
+    >
+      <span
         aria-hidden="true"
-        strokeWidth={compact ? (active || relatedActive ? 2 : 1.75) : 2}
-        className={compact ? 'size-6' : 'size-5 shrink-0'}
-      />
-      <span className={cn(!compact && 'md:sr-only wide:not-sr-only')}>{item.label}</span>
+        className={cn(
+          'flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-medium text-primary-foreground',
+          !active && 'bg-muted text-text-secondary',
+        )}
+      >
+        {getUserInitials(user)}
+      </span>
+      <span className={cn('min-w-0 flex-1', collapsed && 'sr-only')}>
+        <span className="block truncate text-sm font-medium">
+          {user.fullName || user.username || 'Account'}
+        </span>
+        <span className="block truncate text-xs text-text-tertiary">
+          {getUserRoleLabel(user.role)}
+        </span>
+      </span>
     </Link>
   )
 }
 
 export function AppShell({ children }: { children: ReactNode }) {
   const tenants = useTenantsQuery()
+  const session = useSessionQuery()
   const activeTenantId = useActiveTenantId()
   const pathname = usePathname()
+  const isSidebarCollapsed = useSyncExternalStore(
+    subscribeToSidebarPreference,
+    getSidebarCollapsedSnapshot,
+    getServerSidebarCollapsedSnapshot,
+  )
+  const user = session.data?.user
+  const isAdmin = user?.role === 'superadmin' || user?.role === 'admin'
   const isReportDetail = pathname.split('/').filter(Boolean).length === 2 && pathname.startsWith('/report/')
 
   useEffect(() => {
@@ -57,6 +178,10 @@ export function AppShell({ children }: { children: ReactNode }) {
       setActiveTenant(tenants.data[0].tenant.id)
     }
   }, [activeTenantId, tenants.data])
+
+  const toggleSidebar = useCallback(() => {
+    setSidebarCollapsedPreference(!isSidebarCollapsed)
+  }, [isSidebarCollapsed])
 
   if (tenants.isPending) {
     return (
@@ -84,33 +209,92 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <AppShellContext.Provider value={{ tenant: selected, tenants: tenants.data }}>
       <div className="flex h-dvh overflow-hidden bg-background">
-        <aside className="hidden w-20 shrink-0 flex-col border-r border-border/70 bg-card px-2 py-4 md:flex wide:w-64">
-          <div className="flex h-14 items-center justify-center px-2 wide:justify-start">
-            <span className="text-lg font-semibold text-primary md:hidden wide:inline">Petromate</span>
-            <span className="text-lg font-semibold text-primary wide:hidden" aria-label="Petromate">
-              P
-            </span>
+        <aside
+          className={cn(
+            'hidden shrink-0 flex-col gap-4 border-r border-border/70 bg-card px-2 py-4 transition-[width,padding] duration-200 ease-out motion-reduce:transition-none md:flex',
+            isSidebarCollapsed ? 'w-20' : 'w-64',
+          )}
+        >
+          <div
+            className={cn(
+              'flex h-14 shrink-0 items-center',
+              isSidebarCollapsed ? 'justify-center' : 'justify-between gap-2 px-2',
+            )}
+          >
+            {!isSidebarCollapsed && (
+              <Link
+                href="/home"
+                aria-label="Petromate home"
+                className="shrink-0 rounded-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/30"
+              >
+                <OputechPetrohubLogo
+                  aria-hidden="true"
+                  aria-label={undefined}
+                  className="w-36"
+                />
+              </Link>
+            )}
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="size-10"
+              onClick={toggleSidebar}
+              aria-controls="desktop-sidebar-navigation"
+              aria-expanded={!isSidebarCollapsed}
+              aria-label={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              title={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            >
+              {isSidebarCollapsed ? (
+                <ChevronRight className="size-5" aria-hidden="true" />
+              ) : (
+                <ChevronLeft className="size-5" aria-hidden="true" />
+              )}
+            </Button>
           </div>
 
-          <label className="mb-4 hidden flex-col gap-1 px-2 wide:flex">
-            <span className="text-xs font-medium text-text-tertiary">Station</span>
-            <select
-              value={selected.tenant.id}
-              onChange={(event) => setActiveTenant(event.target.value)}
-              className="h-10 rounded-sm border border-input bg-card px-2 text-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/20"
-            >
-              {tenants.data.map(({ tenant }) => (
-                <option key={tenant.id} value={tenant.id}>
-                  {tenant.name}
-                </option>
-              ))}
-            </select>
-          </label>
+          <SidebarTenantSwitcher collapsed={isSidebarCollapsed} canSwitch={isAdmin} />
 
-          <nav aria-label="Primary navigation" className="flex flex-1 flex-col gap-1">
-            {navigation.map((item) => (
-              <NavigationLink key={item.href} item={item} />
-            ))}
+          <nav
+            id="desktop-sidebar-navigation"
+            aria-label="Primary navigation"
+            className="flex min-h-0 flex-1 flex-col gap-4"
+          >
+            <div className="flex min-h-0 flex-1 flex-col gap-0 overflow-y-auto">
+              {desktopNavigation.map((item) => (
+                <NavigationLink
+                  key={item.href}
+                  item={item}
+                  collapsed={isSidebarCollapsed}
+                />
+              ))}
+
+              {isAdmin &&
+                managementNavigation.map((section) => (
+                  <div
+                    key={section.label}
+                    className="mt-2 flex flex-col gap-0 border-t border-border/70 pt-2"
+                  >
+                    <p
+                      className={cn(
+                        'px-1.5 py-1 text-xs font-medium uppercase tracking-wide text-text-tertiary',
+                        isSidebarCollapsed && 'sr-only',
+                      )}
+                    >
+                      {section.label}
+                    </p>
+                    {section.items.map((item) => (
+                      <NavigationLink
+                        key={item.href}
+                        item={item}
+                        collapsed={isSidebarCollapsed}
+                      />
+                    ))}
+                  </div>
+                ))}
+            </div>
+
+            {user && <AccountProfileLink user={user} collapsed={isSidebarCollapsed} />}
           </nav>
         </aside>
 
