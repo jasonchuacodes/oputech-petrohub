@@ -6,6 +6,7 @@ import { createPortal } from 'react-dom'
 import { Button } from '~/components/ui/button'
 import { Spinner } from '~/components/ui/spinner'
 import { cn } from '~/utils/cn'
+import { formatShiftTime } from '~/utils/time'
 import { useActiveTenant } from '../layout/use-active-tenant'
 import { useCreateReportMutation, useReportCreationContextQuery } from './reports.queries'
 
@@ -89,7 +90,7 @@ export function CreateReportSheet({ onClose, onOpenReport }: CreateReportSheetPr
                 const blocked = !slot.report && !slot.canCreate
                 return <label key={slot.id} className={cn('flex min-h-20 items-center gap-3 rounded-md border p-3', selectedSlot ? 'border-primary bg-accent' : 'border-border', blocked && 'cursor-not-allowed opacity-60')}>
                   <input type="radio" name="report-slot" checked={selectedSlot} disabled={blocked} className="size-5 accent-primary" onChange={() => setSelectedSlotId(slot.id)} />
-                  <span className="min-w-0 flex-1"><span className="block font-medium text-text-heading">{slot.shift.name}</span><span className="mt-0.5 block text-sm text-text-secondary">{formatShiftTime(slot.interval)}</span><span className="mt-0.5 block text-xs text-text-tertiary">Scheduled {formatShiftTime(slot.shift)}</span><span className={cn('mt-1 inline-flex rounded-sm px-2 py-0.5 text-xs font-medium', slot.report?.status === 'submitted' ? 'bg-status-success/12 text-status-success' : slot.report ? 'bg-status-warning/12 text-status-warning' : blocked ? 'bg-muted text-text-tertiary' : 'bg-primary/10 text-primary')}>{slot.report ? slot.report.stale ? 'Recreate required' : slot.report.status === 'submitted' ? 'Submitted' : 'Draft' : slot.blockedReason ?? 'Available'}</span></span>
+                  <span className="min-w-0 flex-1"><span className="block font-medium text-text-heading">{slot.shift.name}</span><span className="mt-0.5 block text-sm text-text-secondary">Period {formatShiftTime(slot.interval)}</span><span className={cn('mt-1 inline-flex rounded-sm px-2 py-0.5 text-xs font-medium', slot.report?.status === 'submitted' ? 'bg-status-success/12 text-status-success' : slot.report ? 'bg-status-warning/12 text-status-warning' : blocked ? 'bg-muted text-text-tertiary' : 'bg-primary/10 text-primary')}>{slot.report ? slot.report.stale ? 'Recreate required' : slot.report.status === 'submitted' ? 'Submitted' : 'Draft' : slot.blockedReason ?? 'Available'}</span></span>
                 </label>
               })}</fieldset>}
               <p className="mt-3 flex gap-2 text-sm text-text-secondary"><CircleAlert aria-hidden="true" className="mt-0.5 size-4" />Reports are visible to users in this tenant.</p>
@@ -108,6 +109,4 @@ export function formatBusinessDate(value: string): string {
   return new Intl.DateTimeFormat(undefined, { dateStyle: 'long' }).format(new Date(year, month - 1, day))
 }
 
-export function formatShiftTime(shift: { startTime: string; endTime: string }): string {
-  return `${shift.startTime}–${shift.endTime}`
-}
+export { formatShiftTime }
