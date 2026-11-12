@@ -19,9 +19,9 @@ type NumberInputProps<T extends FieldValues> = Omit<ComponentProps<'input'>, 'na
 type NumberField = {
   name: string;
   onBlur: () => void;
-  onChange: (value: number | undefined) => void;
+  onChange: (value: number | null) => void;
   ref: Ref<HTMLInputElement>;
-  value: number | undefined;
+  value: number | null | undefined;
 };
 
 type NumberInputFieldProps = Omit<
@@ -47,7 +47,7 @@ function NumberInputField({
   const decimals = String(step).includes('.') ? String(step).split('.')[1].length : 0;
   const round = (value: number) => Number(value.toFixed(decimals));
   const [text, setText] = useState(() => field.value?.toString() ?? '');
-  const [lastValue, setLastValue] = useState(field.value);
+  const [lastValue, setLastValue] = useState<number | null | undefined>(field.value);
 
   if (field.value !== lastValue) {
     setLastValue(field.value);
@@ -77,13 +77,11 @@ function NumberInputField({
           const nextText = event.target.value;
           setText(nextText);
           if (nextText === '') {
-            setLastValue(undefined);
-            field.onChange(undefined);
+            field.onChange(null);
             return;
           }
           const parsed = event.target.valueAsNumber;
-          const value = Number.isNaN(parsed) ? undefined : round(parsed);
-          setLastValue(value);
+          const value = Number.isNaN(parsed) ? null : round(parsed);
           field.onChange(value);
         }}
         className="min-w-0 flex-1 [appearance:textfield] bg-transparent px-3 text-base outline-none placeholder:text-text-tertiary disabled:cursor-not-allowed disabled:opacity-50 wide:text-sm [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"

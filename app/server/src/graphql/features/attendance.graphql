@@ -73,6 +73,7 @@ type UserTimesheet {
   userId: ObjectId!
   fullName: String!
   username: String!
+  timezone: String!
   days: [TimesheetDay!]!
 }
 
@@ -80,6 +81,8 @@ type TimesheetDay {
   localDate: String!
   trackedSeconds: Int!
   automaticSeconds: Int!
+  checkInAt: String
+  checkOutAt: String
   overrideHours: Decimal
   effectiveHours: Decimal!
   revision: Int!

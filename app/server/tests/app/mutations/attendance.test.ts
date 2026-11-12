@@ -6,7 +6,8 @@ import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import { Model, Types } from 'mongoose'
 import request from 'supertest'
 import { configureApplication } from '../../../src/configure-application'
-import { addLocalDays, currentWeek, startOfLocalDate } from '../../../src/modules/attendance/attendance-date'
+import { addLocalDays, currentWeek, localDateFor, startOfLocalDate } from '../../../src/modules/attendance/attendance-date'
+import { AttendanceService } from '../../../src/modules/attendance/attendance.service'
 import { AttendanceSession } from '../../../src/modules/attendance/schemas/attendance-session.schema'
 import { TenantService } from '../../../src/modules/tenants/tenant.service'
 import { UserRole } from '../../../src/modules/users/schemas/user.schema'
@@ -143,6 +144,67 @@ describe('attendance and timesheets', () => {
       filter: { startDate: localDate, endDate: localDate, offset: 0, limit: 20 },
     })
     expect(overridden.body.data.timesheets.items).toContainEqual({ userId: memberId, totalHours: '10.5' })
+  })
+
+  it('returns first check-in and final checkout for a day', async () => {
+    const adminToken = await login('attendance-admin', 'AdminPassword123')
+    const sessions = app.get<Model<AttendanceSession>>(getModelToken(AttendanceSession.name))
+    const tenantObjectId = new Types.ObjectId(tenantId)
+    const memberObjectId = new Types.ObjectId(memberId)
+    const localDate = addLocalDays(currentWeek('Asia/Manila').startDate, 2)
+    const dayStart = startOfLocalDate(localDate, 'Asia/Manila')
+    const firstCheckIn = new Date(dayStart.getTime() + 60 * 60 * 1000)
+    const finalCheckOut = new Date(dayStart.getTime() + 7 * 60 * 60 * 1000)
+    await sessions.insertMany([
+      {
+        tenantId: tenantObjectId,
+        userId: memberObjectId,
+        startedAt: firstCheckIn,
+        endedAt: new Date(dayStart.getTime() + 3 * 60 * 60 * 1000),
+        idempotencyKey: 'first-daily-session',
+      },
+      {
+        tenantId: tenantObjectId,
+        userId: memberObjectId,
+        startedAt: new Date(dayStart.getTime() + 5 * 60 * 60 * 1000),
+        endedAt: finalCheckOut,
+        idempotencyKey: 'final-daily-session',
+      },
+    ])
+
+    const result = await graphql(
+      adminToken,
+      'query ($filter: TimesheetDaysFilter!) { timesheetDays(filter: $filter) { timezone days { checkInAt checkOutAt } } }',
+      { filter: { userId: memberId, startDate: localDate, endDate: localDate } },
+    )
+
+    expect(result.body.errors).toBeUndefined()
+    expect(result.body.data.timesheetDays).toEqual({
+      timezone: 'Asia/Manila',
+      days: [{ checkInAt: firstCheckIn.toISOString(), checkOutAt: finalCheckOut.toISOString() }],
+    })
+  })
+
+  it('automatically closes a stale session at tenant-local midnight', async () => {
+    const sessions = app.get<Model<AttendanceSession>>(getModelToken(AttendanceSession.name))
+    const attendance = app.get(AttendanceService)
+    const tenantObjectId = new Types.ObjectId(tenantId)
+    const memberObjectId = new Types.ObjectId(memberId)
+    const now = new Date('2026-12-12T01:00:00.000Z')
+    const priorDate = addLocalDays(localDateFor('Asia/Manila', now), -1)
+    const startedAt = new Date(startOfLocalDate(priorDate, 'Asia/Manila').getTime() + 60 * 60 * 1000)
+    const expectedCheckout = startOfLocalDate(addLocalDays(priorDate, 1), 'Asia/Manila')
+    const session = await sessions.create({
+      tenantId: tenantObjectId,
+      userId: memberObjectId,
+      startedAt,
+      endedAt: null,
+      idempotencyKey: 'stale-session',
+    })
+
+    expect(await attendance.closeStaleSessions(now, tenantObjectId, memberObjectId)).toBe(1)
+    const closed = await sessions.findById(session._id).lean<AttendanceSession>().exec()
+    expect(closed?.endedAt).toEqual(expectedCheckout)
   })
 
   it('lets members read only their own tenant timesheet and protects clock roles', async () => {

@@ -17,6 +17,7 @@ import {
 } from './attendance.schemas'
 import { AttendanceSession } from './schemas/attendance-session.schema'
 import { TimesheetDay } from './schemas/timesheet-day.schema'
+import { Tenant } from '../tenants/schemas/tenant.schema'
 
 const automaticDailyCapMs = 8 * 60 * 60 * 1000
 
@@ -29,11 +30,15 @@ type AttendanceScope = {
 type AttendanceSessionRecord = AttendanceSession & { _id: Types.ObjectId }
 type TimesheetDayRecord = TimesheetDay & { _id: Types.ObjectId }
 type MemberRecord = Pick<User, 'firstName' | 'lastName' | 'username'> & { _id: Types.ObjectId }
+type TenantTimezoneRecord = Pick<Tenant, 'timezone'> & { _id: Types.ObjectId }
 
 export type CalculatedTimesheetDay = {
   localDate: string
   trackedMs: number
   automaticMs: number
+  checkInAt: Date | null
+  checkOutAt: Date | null
+  hasOpenSession: boolean
   overrideHours: string | null
   effectiveHours: Decimal
   revision: number
@@ -48,9 +53,12 @@ export class AttendanceService {
     private readonly timesheetDays: Model<TimesheetDay>,
     @InjectModel(User.name)
     private readonly users: Model<User>,
+    @InjectModel(Tenant.name)
+    private readonly tenants: Model<Tenant>,
   ) {}
 
   async status(scope: AttendanceScope, now = new Date()) {
+    await this.closeStaleSessions(now, scope.tenantId, scope.userId)
     const localDate = localDateFor(scope.timezone, now)
     const calculated = await this.calculateDays(
       scope.tenantId,
@@ -87,6 +95,8 @@ export class AttendanceService {
       .lean()
       .exec()
     if (retried) return this.status(scope)
+
+    await this.closeStaleSessions(new Date(), scope.tenantId, scope.userId)
 
     const active = await this.sessions.exists({
       tenantId: scope.tenantId,
@@ -146,6 +156,7 @@ export class AttendanceService {
 
   async list(tenantId: Types.ObjectId, timezone: string, filter: TimesheetsFilter) {
     const now = new Date()
+    await this.closeStaleSessions(now, tenantId, filter.userId ?? undefined)
     const range = filter.startDate && filter.endDate
       ? { startDate: filter.startDate, endDate: filter.endDate }
       : currentWeek(timezone, now)
@@ -194,6 +205,7 @@ export class AttendanceService {
   }
 
   async days(tenantId: Types.ObjectId, timezone: string, filter: TimesheetDaysFilter) {
+    await this.closeStaleSessions(new Date(), tenantId, filter.userId)
     const member = await this.member(tenantId, filter.userId)
     const dates = datesBetween(filter.startDate, filter.endDate)
     const calculated = await this.calculateDays(
@@ -208,8 +220,48 @@ export class AttendanceService {
       userId: member._id,
       fullName: this.fullName(member),
       username: member.username,
+      timezone,
       days: dates.map((date) => calculated.get(this.dayKey(filter.userId, date))!),
     }
+  }
+
+  async closeStaleSessions(now = new Date(), tenantId?: Types.ObjectId, userId?: Types.ObjectId) {
+    const openSessions = await this.sessions
+      .find({
+        endedAt: null,
+        ...(tenantId ? { tenantId } : {}),
+        ...(userId ? { userId } : {}),
+      })
+      .select('_id tenantId startedAt')
+      .lean<AttendanceSessionRecord[]>()
+      .exec()
+    if (openSessions.length === 0) return 0
+
+    const tenantIds = [...new Set(openSessions.map((session) => session.tenantId.toHexString()))]
+      .map((id) => new Types.ObjectId(id))
+    const tenants = await this.tenants
+      .find({ _id: { $in: tenantIds } })
+      .select('timezone')
+      .lean<TenantTimezoneRecord[]>()
+      .exec()
+    const timezones = new Map(tenants.map((tenant) => [tenant._id.toHexString(), tenant.timezone]))
+    const operations = openSessions.flatMap((session) => {
+      const timezone = timezones.get(session.tenantId.toHexString())
+      if (!timezone) return []
+      const startedDate = localDateFor(timezone, session.startedAt)
+      const cutoff = startOfLocalDate(addLocalDays(startedDate, 1), timezone)
+      if (cutoff.getTime() > now.getTime()) return []
+      return [{
+        updateOne: {
+          filter: { _id: session._id, endedAt: null },
+          update: { $set: { endedAt: cutoff } },
+        },
+      }]
+    })
+    if (operations.length === 0) return 0
+
+    const result = await this.sessions.bulkWrite(operations)
+    return result.modifiedCount
   }
 
   async setOverride(
@@ -300,6 +352,9 @@ export class AttendanceService {
           localDate,
           trackedMs: 0,
           automaticMs: 0,
+          checkInAt: null,
+          checkOutAt: null,
+          hasOpenSession: false,
           overrideHours: null,
           effectiveHours: new Decimal(0),
           revision: 0,
@@ -338,11 +393,22 @@ export class AttendanceService {
         const dayStart = startOfLocalDate(localDate, timezone).getTime()
         const dayEnd = startOfLocalDate(addLocalDays(localDate, 1), timezone).getTime()
         const overlap = Math.max(0, Math.min(sessionEnd, dayEnd) - Math.max(sessionStart, dayStart))
-        if (overlap > 0) result.get(this.dayKey(attendance.userId, localDate))!.trackedMs += overlap
+        if (overlap <= 0) continue
+        const day = result.get(this.dayKey(attendance.userId, localDate))!
+        day.trackedMs += overlap
+        const checkInAt = new Date(Math.max(sessionStart, dayStart))
+        if (!day.checkInAt || checkInAt < day.checkInAt) day.checkInAt = checkInAt
+        if (attendance.endedAt === null) {
+          day.hasOpenSession = true
+        } else {
+          const checkOutAt = new Date(Math.min(sessionEnd, dayEnd))
+          if (!day.checkOutAt || checkOutAt > day.checkOutAt) day.checkOutAt = checkOutAt
+        }
       }
     }
 
     for (const day of result.values()) {
+      if (day.hasOpenSession) day.checkOutAt = null
       day.automaticMs = Math.min(day.trackedMs, automaticDailyCapMs)
       day.effectiveHours = hoursForMilliseconds(day.automaticMs)
     }
@@ -385,6 +451,8 @@ export function serializeCalculatedDay(day: CalculatedTimesheetDay) {
     localDate: day.localDate,
     trackedSeconds: Math.floor(day.trackedMs / 1000),
     automaticSeconds: Math.floor(day.automaticMs / 1000),
+    checkInAt: day.checkInAt?.toISOString() ?? null,
+    checkOutAt: day.checkOutAt?.toISOString() ?? null,
     overrideHours: day.overrideHours,
     effectiveHours: day.effectiveHours.toDecimalPlaces(4).toString(),
     revision: day.revision,

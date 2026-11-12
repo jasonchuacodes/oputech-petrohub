@@ -1,6 +1,6 @@
 'use client'
 
-import { Clock3 } from 'lucide-react'
+import { ChevronRight, Clock3 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Button } from '~/components/ui/button'
@@ -17,7 +17,7 @@ import {
   type TimesheetDateRange,
   userTimesheetHref,
 } from './attendance-route'
-import { formatDuration, formatHours, formatTimesheetDate, localDateAt } from './attendance.utils'
+import { formatHours, formatTimesheetDate, formatTimesheetTime, localDateAt } from './attendance.utils'
 import { TimesheetDayEditor } from './timesheet-day-editor'
 
 export function UserTimesheetPage({
@@ -72,6 +72,7 @@ function AdminUserTimesheetPage({
   const days = timesheet.data?.days.filter((day) => Number(day.effectiveHours) > 0) ?? []
   const member = timesheet.data ?? summary.data?.items[0]
   const memberName = member?.fullName ?? 'Member timesheet'
+  const timezone = timesheet.data?.timezone ?? summary.data?.timezone ?? 'UTC'
 
   const columns: DataTableColumn<TimesheetDayFieldsFragment>[] = [
     {
@@ -88,16 +89,14 @@ function AdminUserTimesheetPage({
       ),
     },
     {
-      id: 'trackedSeconds',
-      heading: 'Tracked',
-      align: 'right',
-      cell: (day) => <span className="tabular-nums">{formatDuration(day.trackedSeconds)}</span>,
+      id: 'checkInAt',
+      heading: 'Check-in',
+      cell: (day) => <span className="tabular-nums">{formatTimesheetTime(day.checkInAt, timezone)}</span>,
     },
     {
-      id: 'automaticSeconds',
-      heading: 'Automatic',
-      align: 'right',
-      cell: (day) => <span className="tabular-nums">{formatDuration(day.automaticSeconds)}</span>,
+      id: 'checkOutAt',
+      heading: 'Check-out',
+      cell: (day) => <span className="tabular-nums">{formatTimesheetTime(day.checkOutAt, timezone)}</span>,
     },
     {
       id: 'effectiveHours',
@@ -168,24 +167,23 @@ function AdminUserTimesheetPage({
           </div>
         ) : (
           <section aria-label="Daily timesheets">
-            <ul className="overflow-hidden rounded-md bg-card shadow-card md:hidden">
+            <ul className="flex flex-col gap-3 md:hidden">
               {days.map((day) => (
-                <li key={day.localDate} className="border-b border-border/60 last:border-b-0">
+                <li key={day.localDate} className="overflow-hidden rounded-md bg-card shadow-card ring-1 ring-border/50">
                   <button
                     type="button"
-                    className="flex min-h-20 w-full items-center gap-3 px-4 py-3 text-left outline-none hover:bg-surface-hover focus-visible:ring-3 focus-visible:ring-ring/30"
+                    className="w-full rounded-md p-4 text-left outline-none transition-colors hover:bg-surface-hover active:bg-surface-hover focus-visible:ring-3 focus-visible:ring-ring/30"
                     onClick={() => setSelectedDay(day)}
                   >
-                    <span className="min-w-0 flex-1">
-                      <span className="block font-medium text-text-heading">
-                        {formatTimesheetDate(day.localDate)}
-                      </span>
-                      <span className="mt-1 block text-xs text-text-tertiary">
-                        Tracked {formatDuration(day.trackedSeconds)} · Automatic {formatDuration(day.automaticSeconds)}
-                      </span>
+                    <span className="flex items-center justify-between gap-3">
+                      <time dateTime={day.localDate} className="font-semibold text-text-heading tabular-nums">
+                        {day.localDate}
+                      </time>
+                      <ChevronRight aria-hidden="true" className="size-4 shrink-0 text-text-tertiary" />
                     </span>
-                    <span className="text-right">
-                      <span className="block font-semibold text-text-heading tabular-nums">
+                    <span className="mt-3 flex items-center justify-between gap-4 border-t border-border/60 pt-3">
+                      <span className="text-sm text-text-secondary">Total hours logged</span>
+                      <span className="shrink-0 font-semibold text-text-heading tabular-nums">
                         {formatHours(day.effectiveHours)} hrs
                       </span>
                     </span>
@@ -214,6 +212,7 @@ function AdminUserTimesheetPage({
           tenantId={tenantId}
           userId={userId}
           memberName={memberName}
+          timezone={timezone}
           day={selectedDay}
           onClose={() => setSelectedDay(undefined)}
         />

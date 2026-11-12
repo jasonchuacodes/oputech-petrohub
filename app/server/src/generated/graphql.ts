@@ -710,6 +710,8 @@ export type TenantSummary = {
 export type TimesheetDay = {
   __typename?: 'TimesheetDay';
   automaticSeconds: Scalars['Int']['output'];
+  checkInAt?: Maybe<Scalars['String']['output']>;
+  checkOutAt?: Maybe<Scalars['String']['output']>;
   effectiveHours: Scalars['Decimal']['output'];
   localDate: Scalars['String']['output'];
   overrideHours?: Maybe<Scalars['Decimal']['output']>;
@@ -829,6 +831,7 @@ export type UserTimesheet = {
   __typename?: 'UserTimesheet';
   days: Array<TimesheetDay>;
   fullName: Scalars['String']['output'];
+  timezone: Scalars['String']['output'];
   userId: Scalars['ObjectId']['output'];
   username: Scalars['String']['output'];
 };
@@ -1369,6 +1372,8 @@ export type TenantSummaryResolvers<ContextType = GraphqlContext, ParentType exte
 
 export type TimesheetDayResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['TimesheetDay'] = ResolversParentTypes['TimesheetDay']> = {
   automaticSeconds?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  checkInAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  checkOutAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   effectiveHours?: Resolver<ResolversTypes['Decimal'], ParentType, ContextType>;
   localDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   overrideHours?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>;
@@ -1410,6 +1415,7 @@ export type UserPageResolvers<ContextType = GraphqlContext, ParentType extends R
 export type UserTimesheetResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['UserTimesheet'] = ResolversParentTypes['UserTimesheet']> = {
   days?: Resolver<Array<ResolversTypes['TimesheetDay']>, ParentType, ContextType>;
   fullName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  timezone?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   userId?: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
   username?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };

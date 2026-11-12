@@ -23,6 +23,16 @@ export function formatTimesheetDate(value: string): string {
   }).format(new Date(`${value}T00:00:00Z`))
 }
 
+export function formatTimesheetTime(value: string | null | undefined, timezone: string): string {
+  if (!value) return '-'
+  return new Intl.DateTimeFormat('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+    timeZone: timezone,
+  }).format(new Date(value)).replace(' ', '')
+}
+
 export function localDateAt(instant: string, timezone: string): string {
   const parts = new Intl.DateTimeFormat('en-US', {
     timeZone: timezone,

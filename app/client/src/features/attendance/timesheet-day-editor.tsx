@@ -13,22 +13,26 @@ import { Spinner } from '~/components/ui/spinner'
 import type { TimesheetDayFieldsFragment } from '~/generated/graphql'
 import { useMediaQuery } from '~/hooks/useMediaQuery'
 import { useSetTimesheetDayOverrideMutation } from './attendance.queries'
-import { formatDuration, formatHours, formatTimesheetDate } from './attendance.utils'
+import { formatTimesheetDate, formatTimesheetTime } from './attendance.utils'
 
 const tabletMediaQuery = '(min-width: 48rem)'
-const overrideSchema = z.object({ hours: z.number().min(0, 'Hours cannot be negative') })
+const overrideSchema = z.object({
+  hours: z.number({ error: 'Enter logged hours' }).min(0, 'Hours cannot be negative'),
+})
 type OverrideForm = z.infer<typeof overrideSchema>
 
 export function TimesheetDayEditor({
   tenantId,
   userId,
   memberName,
+  timezone,
   day,
   onClose,
 }: {
   tenantId: string
   userId: string
   memberName: string
+  timezone: string
   day: TimesheetDayFieldsFragment
   onClose: () => void
 }) {
@@ -63,23 +67,17 @@ export function TimesheetDayEditor({
 
   const fields = (
     <form id={formId} onSubmit={save}>
-      <dl className="grid grid-cols-3 gap-3 rounded-md bg-muted/60 p-3 text-sm">
+      <dl className="grid grid-cols-2 gap-3 rounded-md bg-muted/60 p-3 text-sm">
         <div>
-          <dt className="text-text-tertiary">Tracked</dt>
+          <dt className="text-text-tertiary">Check-in</dt>
           <dd className="mt-0.5 font-medium text-text-heading tabular-nums">
-            {formatDuration(day.trackedSeconds)}
+            {formatTimesheetTime(day.checkInAt, timezone)}
           </dd>
         </div>
         <div>
-          <dt className="text-text-tertiary">Automatic</dt>
+          <dt className="text-text-tertiary">Check-out</dt>
           <dd className="mt-0.5 font-medium text-text-heading tabular-nums">
-            {formatDuration(day.automaticSeconds)}
-          </dd>
-        </div>
-        <div>
-          <dt className="text-text-tertiary">Current hours</dt>
-          <dd className="mt-0.5 font-medium text-text-heading tabular-nums">
-            {formatHours(day.effectiveHours)} hrs
+            {formatTimesheetTime(day.checkOutAt, timezone)}
           </dd>
         </div>
       </dl>
@@ -95,9 +93,6 @@ export function TimesheetDayEditor({
           disabled={mutation.isPending}
         />
       </label>
-      {form.formState.errors.hours?.message && (
-        <p className="mt-1 text-sm text-destructive">{form.formState.errors.hours.message}</p>
-      )}
       {form.formState.errors.root?.message && (
         <p className="mt-2 text-sm text-destructive">{form.formState.errors.root.message}</p>
       )}

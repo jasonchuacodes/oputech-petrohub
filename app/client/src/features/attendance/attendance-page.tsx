@@ -17,7 +17,7 @@ import {
   type TimesheetDateRange,
   userTimesheetHref,
 } from './attendance-route'
-import { formatDuration, formatHours, formatTimesheetDate, localDateAt } from './attendance.utils'
+import { formatHours, formatTimesheetDate, formatTimesheetTime, localDateAt } from './attendance.utils'
 
 const pageSize = 20
 
@@ -45,6 +45,7 @@ function MemberTimesheets({ tenantId, userId }: { tenantId: string; userId: stri
   const days = useTimesheetDaysQuery(tenantId, userId, rangeStart, rangeEnd)
 
   const summary = timesheets.data?.items[0]
+  const timezone = days.data?.timezone ?? timesheets.data?.timezone ?? 'UTC'
   const visibleDays = days.data?.days.filter((day) => Number(day.effectiveHours) > 0) ?? []
   const dayColumns: DataTableColumn<(typeof visibleDays)[number]>[] = [
     {
@@ -53,33 +54,26 @@ function MemberTimesheets({ tenantId, userId }: { tenantId: string; userId: stri
       cell: (day) => <span className="font-medium text-text-heading">{formatTimesheetDate(day.localDate)}</span>,
     },
     {
-      id: 'trackedSeconds',
-      heading: 'Tracked',
-      align: 'right',
-      cell: (day) => <span className="tabular-nums">{formatDuration(day.trackedSeconds)}</span>,
+      id: 'checkInAt',
+      heading: 'Check-in',
+      cell: (day) => <span className="tabular-nums">{formatTimesheetTime(day.checkInAt, timezone)}</span>,
     },
     {
-      id: 'automaticSeconds',
-      heading: 'Automatic',
-      align: 'right',
-      cell: (day) => <span className="tabular-nums">{formatDuration(day.automaticSeconds)}</span>,
+      id: 'checkOutAt',
+      heading: 'Check-out',
+      cell: (day) => <span className="tabular-nums">{formatTimesheetTime(day.checkOutAt, timezone)}</span>,
     },
     {
       id: 'effectiveHours',
-      heading: 'Credited hours',
+      heading: 'Logged hours',
       align: 'right',
       cell: (day) => <span className="font-semibold tabular-nums">{formatHours(day.effectiveHours)} hrs</span>,
-    },
-    {
-      id: 'status',
-      heading: 'Status',
-      cell: (day) => day.overrideHours === null ? 'Credited' : 'Adjusted',
     },
   ]
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-5 py-5 md:p-6 wide:max-w-5xl">
-      <PageHeader title="My timesheets" description="Review your credited hours by date." />
+      <PageHeader title="My timesheets" description="Review your logged hours by date." />
 
       <div className="flex flex-col gap-1">
         <section aria-label="Timesheet date range" className="flex min-h-12 items-center justify-end">
@@ -106,7 +100,7 @@ function MemberTimesheets({ tenantId, userId }: { tenantId: string; userId: stri
         ) : (
           <div className="flex flex-col gap-5">
           <section aria-label="Range summary" className="rounded-md bg-primary p-5 text-primary-foreground shadow-card">
-            <p className="text-sm font-medium text-white/70">Total credited hours</p>
+            <p className="text-sm font-medium text-white/70">Total logged hours</p>
             <p className="mt-2 text-3xl font-semibold text-white tabular-nums">{formatHours(summary?.totalHours ?? 0)} hrs</p>
             {timesheets.data && <p className="mt-2 text-xs text-white/65">{formatTimesheetDate(timesheets.data.startDate)} – {formatTimesheetDate(timesheets.data.endDate)}</p>}
           </section>
@@ -126,12 +120,11 @@ function MemberTimesheets({ tenantId, userId }: { tenantId: string; userId: stri
                       <span className="min-w-0 flex-1">
                         <span className="block font-medium text-text-heading">{formatTimesheetDate(day.localDate)}</span>
                         <span className="mt-1 block text-xs text-text-tertiary">
-                          Tracked {formatDuration(day.trackedSeconds)} · Automatic {formatDuration(day.automaticSeconds)}
+                          Check-in {formatTimesheetTime(day.checkInAt, timezone)} · Check-out {formatTimesheetTime(day.checkOutAt, timezone)}
                         </span>
                       </span>
                       <span className="text-right">
                         <span className="block font-semibold text-text-heading tabular-nums">{formatHours(day.effectiveHours)} hrs</span>
-                        <span className="text-xs text-text-tertiary">{day.overrideHours === null ? 'Credited' : 'Adjusted'}</span>
                       </span>
                     </li>
                   ))}

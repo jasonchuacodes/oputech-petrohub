@@ -9,8 +9,8 @@ fragment AttendanceStatusFields on AttendanceStatus {
 
 fragment TimesheetDayFields on TimesheetDay {
   localDate
-  trackedSeconds
-  automaticSeconds
+  checkInAt
+  checkOutAt
   overrideHours
   effectiveHours
   revision
@@ -44,6 +44,7 @@ query TimesheetDays($filter: TimesheetDaysFilter!) {
     userId
     fullName
     username
+    timezone
     days { ...TimesheetDayFields }
   }
 }

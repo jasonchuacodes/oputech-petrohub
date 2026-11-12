@@ -94,7 +94,7 @@ export function AttendanceCard({ tenantId }: { tenantId: string }) {
           </button>
         </div>
 
-        <p className="mt-4 text-xs text-white/65">Daily credited time is capped at 8 hours.</p>
+        <p className="mt-4 text-xs text-white/65">Daily logged time is capped at 8 hours.</p>
         {(attendance.isError || mutationError) && (
           <div className="mt-3 flex items-center justify-between gap-3 rounded-sm bg-white/10 px-3 py-2 text-sm text-white/90">
             <span>Unable to update attendance.</span>
