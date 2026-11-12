@@ -11,12 +11,14 @@ extend type Mutation {
 }
 
 input CreateShiftInput {
+  name: String!
   startTime: String!
   endTime: String!
 }
 
 input UpdateShiftInput {
   shiftId: ObjectId!
+  name: String!
   startTime: String!
   endTime: String!
 }
@@ -27,6 +29,7 @@ input DeleteShiftInput {
 
 type Shift {
   id: ObjectId!
+  name: String!
   startTime: String!
   endTime: String!
 }

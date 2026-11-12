@@ -35,6 +35,7 @@ mutation DeleteTenant($input: DeleteTenantInput!) {
 query Shifts {
   shifts {
     id
+    name
     startTime
     endTime
   }
@@ -43,6 +44,7 @@ query Shifts {
 mutation CreateShift($input: CreateShiftInput!) {
   createShift(input: $input) {
     id
+    name
     startTime
     endTime
   }
@@ -51,6 +53,7 @@ mutation CreateShift($input: CreateShiftInput!) {
 mutation UpdateShift($input: UpdateShiftInput!) {
   updateShift(input: $input) {
     id
+    name
     startTime
     endTime
   }

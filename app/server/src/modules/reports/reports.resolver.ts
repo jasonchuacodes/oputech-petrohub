@@ -41,8 +41,10 @@ export class ReportsResolver {
     const context = await this.reports.creationContext(this.toTenant(tenant))
     return {
       businessDate: context.businessDate,
-      slots: context.slots.map(({ shift, report, canCreate, blockedReason }) => ({
-        shift: { id: shift.id, startTime: shift.startTime, endTime: shift.endTime },
+      slots: context.slots.map(({ id, shift, interval, report, canCreate, blockedReason }) => ({
+        id,
+        shift: { id: shift.id, name: shift.name, startTime: shift.startTime, endTime: shift.endTime },
+        interval: this.serializeInterval(interval),
         report: report ? this.serialize(report) : null,
         canCreate,
         blockedReason,
@@ -140,10 +142,12 @@ export class ReportsResolver {
       id: report._id,
       businessDate: report.businessDate,
       shiftId: report.shiftId,
-      interval: report.interval,
+      shiftName: report.shiftName,
+      interval: this.serializeInterval(report.interval),
       currency: report.currency ?? 'PHP',
       legacy: !report.disposalBatchId,
       effective: report.effective ?? report.status !== 'revoked',
+      stale: report.stale,
       incomeEntries: (report.incomeEntries ?? []).map((entry) => ({
         ...entry,
         recurringIncomeFieldId: entry.recurringIncomeFieldId ?? null,
@@ -209,6 +213,16 @@ export class ReportsResolver {
       pumpSales: decimalString(batch.pumpSales),
       complete: batch.complete,
       blockingIssues: batch.blockingIssues,
+    }
+  }
+
+  private serializeInterval(interval: ReportRecord['interval']) {
+    return {
+      startTime: interval.startTime,
+      endTime: interval.endTime,
+      timezone: interval.timezone,
+      startAt: interval.startAt.toISOString(),
+      endAt: interval.endAt.toISOString(),
     }
   }
 }

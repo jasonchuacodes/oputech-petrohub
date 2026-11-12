@@ -13,6 +13,7 @@ import { useReportEditor } from './report-editor-context';
 export function ReportEditorFooter() {
   const {
     canEdit,
+    report,
     pending,
     isValid,
     saveReportPending,
@@ -27,7 +28,7 @@ export function ReportEditorFooter() {
         type="button"
         size="lg"
         className="flex-1 rounded-md shadow-[0_4px_14px_rgba(16,16,16,0.14)]"
-        disabled={pending || !isValid}
+        disabled={pending || !isValid || report.stale}
         onClick={submitConfirmation.onOpen}
       >
         {saveReportPending ? <Spinner className="size-4" /> : <CheckCircle2 aria-hidden="true" />}
@@ -58,7 +59,7 @@ export function ReportEditorDialogs() {
       <Sheet
         open={reportActions.open}
         title="Report actions"
-        description={`${formatBusinessDate(report.businessDate)} · ${formatShiftTime(report.interval)}`}
+        description={`${report.shiftName} · ${formatBusinessDate(report.businessDate)} · ${formatShiftTime(report.interval)}`}
         manageFocus
         onClose={reportActions.onClose}
       >
@@ -81,7 +82,7 @@ export function ReportEditorDialogs() {
       <ConfirmationDialog
         open={submitConfirmation.open}
         title="Submit report summary?"
-        description={`${formatBusinessDate(report.businessDate)} · ${formatShiftTime(report.interval)}`}
+        description={`${report.shiftName} · ${formatBusinessDate(report.businessDate)} · ${formatShiftTime(report.interval)}`}
         icon={CheckCircle2}
         confirmText="Submit report"
         loading={submitReportPending || saveReportPending}

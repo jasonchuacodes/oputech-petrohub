@@ -24,7 +24,7 @@ type ShiftSheetProps = {
   onClose: () => void
 }
 
-const defaultValues: AddShiftFormValues = { startTime: '05:00', endTime: '13:00' }
+const defaultValues: AddShiftFormValues = { name: '', startTime: '05:00', endTime: '13:00' }
 const focusableSelector =
   'button:not([disabled]),input:not([disabled]),[href],[tabindex]:not([tabindex="-1"])'
 
@@ -46,7 +46,7 @@ export function ShiftSheet({ open, tenantId, tenantName, shift, onClose }: Shift
     formState: { errors, isValid },
   } = useForm<AddShiftFormValues>({
     defaultValues: shift
-      ? { startTime: shift.startTime, endTime: shift.endTime }
+      ? { name: shift.name, startTime: shift.startTime, endTime: shift.endTime }
       : defaultValues,
     mode: 'onChange',
     resolver: zodResolver(addShiftFormSchema),
@@ -86,7 +86,7 @@ export function ShiftSheet({ open, tenantId, tenantName, shift, onClose }: Shift
       toast.success(shift ? 'Shift updated successfully' : 'Shift created successfully')
     } catch {
       setError('root', {
-        message: `Unable to ${shift ? 'update' : 'create'} the shift. Check that it does not overlap an existing shift.`,
+        message: `Unable to ${shift ? 'update' : 'create'} the shift. Check that its name is unique and its times do not overlap another shift.`,
       })
     }
   })
@@ -158,7 +158,7 @@ export function ShiftSheet({ open, tenantId, tenantName, shift, onClose }: Shift
             </h2>
             <p id={descriptionId} className="mt-0.5 text-sm text-text-secondary">
               {shift && !editing
-                ? `${shift.startTime}–${shift.endTime}`
+                ? `${shift.name} · ${shift.startTime}–${shift.endTime}`
                 : `${shift ? 'Update' : 'Add'} a daily shift for ${tenantName}.`}
             </p>
           </div>
@@ -177,13 +177,25 @@ export function ShiftSheet({ open, tenantId, tenantName, shift, onClose }: Shift
 
         {editing ? (
           <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-5">
+            <div className="mb-4 flex flex-col gap-1.5">
+              <label htmlFor="shift-name" className="text-sm font-medium">Shift name</label>
+              <Input
+                id="shift-name"
+                autoFocus
+                placeholder="Morning"
+                disabled={isPending}
+                aria-invalid={Boolean(errors.name)}
+                aria-describedby={errors.name ? 'shift-name-error' : undefined}
+                {...register('name')}
+              />
+              {errors.name?.message && <p id="shift-name-error" role="alert" className="text-sm text-destructive">{errors.name.message}</p>}
+            </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="flex flex-col gap-1.5">
                 <label htmlFor="new-shift-start" className="text-sm font-medium">Start time</label>
                 <Input
                   id="new-shift-start"
                   type="time"
-                  autoFocus
                   disabled={isPending}
                   aria-invalid={Boolean(errors.startTime)}
                   aria-describedby={errors.startTime ? 'new-shift-start-error' : undefined}
@@ -237,7 +249,7 @@ export function ShiftSheet({ open, tenantId, tenantName, shift, onClose }: Shift
         <ConfirmationDialog
           open={deleteOpen}
           title="Delete shift?"
-          description={`${shift.startTime}–${shift.endTime} will be removed from the tenant schedule.`}
+          description={`${shift.name} · ${shift.startTime}–${shift.endTime} will be removed from the tenant schedule.`}
           icon={Trash2}
           variant="danger"
           confirmText="Delete shift"

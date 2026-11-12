@@ -58,7 +58,7 @@ export function useReportQuery(tenantId: string, reportId: string) {
 export function useCreateReportMutation(tenantId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (input: { shiftId: string; businessDate: string }) =>
+    mutationFn: async (input: { slotId: string; businessDate: string }) =>
       (await graphqlClient.request(CreateReportDocument, { input }, { tenantId })).createReport,
     onSuccess: async ({ report }) => {
       queryClient.setQueryData(reportKeys.detail(tenantId, report.id), report)

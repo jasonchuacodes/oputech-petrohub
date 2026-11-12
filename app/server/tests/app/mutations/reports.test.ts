@@ -16,6 +16,8 @@ describe('report disposal lifecycle', () => {
   let tenantId: string
   let firstShiftId: string
   let secondShiftId: string
+  let fuelProductId: string
+  let snapshottedReportId: string
   let lubricantProductId: string
 
   beforeAll(async () => {
@@ -43,11 +45,12 @@ describe('report disposal lifecycle', () => {
     await users.create({ username: 'report-admin', passwordHash: await hash('AdminPassword123'), role: UserRole.ADMIN, accountHolderId: owner._id, tenantIds: [tenant._id] })
     await users.create({ username: 'report-member', passwordHash: await hash('MemberPassword123'), role: UserRole.MEMBER, accountHolderId: owner._id, tenantIds: [tenant._id] })
     await users.create({ username: 'report-other-member', passwordHash: await hash('OtherMemberPassword123'), role: UserRole.MEMBER, accountHolderId: owner._id, tenantIds: [tenant._id] })
-    const first = await tenants.createShift(tenant._id, { startTime: '05:00', endTime: '13:00' })
-    const second = await tenants.createShift(tenant._id, { startTime: '13:00', endTime: '21:00' })
+    const first = await tenants.createShift(tenant._id, { name: 'Morning', startTime: '05:00', endTime: '13:00' })
+    const second = await tenants.createShift(tenant._id, { name: 'Afternoon', startTime: '13:00', endTime: '21:00' })
     firstShiftId = first.id.toHexString()
     secondShiftId = second.id.toHexString()
     const product = await setup.createProduct(tenant._id, { name: 'ADO', unitPrice: '10.00' })
+    fuelProductId = product._id.toHexString()
     await setup.createMeter(tenant._id, { label: 'ADO 1', productId: product._id, initialReading: '100.000' })
     const lubricant = await inventory.createProduct(
       tenant._id,
@@ -226,6 +229,127 @@ describe('report disposal lifecycle', () => {
     expect(superadminDeleted.body.data.deleteReport.status).toBe('revoked')
   })
 
+  it('splits a scheduled shift at an hour-effective fuel price change', async () => {
+    const memberToken = await login('report-member', 'MemberPassword123')
+    const adminToken = await login('report-admin', 'AdminPassword123')
+    const context = await graphql(memberToken, `query { reportCreationContext { businessDate } }`)
+    const businessDate = context.body.data.reportCreationContext.businessDate as string
+
+    const changed = await graphql(adminToken, `mutation ($input: ChangeFuelPriceInput!) { changeFuelPrice(input: $input) { id unitPrice revision } }`, {
+      input: {
+        productId: fuelProductId,
+        expectedRevision: 0,
+        unitPrice: '12.00',
+        effectiveDate: businessDate,
+        effectiveHour: 6,
+      },
+    })
+    expect(changed.body.errors).toBeUndefined()
+
+    const splitContext = await graphql(memberToken, `query { reportCreationContext { slots { id shift { id } interval { startTime endTime } } } }`)
+    expect(splitContext.body.errors).toBeUndefined()
+    expect(splitContext.body.data.reportCreationContext.slots.map((slot: { shift: { id: string }; interval: { startTime: string; endTime: string } }) => ({
+      shiftId: slot.shift.id,
+      ...slot.interval,
+    }))).toEqual([
+      { shiftId: firstShiftId, startTime: '05:00', endTime: '06:00' },
+      { shiftId: firstShiftId, startTime: '06:00', endTime: '13:00' },
+      { shiftId: secondShiftId, startTime: '13:00', endTime: '21:00' },
+    ])
+
+    const oldPriceReport = await createReport(memberToken, firstShiftId, businessDate, '05:00')
+    expect(oldPriceReport.disposals.readings[0].unitPrice).toBe('10')
+    const saved = await saveReport(memberToken, oldPriceReport.id, oldPriceReport.revision, oldPriceReport.disposals.revision, '110.000')
+    await transition(memberToken, 'submitReport', saved.id, saved.revision, saved.disposals.revision)
+
+    const newPriceReport = await createReport(memberToken, firstShiftId, businessDate, '06:00')
+    expect(newPriceReport.disposals.readings[0]).toMatchObject({ unitPrice: '12', openingReading: '110' })
+
+    const corrected = await graphql(adminToken, `mutation ($input: ChangeFuelPriceInput!) { changeFuelPrice(input: $input) { unitPrice revision } }`, {
+      input: {
+        productId: fuelProductId,
+        expectedRevision: 1,
+        unitPrice: '14.00',
+        effectiveDate: businessDate,
+        effectiveHour: 6,
+      },
+    })
+    expect(corrected.body.errors).toBeUndefined()
+    const stale = await reportDetail(memberToken, newPriceReport.id)
+    expect(stale.stale).toBe(true)
+
+    const staleSubmission = await graphql(memberToken, `mutation ($input: ReportTransitionInput!) { submitReport(input: $input) { id } }`, {
+      input: {
+        reportId: stale.id,
+        expectedReportRevision: stale.revision,
+        expectedDisposalRevision: stale.disposals.revision,
+      },
+    })
+    expect(staleSubmission.body.errors?.[0]?.extensions?.originalError).toMatchObject({ code: 'CONFLICT' })
+
+    const correctedContext = await graphql(memberToken, `query { reportCreationContext { slots { interval { startTime endTime } } } }`)
+    expect(correctedContext.body.data.reportCreationContext.slots.map((slot: { interval: { startTime: string; endTime: string } }) => slot.interval)).toEqual([
+      { startTime: '05:00', endTime: '06:00' },
+      { startTime: '06:00', endTime: '13:00' },
+      { startTime: '13:00', endTime: '21:00' },
+    ])
+
+    const blockedHistoricalChange = await graphql(adminToken, `mutation ($input: ChangeFuelPriceInput!) { changeFuelPrice(input: $input) { id } }`, {
+      input: {
+        productId: fuelProductId,
+        expectedRevision: 2,
+        unitPrice: '9.00',
+        effectiveDate: businessDate,
+        effectiveHour: 5,
+      },
+    })
+    expect(blockedHistoricalChange.body.errors?.[0]?.extensions?.originalError).toMatchObject({ code: 'CONFLICT' })
+
+    const deleted = await deleteReport(memberToken, stale, 'Recreate with corrected fuel price')
+    expect(deleted.body.errors).toBeUndefined()
+    const recreated = await createReport(memberToken, firstShiftId, businessDate, '06:00')
+    expect(recreated.disposals.readings[0].unitPrice).toBe('14')
+    snapshottedReportId = recreated.id
+
+    const nextDate = new Date(`${businessDate}T00:00:00.000Z`)
+    nextDate.setUTCDate(nextDate.getUTCDate() + 1)
+    const futureDate = nextDate.toISOString().slice(0, 10)
+    const scheduled = await graphql(adminToken, `mutation ($input: ChangeFuelPriceInput!) { changeFuelPrice(input: $input) { unitPrice revision } }`, {
+      input: {
+        productId: fuelProductId,
+        expectedRevision: 2,
+        unitPrice: '15.00',
+        effectiveDate: futureDate,
+        effectiveHour: 9,
+      },
+    })
+    expect(scheduled.body.errors).toBeUndefined()
+    const fuelSetup = await graphql(adminToken, `query { fuelSetup { products { id unitPrice nextPriceChange { unitPrice effectiveDate effectiveHour } } } }`)
+    expect(fuelSetup.body.errors).toBeUndefined()
+    expect(fuelSetup.body.data.fuelSetup.products.find((product: { id: string }) => product.id === fuelProductId)).toMatchObject({
+      unitPrice: '14',
+      nextPriceChange: { unitPrice: '15', effectiveDate: futureDate, effectiveHour: 9 },
+    })
+  })
+
+  it('requires unique normalized shift names and preserves report name snapshots', async () => {
+    const adminToken = await login('report-admin', 'AdminPassword123')
+    const renamed = await graphql(adminToken, `mutation ($input: UpdateShiftInput!) { updateShift(input: $input) { id name } }`, {
+      input: { shiftId: firstShiftId, name: '  Daybreak   ', startTime: '05:00', endTime: '13:00' },
+    })
+    expect(renamed.body.errors).toBeUndefined()
+    expect(renamed.body.data.updateShift.name).toBe('Daybreak')
+
+    const duplicate = await graphql(adminToken, `mutation ($input: UpdateShiftInput!) { updateShift(input: $input) { id } }`, {
+      input: { shiftId: secondShiftId, name: 'daybreak', startTime: '13:00', endTime: '21:00' },
+    })
+    expect(duplicate.body.errors?.[0]?.extensions?.originalError).toMatchObject({ code: 'INVALID_INPUT' })
+
+    const memberToken = await login('report-member', 'MemberPassword123')
+    const historical = await reportDetail(memberToken, snapshottedReportId)
+    expect(historical.shiftName).toBe('Morning')
+  })
+
   async function login(username: string, password: string): Promise<string> {
     const response = await request(app.getHttpServer()).post('/api/auth/session').set('origin', 'http://localhost:5173').send({ username, password }).expect(200)
     return response.body.accessToken as string
@@ -235,8 +359,14 @@ describe('report disposal lifecycle', () => {
     return request(app.getHttpServer()).post('/graphql').set('origin', 'http://localhost:5173').set('authorization', `Bearer ${token}`).set('x-tenant-id', tenantId).send({ query, variables })
   }
 
-  async function createReport(token: string, shiftId: string, businessDate: string) {
-    const response = await graphql(token, `mutation ($input: CreateReportInput!) { createReport(input: $input) { report { ${detailFields} } } }`, { input: { shiftId, businessDate } })
+  async function createReport(token: string, shiftId: string, businessDate: string, startTime?: string) {
+    const context = await graphql(token, `query { reportCreationContext { slots { id shift { id } interval { startTime } report { id } } } }`)
+    expect(context.body.errors).toBeUndefined()
+    const slot = context.body.data.reportCreationContext.slots.find((item: { shift: { id: string }; interval: { startTime: string }; report?: { id: string } }) =>
+      item.shift.id === shiftId && (!startTime || item.interval.startTime === startTime),
+    )
+    expect(slot).toBeDefined()
+    const response = await graphql(token, `mutation ($input: CreateReportInput!) { createReport(input: $input) { report { ${detailFields} } } }`, { input: { slotId: slot.id, businessDate } })
     expect(response.body.errors).toBeUndefined()
     return response.body.data.createReport.report
   }
@@ -281,12 +411,12 @@ describe('report disposal lifecycle', () => {
 })
 
 const detailFields = `
-  id status effective revision revokedFromStatus
+  id shiftName status effective stale revision revokedFromStatus
   incomeEntries { id recurringIncomeFieldId description notes amount }
   lubricantSales { id productId productName unit quantity unitPrice amount }
   totals { cashFuelSales pumpSales overShort lubricantSales }
   disposals {
     revision status
-    readings { meterId openingReading openingSource closingReading calibration netVolume sales }
+    readings { meterId unitPrice openingReading openingSource closingReading calibration netVolume sales }
   }
 `

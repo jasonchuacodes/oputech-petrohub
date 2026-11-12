@@ -11,7 +11,7 @@ const businessDateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine((value
 
 export const createReportInputSchema = z
   .object({
-    shiftId: z.instanceof(Types.ObjectId),
+    slotId: z.string().trim().min(1).max(160),
     businessDate: businessDateSchema,
   })
   .strict()

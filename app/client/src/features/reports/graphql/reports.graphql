@@ -2,11 +2,13 @@ fragment ReportFields on Report {
   id
   businessDate
   shiftId
-  interval { startTime endTime timezone }
+  shiftName
+  interval { startTime endTime timezone startAt endAt }
   creatorId
   creatorName
   status
   revision
+  stale
   createdAt
   updatedAt
   submittedAt
@@ -57,9 +59,11 @@ query ReportCreationContext {
   reportCreationContext {
     businessDate
     slots {
+      id
       canCreate
       blockedReason
-      shift { id startTime endTime }
+      shift { id name startTime endTime }
+      interval { startTime endTime timezone startAt endAt }
       report { ...ReportFields }
     }
   }

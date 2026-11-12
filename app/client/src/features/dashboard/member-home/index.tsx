@@ -63,16 +63,16 @@ export function MemberHomePage() {
           Reports overview
         </h2>
         <div className="overflow-hidden rounded-md bg-card shadow-card">
-          {reports.data?.slots.map(({ shift, report }, index) => (
+          {reports.data?.slots.map(({ id, shift, interval, report }) => (
             <div
-              key={shift.id}
+              key={id}
               className="border-b border-border/60 px-4 py-3 last:border-b-0"
             >
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <div className="flex min-w-0 items-center gap-2">
                     <span className="shrink-0 font-semibold text-text-heading">
-                      {formatShiftNumber(index)}
+                      {shift.name}
                     </span>
                     <span
                       className={`shrink-0 rounded-sm px-2 py-0.5 text-xs font-medium ${
@@ -83,17 +83,17 @@ export function MemberHomePage() {
                             : 'bg-muted text-text-secondary'
                       }`}
                     >
-                      {report?.status === 'submitted' ? 'Submitted' : report ? 'Draft' : 'Pending'}
+                      {report?.stale ? 'Recreate' : report?.status === 'submitted' ? 'Submitted' : report ? 'Draft' : 'Pending'}
                     </span>
                   </div>
                   <p className="mt-1 truncate text-sm text-text-secondary">
-                    {formatTime(shift.startTime)}-{formatTime(shift.endTime)}
+                    Report period {formatTime(interval.startTime)}-{formatTime(interval.endTime)}
                   </p>
                 </div>
                 {report && (
                   <Link
                     href={`/report/${report.id}`}
-                    aria-label={`View ${formatShiftNumber(index)} report`}
+                    aria-label={`View ${formatTime(interval.startTime)}-${formatTime(interval.endTime)} report`}
                     className="group flex size-9 items-center justify-center rounded-sm text-primary outline-none hover:bg-primary/10 focus-visible:ring-3 focus-visible:ring-ring/30"
                   >
                     <ChevronRight
@@ -122,22 +122,6 @@ export function MemberHomePage() {
       )}
     </div>
   )
-}
-
-function formatShiftNumber(index: number): string {
-  const number = index + 1
-  const remainder = number % 100
-  const suffix =
-    remainder >= 11 && remainder <= 13
-      ? 'th'
-      : number % 10 === 1
-        ? 'st'
-        : number % 10 === 2
-          ? 'nd'
-          : number % 10 === 3
-            ? 'rd'
-            : 'th'
-  return `${number}${suffix} shift`
 }
 
 function formatTime(value: string): string {

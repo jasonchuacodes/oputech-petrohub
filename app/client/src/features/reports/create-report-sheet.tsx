@@ -16,7 +16,7 @@ export function CreateReportSheet({ onClose, onOpenReport }: CreateReportSheetPr
   const { tenant } = useActiveTenant()
   const context = useReportCreationContextQuery(tenant.id)
   const createReport = useCreateReportMutation(tenant.id)
-  const [selectedShiftId, setSelectedShiftId] = useState<string>()
+  const [selectedSlotId, setSelectedSlotId] = useState<string>()
   const [error, setError] = useState<string>()
   const dialogRef = useRef<HTMLFormElement>(null)
   const titleId = useId()
@@ -47,9 +47,9 @@ export function CreateReportSheet({ onClose, onOpenReport }: CreateReportSheetPr
     }
   }
 
-  const effectiveShiftId =
-    selectedShiftId ?? context.data?.slots.find((slot) => slot.report || slot.canCreate)?.shift.id
-  const selected = context.data?.slots.find((slot) => slot.shift.id === effectiveShiftId)
+  const effectiveSlotId =
+    selectedSlotId ?? context.data?.slots.find((slot) => slot.report || slot.canCreate)?.id
+  const selected = context.data?.slots.find((slot) => slot.id === effectiveSlotId)
   const submit = async (event: FormEvent) => {
     event.preventDefault()
     if (
@@ -64,7 +64,7 @@ export function CreateReportSheet({ onClose, onOpenReport }: CreateReportSheetPr
     }
     setError(undefined)
     try {
-      const result = await createReport.mutateAsync({ shiftId: selected.shift.id, businessDate: context.data.businessDate })
+      const result = await createReport.mutateAsync({ slotId: selected.id, businessDate: context.data.businessDate })
       onOpenReport(result.report.id)
     } catch {
       setError('Unable to create the report. Refresh and try again.')
@@ -85,11 +85,11 @@ export function CreateReportSheet({ onClose, onOpenReport }: CreateReportSheetPr
             <>
               <div className="mb-3 flex min-h-11 items-center gap-3 rounded-sm border border-input px-3"><CalendarDays aria-hidden="true" className="size-5 text-text-secondary" /><span>{formatBusinessDate(context.data.businessDate)}</span></div>
               {context.data.slots.length === 0 ? <p className="rounded-md border border-dashed p-5 text-center text-sm text-text-secondary">No shifts are configured. Ask an administrator to add one.</p> : <fieldset className="flex flex-col gap-2"><legend className="sr-only">Shift</legend>{context.data.slots.map((slot) => {
-                const selectedSlot = slot.shift.id === effectiveShiftId
+                const selectedSlot = slot.id === effectiveSlotId
                 const blocked = !slot.report && !slot.canCreate
-                return <label key={slot.shift.id} className={cn('flex min-h-20 items-center gap-3 rounded-md border p-3', selectedSlot ? 'border-primary bg-accent' : 'border-border', blocked && 'cursor-not-allowed opacity-60')}>
-                  <input type="radio" name="report-shift" checked={selectedSlot} disabled={blocked} className="size-5 accent-primary" onChange={() => setSelectedShiftId(slot.shift.id)} />
-                  <span className="min-w-0 flex-1"><span className="block font-medium text-text-heading">{formatShiftTime(slot.shift)}</span><span className={cn('mt-1 inline-flex rounded-sm px-2 py-0.5 text-xs font-medium', slot.report?.status === 'submitted' ? 'bg-status-success/12 text-status-success' : slot.report ? 'bg-status-warning/12 text-status-warning' : blocked ? 'bg-muted text-text-tertiary' : 'bg-primary/10 text-primary')}>{slot.report ? slot.report.status === 'submitted' ? 'Submitted' : 'Draft' : slot.blockedReason ?? 'Available'}</span></span>
+                return <label key={slot.id} className={cn('flex min-h-20 items-center gap-3 rounded-md border p-3', selectedSlot ? 'border-primary bg-accent' : 'border-border', blocked && 'cursor-not-allowed opacity-60')}>
+                  <input type="radio" name="report-slot" checked={selectedSlot} disabled={blocked} className="size-5 accent-primary" onChange={() => setSelectedSlotId(slot.id)} />
+                  <span className="min-w-0 flex-1"><span className="block font-medium text-text-heading">{slot.shift.name}</span><span className="mt-0.5 block text-sm text-text-secondary">{formatShiftTime(slot.interval)}</span><span className="mt-0.5 block text-xs text-text-tertiary">Scheduled {formatShiftTime(slot.shift)}</span><span className={cn('mt-1 inline-flex rounded-sm px-2 py-0.5 text-xs font-medium', slot.report?.status === 'submitted' ? 'bg-status-success/12 text-status-success' : slot.report ? 'bg-status-warning/12 text-status-warning' : blocked ? 'bg-muted text-text-tertiary' : 'bg-primary/10 text-primary')}>{slot.report ? slot.report.stale ? 'Recreate required' : slot.report.status === 'submitted' ? 'Submitted' : 'Draft' : slot.blockedReason ?? 'Available'}</span></span>
                 </label>
               })}</fieldset>}
               <p className="mt-3 flex gap-2 text-sm text-text-secondary"><CircleAlert aria-hidden="true" className="mt-0.5 size-4" />Reports are visible to users in this tenant.</p>
@@ -97,7 +97,7 @@ export function CreateReportSheet({ onClose, onOpenReport }: CreateReportSheetPr
           )}
           {error && <p role="alert" className="mt-3 text-sm text-destructive">{error}</p>}
         </div>
-        <footer className="border-t border-border p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]"><Button type="submit" size="lg" className="w-full" disabled={!selected || (!selected.report && !selected.canCreate) || context.isPending || createReport.isPending}>{createReport.isPending && <Spinner className="size-4" />}{createReport.isPending ? 'Creating…' : selected?.report ? 'Open report' : selected ? `Create ${formatShiftTime(selected.shift)} report` : 'Select a shift'}</Button></footer>
+        <footer className="border-t border-border p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]"><Button type="submit" size="lg" className="w-full" disabled={!selected || (!selected.report && !selected.canCreate) || context.isPending || createReport.isPending}>{createReport.isPending && <Spinner className="size-4" />}{createReport.isPending ? 'Creating…' : selected?.report ? 'Open report' : selected ? `Create ${formatShiftTime(selected.interval)} report` : 'Select a shift'}</Button></footer>
       </form>
     </div>, document.body,
   )

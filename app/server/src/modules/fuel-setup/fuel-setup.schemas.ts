@@ -13,8 +13,17 @@ export type CreateFuelProductInput = z.infer<typeof createFuelProductInputSchema
 export const updateFuelProductInputSchema = createFuelProductInputSchema.extend({
   productId: z.instanceof(Types.ObjectId),
   expectedRevision: z.number().int().min(0),
-}).strict()
+}).omit({ unitPrice: true }).strict()
 export type UpdateFuelProductInput = z.infer<typeof updateFuelProductInputSchema>
+
+export const changeFuelPriceInputSchema = z.object({
+  productId: z.instanceof(Types.ObjectId),
+  expectedRevision: z.number().int().min(0),
+  unitPrice: priceSchema,
+  effectiveDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  effectiveHour: z.number().int().min(0).max(23),
+}).strict()
+export type ChangeFuelPriceInput = z.infer<typeof changeFuelPriceInputSchema>
 
 export const createPumpMeterInputSchema = z.object({
   label: z.string().trim().min(1).max(80),

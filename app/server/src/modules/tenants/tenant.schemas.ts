@@ -27,22 +27,30 @@ export const deleteTenantInputSchema = z
 export type DeleteTenantInput = z.infer<typeof deleteTenantInputSchema>
 
 const timeSchema = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Use a valid 24-hour time.')
-const shiftTimesSchema = z
+const shiftNameSchema = z
+  .string()
+  .transform((value) => value.trim().replace(/\s+/g, ' '))
+  .pipe(z.string().min(1, 'Shift name is required.').max(80, 'Shift name cannot exceed 80 characters.'))
+const shiftFieldsSchema = z
   .object({
+    name: shiftNameSchema,
     startTime: timeSchema,
     endTime: timeSchema,
   })
-  .refine((shift) => shift.startTime !== shift.endTime, {
+
+function validateShiftTimes<T extends z.ZodType<{ startTime: string; endTime: string }>>(schema: T) {
+  return schema.refine((shift) => shift.startTime !== shift.endTime, {
     message: 'Shift start and end times must be different.',
     path: ['endTime'],
   })
+}
 
-export const createShiftInputSchema = shiftTimesSchema
+export const createShiftInputSchema = validateShiftTimes(shiftFieldsSchema.strict())
 
 export type CreateShiftInput = z.infer<typeof createShiftInputSchema>
 
-export const updateShiftInputSchema = shiftTimesSchema.and(
-  z.object({ shiftId: z.instanceof(Types.ObjectId) }),
+export const updateShiftInputSchema = validateShiftTimes(
+  shiftFieldsSchema.extend({ shiftId: z.instanceof(Types.ObjectId) }).strict(),
 )
 
 export type UpdateShiftInput = z.infer<typeof updateShiftInputSchema>

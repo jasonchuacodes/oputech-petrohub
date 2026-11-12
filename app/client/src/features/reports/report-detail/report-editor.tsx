@@ -63,7 +63,7 @@ function ReportEditorLayout() {
         <PageIntro>
           Review the report details for:
           <span className="mt-1 block font-medium text-status-warning">
-            {formatBusinessDate(report.businessDate)} · {formatShiftTime(report.interval)}.
+            {report.shiftName} · {formatBusinessDate(report.businessDate)} · {formatShiftTime(report.interval)}.
           </span>
         </PageIntro>
       </div>
@@ -155,6 +155,12 @@ function ReportNotices() {
           <CircleAlert aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-status-warning" />
           This draft is being prepared by {report.creatorName}. Only its creator or an administrator
           can edit it.
+        </div>
+      )}
+      {report.stale && (
+        <div className="mt-4 flex gap-2 rounded-md bg-status-warning/10 p-3 text-sm text-text-secondary">
+          <CircleAlert aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-status-warning" />
+          Fuel prices changed during this report period. You may keep editing while coordinating with an administrator, but this draft must be deleted and recreated before submission.
         </div>
       )}
       {report.legacy && (

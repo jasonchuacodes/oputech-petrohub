@@ -12,7 +12,7 @@ extend type Mutation {
 }
 
 input CreateReportInput {
-  shiftId: ObjectId!
+  slotId: String!
   businessDate: String!
 }
 
@@ -75,7 +75,9 @@ type ReportCreationContext {
 }
 
 type ReportSlot {
+  id: String!
   shift: Shift!
+  interval: ReportIntervalSnapshot!
   report: Report
   canCreate: Boolean!
   blockedReason: String
@@ -90,10 +92,12 @@ type Report {
   id: ObjectId!
   businessDate: String!
   shiftId: ObjectId!
+  shiftName: String!
   interval: ReportIntervalSnapshot!
   currency: String!
   legacy: Boolean!
   effective: Boolean!
+  stale: Boolean!
   incomeEntries: [FinancialEntry!]!
   expenseEntries: [FinancialEntry!]!
   lubricantSales: [LubricantSale!]!
@@ -146,6 +150,8 @@ type ReportIntervalSnapshot {
   startTime: String!
   endTime: String!
   timezone: String!
+  startAt: String!
+  endAt: String!
 }
 
 enum ReportStatus {

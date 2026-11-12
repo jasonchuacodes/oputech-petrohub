@@ -25,10 +25,16 @@ export class DisposalsService {
   }
 
   async initializeForReport(
-    input: { tenantId: Types.ObjectId; reportId: Types.ObjectId; businessDate: string; shiftId: Types.ObjectId },
+    input: {
+      tenantId: Types.ObjectId
+      reportId: Types.ObjectId
+      businessDate: string
+      shiftId: Types.ObjectId
+      intervalStartAt: Date
+    },
     session: ClientSession,
   ): Promise<DisposalBatchRecord> {
-    const setup = await this.fuelSetup.activeSnapshot(input.tenantId, session)
+    const setup = await this.fuelSetup.activeSnapshot(input.tenantId, session, input.intervalStartAt)
     if (setup.meters.length === 0) throw new InvalidInputException('Configure at least one active pump meter before creating a report.')
     const products = new Map(setup.products.map((product) => [product._id.toHexString(), product]))
     const meterIds = setup.meters.map((meter) => meter._id)

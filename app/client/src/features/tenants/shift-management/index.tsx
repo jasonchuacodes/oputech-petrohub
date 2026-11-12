@@ -102,7 +102,7 @@ function TenantShiftManagementPage({
                 <button
                   type="button"
                   className="flex min-h-18 w-full items-center gap-3 px-4 py-3 text-left outline-none transition-colors hover:bg-surface-hover focus-visible:ring-3 focus-visible:ring-inset focus-visible:ring-ring/30"
-                  aria-label={`Edit shift ${shift.startTime} to ${shift.endTime}`}
+                  aria-label={`Edit ${shift.name} shift, ${shift.startTime} to ${shift.endTime}`}
                   onClick={() => setEditor({ shift })}
                 >
                   <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
@@ -110,10 +110,10 @@ function TenantShiftManagementPage({
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block font-medium text-text-heading">
-                      {shift.startTime}–{shift.endTime}
+                      {shift.name}
                     </span>
                     <span className="block text-sm text-text-tertiary">
-                      {shift.startTime > shift.endTime ? 'Overnight shift' : 'Daily shift'}
+                      {shift.startTime}–{shift.endTime} · {shift.startTime > shift.endTime ? 'Overnight shift' : 'Daily shift'}
                     </span>
                   </span>
                   <MoreVertical aria-hidden="true" className="size-5 shrink-0 text-text-tertiary" />

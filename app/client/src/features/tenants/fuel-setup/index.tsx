@@ -30,10 +30,10 @@ export function FuelSetupPage() {
   const access = useActiveTenant()
   const canManage = access.role === 'admin' || access.role === 'superadmin'
   if (!canManage) return <div className="mx-auto max-w-xl p-6 text-sm text-text-secondary">Only administrators can manage fuel setup.</div>
-  return <TenantFuelSetup key={access.tenant.id} tenantId={access.tenant.id} />
+  return <TenantFuelSetup key={access.tenant.id} tenantId={access.tenant.id} timezone={access.tenant.timezone} />
 }
 
-function TenantFuelSetup({ tenantId }: { tenantId: string }) {
+function TenantFuelSetup({ tenantId, timezone }: { tenantId: string; timezone: string }) {
   const setup = useFuelSetupQuery(tenantId)
   const deactivateProduct = useDeactivateFuelProductMutation(tenantId)
   const deactivateMeter = useDeactivatePumpMeterMutation(tenantId)
@@ -98,7 +98,7 @@ function TenantFuelSetup({ tenantId }: { tenantId: string }) {
         </section>
       )}
 
-      {productEditor && <FuelProductSheet key={selectedProduct?.id ?? 'new'} tenantId={tenantId} product={selectedProduct} onClose={() => setProductEditor(null)} />}
+      {productEditor && <FuelProductSheet key={selectedProduct?.id ?? 'new'} tenantId={tenantId} product={selectedProduct} timezone={timezone} onClose={() => setProductEditor(null)} />}
       {addingMeter && <PumpMeterSheet tenantId={tenantId} products={setup.data.products} onClose={() => setAddingMeter(false)} />}
       {meterEditor && <PumpMeterSheet key={meterEditor.id} tenantId={tenantId} products={setup.data.products} meter={meterEditor} onClose={() => setMeterEditor(undefined)} />}
 

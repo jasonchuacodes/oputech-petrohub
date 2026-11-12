@@ -53,6 +53,12 @@ export class ReportIntervalSnapshot {
 
   @Prop({ required: true, type: String })
   timezone!: string
+
+  @Prop({ required: true, type: Date })
+  startAt!: Date
+
+  @Prop({ required: true, type: Date })
+  endAt!: Date
 }
 
 const ReportIntervalSnapshotSchema = SchemaFactory.createForClass(ReportIntervalSnapshot)
@@ -67,6 +73,12 @@ export class Report {
 
   @Prop({ required: true, type: Types.ObjectId })
   shiftId!: Types.ObjectId
+
+  @Prop({ required: true, trim: true, type: String })
+  shiftName!: string
+
+  @Prop({ required: true, type: String })
+  slotId!: string
 
   @Prop({ required: true, type: ReportIntervalSnapshotSchema })
   interval!: ReportIntervalSnapshot
@@ -98,6 +110,9 @@ export class Report {
 
   @Prop({ required: true, default: true, type: Boolean })
   effective!: boolean
+
+  @Prop({ required: true, default: false, type: Boolean })
+  stale!: boolean
 
   @Prop({ required: true, type: Types.ObjectId })
   creatorId!: Types.ObjectId
@@ -141,7 +156,7 @@ export type ReportDocument = HydratedDocument<Report>
 export const ReportSchema = SchemaFactory.createForClass(Report)
 
 ReportSchema.index(
-  { tenantId: 1, businessDate: 1, shiftId: 1 },
-  { name: 'report_effective_slot_unique', unique: true, partialFilterExpression: { effective: true } },
+  { tenantId: 1, businessDate: 1, slotId: 1 },
+  { name: 'report_effective_segment_unique', unique: true, partialFilterExpression: { effective: true } },
 )
 ReportSchema.index({ tenantId: 1, businessDate: -1, createdAt: -1, _id: -1 })

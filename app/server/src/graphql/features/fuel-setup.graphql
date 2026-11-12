@@ -5,6 +5,7 @@ extend type Query {
 extend type Mutation {
   createFuelProduct(input: CreateFuelProductInput!): FuelProduct!
   updateFuelProduct(input: UpdateFuelProductInput!): FuelProduct!
+  changeFuelPrice(input: ChangeFuelPriceInput!): FuelProduct!
   deactivateFuelProduct(input: DeactivateFuelSetupInput!): FuelProduct!
   createPumpMeter(input: CreatePumpMeterInput!): PumpMeter!
   updatePumpMeter(input: UpdatePumpMeterInput!): PumpMeter!
@@ -12,12 +13,14 @@ extend type Mutation {
 }
 
 input CreateFuelProductInput { name: String!, unitPrice: Decimal! }
-input UpdateFuelProductInput { productId: ObjectId!, expectedRevision: Int!, name: String!, unitPrice: Decimal! }
+input UpdateFuelProductInput { productId: ObjectId!, expectedRevision: Int!, name: String! }
+input ChangeFuelPriceInput { productId: ObjectId!, expectedRevision: Int!, unitPrice: Decimal!, effectiveDate: String!, effectiveHour: Int! }
 input CreatePumpMeterInput { label: String!, productId: ObjectId!, initialReading: Decimal! }
 input UpdatePumpMeterInput { meterId: ObjectId!, expectedRevision: Int!, label: String! }
 input DeactivateFuelSetupInput { id: ObjectId!, expectedRevision: Int! }
 
 type FuelSetup { products: [FuelProduct!]!, meters: [PumpMeter!]! }
-type FuelProduct { id: ObjectId!, name: String!, unitPrice: Decimal!, status: FuelSetupStatus!, revision: Int! }
+type FuelProduct { id: ObjectId!, name: String!, unitPrice: Decimal!, status: FuelSetupStatus!, revision: Int!, nextPriceChange: FuelPriceChange }
+type FuelPriceChange { unitPrice: Decimal!, effectiveDate: String!, effectiveHour: Int! }
 type PumpMeter { id: ObjectId!, label: String!, productId: ObjectId!, initialReading: Decimal!, currentReading: Decimal!, status: FuelSetupStatus!, revision: Int! }
 enum FuelSetupStatus { active, inactive }

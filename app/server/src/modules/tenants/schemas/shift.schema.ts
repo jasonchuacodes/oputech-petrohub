@@ -6,6 +6,9 @@ export class Shift {
   @Prop({ required: true, type: Types.ObjectId })
   id!: Types.ObjectId
 
+  @Prop({ required: true, trim: true, type: String })
+  name!: string
+
   @Prop({ required: true, type: String })
   startTime!: string
 

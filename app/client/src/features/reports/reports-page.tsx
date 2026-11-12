@@ -73,10 +73,10 @@ function TenantReportsPage({ access }: { access: TenantAccess }) {
             >
               <span className="min-w-0 flex-1">
                 <span className="block font-medium text-text-heading">
-                  {formatShiftTime(report.interval)}
+                  {report.shiftName}
                 </span>
                 <span className="block text-sm text-text-secondary">
-                  {formatBusinessDate(report.businessDate)} · {report.creatorName}
+                  {formatBusinessDate(report.businessDate)} · {formatShiftTime(report.interval)} · {report.creatorName}
                 </span>
                 <span
                   className={
@@ -87,7 +87,7 @@ function TenantReportsPage({ access }: { access: TenantAccess }) {
                       : 'text-xs font-medium text-status-warning'
                   }
                 >
-                  {report.status === 'submitted' ? 'Submitted' : report.status === 'revoked' ? 'Revoked' : 'Draft'}
+                  {report.stale ? 'Recreate required' : report.status === 'submitted' ? 'Submitted' : report.status === 'revoked' ? 'Revoked' : 'Draft'}
                 </span>
               </span>
               <ChevronRight aria-hidden="true" className="size-5 text-primary" />

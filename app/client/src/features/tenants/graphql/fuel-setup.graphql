@@ -1,4 +1,11 @@
-fragment FuelProductFields on FuelProduct { id name unitPrice status revision }
+fragment FuelProductFields on FuelProduct {
+  id
+  name
+  unitPrice
+  status
+  revision
+  nextPriceChange { unitPrice effectiveDate effectiveHour }
+}
 fragment PumpMeterFields on PumpMeter { id label productId initialReading currentReading status revision }
 
 query FuelSetup {
@@ -14,6 +21,10 @@ mutation CreateFuelProduct($input: CreateFuelProductInput!) {
 
 mutation UpdateFuelProduct($input: UpdateFuelProductInput!) {
   updateFuelProduct(input: $input) { ...FuelProductFields }
+}
+
+mutation ChangeFuelPrice($input: ChangeFuelPriceInput!) {
+  changeFuelPrice(input: $input) { ...FuelProductFields }
 }
 
 mutation DeactivateFuelProduct($input: DeactivateFuelSetupInput!) {

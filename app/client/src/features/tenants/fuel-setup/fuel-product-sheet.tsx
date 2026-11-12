@@ -3,12 +3,13 @@ import { X } from 'lucide-react'
 import { useRef, useState, type RefObject } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { toast } from 'sonner'
+import Decimal from 'decimal.js'
 import { Button } from '~/components/ui/button'
 import { DateTimePicker, formatDateTimeValue } from '~/components/ui/date-time-picker'
 import { Input } from '~/components/ui/input'
 import { Spinner } from '~/components/ui/spinner'
 import type { FuelProductFieldsFragment } from '~/generated/graphql'
-import { useCreateFuelProductMutation, useUpdateFuelProductMutation } from '../fuel-setup.queries'
+import { useChangeFuelPriceMutation, useCreateFuelProductMutation, useUpdateFuelProductMutation } from '../fuel-setup.queries'
 import { fuelProductFormSchema, type FuelProductFormValues } from './fuel-setup.schema'
 import { SetupSheet } from './setup-sheet'
 
@@ -31,6 +32,7 @@ export function FuelProductSheet({
 }: FuelProductSheetProps) {
   const createProduct = useCreateFuelProductMutation(tenantId)
   const updateProduct = useUpdateFuelProductMutation(tenantId)
+  const changeFuelPrice = useChangeFuelPriceMutation(tenantId)
   const nameInputRef = useRef<HTMLInputElement>(null)
   const priceInputRef = useRef<HTMLInputElement>(null)
   const priceOnly = mode === 'price' && Boolean(product)
@@ -44,22 +46,33 @@ export function FuelProductSheet({
   const nameField = form.register('name')
   const priceField = form.register('unitPrice')
   const unitPrice = useWatch({ control: form.control, name: 'unitPrice' })
-  const pending = createProduct.isPending || updateProduct.isPending
+  const pending = createProduct.isPending || updateProduct.isPending || changeFuelPrice.isPending
   const close = () => {
     if (!pending) onClose()
   }
   const submit = form.handleSubmit(async (values) => {
-    if (priceOnly && scheduleEnabled) {
-      form.setError('root', { message: 'Scheduled price changes are not connected yet.' })
-      return
-    }
     try {
       if (product) {
-        await updateProduct.mutateAsync({
-          productId: product.id,
-          expectedRevision: product.revision,
-          ...values,
-        })
+        let expectedRevision = product.revision
+        if (!priceOnly && values.name !== product.name) {
+          await updateProduct.mutateAsync({
+            productId: product.id,
+            expectedRevision,
+            name: values.name,
+          })
+          expectedRevision += 1
+        }
+        if (!new Decimal(values.unitPrice).equals(product.unitPrice)) {
+          const effective = scheduleEnabled && scheduledAt
+            ? parseEffectiveHour(scheduledAt)
+            : currentEffectiveHour(timezone ?? 'UTC')
+          await changeFuelPrice.mutateAsync({
+            productId: product.id,
+            expectedRevision,
+            unitPrice: values.unitPrice,
+            ...effective,
+          })
+        }
       } else {
         await createProduct.mutateAsync(values)
       }
@@ -83,12 +96,23 @@ export function FuelProductSheet({
     >
       <form className="flex min-h-0 flex-1 flex-col" onSubmit={submit}>
         <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-5 pb-5">
+          {priceOnly && product?.nextPriceChange && (
+            <div className="rounded-md border border-primary/20 bg-primary/5 px-3 py-2.5 text-sm">
+              <p className="font-medium text-text-heading">Scheduled price change</p>
+              <p className="mt-1 text-text-secondary">
+                ₱{formatPrice(product.nextPriceChange.unitPrice)} effective{' '}
+                <span className="font-medium text-text-heading">
+                  {formatEffectiveHour(product.nextPriceChange.effectiveDate, product.nextPriceChange.effectiveHour)}
+                </span>
+              </p>
+            </div>
+          )}
           {priceOnly && scheduledAt && (
             <div className="flex items-center gap-3 rounded-md border border-status-warning/25 bg-status-warning/10 px-3 py-2.5 text-sm text-text-secondary">
               <p className="min-w-0 flex-1">
-                Scheduled price update to{' '}
+                Price update to{' '}
                 <span className="font-medium text-text-heading">₱{unitPrice || '0.00'}</span> on{' '}
-                <span className="font-medium text-text-heading">{formatDateTimeValue(scheduledAt)}</span>
+                <span className="font-medium text-text-heading">{formatDateTimeValue(scheduledAt, true)}</span>
               </p>
               <Button
                 type="button"
@@ -159,12 +183,13 @@ export function FuelProductSheet({
                     if (!event.target.checked) setScheduledAt('')
                   }}
                 />
-                <span className="text-sm font-medium text-text-heading">Schedule price change</span>
+                <span className="text-sm font-medium text-text-heading">Scheduled price change</span>
               </label>
               {scheduleEnabled && (
                 <DateTimePicker
                   value={scheduledAt}
                   timezone={timezone ?? 'UTC'}
+                  hourOnly
                   disabled={pending}
                   onChange={(value) => {
                     setScheduledAt(value)
@@ -188,10 +213,43 @@ export function FuelProductSheet({
             disabled={!form.formState.isValid || pending || (scheduleEnabled && !scheduledAt)}
           >
             {pending && <Spinner className="size-4" />}
-            {pending ? 'Saving…' : scheduleEnabled ? 'Schedule change' : product ? 'Save changes' : 'Add product'}
+            {pending ? 'Saving…' : scheduleEnabled ? 'Save price change' : product ? 'Save changes' : 'Add product'}
           </Button>
         </footer>
       </form>
     </SetupSheet>
   )
+}
+
+function parseEffectiveHour(value: string): { effectiveDate: string; effectiveHour: number } {
+  const [effectiveDate = '', time = ''] = value.split('T')
+  return { effectiveDate, effectiveHour: Number(time.slice(0, 2)) }
+}
+
+function currentEffectiveHour(timezone: string): { effectiveDate: string; effectiveHour: number } {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: timezone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    hourCycle: 'h23',
+  }).formatToParts(new Date())
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]))
+  return {
+    effectiveDate: `${values.year}-${values.month}-${values.day}`,
+    effectiveHour: Number(values.hour),
+  }
+}
+
+function formatEffectiveHour(effectiveDate: string, effectiveHour: number): string {
+  return formatDateTimeValue(
+    `${effectiveDate}T${String(effectiveHour).padStart(2, '0')}:00`,
+    true,
+  )
+}
+
+function formatPrice(value: string): string {
+  const [whole, fraction = ''] = value.split('.')
+  return `${whole}.${fraction.padEnd(2, '0').slice(0, 2)}`
 }

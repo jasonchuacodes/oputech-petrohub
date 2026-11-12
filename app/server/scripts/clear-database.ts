@@ -1,4 +1,6 @@
 import 'reflect-metadata'
+import { stdin, stdout } from 'node:process'
+import { createInterface } from 'node:readline/promises'
 import { NestFactory } from '@nestjs/core'
 import { ConfigService } from '@nestjs/config'
 import { getConnectionToken } from '@nestjs/mongoose'
@@ -13,6 +15,8 @@ const collectionFlags = {
   '--disposal-batches': 'disposalBatches',
   '--meter-heads': 'meterHeads',
   '--fuel-products': 'fuelProducts',
+  '--fuel-price-changes': 'fuelPriceChanges',
+  '--fuel-price-states': 'fuelPriceStates',
   '--pump-meters': 'pumpMeters',
   '--inventory-products': 'inventoryProducts',
   '--stock-movements': 'stockMovements',
@@ -34,6 +38,10 @@ async function clearDatabase(): Promise<void> {
     selected.add('inventoryProducts')
     selected.add('stockMovements')
   }
+  if (!await confirmClear(selected, clearAll)) {
+    console.log('database: clear cancelled')
+    return
+  }
   const application = await NestFactory.createApplicationContext(AppModule, { logger: false })
 
   try {
@@ -43,11 +51,6 @@ async function clearDatabase(): Promise<void> {
     }
 
     const connection = application.get<Connection>(getConnectionToken())
-    if (clearAll) {
-      await connection.dropDatabase()
-      console.log('database: dropped all collections')
-      return
-    }
     const results = new Map<CollectionName, number>()
 
     if (selected.has('tenants')) {
@@ -70,8 +73,29 @@ async function clearDatabase(): Promise<void> {
     for (const collectionName of displayOrder(selected, results)) {
       console.log(`${collectionName}: deleted ${results.get(collectionName) ?? 0}`)
     }
+    if (clearAll) {
+      for (const model of Object.values(connection.models)) {
+        await model.syncIndexes()
+      }
+      console.log('database: synchronized indexes')
+    }
   } finally {
     await application.close()
+  }
+}
+
+async function confirmClear(selected: Set<CollectionName>, clearAll: boolean): Promise<boolean> {
+  const scope = clearAll
+    ? 'all database collections'
+    : [...selected].sort().join(', ')
+  const prompt = createInterface({ input: stdin, output: stdout })
+  try {
+    const answer = await prompt.question(
+      `Clear data from ${scope}? This cannot be undone. Type "yes" to continue: `,
+    )
+    return answer.trim().toLowerCase() === 'yes'
+  } finally {
+    prompt.close()
   }
 }
 
@@ -134,6 +158,8 @@ async function clearTenants(
     'meterHeads',
     'reports',
     'fuelProducts',
+    'fuelPriceChanges',
+    'fuelPriceStates',
     'pumpMeters',
     'inventoryProducts',
     'stockMovements',
@@ -169,7 +195,7 @@ function parseCollectionFlags(args: string[]): Set<CollectionName> {
 }
 
 function deletionOrder(selected: Set<CollectionName>): CollectionName[] {
-  return (['stockMovements', 'disposalBatches', 'meterHeads', 'reports', 'inventoryProducts', 'fuelProducts', 'pumpMeters', 'attendanceSessions', 'timesheetDays', 'memberActivities', 'sessions', 'tenants', 'users'] as const).filter((name) =>
+  return (['stockMovements', 'disposalBatches', 'meterHeads', 'reports', 'inventoryProducts', 'fuelPriceChanges', 'fuelPriceStates', 'fuelProducts', 'pumpMeters', 'attendanceSessions', 'timesheetDays', 'memberActivities', 'sessions', 'tenants', 'users'] as const).filter((name) =>
     selected.has(name),
   )
 }
@@ -178,7 +204,7 @@ function displayOrder(
   selected: Set<CollectionName>,
   results: Map<CollectionName, number>,
 ): CollectionName[] {
-  return (['users', 'tenants', 'reports', 'disposalBatches', 'meterHeads', 'inventoryProducts', 'stockMovements', 'fuelProducts', 'pumpMeters', 'attendanceSessions', 'timesheetDays', 'sessions', 'memberActivities'] as const).filter(
+  return (['users', 'tenants', 'reports', 'disposalBatches', 'meterHeads', 'inventoryProducts', 'stockMovements', 'fuelProducts', 'fuelPriceChanges', 'fuelPriceStates', 'pumpMeters', 'attendanceSessions', 'timesheetDays', 'sessions', 'memberActivities'] as const).filter(
     (name) => selected.has(name) || results.has(name),
   )
 }
@@ -192,7 +218,7 @@ function addResult(
 }
 
 function usage(): string {
-  return 'Use --users, --tenants, --reports, --disposal-batches, --meter-heads, --inventory-products, --stock-movements, --fuel-products, --pump-meters, --sessions, --member-activities, or --all.'
+  return 'Use --users, --tenants, --reports, --disposal-batches, --meter-heads, --inventory-products, --stock-movements, --fuel-products, --fuel-price-changes, --fuel-price-states, --pump-meters, --sessions, --member-activities, or --all.'
 }
 
 clearDatabase().catch((error: unknown) => {

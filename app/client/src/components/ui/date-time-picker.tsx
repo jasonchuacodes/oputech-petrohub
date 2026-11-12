@@ -11,10 +11,11 @@ type DateTimePickerProps = {
   value: string
   timezone: string
   disabled?: boolean
+  hourOnly?: boolean
   onChange: (value: string) => void
 }
 
-export function DateTimePicker({ value, timezone, disabled, onChange }: DateTimePickerProps) {
+export function DateTimePicker({ value, timezone, disabled, hourOnly = false, onChange }: DateTimePickerProps) {
   const [open, setOpen] = useState(false)
   const triggerRef = useRef<HTMLButtonElement>(null)
 
@@ -29,7 +30,7 @@ export function DateTimePicker({ value, timezone, disabled, onChange }: DateTime
       >
         <CalendarClock aria-hidden="true" className="size-4 shrink-0 text-text-secondary" />
         <span className={value ? 'min-w-0 flex-1 truncate text-sm text-text-heading' : 'min-w-0 flex-1 truncate text-sm text-text-tertiary'}>
-          {value ? formatDateTimeValue(value) : 'Select date and time'}
+          {value ? formatDateTimeValue(value, hourOnly) : hourOnly ? 'Select date and hour' : 'Select date and time'}
         </span>
         <ChevronDown aria-hidden="true" className="size-4 shrink-0 text-text-secondary" />
       </button>
@@ -39,6 +40,7 @@ export function DateTimePicker({ value, timezone, disabled, onChange }: DateTime
           key={value || 'new'}
           value={value}
           timezone={timezone}
+          hourOnly={hourOnly}
           returnFocusRef={triggerRef}
           onClose={() => setOpen(false)}
           onApply={(nextValue) => {
@@ -54,18 +56,20 @@ export function DateTimePicker({ value, timezone, disabled, onChange }: DateTime
 function DateTimeSheet({
   value,
   timezone,
+  hourOnly,
   returnFocusRef,
   onClose,
   onApply,
 }: {
   value: string
   timezone: string
+  hourOnly: boolean
   returnFocusRef: RefObject<HTMLButtonElement | null>
   onClose: () => void
   onApply: (value: string) => void
 }) {
   const initial = parseDateTimeValue(value)
-  const [date, setDate] = useState<Date | undefined>(initial.date)
+  const [date, setDate] = useState<Date | undefined>(initial.date ?? todayInTimezone(timezone))
   const [time, setTime] = useState(initial.time)
   const [step, setStep] = useState<'date' | 'time'>('date')
 
@@ -73,7 +77,7 @@ function DateTimeSheet({
     <Sheet
       open
       layer="nested"
-      title={step === 'date' ? 'Select date' : 'Select time'}
+      title={step === 'date' ? 'Select date' : hourOnly ? 'Select hour' : 'Select time'}
       manageFocus
       showCloseButton={false}
       returnFocusRef={returnFocusRef}
@@ -90,22 +94,46 @@ function DateTimeSheet({
             />
           </div>
         ) : (
-          <div className="flex flex-1 flex-col items-center justify-center py-8">
+          <div className="flex flex-1 flex-col items-center py-8">
             <span className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
               <Clock3 aria-hidden="true" className="size-5" />
             </span>
             {date && (
               <p className="mt-3 text-sm font-medium text-text-heading">{formatCalendarDate(date)}</p>
             )}
-            <label className="mt-6 flex w-full max-w-xs flex-col gap-1.5">
-              <span className="text-sm font-medium">Time</span>
-              <Input
-                autoFocus
-                type="time"
-                value={time}
-                onChange={(event) => setTime(event.target.value)}
-              />
-            </label>
+            {hourOnly ? (
+              <div className="mt-6 w-full">
+                <p className="text-sm font-medium">Effective hour</p>
+                <p className="mt-1 text-sm text-text-secondary">Choose any hour, including an earlier hour today.</p>
+                <div
+                  role="radiogroup"
+                  aria-label="Effective hour"
+                  className="mt-3 max-h-64 snap-y snap-mandatory overflow-y-auto rounded-md border border-input bg-card p-2"
+                >
+                  {Array.from({ length: 24 }, (_, hour) => {
+                    const value = `${String(hour).padStart(2, '0')}:00`
+                    const selected = time === value
+                    return (
+                      <button
+                        key={value}
+                        type="button"
+                        role="radio"
+                        aria-checked={selected}
+                        className={`flex min-h-11 w-full snap-center items-center justify-center rounded-sm px-3 text-sm font-medium outline-none focus-visible:ring-3 focus-visible:ring-ring/30 ${selected ? 'bg-primary text-primary-foreground' : 'text-text-heading hover:bg-surface-hover'}`}
+                        onClick={() => setTime(value)}
+                      >
+                        {formatHour(hour)}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            ) : (
+              <label className="mt-6 flex w-full max-w-xs flex-col gap-1.5">
+                <span className="text-sm font-medium">Time</span>
+                <Input autoFocus type="time" value={time} onChange={(event) => setTime(event.target.value)} />
+              </label>
+            )}
           </div>
         )}
       </div>
@@ -160,6 +188,17 @@ function fromCalendarDate(date: Date): string {
   return `${year}-${month}-${day}`
 }
 
+function todayInTimezone(timezone: string): Date {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: timezone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(new Date())
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]))
+  return new Date(Number(values.year), Number(values.month) - 1, Number(values.day))
+}
+
 function formatCalendarDate(date: Date): string {
   return new Intl.DateTimeFormat(undefined, {
     weekday: 'long',
@@ -169,7 +208,7 @@ function formatCalendarDate(date: Date): string {
   }).format(date)
 }
 
-export function formatDateTimeValue(value: string): string {
+export function formatDateTimeValue(value: string, hourOnly = false): string {
   const parsed = parseDateTimeValue(value)
   if (!parsed.date || !parsed.time) return value
   const [hours, minutes] = parsed.time.split(':').map(Number)
@@ -187,7 +226,12 @@ export function formatDateTimeValue(value: string): string {
   }).format(date)
   const timePart = new Intl.DateTimeFormat(undefined, {
     hour: 'numeric',
-    minute: '2-digit',
+    ...(hourOnly ? {} : { minute: '2-digit' as const }),
   }).format(date)
   return `${datePart} - ${timePart}`
+}
+
+function formatHour(hour: number): string {
+  const period = hour >= 12 ? 'PM' : 'AM'
+  return `${hour % 12 || 12} ${period}`
 }

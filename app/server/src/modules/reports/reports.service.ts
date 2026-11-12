@@ -11,8 +11,11 @@ import { RecurringIncomeField } from '../tenants/schemas/recurring-income-field.
 import { UserRole } from '../users/schemas/user.schema'
 import { InventoryService } from '../inventory/inventory.service'
 import { StockMovementService } from '../inventory/stock-movement.service'
+import { ChangeFuelPriceInput } from '../fuel-setup/fuel-setup.schemas'
+import { FuelProductRecord, FuelSetupService } from '../fuel-setup/fuel-setup.service'
 import { REPORT_CREATED_EVENT, ReportCreatedEvent } from './events/report-created.event'
 import { businessDateFor } from './report-date'
+import { displayTime, localHourToInstant, ReportInterval, shiftInterval } from './report-time'
 import {
   CreateReportInput,
   DeleteReportInput,
@@ -40,6 +43,12 @@ type ReportActor = {
 
 export type ReportDetailRecord = { report: ReportRecord; disposals?: DisposalBatchRecord }
 
+type DynamicReportSlot = {
+  id: string
+  shift: Shift
+  interval: ReportInterval
+}
+
 @Injectable()
 export class ReportsService {
   constructor(
@@ -48,40 +57,44 @@ export class ReportsService {
     private readonly disposals: DisposalsService,
     private readonly inventory: InventoryService,
     private readonly stockMovements: StockMovementService,
+    private readonly fuelSetup: FuelSetupService,
     private readonly events: EventEmitter2,
   ) {}
 
   async creationContext(tenant: ReportTenant) {
     const businessDate = businessDateFor(tenant.timezone)
-    const reports = await this.reports
+    const [reports, dynamicSlots] = await Promise.all([
+      this.reports
       .find({ tenantId: tenant.tenantId, businessDate, effective: { $ne: false } })
-      .sort({ createdAt: 1 })
+      .sort({ 'interval.startAt': 1, createdAt: 1 })
       .lean<ReportRecord[]>()
-      .exec()
-    const byShift = new Map(reports.map((report) => [report.shiftId.toHexString(), report]))
-    const orderedShifts = sortShifts(tenant.shifts)
-    const configuredIds = new Set(orderedShifts.map((shift) => shift.id.toHexString()))
+      .exec(),
+      this.dynamicSlots(tenant, businessDate),
+    ])
+    const bySlot = new Map(reports.map((report) => [report.slotId, report]))
+    const configuredIds = new Set(dynamicSlots.map((slot) => slot.id))
     let previousSubmitted = true
-    const slots = orderedShifts.map((shift) => {
-      const report = byShift.get(shift.id.toHexString())
+    const slots = dynamicSlots.map((slot) => {
+      const report = bySlot.get(slot.id)
       const canCreate = !report && previousSubmitted
       const blockedReason = report
         ? undefined
         : previousSubmitted
           ? undefined
-          : 'Submit the previous shift report first.'
-      if (!report || report.status !== ReportStatus.SUBMITTED) previousSubmitted = false
+          : 'Submit the previous report period first.'
+      if (!report || report.status !== ReportStatus.SUBMITTED || report.stale) previousSubmitted = false
       return {
-        shift: report
-          ? { id: report.shiftId, startTime: report.interval.startTime, endTime: report.interval.endTime }
-          : shift,
+        ...slot,
+        shift: report ? { ...slot.shift, name: report.shiftName } : slot.shift,
         report,
         canCreate,
         blockedReason,
       }
     })
-    const removed = reports.filter((report) => !configuredIds.has(report.shiftId.toHexString())).map((report) => ({
-      shift: { id: report.shiftId, startTime: report.interval.startTime, endTime: report.interval.endTime },
+    const removed = reports.filter((report) => !configuredIds.has(report.slotId)).map((report) => ({
+      id: report.slotId,
+      shift: { id: report.shiftId, name: report.shiftName, startTime: report.interval.startTime, endTime: report.interval.endTime },
+      interval: report.interval,
       report,
       canCreate: false,
       blockedReason: undefined,
@@ -92,40 +105,45 @@ export class ReportsService {
   async createOrOpen(tenant: ReportTenant, actor: ReportActor, input: CreateReportInput) {
     const today = businessDateFor(tenant.timezone)
     if (input.businessDate !== today) throw new InvalidInputException('Reports can only be created for today.')
-    const slotFilter = { tenantId: tenant.tenantId, businessDate: today, shiftId: input.shiftId }
+    const slotFilter = { tenantId: tenant.tenantId, businessDate: today, slotId: input.slotId }
     const activeFilter = { ...slotFilter, effective: { $ne: false } }
     const existing = await this.reports.findOne(activeFilter).lean<ReportRecord>().exec()
     if (existing) return { report: existing, created: false }
-
-    const orderedShifts = sortShifts(tenant.shifts)
-    const shiftIndex = orderedShifts.findIndex((item) => item.id.equals(input.shiftId))
-    const shift = orderedShifts[shiftIndex]
-    if (!shift) throw new InvalidInputException('Select a tenant shift.')
-    const previousShiftIds = orderedShifts.slice(0, shiftIndex).map((item) => item.id)
-    if (previousShiftIds.length > 0) {
-      const previousCount = await this.reports.countDocuments({
-        tenantId: tenant.tenantId,
-        businessDate: today,
-        shiftId: { $in: previousShiftIds },
-        effective: { $ne: false },
-        status: ReportStatus.SUBMITTED,
-      })
-      if (previousCount !== previousShiftIds.length) throw new InvalidInputException('Submit the previous shift report first.')
-    }
 
     const databaseSession = await this.connection.startSession()
     let created: ReportRecord | undefined
     let didCreate = false
     try {
       await databaseSession.withTransaction(async () => {
+        await this.fuelSetup.lockPricePlan(tenant.tenantId, databaseSession)
         const winner = await this.reports.findOne(activeFilter).session(databaseSession).lean<ReportRecord>().exec()
         if (winner) {
           created = winner
           return
         }
+        const slots = await this.dynamicSlots(tenant, today, databaseSession)
+        const slotIndex = slots.findIndex((slot) => slot.id === input.slotId)
+        const slot = slots[slotIndex]
+        if (!slot) throw new InvalidInputException('Select an available report period.')
+        const previousSlotIds = slots.slice(0, slotIndex).map((item) => item.id)
+        if (previousSlotIds.length > 0) {
+          const previousCount = await this.reports.countDocuments({
+            tenantId: tenant.tenantId,
+            businessDate: today,
+            slotId: { $in: previousSlotIds },
+            effective: { $ne: false },
+            status: ReportStatus.SUBMITTED,
+            stale: false,
+          }).session(databaseSession)
+          if (previousCount !== previousSlotIds.length) {
+            throw new InvalidInputException('Submit the previous report period first.')
+          }
+        }
         const [document] = await this.reports.create([{
           ...slotFilter,
-          interval: { startTime: shift.startTime, endTime: shift.endTime, timezone: tenant.timezone },
+          shiftId: slot.shift.id,
+          shiftName: slot.shift.name,
+          interval: slot.interval,
           currency: tenant.currency,
           creatorId: actor.userId,
           creatorName: actor.name,
@@ -145,7 +163,8 @@ export class ReportsService {
           tenantId: tenant.tenantId,
           reportId: document._id,
           businessDate: today,
-          shiftId: shift.id,
+          shiftId: slot.shift.id,
+          intervalStartAt: slot.interval.startAt,
         }, databaseSession)
         document.disposalBatchId = batch._id
         await document.save({ session: databaseSession })
@@ -163,6 +182,62 @@ export class ReportsService {
       await this.events.emitAsync(REPORT_CREATED_EVENT, new ReportCreatedEvent(tenant.tenantId, actor.userId, created._id, created.createdAt))
     }
     return { report: created, created: didCreate }
+  }
+
+  async changeFuelPrice(
+    tenant: Pick<ReportTenant, 'tenantId' | 'timezone'>,
+    actorId: Types.ObjectId,
+    input: ChangeFuelPriceInput,
+  ): Promise<FuelProductRecord> {
+    const today = businessDateFor(tenant.timezone)
+    if (input.effectiveDate < today) {
+      throw new InvalidInputException('Fuel prices cannot be backdated before the current business date.')
+    }
+    const effectiveAt = localHourToInstant(input.effectiveDate, input.effectiveHour, tenant.timezone)
+    const databaseSession = await this.connection.startSession()
+    let result: FuelProductRecord | undefined
+    try {
+      await databaseSession.withTransaction(async () => {
+        await this.fuelSetup.lockPricePlan(tenant.tenantId, databaseSession)
+        const changed = await this.fuelSetup.changePrice(
+          tenant.tenantId,
+          actorId,
+          input,
+          effectiveAt,
+          databaseSession,
+        )
+        result = changed.product
+        if (!changed.changed) return
+
+        const submitted = await this.reports.exists({
+          tenantId: tenant.tenantId,
+          effective: true,
+          status: ReportStatus.SUBMITTED,
+          'interval.startAt': { $lte: effectiveAt },
+          'interval.endAt': { $gt: effectiveAt },
+        }).session(databaseSession)
+        if (submitted) {
+          throw new ConflictException('A submitted report already covers this effective hour. Revert it before changing the price.')
+        }
+
+        await this.reports.updateMany(
+          {
+            tenantId: tenant.tenantId,
+            effective: true,
+            status: ReportStatus.DRAFT,
+            stale: false,
+            'interval.startAt': { $lte: effectiveAt },
+            'interval.endAt': { $gt: effectiveAt },
+          },
+          { $set: { stale: true }, $inc: { revision: 1 } },
+          { session: databaseSession },
+        )
+      })
+    } finally {
+      await databaseSession.endSession()
+    }
+    if (!result) throw new ConflictException('Unable to change the fuel price.')
+    return result
   }
 
   async get(tenantId: Types.ObjectId, reportId: Types.ObjectId): Promise<ReportRecord> {
@@ -262,10 +337,12 @@ export class ReportsService {
     let result: ReportDetailRecord | undefined
     try {
       await databaseSession.withTransaction(async () => {
+        await this.fuelSetup.lockPricePlan(tenantId, databaseSession)
         const current = await this.reports.findOne({ _id: input.reportId, tenantId, effective: true }).session(databaseSession).lean<ReportRecord>().exec()
         if (!current) throw new NotFoundException('Report not found.')
         this.assertAuthorized(current, actor, 'edit')
         if (current.status !== ReportStatus.DRAFT || current.revision !== input.expectedReportRevision) throw new ConflictException('This report changed or has already been submitted.')
+        if (current.stale) throw new ConflictException('Fuel prices changed during this report period. Revert and recreate the report.')
         const now = new Date()
         const disposalBatch = await this.disposals.submitBatch(tenantId, input.reportId, input.expectedDisposalRevision, now, databaseSession)
         if (!disposalBatch.pumpSales) throw new InvalidInputException('Complete every disposal reading before submitting.')
@@ -377,6 +454,41 @@ export class ReportsService {
     const lubricantIds = (input.lubricantSales ?? []).map((sale) => sale.id)
     if (new Set(lubricantIds).size !== lubricantIds.length) throw new InvalidInputException('Lubricant sale identifiers must be unique.')
   }
+
+  private async dynamicSlots(
+    tenant: Pick<ReportTenant, 'tenantId' | 'timezone' | 'shifts'>,
+    businessDate: string,
+    session?: ClientSession,
+  ): Promise<DynamicReportSlot[]> {
+    const slots: DynamicReportSlot[] = []
+    for (const shift of tenant.shifts) {
+      const scheduled = shiftInterval(businessDate, shift, tenant.timezone)
+      const boundaries = await this.fuelSetup.priceBoundaries(
+        tenant.tenantId,
+        scheduled.startAt,
+        scheduled.endAt,
+        session,
+      )
+      const points = [scheduled.startAt, ...boundaries, scheduled.endAt]
+      for (let index = 0; index < points.length - 1; index += 1) {
+        const startAt = points[index]
+        const endAt = points[index + 1]
+        if (!startAt || !endAt) continue
+        slots.push({
+          id: `${shift.id.toHexString()}:${startAt.toISOString()}`,
+          shift,
+          interval: {
+            startAt,
+            endAt,
+            startTime: displayTime(tenant.timezone, startAt),
+            endTime: displayTime(tenant.timezone, endAt),
+            timezone: tenant.timezone,
+          },
+        })
+      }
+    }
+    return slots.sort((left, right) => left.interval.startAt.getTime() - right.interval.startAt.getTime())
+  }
 }
 
 function toEntries(entries: SaveReportDraftInput['incomeEntries']): ReportFinancialEntry[] {
@@ -434,10 +546,4 @@ function toIncomeEntries(
 
 function isDuplicateKeyError(error: unknown): error is { code: number } {
   return typeof error === 'object' && error !== null && 'code' in error && error.code === 11000
-}
-
-function sortShifts(shifts: Shift[]): Shift[] {
-  return [...shifts].sort((left, right) =>
-    left.startTime.localeCompare(right.startTime) || left.endTime.localeCompare(right.endTime) || left.id.toHexString().localeCompare(right.id.toHexString()),
-  )
 }

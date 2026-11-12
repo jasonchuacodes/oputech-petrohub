@@ -39,19 +39,6 @@ async function ensureIndexes(): Promise<void> {
       )
     }
 
-    const reports = database.collection('reports')
-    const reportBackfill = await reports.updateMany(
-      { effective: { $exists: false } },
-      { $set: { effective: true } },
-    )
-    if (reportBackfill.modifiedCount > 0) {
-      console.log(`Backfilled effective state on ${reportBackfill.modifiedCount} reports`)
-    }
-    if (await reports.indexExists('tenantId_1_businessDate_1_shiftId_1')) {
-      await reports.dropIndex('tenantId_1_businessDate_1_shiftId_1')
-      console.log('Dropped legacy report slot index')
-    }
-
     for (const model of Object.values(connection.models)) {
       await model.createIndexes()
       console.log(`Indexes ensured for ${model.collection.collectionName}`)

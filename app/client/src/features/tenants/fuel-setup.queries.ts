@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   CreateFuelProductDocument,
   CreatePumpMeterDocument,
+  ChangeFuelPriceDocument,
   DeactivateFuelProductDocument,
   DeactivatePumpMeterDocument,
   FuelSetupDocument,
@@ -9,11 +10,13 @@ import {
   UpdatePumpMeterDocument,
   type CreateFuelProductInput,
   type CreatePumpMeterInput,
+  type ChangeFuelPriceInput,
   type DeactivateFuelSetupInput,
   type UpdateFuelProductInput,
   type UpdatePumpMeterInput,
 } from '~/generated/graphql'
 import { graphqlClient } from '~/lib/graphql'
+import { reportKeys } from '../reports/reports.queries'
 
 const fuelSetupKey = (tenantId: string) => ['fuel-setup', tenantId] as const
 
@@ -39,6 +42,20 @@ export function useUpdateFuelProductMutation(tenantId: string) {
   return useFuelSetupMutation(tenantId, async (input: UpdateFuelProductInput) =>
     (await graphqlClient.request(UpdateFuelProductDocument, { input }, { tenantId })).updateFuelProduct,
   )
+}
+
+export function useChangeFuelPriceMutation(tenantId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (input: ChangeFuelPriceInput) =>
+      (await graphqlClient.request(ChangeFuelPriceDocument, { input }, { tenantId })).changeFuelPrice,
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: fuelSetupKey(tenantId) }),
+        queryClient.invalidateQueries({ queryKey: reportKeys.all(tenantId) }),
+      ])
+    },
+  })
 }
 
 export function useDeactivateFuelProductMutation(tenantId: string) {

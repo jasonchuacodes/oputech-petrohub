@@ -2,7 +2,8 @@ import { UseGuards } from '@nestjs/common'
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql'
 import type { Mutation as GraphqlMutation, Query as GraphqlQuery } from '../../generated/graphql'
 import { ZodValidationPipe } from '../../common/validation/zod-validation.pipe'
-import { AuthorizedTenant } from '../auth/auth.types'
+import { AuthorizedTenant, AuthenticatedActor } from '../auth/auth.types'
+import { CurrentActor } from '../auth/decorators/current-actor.decorator'
 import { CurrentTenant } from '../auth/decorators/current-tenant.decorator'
 import { RequireRoles, RolesGuard } from '../auth/guards/roles.guard'
 import { TenantAccessGuard } from '../auth/guards/tenant-access.guard'
@@ -17,17 +18,23 @@ import {
   DeactivateFuelSetupInput,
   updateFuelProductInputSchema,
   UpdateFuelProductInput,
+  changeFuelPriceInputSchema,
+  ChangeFuelPriceInput,
   updatePumpMeterInputSchema,
   UpdatePumpMeterInput,
 } from './fuel-setup.schemas'
-import { FuelProductRecord, FuelSetupService, PumpMeterRecord, PumpMeterWithCurrentReading } from './fuel-setup.service'
+import { FuelProductRecord, FuelProductWithPrice, FuelSetupService, PumpMeterRecord, PumpMeterWithCurrentReading } from './fuel-setup.service'
+import { ReportsService } from '../reports/reports.service'
 
 const tenantGuards = [AccessTokenGuard, TenantAccessGuard]
 const adminGuards = [...tenantGuards, RolesGuard]
 
 @Resolver()
 export class FuelSetupResolver {
-  constructor(private readonly fuelSetup: FuelSetupService) {}
+  constructor(
+    private readonly fuelSetup: FuelSetupService,
+    private readonly reports: ReportsService,
+  ) {}
 
   @Query('fuelSetup')
   @UseGuards(...tenantGuards)
@@ -57,6 +64,22 @@ export class FuelSetupResolver {
     @Args('input', new ZodValidationPipe(updateFuelProductInputSchema)) input: UpdateFuelProductInput,
   ): Promise<GraphqlMutation['updateFuelProduct']> {
     return this.product(await this.fuelSetup.updateProduct(tenant.tenantId, input))
+  }
+
+  @Mutation('changeFuelPrice')
+  @UseGuards(...adminGuards)
+  @RequireRoles(UserRole.SUPERADMIN, UserRole.ADMIN)
+  async changePrice(
+    @CurrentActor() actor: AuthenticatedActor,
+    @CurrentTenant() tenant: AuthorizedTenant,
+    @Args('input', new ZodValidationPipe(changeFuelPriceInputSchema)) input: ChangeFuelPriceInput,
+  ): Promise<GraphqlMutation['changeFuelPrice']> {
+    const product = await this.reports.changeFuelPrice(
+      { tenantId: tenant.tenantId, timezone: tenant.tenant.timezone },
+      actor.userId,
+      input,
+    )
+    return this.product(product)
   }
 
   @Mutation('deactivateFuelProduct')
@@ -102,8 +125,21 @@ export class FuelSetupResolver {
     return this.meter(meter, await this.fuelSetup.currentReading(tenant.tenantId, meter))
   }
 
-  private product(product: FuelProductRecord) {
-    return { id: product._id, name: product.name, unitPrice: product.unitPrice.toString(), status: product.status, revision: product.revision }
+  private product(product: FuelProductRecord | FuelProductWithPrice) {
+    return {
+      id: product._id,
+      name: product.name,
+      unitPrice: product.unitPrice.toString(),
+      status: product.status,
+      revision: product.revision,
+      nextPriceChange: 'nextPriceChange' in product && product.nextPriceChange
+        ? {
+            unitPrice: product.nextPriceChange.unitPrice.toString(),
+            effectiveDate: product.nextPriceChange.effectiveDate,
+            effectiveHour: product.nextPriceChange.effectiveHour,
+          }
+        : null,
+    }
   }
 
   private meter(meter: PumpMeterRecord | PumpMeterWithCurrentReading, currentReading = 'currentReading' in meter ? meter.currentReading : meter.initialReading) {

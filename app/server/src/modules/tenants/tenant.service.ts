@@ -172,6 +172,9 @@ export class TenantService {
       if (shifts.length >= maxShiftsPerTenant) {
         throw new InvalidInputException(`A tenant can have up to ${maxShiftsPerTenant} shifts.`)
       }
+      if (shifts.some((shift) => sameShiftName(shift.name, input.name))) {
+        throw new InvalidInputException('Shift names must be unique.')
+      }
       if (shifts.some((shift) => intervalsOverlap(shift, input))) {
         throw new InvalidInputException('This shift overlaps an existing shift.')
       }
@@ -205,6 +208,13 @@ export class TenantService {
       if (!current) throw new NotFoundException('Shift not found.')
       if (
         tenant.shifts.some(
+          (shift) => !shift.id.equals(input.shiftId) && sameShiftName(shift.name, input.name),
+        )
+      ) {
+        throw new InvalidInputException('Shift names must be unique.')
+      }
+      if (
+        tenant.shifts.some(
           (shift) => !shift.id.equals(input.shiftId) && intervalsOverlap(shift, input),
         )
       ) {
@@ -216,6 +226,7 @@ export class TenantService {
           { _id: tenantId, revision: tenant.revision, 'shifts.id': input.shiftId },
           {
             $set: {
+              'shifts.$.name': input.name,
               'shifts.$.startTime': input.startTime,
               'shifts.$.endTime': input.endTime,
             },
@@ -226,7 +237,7 @@ export class TenantService {
         .select('_id')
         .lean()
         .exec()
-      if (updated) return { id: input.shiftId, startTime: input.startTime, endTime: input.endTime }
+      if (updated) return { id: input.shiftId, name: input.name, startTime: input.startTime, endTime: input.endTime }
     }
 
     throw new ConflictException('Shifts were changed by another request. Please try again.')
@@ -473,6 +484,10 @@ function sortShifts(shifts: Shift[]): Shift[] {
       left.endTime.localeCompare(right.endTime) ||
       left.id.toHexString().localeCompare(right.id.toHexString()),
   )
+}
+
+function sameShiftName(left: string, right: string): boolean {
+  return left.toLocaleLowerCase('en-US') === right.toLocaleLowerCase('en-US')
 }
 
 function intervalsOverlap(
