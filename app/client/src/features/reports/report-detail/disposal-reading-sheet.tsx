@@ -140,7 +140,7 @@ export function DisposalReadingSheet({
                     htmlFor={currentReadingId}
                     className="text-sm font-medium text-text-heading"
                   >
-                    Current reading
+                    After reading
                   </label>
                 </dt>
                 <dd>
@@ -209,7 +209,7 @@ export function DisposalReadingSheet({
           ) : (
             <>
               <DetailRow
-                label="Current reading"
+                label="After reading"
                 value={formatCurrentReading(currentReading)}
                 tabular
                 strong
@@ -221,7 +221,7 @@ export function DisposalReadingSheet({
           <DetailRow label="Product" value={reading.productName} />
           <DetailRow label="Price" value={formatMoney(reading.unitPrice)} tabular />
           <DetailRow
-            label="Previous reading"
+            label="Before reading"
             value={formatReading(reading.openingReading)}
             tabular
           />

@@ -24,6 +24,14 @@ export class DisposalsService {
     return this.batches.findOne({ tenantId, reportId }).lean<DisposalBatchRecord>().exec()
   }
 
+  async getForReports(tenantId: Types.ObjectId, reportIds: Types.ObjectId[]) {
+    if (reportIds.length === 0) return []
+    return this.batches
+      .find({ tenantId, reportId: { $in: reportIds } })
+      .lean<DisposalBatchRecord[]>()
+      .exec()
+  }
+
   async initializeForReport(
     input: {
       tenantId: Types.ObjectId

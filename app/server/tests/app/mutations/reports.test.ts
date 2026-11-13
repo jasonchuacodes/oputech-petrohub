@@ -176,7 +176,7 @@ describe('report disposal lifecycle', () => {
       totals: { income: '1000', expenses: '100', lubricantSales: '375' },
     })
 
-    const submittedReports = await graphql(adminToken, `query ($input: ReportsInput!) { reports(input: $input) { items { id effective status totals { cashFuelSales pumpSales overShort lubricantSales } } totalCount } }`, {
+    const submittedReports = await graphql(adminToken, `query ($input: ReportsInput!) { reports(input: $input) { items { id effective status totals { cashFuelSales pumpSales overShort lubricantSales } disposals { readings { productId productName netVolume } } } totalCount } }`, {
       input: { startDate: businessDate, endDate: businessDate, submittedOnly: true, offset: 0 },
     })
     expect(submittedReports.body.errors).toBeUndefined()
@@ -186,6 +186,9 @@ describe('report disposal lifecycle', () => {
         effective: true,
         status: 'submitted',
         totals: { cashFuelSales: '1100', pumpSales: '80', overShort: '1020', lubricantSales: '375' },
+        disposals: {
+          readings: [{ productId: fuelProductId, productName: 'ADO', netVolume: '8' }],
+        },
       }],
       totalCount: 1,
     })

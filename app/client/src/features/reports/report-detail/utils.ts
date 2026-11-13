@@ -101,9 +101,18 @@ export function calculatePreview(
         complete = false;
         return {};
       }
-      const gross = new Decimal(value.closingReading).minus(reading.openingReading);
-      const net = gross.minus(value.calibration || 0);
-      if (gross.isNegative() || net.isNegative()) {
+      const closing = new Decimal(value.closingReading);
+      const calibration = new Decimal(value.calibration || 0);
+      const gross = closing.minus(reading.openingReading);
+      const net = gross.minus(calibration);
+      if (
+        !closing.isFinite() ||
+        !calibration.isFinite() ||
+        calibration.isNegative() ||
+        !gross.isFinite() ||
+        gross.isNegative() ||
+        net.isNegative()
+      ) {
         complete = false;
         return {};
       }
@@ -156,5 +165,14 @@ export function formatCurrentReading(value?: string | null) {
     return formatReading(value);
   } catch {
     return value;
+  }
+}
+
+export function formatDisposalVolume(value?: string | null) {
+  if (value === undefined || value === null || value === '') return '—';
+  try {
+    return `${formatReading(value)} L`;
+  } catch {
+    return '—';
   }
 }

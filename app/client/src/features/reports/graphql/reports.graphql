@@ -19,6 +19,12 @@ fragment ReportFields on Report {
   revocationReason
 }
 
+fragment DisposalAmountFields on DisposalReading {
+  productId
+  productName
+  netVolume
+}
+
 fragment ReportDetailFields on Report {
   ...ReportFields
   currency
@@ -41,16 +47,14 @@ fragment ReportDetailFields on Report {
     complete
     blockingIssues
     readings {
+      ...DisposalAmountFields
       meterId
       meterLabel
-      productId
-      productName
       unitPrice
       openingReading
       openingSource
       closingReading
       calibration
-      netVolume
       sales
     }
   }
@@ -77,6 +81,9 @@ query Reports($input: ReportsInput!) {
       currency
       effective
       totals { income expenses cashFuelSales pumpSales overShort lubricantSales }
+      disposals {
+        readings { ...DisposalAmountFields }
+      }
     }
     totalCount
   }

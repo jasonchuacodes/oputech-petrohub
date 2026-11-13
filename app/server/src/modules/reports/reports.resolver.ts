@@ -72,7 +72,7 @@ export class ReportsResolver {
     @Args('input', new ZodValidationPipe(reportsInputSchema)) input: ReportsInput,
   ): Promise<GraphqlQuery['reports']> {
     const page = await this.reports.list(tenant.tenantId, input)
-    return { items: page.items.map((report) => this.serialize(report)), totalCount: page.totalCount }
+    return { items: page.items.map((detail) => this.serializeDetail(detail)), totalCount: page.totalCount }
   }
 
   @Query('financialSummary')

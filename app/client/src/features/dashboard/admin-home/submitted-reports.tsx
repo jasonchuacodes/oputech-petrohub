@@ -7,7 +7,9 @@ import { Button } from '~/components/ui/button'
 import { ContentSection } from '~/components/ui/content-section'
 import type { ReportsQuery } from '~/generated/graphql'
 import { formatShiftTime } from '../../reports/create-report-sheet'
+import { summarizeDisposalsByProduct } from '../../reports/disposal-summary'
 import { ReportSummaryRows } from '../../reports/report-detail/report-summary-rows'
+import { formatDisposalVolume } from '../../reports/report-detail/utils'
 import { useReportsQuery } from '../../reports/reports.queries'
 import { localDateFor } from './financial-range'
 
@@ -149,6 +151,8 @@ function ReportSummaryCard({
   ref?: Ref<HTMLElement>
   fullWidth: boolean
 }) {
+  const disposalSummary = summarizeDisposalsByProduct(report.disposals?.readings ?? [])
+
   return (
     <article
       ref={ref}
@@ -171,6 +175,23 @@ function ReportSummaryCard({
         </Link>
       </header>
       <ReportSummaryRows summary={report.totals} className="p-4" />
+      <section className="border-t border-border/60 px-4 py-3" aria-label="Disposals">
+        <h4 className="text-sm font-semibold text-text-heading">Disposals</h4>
+        {disposalSummary.length > 0 ? (
+          <dl className="mt-2 divide-y divide-border/60">
+            {disposalSummary.map((item) => (
+              <div key={item.productId} className="flex min-h-10 items-center justify-between gap-4 py-2">
+                <dt className="text-sm text-text-secondary">{item.productName}</dt>
+                <dd className="text-right font-semibold tabular-nums text-text-heading">
+                  {formatDisposalVolume(item.netVolume)}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        ) : (
+          <p className="mt-2 text-sm text-text-secondary">No disposal data available.</p>
+        )}
+      </section>
     </article>
   )
 }
@@ -192,6 +213,15 @@ function SummaryCarouselSkeleton() {
               <div key={index} className="border-b border-r border-border/60 p-3">
                 <div className="h-3 w-20 animate-pulse rounded bg-muted" />
                 <div className="mt-2 h-4 w-24 animate-pulse rounded bg-muted" />
+              </div>
+            ))}
+          </div>
+          <div className="border-t border-border/60 px-4 py-3">
+            <div className="h-3 w-20 animate-pulse rounded bg-muted" />
+            {Array.from({ length: 2 }, (_, index) => (
+              <div key={index} className="mt-3 flex items-center justify-between gap-4">
+                <div className="h-3 w-16 animate-pulse rounded bg-muted" />
+                <div className="h-4 w-20 animate-pulse rounded bg-muted" />
               </div>
             ))}
           </div>

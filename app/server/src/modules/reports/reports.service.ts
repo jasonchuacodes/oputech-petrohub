@@ -298,7 +298,18 @@ export class ReportsService {
       this.reports.find(filter).sort({ businessDate: -1, createdAt: -1, _id: -1 }).skip(input.offset).limit(input.limit).lean<ReportRecord[]>().exec(),
       this.reports.countDocuments(filter).exec(),
     ])
-    return { items, totalCount }
+    const reportIds = items.filter((report) => report.disposalBatchId).map((report) => report._id)
+    const disposalBatches = await this.disposals.getForReports(tenantId, reportIds)
+    const disposalsByReport = new Map(
+      disposalBatches.map((batch) => [batch.reportId.toHexString(), batch]),
+    )
+    return {
+      items: items.map((report): ReportDetailRecord => ({
+        report,
+        disposals: disposalsByReport.get(report._id.toHexString()),
+      })),
+      totalCount,
+    }
   }
 
   async financialSummary(
