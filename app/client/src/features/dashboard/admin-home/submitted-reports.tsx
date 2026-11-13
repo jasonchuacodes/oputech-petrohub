@@ -28,6 +28,7 @@ export function SubmittedReports({ tenantId, timezone }: { tenantId: string; tim
   return (
     <ContentSection
       label="Reports today"
+      className="w-full"
       headingClassName="font-sans text-sm font-semibold tracking-[0.14em] uppercase"
       rightContent={
         <Link
@@ -38,26 +39,28 @@ export function SubmittedReports({ tenantId, timezone }: { tenantId: string; tim
         </Link>
       }
     >
-      {reports.isPending ? (
-        <SummaryCarouselSkeleton />
-      ) : reports.isError && !reports.data ? (
-        <div className="flex min-h-40 flex-col items-center justify-center gap-3 rounded-md bg-card p-6 text-center shadow-card">
-          <AlertCircle aria-hidden="true" className="size-6 text-destructive" />
-          <p className="text-sm text-text-secondary">Unable to load submitted reports.</p>
-          <Button type="button" variant="outline" onClick={() => void reports.refetch()}>
-            <RefreshCw aria-hidden="true" /> Try again
-          </Button>
-        </div>
-      ) : reports.data?.items.length === 0 ? (
-        <div className="flex min-h-40 items-center justify-center rounded-md bg-card p-6 text-center shadow-card">
-          <div>
-            <p className="font-medium text-text-heading">No submitted reports</p>
-            <p className="mt-1 text-sm text-text-secondary">No reports have been submitted.</p>
+      <div className="w-full rounded-lg bg-muted p-3">
+        {reports.isPending ? (
+          <SummaryCarouselSkeleton />
+        ) : reports.isError && !reports.data ? (
+          <div className="flex min-h-40 flex-col items-center justify-center gap-3 rounded-md bg-card p-6 text-center shadow-card">
+            <AlertCircle aria-hidden="true" className="size-6 text-destructive" />
+            <p className="text-sm text-text-secondary">Unable to load submitted reports.</p>
+            <Button type="button" variant="outline" onClick={() => void reports.refetch()}>
+              <RefreshCw aria-hidden="true" /> Try again
+            </Button>
           </div>
-        </div>
-      ) : reports.data ? (
-        <ReportSummaryCarousel reports={reports.data.items} refreshFailed={reports.isRefetchError} />
-      ) : null}
+        ) : reports.data?.items.length === 0 ? (
+          <div className="flex min-h-40 items-center justify-center rounded-md bg-card p-6 text-center shadow-card">
+            <div>
+              <p className="font-medium text-text-heading">No submitted reports</p>
+              <p className="mt-1 text-sm text-text-secondary">No reports have been submitted.</p>
+            </div>
+          </div>
+        ) : reports.data ? (
+          <ReportSummaryCarousel reports={reports.data.items} refreshFailed={reports.isRefetchError} />
+        ) : null}
+      </div>
     </ContentSection>
   )
 }
@@ -157,7 +160,7 @@ function ReportSummaryCard({
     <article
       ref={ref}
       role="listitem"
-      className={`${fullWidth ? 'w-full' : 'w-[min(85vw,22rem)] wide:w-4/5'} shrink-0 snap-start overflow-hidden rounded-md bg-card shadow-card`}
+      className={`${fullWidth ? 'w-full' : 'w-[min(85vw,22rem)]'} wide:w-full wide:max-w-md shrink-0 snap-start overflow-hidden rounded-md bg-card shadow-card`}
     >
       <header className="flex items-start justify-between gap-3 border-b border-border/60 px-4 py-3">
         <div className="min-w-0">
@@ -182,7 +185,7 @@ function ReportSummaryCard({
             {disposalSummary.map((item) => (
               <div key={item.productId} className="flex min-h-10 items-center justify-between gap-4 py-2">
                 <dt className="text-sm text-text-secondary">{item.productName}</dt>
-                <dd className="text-right font-semibold tabular-nums text-text-heading">
+                <dd className="text-right tabular-nums text-text-heading">
                   {formatDisposalVolume(item.netVolume)}
                 </dd>
               </div>
@@ -202,7 +205,7 @@ function SummaryCarouselSkeleton() {
       {Array.from({ length: 2 }, (_, cardIndex) => (
         <div
           key={cardIndex}
-          className="w-[min(85vw,22rem)] shrink-0 overflow-hidden rounded-md bg-card shadow-card wide:w-4/5"
+          className="w-[min(85vw,22rem)] shrink-0 overflow-hidden rounded-md bg-card shadow-card wide:w-full wide:max-w-md"
         >
           <div className="border-b border-border/60 px-4 py-3">
             <div className="h-4 w-28 animate-pulse rounded bg-muted" />

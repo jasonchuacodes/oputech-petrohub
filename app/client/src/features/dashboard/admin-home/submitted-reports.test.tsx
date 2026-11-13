@@ -66,5 +66,7 @@ describe('SubmittedReports', () => {
     expect(html).toContain('5.500 L')
     expect(html.indexOf('Disposals')).toBeGreaterThan(html.indexOf('Cash fuel sales'))
     expect(html).toContain('href="/report/report-1"')
+    expect(html).toContain('wide:max-w-md')
+    expect(html).toContain('bg-muted')
   })
 })

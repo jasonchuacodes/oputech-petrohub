@@ -8,7 +8,13 @@ import { Sheet } from '~/components/ui/sheet';
 import type { ReportDetailRecord } from '../reports.queries';
 import { disposalReadingSchema } from './report-detail.schema';
 import { useReportEditor } from './report-editor-context';
-import { calculatePreview, formatCurrentReading, formatMoney, formatReading } from './utils';
+import {
+  calculatePreview,
+  formatCurrentReading,
+  formatDisposalVolume,
+  formatMoney,
+  formatReading,
+} from './utils';
 
 type DisposalReading = NonNullable<ReportDetailRecord['disposals']>['readings'][number];
 
@@ -123,7 +129,7 @@ export function DisposalReadingSheet({
     <Sheet
       open
       title="Disposal Reading"
-      description={`${reading.meterLabel} @ ${formatMoney(reading.unitPrice)}`}
+      description={`${reading.meterLabel} · ${reading.productName}`}
       onClose={handleClose}
       escapeDisabled={saving}
       manageFocus
@@ -133,103 +139,103 @@ export function DisposalReadingSheet({
       <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-5">
         <dl className="divide-y divide-border/60 border-y border-border/60">
           {canEdit ? (
-            <>
-              <div className="grid min-h-16 grid-cols-[minmax(0,1fr)_minmax(0,11rem)] items-center gap-4 py-3">
-                <dt>
-                  <label
-                    htmlFor={currentReadingId}
-                    className="text-sm font-medium text-text-heading"
-                  >
-                    After reading
-                  </label>
-                </dt>
-                <dd>
-                  <Input
-                    ref={currentReadingRef}
-                    id={currentReadingId}
-                    className="text-right text-lg tabular-nums"
-                    inputMode="decimal"
-                    placeholder="0.00"
-                    value={draft.closingReading}
-                    disabled={editingDisabled}
-                    aria-invalid={showCurrentReadingError}
-                    aria-describedby={showCurrentReadingError ? currentReadingErrorId : undefined}
-                    onFocus={() => setFocusedField('currentReading')}
-                    onChange={(event) => {
-                      setDraft((current) => ({
-                        ...current,
-                        closingReading: event.target.value,
-                      }));
-                    }}
-                    onBlur={() => {
-                      setFocusedField(undefined);
-                      setBlurred((current) => ({ ...current, currentReading: true }));
-                    }}
-                  />
-                  {showCurrentReadingError && currentReadingError && (
-                    <p id={currentReadingErrorId} className="mt-2 text-sm text-destructive">
-                      {currentReadingError}
-                    </p>
-                  )}
-                </dd>
-              </div>
-              <div className="grid min-h-16 grid-cols-[minmax(0,1fr)_minmax(0,11rem)] items-center gap-4 py-3">
-                <dt>
-                  <label htmlFor={calibrationId} className="text-sm text-text-secondary">
-                    Calibration
-                  </label>
-                </dt>
-                <dd>
-                  <Input
-                    id={calibrationId}
-                    className="text-right tabular-nums"
-                    inputMode="decimal"
-                    placeholder="0.00"
-                    value={draft.calibration}
-                    disabled={editingDisabled}
-                    aria-invalid={showCalibrationError}
-                    aria-describedby={showCalibrationError ? calibrationErrorId : undefined}
-                    onFocus={() => setFocusedField('calibration')}
-                    onChange={(event) => {
-                      setDraft((current) => ({ ...current, calibration: event.target.value }));
-                    }}
-                    onBlur={() => {
-                      setFocusedField(undefined);
-                      setBlurred((current) => ({ ...current, calibration: true }));
-                    }}
-                  />
-                  {showCalibrationError && calibrationError && (
-                    <p id={calibrationErrorId} className="mt-2 text-sm text-destructive">
-                      {calibrationError}
-                    </p>
-                  )}
-                </dd>
-              </div>
-            </>
+            <div className="grid min-h-16 grid-cols-[minmax(0,1fr)_minmax(0,11rem)] items-center gap-4 py-3">
+              <dt>
+                <label
+                  htmlFor={currentReadingId}
+                  className="text-sm text-text-secondary"
+                >
+                  After reading
+                </label>
+              </dt>
+              <dd>
+                <Input
+                  ref={currentReadingRef}
+                  id={currentReadingId}
+                  className="text-right text-lg tabular-nums"
+                  inputMode="decimal"
+                  placeholder="0.00"
+                  value={draft.closingReading}
+                  disabled={editingDisabled}
+                  aria-invalid={showCurrentReadingError}
+                  aria-describedby={showCurrentReadingError ? currentReadingErrorId : undefined}
+                  onFocus={() => setFocusedField('currentReading')}
+                  onChange={(event) => {
+                    setDraft((current) => ({
+                      ...current,
+                      closingReading: event.target.value,
+                    }));
+                  }}
+                  onBlur={() => {
+                    setFocusedField(undefined);
+                    setBlurred((current) => ({ ...current, currentReading: true }));
+                  }}
+                />
+                {showCurrentReadingError && currentReadingError && (
+                  <p id={currentReadingErrorId} className="mt-2 text-sm text-destructive">
+                    {currentReadingError}
+                  </p>
+                )}
+              </dd>
+            </div>
           ) : (
-            <>
-              <DetailRow
-                label="After reading"
-                value={formatCurrentReading(currentReading)}
-                tabular
-                strong
-              />
-              <DetailRow label="Calibration" value={formatReading(reading.calibration)} tabular />
-            </>
+            <DetailRow
+              label="After reading"
+              value={formatCurrentReading(currentReading)}
+              tabular
+            />
           )}
-          <DetailRow label="Meter name" value={reading.meterLabel} />
-          <DetailRow label="Product" value={reading.productName} />
-          <DetailRow label="Price" value={formatMoney(reading.unitPrice)} tabular />
           <DetailRow
             label="Before reading"
             value={formatReading(reading.openingReading)}
             tabular
           />
+          {canEdit ? (
+            <div className="grid min-h-16 grid-cols-[minmax(0,1fr)_minmax(0,11rem)] items-center gap-4 py-3">
+              <dt>
+                <label htmlFor={calibrationId} className="text-sm text-text-secondary">
+                  Calibration
+                </label>
+              </dt>
+              <dd>
+                <Input
+                  id={calibrationId}
+                  className="text-right tabular-nums"
+                  inputMode="decimal"
+                  placeholder="0.00"
+                  value={draft.calibration}
+                  disabled={editingDisabled}
+                  aria-invalid={showCalibrationError}
+                  aria-describedby={showCalibrationError ? calibrationErrorId : undefined}
+                  onFocus={() => setFocusedField('calibration')}
+                  onChange={(event) => {
+                    setDraft((current) => ({ ...current, calibration: event.target.value }));
+                  }}
+                  onBlur={() => {
+                    setFocusedField(undefined);
+                    setBlurred((current) => ({ ...current, calibration: true }));
+                  }}
+                />
+                {showCalibrationError && calibrationError && (
+                  <p id={calibrationErrorId} className="mt-2 text-sm text-destructive">
+                    {calibrationError}
+                  </p>
+                )}
+              </dd>
+            </div>
+          ) : (
+            <DetailRow label="Calibration" value={formatReading(reading.calibration)} tabular />
+          )}
           <DetailRow
-            label="Calculated sales"
+            label="Disposal"
+            value={formatDisposalVolume(calculated?.net)}
+            tabular
+          />
+          <DetailRow label="Price" value={formatMoney(reading.unitPrice)} tabular />
+          <DetailRow
+            label="Computed sales"
             value={calculated?.sales ? formatMoney(calculated.sales) : '—'}
             tabular
-            strong
           />
         </dl>
 
@@ -266,20 +272,16 @@ function DetailRow({
   label,
   value,
   tabular = false,
-  strong = false,
 }: {
   label: string;
   value: string;
   tabular?: boolean;
-  strong?: boolean;
 }) {
   return (
     <div className="flex min-h-14 items-center justify-between gap-4 py-3">
       <dt className="text-sm text-text-secondary">{label}</dt>
       <dd className={`text-right ${tabular ? 'tabular-nums' : ''}`}>
-        <span className={strong ? 'font-semibold text-text-heading' : 'text-text-heading'}>
-          {value}
-        </span>
+        <span className="text-text-heading">{value}</span>
       </dd>
     </div>
   );

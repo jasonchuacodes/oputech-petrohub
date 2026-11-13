@@ -41,8 +41,8 @@ export function ReportDisposalsPanel() {
             <dl className="divide-y divide-border/60 rounded-md bg-card px-4 shadow-card">
               {disposalSummary.map((item) => (
                 <div key={item.productId} className="flex min-h-12 items-center justify-between gap-4 py-2">
-                  <dt className="font-medium text-text-heading">{item.productName}</dt>
-                  <dd className="text-right font-semibold tabular-nums text-text-heading">
+                  <dt className="text-text-secondary">{item.productName}</dt>
+                  <dd className="text-right tabular-nums text-text-heading">
                     {formatDisposalVolume(item.netVolume)}
                   </dd>
                 </div>
@@ -94,7 +94,7 @@ export function ReportDisposalsPanel() {
                       </Button>
                     </div>
 
-                    <div className="mt-4 divide-y divide-border/60 border-t border-border/60">
+                    <div className="mt-2 divide-y divide-border/60 border-t border-border/60">
                       <Metric
                         label="After reading"
                         value={formatCurrentReading(formReading?.closingReading)}
@@ -155,15 +155,10 @@ function Metric({
   value: string;
   emphasis?: 'primary' | 'default' | 'secondary';
 }) {
-  const valueClass =
-    emphasis === 'primary'
-      ? 'text-metric-md font-semibold text-text-heading'
-      : emphasis === 'secondary'
-        ? 'font-medium text-text-secondary'
-        : 'font-semibold text-text-heading';
+  const valueClass = emphasis === 'primary' ? 'text-metric-md text-text-heading' : 'text-text-heading';
 
   return (
-    <div className={`flex items-center justify-between gap-4 py-2 ${emphasis === 'primary' ? 'min-h-14' : 'min-h-12'}`}>
+    <div className={`flex items-center justify-between gap-2 py-1 ${emphasis === 'primary' ? 'min-h-10' : 'min-h-9'}`}>
       <span className="text-sm text-text-secondary">{label}</span>
       <span className={`text-right tabular-nums ${valueClass}`}>{value}</span>
     </div>
