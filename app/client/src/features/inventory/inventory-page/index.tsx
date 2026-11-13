@@ -5,6 +5,13 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '~/components/ui/button';
 import { ConfirmationDialog } from '~/components/ui/confirmation-dialog';
+import { DataTable, type DataTableColumn } from '~/components/ui/data-table';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '~/components/ui/dropdown-menu';
 import { Input } from '~/components/ui/input';
 import { PageHeader } from '~/components/ui/page-header';
 import { Sheet } from '~/components/ui/sheet';
@@ -66,6 +73,66 @@ function TenantInventory({ tenantId }: { tenantId: string }) {
   };
 
   const selectedEditor = editor && editor !== 'new' ? editor : undefined;
+  const columns: DataTableColumn<InventoryProductFieldsFragment>[] = [
+    {
+      id: 'name',
+      heading: 'Product',
+      cell: (product) => (
+        <span className="font-medium text-text-heading">{product.name}</span>
+      ),
+    },
+    {
+      id: 'stockCount',
+      heading: 'Stock balance',
+      align: 'right',
+      cell: (product) => (
+        <span
+          className={cn(
+            'font-semibold tabular-nums text-text-heading',
+            product.stockCount.startsWith('-') && 'text-destructive',
+          )}
+        >
+          {product.stockCount}
+        </span>
+      ),
+    },
+    {
+      id: 'unit',
+      heading: 'Unit',
+      cell: (product) => <span className="text-text-secondary">{product.unit}</span>,
+    },
+    {
+      id: 'unitPrice',
+      heading: 'Unit price',
+      align: 'right',
+      cell: (product) => (
+        <span className="tabular-nums text-text-secondary">
+          {formatMoney(product.unitPrice)}
+        </span>
+      ),
+    },
+    {
+      id: 'status',
+      heading: 'Status',
+      cell: (product) => <ProductStatus status={product.status} />,
+    },
+    {
+      id: 'actions',
+      heading: '',
+      align: 'right',
+      width: 64,
+      cell: (product) => (
+        <InventoryRowActions
+          product={product}
+          onEdit={() => setEditor(product)}
+          onRecordMovement={() => setMovementProduct(product)}
+          onViewHistory={() => setHistoryProduct(product)}
+          onDeactivate={() => setDeactivation(product)}
+        />
+      ),
+    },
+  ];
+
   return (
     <div className="mx-auto flex w-full flex-col gap-5 px-5 py-5 md:max-w-4xl md:p-6 wide:max-w-7xl">
       <PageHeader
@@ -125,53 +192,56 @@ function TenantInventory({ tenantId }: { tenantId: string }) {
                 </div>
               </div>
             ) : (
-              <div className="overflow-hidden rounded-md bg-card shadow-card">
-                {products.data.items.map((product) => (
-                  <article
-                    key={product.id}
-                    className="flex min-h-20 items-center gap-3 border-b border-border/60 p-4 last:border-0"
-                  >
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h2 className="font-medium text-text-heading">{product.name}</h2>
-                        <span
-                          className={cn(
-                            'rounded-sm px-2 py-0.5 text-xs font-medium',
-                            product.status === 'active'
-                              ? 'bg-status-success/10 text-status-success'
-                              : 'bg-muted text-text-tertiary',
-                          )}
-                        >
-                          {product.status === 'active' ? 'Active' : 'Inactive'}
-                        </span>
-                      </div>
-                      <div className="mt-1 flex items-baseline gap-1.5">
-                        <span
-                          className={cn(
-                            'text-sm font-semibold tabular-nums text-text-heading',
-                            product.stockCount.startsWith('-') && 'text-destructive',
-                          )}
-                        >
-                          {product.stockCount} {product.unit}
-                        </span>
-                        <span aria-hidden="true" className="text-xs text-text-tertiary">·</span>
-                        <span className="text-xs font-normal tabular-nums text-text-secondary">
-                          {formatMoney(product.unitPrice)}
-                        </span>
-                      </div>
-                    </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      aria-label={`Actions for ${product.name}`}
-                      onClick={() => setActions(product)}
+              <>
+                <div className="overflow-hidden rounded-md bg-card shadow-card md:hidden">
+                  {products.data.items.map((product) => (
+                    <article
+                      key={product.id}
+                      className="flex min-h-20 items-center gap-3 border-b border-border/60 p-4 last:border-0"
                     >
-                      <MoreVertical aria-hidden="true" />
-                    </Button>
-                  </article>
-                ))}
-              </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h2 className="font-medium text-text-heading">{product.name}</h2>
+                          <ProductStatus status={product.status} />
+                        </div>
+                        <div className="mt-1 flex items-baseline gap-1.5">
+                          <span
+                            className={cn(
+                              'text-sm font-semibold tabular-nums text-text-heading',
+                              product.stockCount.startsWith('-') && 'text-destructive',
+                            )}
+                          >
+                            {product.stockCount} {product.unit}
+                          </span>
+                          <span aria-hidden="true" className="text-xs text-text-tertiary">·</span>
+                          <span className="text-xs font-normal tabular-nums text-text-secondary">
+                            {formatMoney(product.unitPrice)}
+                          </span>
+                        </div>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        aria-label={`Actions for ${product.name}`}
+                        onClick={() => setActions(product)}
+                      >
+                        <MoreVertical aria-hidden="true" />
+                      </Button>
+                    </article>
+                  ))}
+                </div>
+                <div className="hidden md:block">
+                  <DataTable
+                    collection={DataTable.collection({
+                      items: products.data.items,
+                      itemToValue: (product) => product.id,
+                      itemToString: (product) => `${product.name} inventory product`,
+                    })}
+                    columns={columns}
+                  />
+                </div>
+              </>
             )}
           </section>
           <div className="flex items-center justify-between gap-3">
@@ -296,6 +366,62 @@ function TenantInventory({ tenantId }: { tenantId: string }) {
         </p>
       </ConfirmationDialog>
     </div>
+  );
+}
+
+function ProductStatus({ status }: { status: InventoryProductFieldsFragment['status'] }) {
+  return (
+    <span
+      className={cn(
+        'rounded-sm px-2 py-0.5 text-xs font-medium',
+        status === 'active'
+          ? 'bg-status-success/10 text-status-success'
+          : 'bg-muted text-text-tertiary',
+      )}
+    >
+      {status === 'active' ? 'Active' : 'Inactive'}
+    </span>
+  );
+}
+
+function InventoryRowActions({
+  product,
+  onEdit,
+  onRecordMovement,
+  onViewHistory,
+  onDeactivate,
+}: {
+  product: InventoryProductFieldsFragment;
+  onEdit: () => void;
+  onRecordMovement: () => void;
+  onViewHistory: () => void;
+  onDeactivate: () => void;
+}) {
+  const inactive = product.status !== 'active';
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        aria-label={`Actions for ${product.name}`}
+        className="inline-flex size-9 items-center justify-center rounded-sm text-text-secondary outline-none hover:bg-surface-hover focus-visible:ring-3 focus-visible:ring-ring/30"
+      >
+        <MoreVertical aria-hidden="true" className="size-4" />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem disabled={inactive} onSelect={onEdit}>
+          <Pencil aria-hidden="true" /> Edit product
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={onRecordMovement}>
+          <PackagePlus aria-hidden="true" /> Record stock movement
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={onViewHistory}>
+          <History aria-hidden="true" /> Movement history
+        </DropdownMenuItem>
+        <DropdownMenuItem variant="destructive" disabled={inactive} onSelect={onDeactivate}>
+          <Trash2 aria-hidden="true" /> Deactivate product
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 

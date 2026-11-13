@@ -5,6 +5,13 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '~/components/ui/button'
 import { ConfirmationDialog } from '~/components/ui/confirmation-dialog'
+import { DataTable, type DataTableColumn } from '~/components/ui/data-table'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '~/components/ui/dropdown-menu'
 import { PageHeader } from '~/components/ui/page-header'
 import { Spinner } from '~/components/ui/spinner'
 import type { FuelProductFieldsFragment, PumpMeterFieldsFragment } from '~/generated/graphql'
@@ -70,6 +77,82 @@ function TenantFuelSetup({ tenantId, timezone }: { tenantId: string; timezone: s
       ? deactivation.item.name
       : deactivation.item.label
     : undefined
+  const productColumns: DataTableColumn<FuelProductFieldsFragment>[] = [
+    {
+      id: 'name',
+      heading: 'Product',
+      cell: (product) => <span className="font-medium text-text-heading">{product.name}</span>,
+    },
+    {
+      id: 'unitPrice',
+      heading: 'Unit price',
+      align: 'right',
+      cell: (product) => (
+        <span className="font-medium tabular-nums text-text-heading">
+          ₱{formatPrice(product.unitPrice)}
+        </span>
+      ),
+    },
+    {
+      id: 'status',
+      heading: 'Status',
+      cell: (product) => <Status status={product.status} />,
+    },
+    {
+      id: 'actions',
+      heading: '',
+      align: 'right',
+      width: 64,
+      cell: (product) => (
+        <FuelProductRowActions
+          product={product}
+          onEdit={() => setProductEditor(product)}
+          onDeactivate={() => setDeactivation({ kind: 'product', item: product })}
+        />
+      ),
+    },
+  ]
+  const meterColumns: DataTableColumn<PumpMeterFieldsFragment>[] = [
+    {
+      id: 'label',
+      heading: 'Pump',
+      cell: (meter) => <span className="font-medium text-text-heading">{meter.label}</span>,
+    },
+    {
+      id: 'productId',
+      heading: 'Fuel product',
+      cell: (meter) => setup.data.products.find((product) => product.id === meter.productId)?.name ?? 'Unknown fuel product',
+    },
+    {
+      id: 'currentReading',
+      heading: 'Current reading',
+      align: 'right',
+      cell: (meter) => (
+        <span className="font-semibold tabular-nums text-text-heading">
+          {formatReading(meter.currentReading)}
+        </span>
+      ),
+    },
+    {
+      id: 'status',
+      heading: 'Status',
+      cell: (meter) => <Status status={meter.status} />,
+    },
+    {
+      id: 'actions',
+      heading: '',
+      align: 'right',
+      width: 64,
+      cell: (meter) => (
+        <PumpMeterRowActions
+          meter={meter}
+          onEdit={() => setMeterEditor(meter)}
+          onDeactivate={() => setDeactivation({ kind: 'meter', item: meter })}
+        />
+      ),
+    },
+  ]
+
   return (
     <div className="mx-auto flex w-full flex-col gap-5 px-5 py-5 md:max-w-4xl md:p-6 wide:max-w-7xl">
       <PageHeader
@@ -87,12 +170,89 @@ function TenantFuelSetup({ tenantId, timezone }: { tenantId: string; timezone: s
 
       {tab === 'products' ? (
         <section role="tabpanel" aria-label="Fuel products">
-          {setup.data.products.length === 0 ? <EmptyCard icon={Fuel} title="No fuel products" description="Add the first fuel product and its selling price." /> : <div className="overflow-hidden rounded-md bg-card shadow-card">{setup.data.products.map((product) => <article key={product.id} className="flex min-h-20 items-center gap-3 border-b border-border/60 p-4 last:border-b-0"><span className="flex size-10 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary"><Fuel aria-hidden="true" className="size-5" /></span><div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><h3 className="font-medium text-text-heading">{product.name}</h3><Status status={product.status} /></div><p className="mt-1 text-sm font-medium tabular-nums">₱{formatPrice(product.unitPrice)}</p></div><Button type="button" size="icon" variant="ghost" aria-label={`Actions for ${product.name}`} onClick={() => setProductActions(product)}><MoreVertical aria-hidden="true" /></Button></article>)}</div>}
+          {setup.data.products.length === 0 ? (
+            <EmptyCard icon={Fuel} title="No fuel products" description="Add the first fuel product and its selling price." />
+          ) : (
+            <>
+              <div className="overflow-hidden rounded-md bg-card shadow-card md:hidden">
+                {setup.data.products.map((product) => (
+                  <article key={product.id} className="flex min-h-20 items-center gap-3 border-b border-border/60 p-4 last:border-b-0">
+                    <span className="flex size-10 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+                      <Fuel aria-hidden="true" className="size-5" />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="font-medium text-text-heading">{product.name}</h3>
+                        <Status status={product.status} />
+                      </div>
+                      <p className="mt-1 text-sm font-medium tabular-nums">₱{formatPrice(product.unitPrice)}</p>
+                    </div>
+                    <Button type="button" size="icon" variant="ghost" aria-label={`Actions for ${product.name}`} onClick={() => setProductActions(product)}>
+                      <MoreVertical aria-hidden="true" />
+                    </Button>
+                  </article>
+                ))}
+              </div>
+              <div className="hidden md:block">
+                <DataTable
+                  collection={DataTable.collection({
+                    items: setup.data.products,
+                    itemToValue: (product) => product.id,
+                    itemToString: (product) => `${product.name} fuel product`,
+                  })}
+                  columns={productColumns}
+                />
+              </div>
+            </>
+          )}
           <Button type="button" variant="outline" className="mt-4 w-full" onClick={() => setProductEditor('new')}><Plus aria-hidden="true" />Add product</Button>
         </section>
       ) : (
         <section role="tabpanel" aria-label="Pump meters">
-          {setup.data.meters.length === 0 ? <EmptyCard icon={Gauge} title="No pump meters" description="Add one card for each independently incrementing physical meter." /> : <div className="overflow-hidden rounded-md bg-card shadow-card">{setup.data.meters.map((meter) => { const product = setup.data.products.find((item) => item.id === meter.productId); return <article key={meter.id} className="border-b border-border/60 p-4 last:border-b-0"><div className="flex items-start gap-3"><span className="flex size-10 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary"><Gauge aria-hidden="true" className="size-5" /></span><div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><h3 className="font-medium text-text-heading">{meter.label}</h3><Status status={meter.status} /></div><p className="mt-1 text-sm text-text-secondary">{product?.name ?? 'Unknown fuel product'}</p></div><Button type="button" size="icon" variant="ghost" aria-label={`Actions for ${meter.label}`} onClick={() => setMeterActions(meter)}><MoreVertical aria-hidden="true" /></Button></div><div className="mt-3 flex items-center justify-between gap-4 sm:ml-13"><span className="text-xs font-medium uppercase tracking-wide text-text-tertiary">Current reading</span><span className="text-base font-semibold tabular-nums text-text-heading">{formatReading(meter.currentReading)}</span></div></article> })}</div>}
+          {setup.data.meters.length === 0 ? (
+            <EmptyCard icon={Gauge} title="No pump meters" description="Add one card for each independently incrementing physical meter." />
+          ) : (
+            <>
+              <div className="overflow-hidden rounded-md bg-card shadow-card md:hidden">
+                {setup.data.meters.map((meter) => {
+                  const product = setup.data.products.find((item) => item.id === meter.productId)
+                  return (
+                    <article key={meter.id} className="border-b border-border/60 p-4 last:border-b-0">
+                      <div className="flex items-start gap-3">
+                        <span className="flex size-10 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+                          <Gauge aria-hidden="true" className="size-5" />
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="font-medium text-text-heading">{meter.label}</h3>
+                            <Status status={meter.status} />
+                          </div>
+                          <p className="mt-1 text-sm text-text-secondary">{product?.name ?? 'Unknown fuel product'}</p>
+                        </div>
+                        <Button type="button" size="icon" variant="ghost" aria-label={`Actions for ${meter.label}`} onClick={() => setMeterActions(meter)}>
+                          <MoreVertical aria-hidden="true" />
+                        </Button>
+                      </div>
+                      <div className="mt-3 flex items-center justify-between gap-4 sm:ml-13">
+                        <span className="text-xs font-medium uppercase tracking-wide text-text-tertiary">Current reading</span>
+                        <span className="text-base font-semibold tabular-nums text-text-heading">{formatReading(meter.currentReading)}</span>
+                      </div>
+                    </article>
+                  )
+                })}
+              </div>
+              <div className="hidden md:block">
+                <DataTable
+                  collection={DataTable.collection({
+                    items: setup.data.meters,
+                    itemToValue: (meter) => meter.id,
+                    itemToString: (meter) => `${meter.label} pump meter`,
+                  })}
+                  columns={meterColumns}
+                />
+              </div>
+            </>
+          )}
           <Button type="button" variant="outline" className="mt-4 w-full" disabled={setup.data.products.every((product) => product.status !== 'active')} onClick={() => setAddingMeter(true)}><Plus aria-hidden="true" />Add meter</Button>
         </section>
       )}
@@ -106,6 +266,68 @@ function TenantFuelSetup({ tenantId, timezone }: { tenantId: string; timezone: s
 
       <ConfirmationDialog open={Boolean(deactivation)} title={`Deactivate ${deactivation?.kind === 'product' ? 'fuel product' : 'pump meter'}?`} description={deactivationDescription} icon={Trash2} variant="danger" confirmText="Deactivate" loading={pending} onClose={() => setDeactivation(undefined)} onConfirm={() => void deactivate()}><p className="text-sm text-text-secondary">Existing reports keep their saved product and meter details. Inactive setup is not included in new reports.</p></ConfirmationDialog>
     </div>
+  )
+}
+
+function FuelProductRowActions({
+  product,
+  onEdit,
+  onDeactivate,
+}: {
+  product: FuelProductFieldsFragment
+  onEdit: () => void
+  onDeactivate: () => void
+}) {
+  const inactive = product.status !== 'active'
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        aria-label={`Actions for ${product.name}`}
+        className="inline-flex size-9 items-center justify-center rounded-sm text-text-secondary outline-none hover:bg-surface-hover focus-visible:ring-3 focus-visible:ring-ring/30"
+      >
+        <MoreVertical aria-hidden="true" className="size-4" />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem disabled={inactive} onSelect={onEdit}>
+          <Pencil aria-hidden="true" /> Edit product
+        </DropdownMenuItem>
+        <DropdownMenuItem variant="destructive" disabled={inactive} onSelect={onDeactivate}>
+          <Trash2 aria-hidden="true" /> Deactivate product
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
+
+function PumpMeterRowActions({
+  meter,
+  onEdit,
+  onDeactivate,
+}: {
+  meter: PumpMeterFieldsFragment
+  onEdit: () => void
+  onDeactivate: () => void
+}) {
+  const inactive = meter.status !== 'active'
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        aria-label={`Actions for ${meter.label}`}
+        className="inline-flex size-9 items-center justify-center rounded-sm text-text-secondary outline-none hover:bg-surface-hover focus-visible:ring-3 focus-visible:ring-ring/30"
+      >
+        <MoreVertical aria-hidden="true" className="size-4" />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem disabled={inactive} onSelect={onEdit}>
+          <Pencil aria-hidden="true" /> Edit pump
+        </DropdownMenuItem>
+        <DropdownMenuItem variant="destructive" disabled={inactive} onSelect={onDeactivate}>
+          <Trash2 aria-hidden="true" /> Deactivate meter
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
 

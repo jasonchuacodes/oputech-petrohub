@@ -1,9 +1,9 @@
 import {
   Building2,
+  Box,
   CalendarClock,
   ClipboardList,
   Clock3,
-  Database,
   FileText,
   Fuel,
   House,
@@ -51,7 +51,7 @@ export const managementNavigation: ManagementNavigationSection[] = [
         label: 'Inventory',
         description: 'Manage lubricant products and stock movements',
         href: '/inventory',
-        icon: Database,
+        icon: Box,
       },
       {
         label: 'Shifts',
