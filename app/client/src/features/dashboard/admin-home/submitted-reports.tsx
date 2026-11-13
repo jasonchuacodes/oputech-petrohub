@@ -177,14 +177,19 @@ function ReportSummaryCard({
           <ChevronRight aria-hidden="true" className="size-5" />
         </Link>
       </header>
-      <ReportSummaryRows summary={report.totals} className="p-4" />
+      <section className="px-4 py-3" aria-label="Financial summary">
+        <h4 className="text-xs tracking-[0.12em] text-text-secondary uppercase">
+          Financial summary
+        </h4>
+        <ReportSummaryRows summary={report.totals} className="mt-2" />
+      </section>
       <section className="border-t border-border/60 px-4 py-3" aria-label="Disposals">
-        <h4 className="text-sm font-semibold text-text-heading">Disposals</h4>
+        <h4 className="text-xs tracking-[0.12em] text-text-secondary uppercase">Disposals</h4>
         {disposalSummary.length > 0 ? (
           <dl className="mt-2 divide-y divide-border/60">
             {disposalSummary.map((item) => (
               <div key={item.productId} className="flex min-h-10 items-center justify-between gap-4 py-2">
-                <dt className="text-sm text-text-secondary">{item.productName}</dt>
+                <dt className="text-sm text-text-heading">{item.productName}</dt>
                 <dd className="text-right tabular-nums text-text-heading">
                   {formatDisposalVolume(item.netVolume)}
                 </dd>
@@ -211,13 +216,16 @@ function SummaryCarouselSkeleton() {
             <div className="h-4 w-28 animate-pulse rounded bg-muted" />
             <div className="mt-2 h-3 w-36 animate-pulse rounded bg-muted" />
           </div>
-          <div className="grid grid-cols-2">
-            {Array.from({ length: 6 }, (_, index) => (
-              <div key={index} className="border-b border-r border-border/60 p-3">
-                <div className="h-3 w-20 animate-pulse rounded bg-muted" />
-                <div className="mt-2 h-4 w-24 animate-pulse rounded bg-muted" />
-              </div>
-            ))}
+          <div className="px-4 py-3">
+            <div className="h-3 w-28 animate-pulse rounded bg-muted" />
+            <div className="mt-3 grid grid-cols-2">
+              {Array.from({ length: 6 }, (_, index) => (
+                <div key={index} className="border-b border-r border-border/60 p-3">
+                  <div className="h-3 w-20 animate-pulse rounded bg-muted" />
+                  <div className="mt-2 h-4 w-24 animate-pulse rounded bg-muted" />
+                </div>
+              ))}
+            </div>
           </div>
           <div className="border-t border-border/60 px-4 py-3">
             <div className="h-3 w-20 animate-pulse rounded bg-muted" />
