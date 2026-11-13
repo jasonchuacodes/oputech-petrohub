@@ -72,7 +72,7 @@ function MemberTimesheets({ tenantId, userId }: { tenantId: string; userId: stri
   ]
 
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col gap-5 px-5 py-5 md:p-6">
+    <div className="mx-auto flex w-full flex-col gap-5 px-5 py-5 md:max-w-4xl md:p-6 wide:max-w-7xl">
       <PageHeader title="My timesheets" description="Review your logged hours by date." />
 
       <div className="flex flex-col gap-1">
@@ -201,7 +201,7 @@ function TenantTimesheets({
   ]
 
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col gap-5 px-5 py-5 md:p-6">
+    <div className="mx-auto flex w-full flex-col gap-5 px-5 py-5 md:max-w-4xl md:p-6 wide:max-w-7xl">
       <PageHeader title="Timesheets" description="Review and adjust member hours." />
 
       <div className="flex flex-col gap-1">

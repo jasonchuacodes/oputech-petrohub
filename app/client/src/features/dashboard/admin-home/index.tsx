@@ -9,7 +9,7 @@ import { SubmittedReports } from './submitted-reports'
 
 export function AdminHomePage({ access }: { access: TenantAccess }) {
   return (
-    <div className="mx-auto flex min-h-full w-full max-w-4xl flex-col gap-5 px-5 py-5 md:p-6">
+    <div className="mx-auto flex min-h-full w-full flex-col gap-5 px-5 py-5 md:max-w-4xl md:p-6 wide:max-w-7xl">
       <HomeGreeting />
       <Suspense fallback={<FinancialSummarySkeleton />}>
         <FinancialSummary tenantId={access.tenant.id} timezone={access.tenant.timezone} />

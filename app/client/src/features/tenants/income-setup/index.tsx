@@ -104,7 +104,7 @@ function TenantIncomeSetup({ tenantId }: { tenantId: string }) {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col gap-5 px-5 py-5 md:p-6">
+    <div className="mx-auto flex w-full flex-col gap-5 px-5 py-5 md:max-w-4xl md:p-6 wide:max-w-7xl">
       <PageHeader
         title="Recurring income"
         description="Configure fields that start at zero in new reports. Changes save immediately and do not affect existing reports."

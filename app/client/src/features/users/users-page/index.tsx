@@ -64,7 +64,7 @@ function TenantUsersPage({
   const pageEnd = Math.min(offset + pageSize, totalCount)
 
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col gap-5 px-5 py-5 md:p-6">
+    <div className="mx-auto flex w-full flex-col gap-5 px-5 py-5 md:max-w-4xl md:p-6 wide:max-w-7xl">
       <PageHeader
         title="Users"
         description="Manage users and their access to this tenant."
