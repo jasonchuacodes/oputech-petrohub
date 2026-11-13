@@ -149,7 +149,7 @@ export function DisposalReadingSheet({
                     id={currentReadingId}
                     className="text-right text-lg tabular-nums"
                     inputMode="decimal"
-                    placeholder="Enter reading"
+                    placeholder="0.00"
                     value={draft.closingReading}
                     disabled={editingDisabled}
                     aria-invalid={showCurrentReadingError}
@@ -184,7 +184,7 @@ export function DisposalReadingSheet({
                     id={calibrationId}
                     className="text-right tabular-nums"
                     inputMode="decimal"
-                    placeholder="0"
+                    placeholder="0.00"
                     value={draft.calibration}
                     disabled={editingDisabled}
                     aria-invalid={showCalibrationError}
