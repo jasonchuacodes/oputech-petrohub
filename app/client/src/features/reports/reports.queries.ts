@@ -103,9 +103,12 @@ export function useSaveReportDraftMutation(tenantId: string) {
   return useMutation({
     mutationFn: async (input: SaveReportDraftInput) =>
       (await graphqlClient.request(SaveReportDraftDocument, { input }, { tenantId })).saveReportDraft,
-    onSuccess: async (report) => {
-      queryClient.setQueryData(reportKeys.detail(tenantId, report.id), report)
-      await queryClient.invalidateQueries({ queryKey: reportKeys.lists(tenantId) })
+    onSuccess: (report) => {
+      queryClient.setQueryData<ReportDetailRecord>(
+        reportKeys.detail(tenantId, report.id),
+        (current) => !current || report.revision >= current.revision ? report : current,
+      )
+      void queryClient.invalidateQueries({ queryKey: reportKeys.lists(tenantId) })
     },
   })
 }

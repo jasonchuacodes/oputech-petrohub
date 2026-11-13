@@ -1,11 +1,10 @@
 'use client';
 
-import { CheckCircle2, Trash2 } from 'lucide-react';
+import { CheckCircle2, LoaderCircle, Trash2 } from 'lucide-react';
 import { Button } from '~/components/ui/button';
 import { ConfirmationDialog } from '~/components/ui/confirmation-dialog';
 import { Input } from '~/components/ui/input';
 import { Sheet } from '~/components/ui/sheet';
-import { Spinner } from '~/components/ui/spinner';
 import { formatBusinessDate, formatShiftTime } from '../create-report-sheet';
 import { SummaryCard } from './report-details';
 import { useReportEditor } from './report-editor-context';
@@ -31,9 +30,16 @@ export function ReportEditorFooter() {
         disabled={pending || !isValid || report.stale}
         onClick={submitConfirmation.onOpen}
       >
-        {saveReportPending ? <Spinner className="size-4" /> : <CheckCircle2 aria-hidden="true" />}
-        {saveReportPending ? 'Saving draft…' : 'Review and submit'}
+        {saveReportPending ? (
+          <LoaderCircle aria-hidden="true" className="size-4 motion-safe:animate-spin" />
+        ) : (
+          <CheckCircle2 aria-hidden="true" />
+        )}
+        Review and submit
       </Button>
+      <span role="status" aria-live="polite" className="sr-only">
+        {saveReportPending ? 'Saving draft' : ''}
+      </span>
     </footer>
   );
 }
@@ -46,7 +52,6 @@ export function ReportEditorDialogs() {
     submitConfirmation,
     deleteConfirmation,
     submitReportPending,
-    saveReportPending,
     deleteReportPending,
     submit,
     remove,
@@ -86,7 +91,7 @@ export function ReportEditorDialogs() {
         icon={CheckCircle2}
         confirmText="Submit report"
         disabled={!preview.complete}
-        loading={submitReportPending || saveReportPending}
+        loading={submitReportPending}
         onClose={submitConfirmation.onClose}
         onConfirm={() => void submit()}
       >

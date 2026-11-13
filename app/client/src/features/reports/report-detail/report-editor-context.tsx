@@ -52,7 +52,7 @@ function useReportEditorState({
   userId,
   role,
 }: Omit<ReportEditorProviderProps, 'children'>) {
-  const saveReport = useSaveReportDraftMutation(tenantId);
+  const { mutateAsync: saveReportDraft } = useSaveReportDraftMutation(tenantId);
   const submitReport = useSubmitReportMutation(tenantId);
   const deleteReport = useDeleteReportMutation(tenantId);
   const updateRemarks = useUpdateReportRemarksMutation(tenantId);
@@ -72,6 +72,16 @@ function useReportEditorState({
   const [savedRemarks, setSavedRemarks] = useState(report.remarks);
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [failedSaveSignature, setFailedSaveSignature] = useState<string>();
+  const [savedValuesSignature, setSavedValuesSignature] = useState(() =>
+    JSON.stringify(toFormValues(report)),
+  );
+  const [submitting, setSubmitting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [savingRemarks, setSavingRemarks] = useState(false);
+  const savedValuesRef = useRef(cloneFormValues(toFormValues(report)));
+  const failedSaveSignatureRef = useRef<string | undefined>(undefined);
+  const inFlightSaveRef = useRef<Promise<ReportDetailRecord | undefined> | undefined>(undefined);
+  const foregroundActionRef = useRef(false);
   const administrator = role === 'admin' || role === 'superadmin';
   const reportOwner = report.creatorId === userId;
   const canEdit =
@@ -106,16 +116,17 @@ function useReportEditorState({
   });
   const values = useWatch({ control: form.control });
   const preview = calculatePreview(report, values);
-  const { isDirty, isValid } = form.formState;
-  const valuesSignature = JSON.stringify(values);
+  const { isValid } = form.formState;
+  const watchedValuesResult = reportDetailFormSchema.safeParse(values);
+  const valuesSignature = JSON.stringify(
+    watchedValuesResult.success ? watchedValuesResult.data : values,
+  );
   const saveFailed = saveState === 'error' && failedSaveSignature === valuesSignature;
+  const hasUnsavedChanges = valuesSignature !== savedValuesSignature;
   const remarksDirty = remarks !== savedRemarks;
   const remarksValidation = reportRemarksSchema.safeParse(remarks);
   const pending =
-    saveReport.isPending ||
-    submitReport.isPending ||
-    deleteReport.isPending ||
-    updateRemarks.isPending;
+    submitting || deleting || savingRemarks || submitReport.isPending || deleteReport.isPending;
 
   const openFinancialEntry = (kind: FinancialEntryTarget['kind'], index?: number) => {
     if (
@@ -149,26 +160,60 @@ function useReportEditorState({
 
   const persistDraft = useCallback(
     async (formValues: ReportDetailFormValues) => {
-      const submittedValues = cloneFormValues(form.getValues());
-      setActionError(undefined);
+      const submittedValues = cloneFormValues(formValues);
+      if (formValuesEqual(submittedValues, savedValuesRef.current)) return reportRef.current;
+
+      while (inFlightSaveRef.current) {
+        const pendingResult = await inFlightSaveRef.current;
+        if (!pendingResult) return undefined;
+        if (formValuesEqual(submittedValues, savedValuesRef.current)) return reportRef.current;
+      }
+
       setSaveState('saving');
       setFailedSaveSignature(undefined);
-      try {
-        const updated = await saveReport.mutateAsync(toSaveInput(reportRef.current, formValues));
-        reportRef.current = updated;
-        const changedWhileSaving = !formValuesEqual(form.getValues(), submittedValues);
-        if (!changedWhileSaving) form.reset(toFormValues(updated));
-        setSaveState('saved');
-        return updated;
-      } catch {
-        setSaveState('error');
-        setFailedSaveSignature(JSON.stringify(submittedValues));
-        setActionError('Unable to save. The report may have changed; reload before trying again.');
-        return undefined;
-      }
+      failedSaveSignatureRef.current = undefined;
+
+      const request = (async () => {
+        try {
+          const updated = await saveReportDraft(toSaveInput(reportRef.current, submittedValues));
+          reportRef.current = updated;
+          savedValuesRef.current = submittedValues;
+          setSavedValuesSignature(JSON.stringify(submittedValues));
+          setSaveState('saved');
+          return updated;
+        } catch {
+          const signature = JSON.stringify(submittedValues);
+          failedSaveSignatureRef.current = signature;
+          setSaveState('error');
+          setFailedSaveSignature(signature);
+          setActionError('Unable to save. The report may have changed; reload before trying again.');
+          return undefined;
+        } finally {
+          inFlightSaveRef.current = undefined;
+        }
+      })();
+      inFlightSaveRef.current = request;
+      return request;
     },
-    [form, saveReport],
+    [saveReportDraft],
   );
+
+  const saveLatestDraft = useCallback(async () => {
+    let updated: ReportDetailRecord | undefined;
+    while (!foregroundActionRef.current) {
+      const result = reportDetailFormSchema.safeParse(form.getValues());
+      if (!result.success) return updated;
+      const snapshot = cloneFormValues(result.data);
+      const signature = JSON.stringify(snapshot);
+      if (formValuesEqual(snapshot, savedValuesRef.current)) {
+        return updated ?? reportRef.current;
+      }
+      if (failedSaveSignatureRef.current === signature) return undefined;
+      updated = await persistDraft(snapshot);
+      if (!updated) return undefined;
+    }
+    return updated;
+  }, [form, persistDraft]);
 
   const save = useCallback(
     async () => {
@@ -176,6 +221,7 @@ function useReportEditorState({
       if (!valid) return undefined;
       const result = reportDetailFormSchema.safeParse(form.getValues());
       if (!result.success) return undefined;
+      setActionError(undefined);
       return persistDraft(result.data);
     },
     [form, persistDraft],
@@ -184,29 +230,24 @@ function useReportEditorState({
   useEffect(() => {
     if (
       !canEdit ||
-      !isDirty ||
+      !hasUnsavedChanges ||
       !isValid ||
-      saveReport.isPending ||
       saveFailed ||
-      submitReport.isPending ||
-      deleteReport.isPending ||
-      updateRemarks.isPending
+      pending
     )
       return;
     const timer = window.setTimeout(() => {
-      void save();
+      void saveLatestDraft();
     }, 750);
     return () => window.clearTimeout(timer);
   }, [
     canEdit,
-    deleteReport.isPending,
-    isDirty,
+    hasUnsavedChanges,
     isValid,
-    save,
+    pending,
+    saveLatestDraft,
     saveFailed,
-    saveReport.isPending,
-    submitReport.isPending,
-    updateRemarks.isPending,
+    saveState,
     valuesSignature,
   ]);
 
@@ -229,31 +270,45 @@ function useReportEditorState({
   };
 
   const saveRemarks = async () => {
-    if (!canEditRemarks || !remarksDirty) return;
+    if (!canEditRemarks || !remarksDirty || foregroundActionRef.current) return;
+    foregroundActionRef.current = true;
+    setSavingRemarks(true);
     setActionError(undefined);
     try {
+      await inFlightSaveRef.current;
       const updated = await persistRemarks(reportRef.current);
       if (updated) toast.success('Remarks saved');
     } catch {
       setActionError('Unable to save remarks. The report may have changed; reload before trying again.');
+    } finally {
+      foregroundActionRef.current = false;
+      setSavingRemarks(false);
     }
   };
 
   const submit = async () => {
+    if (foregroundActionRef.current) return;
+    foregroundActionRef.current = true;
+    setSubmitting(true);
     setActionError(undefined);
     try {
       let current = reportRef.current;
-      if (isDirty) {
-        const valid = await form.trigger();
-        if (!valid) {
-          submitConfirmation.onClose();
-          return;
-        }
-        current = await saveReport.mutateAsync(toSaveInput(current, form.getValues()));
-        reportRef.current = current;
-        form.reset(toFormValues(current));
-        setSaveState('saved');
+      const valid = await form.trigger();
+      if (!valid) {
+        submitConfirmation.onClose();
+        return;
       }
+      const valuesResult = reportDetailFormSchema.safeParse(form.getValues());
+      if (!valuesResult.success) {
+        submitConfirmation.onClose();
+        return;
+      }
+      const saved = await persistDraft(valuesResult.data);
+      if (!saved) {
+        submitConfirmation.onClose();
+        return;
+      }
+      current = saved;
       if (remarks !== savedRemarksRef.current) {
         const updated = await persistRemarks(current);
         if (!updated) {
@@ -277,14 +332,21 @@ function useReportEditorState({
       toast.success('Report submitted');
     } catch {
       setActionError('Unable to submit. Refresh and review the latest report values.');
+    } finally {
+      foregroundActionRef.current = false;
+      setSubmitting(false);
     }
   };
 
   const remove = async () => {
-    const current = reportRef.current;
-    if (!current.disposals || deleteReason.trim().length < 3) return;
+    if (deleteReason.trim().length < 3 || foregroundActionRef.current) return;
+    foregroundActionRef.current = true;
+    setDeleting(true);
     setActionError(undefined);
     try {
+      await inFlightSaveRef.current;
+      const current = reportRef.current;
+      if (!current.disposals) return;
       await deleteReport.mutateAsync({
         reportId: current.id,
         expectedReportRevision: current.revision,
@@ -298,6 +360,9 @@ function useReportEditorState({
         'Unable to delete this report. A later report may already depend on its readings.',
       );
       deleteConfirmation.onClose();
+    } finally {
+      foregroundActionRef.current = false;
+      setDeleting(false);
     }
   };
 
@@ -321,10 +386,10 @@ function useReportEditorState({
     remarksDirty,
     remarksValid: remarksValidation.success,
     remarksError: remarksValidation.success ? undefined : remarksValidation.error.issues[0]?.message,
-    remarksPending: updateRemarks.isPending,
-    saveReportPending: saveReport.isPending,
-    submitReportPending: submitReport.isPending,
-    deleteReportPending: deleteReport.isPending,
+    remarksPending: savingRemarks,
+    saveReportPending: saveState === 'saving',
+    submitReportPending: submitting,
+    deleteReportPending: deleting,
     actionError,
     save,
     saveRemarks,
