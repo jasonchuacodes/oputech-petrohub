@@ -1,6 +1,6 @@
 'use client';
 
-import { Boxes, History, MoreVertical, PackagePlus, Pencil, Search, Trash2 } from 'lucide-react';
+import { History, MoreVertical, PackagePlus, Pencil, Search, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '~/components/ui/button';
@@ -117,7 +117,6 @@ function TenantInventory({ tenantId }: { tenantId: string }) {
           <section aria-label="Lubricant products">
             {products.data.items.length === 0 ? (
               <div className="flex min-h-52 flex-col items-center justify-center gap-3 rounded-md bg-card p-6 text-center shadow-card">
-                <Boxes aria-hidden="true" className="size-8 text-primary" />
                 <div>
                   <p className="font-medium text-text-heading">No lubricant products</p>
                   <p className="mt-1 text-sm text-text-secondary">
