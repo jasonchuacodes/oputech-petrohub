@@ -27,14 +27,14 @@ describe('financial dashboard ranges', () => {
   })
 
   it('accepts a valid custom range and falls back from future dates', () => {
-    const valid = new URLSearchParams('financePeriod=custom&financeStart=2026-10-01&financeEnd=2026-10-10')
+    const valid = new URLSearchParams('period=custom&start=2026-10-01&end=2026-10-10')
     expect(financialRangeFromParams(valid, 'Asia/Manila', new Date('2026-11-12T04:00:00Z'))).toEqual({
       period: 'custom',
       startDate: '2026-10-01',
       endDate: '2026-10-10',
     })
 
-    const future = new URLSearchParams('financePeriod=custom&financeStart=2026-12-01&financeEnd=2026-12-10')
+    const future = new URLSearchParams('period=custom&start=2026-12-01&end=2026-12-10')
     expect(financialRangeFromParams(future, 'Asia/Manila', new Date('2026-11-12T04:00:00Z')).period).toBe('monthly')
   })
 })

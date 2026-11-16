@@ -21,12 +21,12 @@ export function financialRangeFromParams(
   now = new Date(),
 ): FinancialRange {
   const today = localDateFor(timezone, now)
-  const period = financialPeriodSchema.safeParse(params.get('financePeriod')).data ?? 'monthly'
+  const period = financialPeriodSchema.safeParse(params.get('period')).data ?? 'monthly'
 
   if (period === 'weekly') return currentFinancialRange('weekly', timezone, now)
   if (period === 'custom') {
-    const parsedStart = localDateSchema.safeParse(params.get('financeStart'))
-    const parsedEnd = localDateSchema.safeParse(params.get('financeEnd'))
+    const parsedStart = localDateSchema.safeParse(params.get('start'))
+    const parsedEnd = localDateSchema.safeParse(params.get('end'))
     if (
       parsedStart.success &&
       parsedEnd.success &&

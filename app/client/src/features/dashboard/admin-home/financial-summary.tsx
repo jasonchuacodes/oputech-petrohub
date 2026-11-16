@@ -58,17 +58,19 @@ export function FinancialSummary({ tenantId, timezone }: { tenantId: string; tim
 
   const replacePeriod = (period: Exclude<FinancialPeriod, 'custom'>) => {
     const params = new URLSearchParams(searchParams.toString())
-    params.set('financePeriod', period)
-    params.delete('financeStart')
-    params.delete('financeEnd')
+    params.set('period', period)
+    params.delete('start')
+    params.delete('end')
+    deleteLegacyFinancialParams(params)
     router.replace(`${pathname}?${params.toString()}`, { scroll: false })
   }
 
   const replaceCustomRange = (startDate: string, endDate: string) => {
     const params = new URLSearchParams(searchParams.toString())
-    params.set('financePeriod', 'custom')
-    params.set('financeStart', startDate)
-    params.set('financeEnd', endDate)
+    params.set('period', 'custom')
+    params.set('start', startDate)
+    params.set('end', endDate)
+    deleteLegacyFinancialParams(params)
     router.replace(`${pathname}?${params.toString()}`, { scroll: false })
   }
 
@@ -314,6 +316,12 @@ function chartNumber(value: string): number {
 function formatIndicatorDate(value: string): string {
   const [year, month, day] = value.split('-')
   return `${month}/${day}/${year}`
+}
+
+function deleteLegacyFinancialParams(params: URLSearchParams) {
+  params.delete('financePeriod')
+  params.delete('financeStart')
+  params.delete('financeEnd')
 }
 
 function formatCurrency(value: string, currency: string): string {
