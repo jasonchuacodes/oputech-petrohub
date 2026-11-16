@@ -29,7 +29,15 @@ export function useFuelSetupQuery(tenantId: string) {
 
 function useFuelSetupMutation<T>(tenantId: string, mutationFn: (input: T) => Promise<unknown>) {
   const queryClient = useQueryClient()
-  return useMutation({ mutationFn, onSuccess: async () => queryClient.invalidateQueries({ queryKey: fuelSetupKey(tenantId) }) })
+  return useMutation({
+    mutationFn,
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: fuelSetupKey(tenantId) }),
+        queryClient.invalidateQueries({ queryKey: reportKeys.financialSummaries(tenantId) }),
+      ])
+    },
+  })
 }
 
 export function useCreateFuelProductMutation(tenantId: string) {

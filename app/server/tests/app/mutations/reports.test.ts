@@ -17,6 +17,7 @@ describe('report disposal lifecycle', () => {
   let firstShiftId: string
   let secondShiftId: string
   let fuelProductId: string
+  let unusedFuelProductId: string
   let snapshottedReportId: string
   let lubricantProductId: string
 
@@ -52,6 +53,8 @@ describe('report disposal lifecycle', () => {
     const product = await setup.createProduct(tenant._id, { name: 'ADO', unitPrice: '10.00' })
     fuelProductId = product._id.toHexString()
     await setup.createMeter(tenant._id, { label: 'ADO 1', productId: product._id, initialReading: '100.000' })
+    const unusedProduct = await setup.createProduct(tenant._id, { name: 'XTR', unitPrice: '12.00' })
+    unusedFuelProductId = unusedProduct._id.toHexString()
     const lubricant = await inventory.createProduct(
       tenant._id,
       { userId: owner._id, name: owner.username },
@@ -145,6 +148,10 @@ describe('report disposal lifecycle', () => {
       bucketInterval: 'day',
       includedReportCount: 1,
       totals: { income: '1000', expenses: '100', lubricantSales: '375' },
+      disposalTotals: [
+        { productId: fuelProductId, productName: 'ADO', netVolume: '8' },
+        { productId: unusedFuelProductId, productName: 'XTR', netVolume: '0' },
+      ],
       buckets: [{
         startDate: businessDate,
         endDate: businessDate,
@@ -218,6 +225,10 @@ describe('report disposal lifecycle', () => {
     expect(revokedFinancialSummary.body.data.financialSummary).toMatchObject({
       includedReportCount: 0,
       totals: { income: '0', expenses: '0', lubricantSales: '0' },
+      disposalTotals: [
+        { productId: fuelProductId, productName: 'ADO', netVolume: '0' },
+        { productId: unusedFuelProductId, productName: 'XTR', netVolume: '0' },
+      ],
       buckets: [{ amounts: { income: '0', expenses: '0', lubricantSales: '0' } }],
     })
     expect((await inventoryProducts(memberToken)).items.find((item: { id: string }) => item.id === lubricantProductId)?.stockCount).toBe('1')
@@ -456,6 +467,7 @@ describe('report disposal lifecycle', () => {
         startDate endDate bucketInterval includedReportCount
         totals { income expenses lubricantSales }
         buckets { startDate endDate amounts { income expenses lubricantSales } }
+        disposalTotals { productId productName netVolume }
       }
     }`, { input: { startDate, endDate } })
   }

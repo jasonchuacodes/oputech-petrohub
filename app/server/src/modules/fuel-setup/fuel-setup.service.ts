@@ -21,6 +21,7 @@ export type PumpMeterRecord = PumpMeter & { _id: Types.ObjectId }
 export type PumpMeterWithCurrentReading = PumpMeterRecord & { currentReading: Types.Decimal128 }
 export type FuelPriceChangeRecord = FuelPriceChange & { _id: Types.ObjectId }
 export type FuelProductWithPrice = FuelProductRecord & { nextPriceChange?: FuelPriceChangeRecord }
+export type ActiveFuelProductRecord = Pick<FuelProductRecord, '_id' | 'name'>
 type MeterHeadRecord = MeterHead & { _id: Types.ObjectId }
 
 @Injectable()
@@ -70,6 +71,15 @@ export class FuelSetupService {
     ])
     const products = await this.withPrices(tenantId, storedProducts, asOf, session)
     return { products, meters }
+  }
+
+  async listActiveProducts(tenantId: Types.ObjectId, session?: ClientSession) {
+    const query = this.products
+      .find({ tenantId, status: FuelSetupStatus.ACTIVE })
+      .select({ name: 1 })
+      .sort({ name: 1, _id: 1 })
+    if (session) query.session(session)
+    return query.lean<ActiveFuelProductRecord[]>().exec()
   }
 
   async createProduct(tenantId: Types.ObjectId, input: CreateFuelProductInput) {

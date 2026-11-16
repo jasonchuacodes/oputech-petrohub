@@ -92,6 +92,10 @@ export class ReportsResolver {
         ...bucket,
         amounts: this.serializeFinancialAmounts(bucket.amounts),
       })),
+      disposalTotals: summary.disposalTotals.map((item) => ({
+        ...item,
+        netVolume: item.netVolume?.toString() ?? null,
+      })),
     }
   }
 

@@ -103,6 +103,7 @@ query FinancialSummary($input: FinancialSummaryInput!) {
       endDate
       amounts { income expenses lubricantSales }
     }
+    disposalTotals { productId productName netVolume }
   }
 }
 

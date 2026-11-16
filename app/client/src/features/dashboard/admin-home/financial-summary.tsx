@@ -20,6 +20,7 @@ import {
   type FinancialPeriod,
   type FinancialRange,
 } from './financial-range'
+import { TotalDisposal } from './total-disposal'
 
 type FinancialBucket = FinancialSummaryQuery['financialSummary']['buckets'][number]
 type FinancialAmounts = FinancialSummaryQuery['financialSummary']['totals']
@@ -72,7 +73,7 @@ export function FinancialSummary({ tenantId, timezone }: { tenantId: string; tim
   }
 
   return (
-    <section aria-label="Financial summary" className="flex flex-col gap-2">
+    <section aria-label="Dashboard summary" className="flex flex-col gap-2">
       <div className="flex justify-end">
         <PeriodDropdown
           range={range}
@@ -85,16 +86,19 @@ export function FinancialSummary({ tenantId, timezone }: { tenantId: string; tim
       </div>
 
       {summary.isPending ? (
-        <FinancialSummarySkeleton />
+        <div className="flex flex-col gap-5">
+          <FinancialGraphsSkeleton />
+          <TotalDisposal totals={[]} pending />
+        </div>
       ) : summary.isError && !summary.data ? (
         <div className="flex min-h-52 flex-col items-center justify-center gap-3 rounded-md bg-card p-6 text-center shadow-card">
-          <p className="text-sm text-text-secondary">Unable to load the financial summary.</p>
+          <p className="text-sm text-text-secondary">Unable to load the dashboard summary.</p>
           <Button type="button" variant="outline" onClick={() => void summary.refetch()}>
             <RefreshCw aria-hidden="true" /> Try again
           </Button>
         </div>
       ) : summary.data ? (
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-5">
           {summary.isRefetchError && (
             <p className="text-sm text-status-warning">
               Unable to refresh. Showing the last available summary.
@@ -111,6 +115,7 @@ export function FinancialSummary({ tenantId, timezone }: { tenantId: string; tim
               />
             ))}
           </div>
+          <TotalDisposal totals={summary.data.disposalTotals} />
         </div>
       ) : null}
     </section>
@@ -144,7 +149,7 @@ function PeriodDropdown({
             ref={periodTriggerRef}
             type="button"
             disabled={disabled}
-            aria-label="Select financial summary date range"
+            aria-label="Select dashboard summary date range"
             className="inline-flex min-h-11 max-w-full items-center gap-2 rounded-sm px-1 text-left whitespace-nowrap outline-none focus-visible:ring-3 focus-visible:ring-ring/30 disabled:opacity-50"
           >
             <span className="text-xs text-text-tertiary">Period</span>
@@ -284,13 +289,20 @@ function MetricGraph({
 
 export function FinancialSummarySkeleton() {
   return (
-    <section aria-label="Loading financial summary" className="flex flex-col gap-2">
-      <div className="grid gap-3 md:grid-cols-3">
-        {Array.from({ length: 3 }, (_, index) => (
-          <div key={index} className="h-40 animate-pulse rounded-md bg-card shadow-card" />
-        ))}
-      </div>
+    <section aria-label="Loading dashboard summary" className="flex flex-col gap-5">
+      <FinancialGraphsSkeleton />
+      <TotalDisposal totals={[]} pending />
     </section>
+  )
+}
+
+function FinancialGraphsSkeleton() {
+  return (
+    <div className="grid gap-3 md:grid-cols-3">
+      {Array.from({ length: 3 }, (_, index) => (
+        <div key={index} className="h-40 animate-pulse rounded-md bg-card shadow-card" />
+      ))}
+    </div>
   )
 }
 

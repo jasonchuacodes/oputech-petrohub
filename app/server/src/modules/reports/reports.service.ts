@@ -6,14 +6,14 @@ import { InjectConnection, InjectModel } from '@nestjs/mongoose'
 import { ClientSession, Connection, Model, Types } from 'mongoose'
 import { ConflictException, ForbiddenException, InvalidInputException, NotFoundException } from '../../common/exceptions'
 import { decimal, decimal128, sum } from '../../common/numeric/decimal'
-import { DisposalsService, DisposalBatchRecord } from '../disposals/disposals.service'
+import { DisposalsService, DisposalBatchRecord, type DisposalRangeSummary } from '../disposals/disposals.service'
 import { Shift } from '../tenants/schemas/shift.schema'
 import { RecurringIncomeField } from '../tenants/schemas/recurring-income-field.schema'
 import { UserRole } from '../users/schemas/user.schema'
 import { InventoryService } from '../inventory/inventory.service'
 import { StockMovementService } from '../inventory/stock-movement.service'
 import { ChangeFuelPriceInput } from '../fuel-setup/fuel-setup.schemas'
-import { FuelProductRecord, FuelSetupService } from '../fuel-setup/fuel-setup.service'
+import { ActiveFuelProductRecord, FuelProductRecord, FuelSetupService } from '../fuel-setup/fuel-setup.service'
 import { REPORT_CREATED_EVENT, ReportCreatedEvent } from './events/report-created.event'
 import { businessDateFor } from './report-date'
 import { displayTime, localHourToInstant, ReportInterval, shiftInterval } from './report-time'
@@ -64,6 +64,11 @@ export type FinancialSummaryResult = {
     startDate: string
     endDate: string
     amounts: FinancialAmounts
+  }>
+  disposalTotals: Array<{
+    productId: Types.ObjectId
+    productName: string
+    netVolume: Decimal | null
   }>
 }
 
@@ -317,26 +322,70 @@ export class ReportsService {
     input: FinancialSummaryInput,
   ): Promise<FinancialSummaryResult> {
     const zero = Types.Decimal128.fromString('0')
-    const days = await this.reports.aggregate<FinancialDayAggregate>([
-      {
-        $match: {
-          tenantId,
-          status: ReportStatus.SUBMITTED,
-          effective: { $ne: false },
-          businessDate: { $gte: input.startDate, $lte: input.endDate },
-        },
-      },
-      {
-        $group: {
-          _id: '$businessDate',
-          income: { $sum: { $ifNull: ['$totals.income', zero] } },
-          expenses: { $sum: { $ifNull: ['$totals.expenses', zero] } },
-          lubricantSales: { $sum: { $ifNull: ['$totals.lubricantSales', zero] } },
-          reportCount: { $sum: 1 },
-        },
-      },
-      { $sort: { _id: 1 } },
-    ]).exec()
+    const databaseSession = await this.connection.startSession()
+    let days: FinancialDayAggregate[] = []
+    let activeProducts: ActiveFuelProductRecord[] = []
+    let disposalSummary: DisposalRangeSummary = {
+      matchedReportCount: 0,
+      emptyReadingsReportCount: 0,
+      products: [],
+    }
+    try {
+      await databaseSession.withTransaction(async () => {
+        days = await this.reports.aggregate<FinancialDayAggregate>([
+          {
+            $match: {
+              tenantId,
+              status: ReportStatus.SUBMITTED,
+              effective: { $ne: false },
+              businessDate: { $gte: input.startDate, $lte: input.endDate },
+            },
+          },
+          {
+            $group: {
+              _id: '$businessDate',
+              income: { $sum: { $ifNull: ['$totals.income', zero] } },
+              expenses: { $sum: { $ifNull: ['$totals.expenses', zero] } },
+              lubricantSales: { $sum: { $ifNull: ['$totals.lubricantSales', zero] } },
+              reportCount: { $sum: 1 },
+            },
+          },
+          { $sort: { _id: 1 } },
+        ]).session(databaseSession).exec()
+        activeProducts = await this.fuelSetup.listActiveProducts(tenantId, databaseSession)
+        if (activeProducts.length > 0) {
+          disposalSummary = await this.disposals.summarizeByProductForReportRange({
+            tenantId,
+            ...input,
+            productIds: activeProducts.map((product) => product._id),
+          }, databaseSession)
+        }
+      }, {
+        readConcern: { level: 'snapshot' },
+        writeConcern: { w: 'majority' },
+      })
+    } finally {
+      await databaseSession.endSession()
+    }
+
+    const includedReportCount = days.reduce((total, day) => total + day.reportCount, 0)
+    const disposalByProduct = new Map(
+      disposalSummary.products.map((product) => [product.productId.toHexString(), product]),
+    )
+    const allDisposalsUnavailable = disposalSummary.matchedReportCount !== includedReportCount ||
+      disposalSummary.emptyReadingsReportCount > 0
+    const disposalTotals = activeProducts.map((product) => {
+      const aggregate = disposalByProduct.get(product._id.toHexString())
+      return {
+        productId: product._id,
+        productName: aggregate?.productName ?? product.name,
+        netVolume: allDisposalsUnavailable || (aggregate?.missingVolumeCount ?? 0) > 0
+          ? null
+          : aggregate
+            ? decimal(aggregate.netVolume)
+            : new Decimal(0),
+      }
+    })
 
     const bucketInterval = financialBucketInterval(input.startDate, input.endDate)
     const buckets = buildFinancialBuckets(input.startDate, input.endDate, bucketInterval, days)
@@ -348,9 +397,10 @@ export class ReportsService {
     return {
       ...input,
       bucketInterval,
-      includedReportCount: days.reduce((total, day) => total + day.reportCount, 0),
+      includedReportCount,
       totals,
       buckets,
+      disposalTotals,
     }
   }
 

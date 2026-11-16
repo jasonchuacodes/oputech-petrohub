@@ -31,8 +31,9 @@ export const reportKeys = {
   list: (tenantId: string, input: ReportsInput) =>
     [...reportKeys.lists(tenantId), input] as const,
   detail: (tenantId: string, reportId: string) => ['reports', tenantId, reportId] as const,
+  financialSummaries: (tenantId: string) => [...reportKeys.all(tenantId), 'financial-summary'] as const,
   financialSummary: (tenantId: string, input: FinancialSummaryInput) =>
-    [...reportKeys.all(tenantId), 'financial-summary', input] as const,
+    [...reportKeys.financialSummaries(tenantId), input] as const,
 }
 
 export function useReportCreationContextQuery(tenantId: string) {

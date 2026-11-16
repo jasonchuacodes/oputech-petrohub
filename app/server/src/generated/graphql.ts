@@ -205,6 +205,7 @@ export type FinancialSummary = {
   bucketInterval: FinancialBucketInterval;
   buckets: Array<FinancialBucket>;
   currency: Scalars['String']['output'];
+  disposalTotals: Array<ProductDisposalTotal>;
   endDate: Scalars['String']['output'];
   includedReportCount: Scalars['Int']['output'];
   startDate: Scalars['String']['output'];
@@ -481,6 +482,13 @@ export type MutationUpdateTenantArgs = {
 
 export type MutationUpdateUserArgs = {
   input: UpdateUserInput;
+};
+
+export type ProductDisposalTotal = {
+  __typename?: 'ProductDisposalTotal';
+  netVolume?: Maybe<Scalars['Decimal']['output']>;
+  productId: Scalars['ObjectId']['output'];
+  productName: Scalars['String']['output'];
 };
 
 export type PumpMeter = {
@@ -1022,6 +1030,7 @@ export type ResolversTypes = {
   ManualStockMovementType: ManualStockMovementType;
   Mutation: ResolverTypeWrapper<Record<PropertyKey, never>>;
   ObjectId: ResolverTypeWrapper<Scalars['ObjectId']['output']>;
+  ProductDisposalTotal: ResolverTypeWrapper<ProductDisposalTotal>;
   PumpMeter: ResolverTypeWrapper<PumpMeter>;
   Query: ResolverTypeWrapper<Record<PropertyKey, never>>;
   RecordStockMovementInput: RecordStockMovementInput;
@@ -1115,6 +1124,7 @@ export type ResolversParentTypes = {
   LubricantSaleInput: LubricantSaleInput;
   Mutation: Record<PropertyKey, never>;
   ObjectId: Scalars['ObjectId']['output'];
+  ProductDisposalTotal: ProductDisposalTotal;
   PumpMeter: PumpMeter;
   Query: Record<PropertyKey, never>;
   RecordStockMovementInput: RecordStockMovementInput;
@@ -1234,6 +1244,7 @@ export type FinancialSummaryResolvers<ContextType = GraphqlContext, ParentType e
   bucketInterval?: Resolver<ResolversTypes['FinancialBucketInterval'], ParentType, ContextType>;
   buckets?: Resolver<Array<ResolversTypes['FinancialBucket']>, ParentType, ContextType>;
   currency?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  disposalTotals?: Resolver<Array<ResolversTypes['ProductDisposalTotal']>, ParentType, ContextType>;
   endDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   includedReportCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   startDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -1323,6 +1334,12 @@ export type MutationResolvers<ContextType = GraphqlContext, ParentType extends R
 export interface ObjectIdScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['ObjectId'], any> {
   name: 'ObjectId';
 }
+
+export type ProductDisposalTotalResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['ProductDisposalTotal'] = ResolversParentTypes['ProductDisposalTotal']> = {
+  netVolume?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>;
+  productId?: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
+  productName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
 
 export type PumpMeterResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['PumpMeter'] = ResolversParentTypes['PumpMeter']> = {
   currentReading?: Resolver<ResolversTypes['Decimal'], ParentType, ContextType>;
@@ -1544,6 +1561,7 @@ export type Resolvers<ContextType = GraphqlContext> = {
   LubricantSale?: LubricantSaleResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
   ObjectId?: GraphQLScalarType;
+  ProductDisposalTotal?: ProductDisposalTotalResolvers<ContextType>;
   PumpMeter?: PumpMeterResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   RecurringIncomeConfiguration?: RecurringIncomeConfigurationResolvers<ContextType>;

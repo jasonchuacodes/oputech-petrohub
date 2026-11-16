@@ -116,6 +116,13 @@ type FinancialSummary {
   includedReportCount: Int!
   totals: FinancialAmounts!
   buckets: [FinancialBucket!]!
+  disposalTotals: [ProductDisposalTotal!]!
+}
+
+type ProductDisposalTotal {
+  productId: ObjectId!
+  productName: String!
+  netVolume: Decimal
 }
 
 type FinancialAmounts {

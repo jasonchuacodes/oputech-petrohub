@@ -9,6 +9,32 @@ import { DisposalBatch, DisposalBatchStatus, DisposalReading } from './schemas/d
 import { MeterHead } from './schemas/meter-head.schema'
 
 export type DisposalBatchRecord = DisposalBatch & { _id: Types.ObjectId }
+export type DisposalProductRangeSummary = {
+  productId: Types.ObjectId
+  productName: string
+  netVolume: Types.Decimal128
+  missingVolumeCount: number
+}
+
+export type DisposalRangeSummary = {
+  matchedReportCount: number
+  emptyReadingsReportCount: number
+  products: DisposalProductRangeSummary[]
+}
+
+type DisposalRangeAggregation = {
+  coverage: Array<{
+    matchedReportCount: number
+    emptyReadingsReportCount: number
+  }>
+  products: Array<{
+    _id: Types.ObjectId
+    productName: string
+    netVolume: Types.Decimal128
+    missingVolumeCount: number
+  }>
+}
+
 type MeterHeadRecord = MeterHead & { _id: Types.ObjectId }
 type RevocationActor = { userId: Types.ObjectId; name: string }
 
@@ -30,6 +56,128 @@ export class DisposalsService {
       .find({ tenantId, reportId: { $in: reportIds } })
       .lean<DisposalBatchRecord[]>()
       .exec()
+  }
+
+  async summarizeByProductForReportRange(
+    input: {
+      tenantId: Types.ObjectId
+      startDate: string
+      endDate: string
+      productIds: Types.ObjectId[]
+    },
+    session: ClientSession,
+  ): Promise<DisposalRangeSummary> {
+    if (input.productIds.length === 0) {
+      return { matchedReportCount: 0, emptyReadingsReportCount: 0, products: [] }
+    }
+
+    const zero = Types.Decimal128.fromString('0')
+    const [result] = await this.batches.aggregate<DisposalRangeAggregation>([
+      {
+        $match: {
+          tenantId: input.tenantId,
+          status: DisposalBatchStatus.SUBMITTED,
+          businessDate: { $gte: input.startDate, $lte: input.endDate },
+        },
+      },
+      {
+        $lookup: {
+          from: 'reports',
+          let: { batchId: '$_id', reportId: '$reportId' },
+          pipeline: [
+            {
+              $match: {
+                tenantId: input.tenantId,
+                status: 'submitted',
+                effective: { $ne: false },
+                businessDate: { $gte: input.startDate, $lte: input.endDate },
+                $expr: {
+                  $and: [
+                    { $eq: ['$_id', '$$reportId'] },
+                    { $eq: ['$disposalBatchId', '$$batchId'] },
+                  ],
+                },
+              },
+            },
+            {
+              $project: {
+                businessDate: 1,
+                'interval.startAt': 1,
+                submittedAt: 1,
+                createdAt: 1,
+              },
+            },
+          ],
+          as: 'report',
+        },
+      },
+      { $unwind: '$report' },
+      {
+        $facet: {
+          coverage: [
+            {
+              $group: {
+                _id: null,
+                matchedReportCount: { $sum: 1 },
+                emptyReadingsReportCount: {
+                  $sum: {
+                    $cond: [
+                      { $eq: [{ $size: { $ifNull: ['$readings', []] } }, 0] },
+                      1,
+                      0,
+                    ],
+                  },
+                },
+              },
+            },
+          ],
+          products: [
+            { $unwind: { path: '$readings', includeArrayIndex: 'readingIndex' } },
+            { $match: { 'readings.productId': { $in: input.productIds } } },
+            {
+              $group: {
+                _id: '$readings.productId',
+                productName: {
+                  $top: {
+                    sortBy: {
+                      'report.businessDate': -1,
+                      'report.interval.startAt': -1,
+                      'report.submittedAt': -1,
+                      'report.createdAt': -1,
+                      'report._id': -1,
+                      readingIndex: -1,
+                    },
+                    output: '$readings.productName',
+                  },
+                },
+                netVolume: { $sum: { $ifNull: ['$readings.netVolume', zero] } },
+                missingVolumeCount: {
+                  $sum: {
+                    $cond: [
+                      { $in: [{ $type: '$readings.netVolume' }, ['missing', 'null']] },
+                      1,
+                      0,
+                    ],
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
+    ]).session(session).exec()
+
+    const coverage = result?.coverage[0]
+    return {
+      matchedReportCount: coverage?.matchedReportCount ?? 0,
+      emptyReadingsReportCount: coverage?.emptyReadingsReportCount ?? 0,
+      products: (result?.products ?? []).map((product) => ({
+        productId: product._id,
+        productName: product.productName,
+        netVolume: product.netVolume,
+        missingVolumeCount: product.missingVolumeCount,
+      })),
+    }
   }
 
   async initializeForReport(
