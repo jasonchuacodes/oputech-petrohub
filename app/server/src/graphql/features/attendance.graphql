@@ -74,6 +74,7 @@ type UserTimesheet {
   fullName: String!
   username: String!
   timezone: String!
+  availability: TenantUserAvailability!
   days: [TimesheetDay!]!
 }
 

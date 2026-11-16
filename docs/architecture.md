@@ -21,6 +21,9 @@ Short-lived bearer access tokens are paired with rotating, path-scoped HTTP-only
 - `admin` has tenant administration permissions but is not the account holder. An admin requires an `accountHolderId` and at least one assigned `tenantIds` entry.
 - `member` represents station staff and employees. A member requires an `accountHolderId` and exactly one assigned tenant.
 - Superadmin access derives from owned tenants; admin and member access derives from assignments under the same account holder.
+- Tenant assignments are retained when staff are deactivated. An immutable per-tenant deactivation
+  record carries the reason, effective date, timezone, and recording actor. Tenant discovery and access
+  evaluate the effective cutoff on each request, while global user status and sessions remain separate.
 
 Mongo identifiers use `Types.ObjectId` internally and the shared GraphQL `ObjectId` scalar. The scalar validates ObjectId inputs and serializes them as canonical hexadecimal strings.
 

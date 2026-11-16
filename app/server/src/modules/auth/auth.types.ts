@@ -6,6 +6,7 @@ import { TenantRecord } from '../tenants/tenant.service'
 export type AuthenticatedActor = {
   userId: Types.ObjectId
   user: AuthenticatedUser
+  tenantDeactivationCutoffs: Array<{ tenantId: Types.ObjectId; effectiveAt: Date }>
 }
 
 export type AuthorizedTenant = {

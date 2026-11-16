@@ -1,5 +1,9 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { HydratedDocument, Types } from 'mongoose'
+import {
+  UserTenantDeactivation,
+  UserTenantDeactivationSchema,
+} from './user-tenant-deactivation.schema'
 
 export enum UserStatus {
   ACTIVE = 'active',
@@ -70,6 +74,17 @@ export class User {
 
   @Prop({ required: true, default: 1, type: Number })
   credentialVersion!: number
+
+  @Prop({
+    type: [UserTenantDeactivationSchema],
+    default: [],
+    validate: {
+      validator: (events: UserTenantDeactivation[]) =>
+        new Set(events.map((event) => event.tenantId.toHexString())).size === events.length,
+      message: 'A user can only be deactivated once per tenant.',
+    },
+  })
+  tenantDeactivations!: UserTenantDeactivation[]
 
   createdAt!: Date
   updatedAt!: Date

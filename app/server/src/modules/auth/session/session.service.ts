@@ -233,7 +233,11 @@ export class SessionService {
   }
 
   private toActor(user: Parameters<UsersService['toAuthenticatedUser']>[0]): AuthenticatedActor {
-    return { userId: user._id, user: this.users.toAuthenticatedUser(user) }
+    return {
+      userId: user._id,
+      user: this.users.toAuthenticatedUser(user),
+      tenantDeactivationCutoffs: this.users.getTenantDeactivationCutoffs(user),
+    }
   }
 
   private async toIssuedSession(

@@ -5,14 +5,16 @@ extend type Query {
 extend type Mutation {
   createUser(input: CreateUserInput!): User!
   updateUser(input: UpdateUserInput!): User!
+  deactivateUser(input: DeactivateUserInput!): User!
   resetUserPassword(input: ResetUserPasswordInput!): User!
   updateMyProfile(input: UpdateMyProfileInput!): User!
-  deleteUser(input: DeleteUserInput!): Boolean!
+  deleteUser(input: DeleteUserInput!): Boolean! @deprecated(reason: "Use deactivateUser")
 }
 
 input UsersInput {
   offset: Int = 0
   limit: Int = 20
+  availability: TenantUserAvailability = active
 }
 
 input CreateUserInput {
@@ -38,6 +40,13 @@ input DeleteUserInput {
   userId: ObjectId!
 }
 
+input DeactivateUserInput {
+  userId: ObjectId!
+  reason: UserDeactivationReason!
+  details: String
+  effectiveDate: String!
+}
+
 input ResetUserPasswordInput {
   userId: ObjectId!
   newPassword: String!
@@ -46,6 +55,8 @@ input ResetUserPasswordInput {
 type UserPage {
   items: [User!]!
   totalCount: Int!
+  asOf: String!
+  nextTransitionAt: String
 }
 
 type User {
@@ -56,6 +67,35 @@ type User {
   username: String!
   role: UserRole!
   status: UserStatus!
+  tenantMembership: UserTenantMembership
+}
+
+type UserTenantMembership {
+  tenantId: ObjectId!
+  availability: TenantUserAvailability!
+  deactivation: UserTenantDeactivation
+}
+
+type UserTenantDeactivation {
+  reason: UserDeactivationReason!
+  details: String
+  effectiveDate: String!
+  timezone: String!
+  effectiveAt: String!
+  recordedAt: String!
+  recordedById: ObjectId!
+  recordedByName: String!
+}
+
+enum TenantUserAvailability {
+  active
+  inactive
+}
+
+enum UserDeactivationReason {
+  resign
+  terminated
+  other
 }
 
 enum UserStatus {

@@ -1,6 +1,8 @@
 import { Types } from 'mongoose'
 import { z } from 'zod'
 import { UserRole } from './schemas/user.schema'
+import { UserDeactivationReason } from './schemas/user-tenant-deactivation.schema'
+import { TenantUserAvailability } from './user-tenant-membership'
 
 const usernameSchema = z.string().trim().min(3).max(80).toLowerCase()
 const optionalNameSchema = z
@@ -16,6 +18,7 @@ export const usersInputSchema = z
   .object({
     offset: z.number().int().min(0).default(0),
     limit: z.number().int().min(1).max(100).default(20),
+    availability: z.nativeEnum(TenantUserAvailability).default(TenantUserAvailability.ACTIVE),
   })
   .strict()
 
@@ -50,6 +53,29 @@ export const deleteUserInputSchema = z
   })
   .strict()
 
+export const deactivateUserInputSchema = z
+  .object({
+    userId: z.instanceof(Types.ObjectId),
+    reason: z.nativeEnum(UserDeactivationReason),
+    details: z
+      .string()
+      .trim()
+      .max(500)
+      .nullish()
+      .transform((value) => value || undefined),
+    effectiveDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  })
+  .strict()
+  .superRefine((input, context) => {
+    if (input.reason === UserDeactivationReason.OTHER && !input.details) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['details'],
+        message: 'Provide details for this reason.',
+      })
+    }
+  })
+
 export const resetUserPasswordInputSchema = z
   .object({
     userId: z.instanceof(Types.ObjectId),
@@ -62,4 +88,5 @@ export type CreateUserInput = z.infer<typeof createUserInputSchema>
 export type UpdateMyProfileInput = z.infer<typeof updateMyProfileInputSchema>
 export type UpdateUserInput = z.infer<typeof updateUserInputSchema>
 export type DeleteUserInput = z.infer<typeof deleteUserInputSchema>
+export type DeactivateUserInput = z.infer<typeof deactivateUserInputSchema>
 export type ResetUserPasswordInput = z.infer<typeof resetUserPasswordInputSchema>

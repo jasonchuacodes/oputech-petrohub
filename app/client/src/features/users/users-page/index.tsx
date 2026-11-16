@@ -1,12 +1,13 @@
 'use client'
 
-import { Plus, UsersRound } from 'lucide-react'
+import { History, Plus, UsersRound } from 'lucide-react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Button } from '~/components/ui/button'
 import { PageHeader } from '~/components/ui/page-header'
 import { Spinner } from '~/components/ui/spinner'
-import type { UserRole } from '~/generated/graphql'
+import type { TenantUserAvailability, UserRole } from '~/generated/graphql'
 import { useDisclosure } from '~/hooks/useDisclosure'
 import { useSessionQuery } from '../../auth/auth.queries'
 import { useAppShellContext } from '../../layout/use-active-tenant'
@@ -40,6 +41,7 @@ export function UsersPage() {
     <TenantUsersPage
       key={selected.tenant.id}
       tenantId={selected.tenant.id}
+      timezone={selected.tenant.timezone}
       actorId={user.id}
       actorRole={role}
     />
@@ -48,20 +50,45 @@ export function UsersPage() {
 
 function TenantUsersPage({
   tenantId,
+  timezone,
   actorId,
   actorRole,
 }: {
   tenantId: string
+  timezone: string
   actorId: string
   actorRole: UserRole
 }) {
   const creating = useDisclosure()
+  const [availability, setAvailability] = useState<TenantUserAvailability>('active')
   const [offset, setOffset] = useState(0)
-  const users = useUsersQuery(tenantId, offset, pageSize)
+  const users = useUsersQuery(tenantId, availability, offset, pageSize)
 
   const totalCount = users.data?.totalCount ?? 0
   const pageStart = totalCount === 0 ? 0 : offset + 1
   const pageEnd = Math.min(offset + pageSize, totalCount)
+  const nextTransitionAt = users.data?.nextTransitionAt
+  const refetchUsers = users.refetch
+
+  useEffect(() => {
+    if (!users.isSuccess || offset === 0 || offset < totalCount) return
+    const timeout = window.setTimeout(
+      () => setOffset(Math.max(0, Math.floor((totalCount - 1) / pageSize) * pageSize)),
+      0,
+    )
+    return () => window.clearTimeout(timeout)
+  }, [offset, totalCount, users.isSuccess])
+
+  useEffect(() => {
+    if (!nextTransitionAt) return
+    const delay = new Date(nextTransitionAt).getTime() - Date.now() + 500
+    if (delay <= 0) {
+      void refetchUsers()
+      return
+    }
+    const timeout = window.setTimeout(() => void refetchUsers(), Math.min(delay, 2_147_483_647))
+    return () => window.clearTimeout(timeout)
+  }, [nextTransitionAt, refetchUsers])
 
   return (
     <div className="mx-auto flex w-full flex-col gap-5 px-5 py-5 md:max-w-4xl md:p-6 wide:max-w-7xl">
@@ -80,6 +107,28 @@ function TenantUsersPage({
         onClose={creating.onClose}
       />
 
+      <div role="tablist" aria-label="User availability" className="flex rounded-md bg-muted p-1">
+        {(['active', 'inactive'] as const).map((value) => (
+          <button
+            key={value}
+            type="button"
+            role="tab"
+            aria-selected={availability === value}
+            className={`flex h-11 flex-1 items-center justify-center rounded-sm px-3 text-sm font-medium outline-none focus-visible:ring-3 focus-visible:ring-ring/30 ${
+              availability === value
+                ? 'bg-primary text-primary-foreground shadow-sm'
+                : 'text-text-secondary hover:bg-surface-hover'
+            }`}
+            onClick={() => {
+              setAvailability(value)
+              setOffset(0)
+            }}
+          >
+            {value === 'active' ? 'Active' : 'Inactive'}
+          </button>
+        ))}
+      </div>
+
       {users.isPending ? (
         <div className="flex min-h-48 items-center justify-center rounded-md bg-card shadow-card">
           <Spinner className="size-6" />
@@ -97,9 +146,13 @@ function TenantUsersPage({
             <UsersRound aria-hidden="true" className="size-5" />
           </span>
           <div>
-            <p className="font-medium text-text-heading">No users yet</p>
+            <p className="font-medium text-text-heading">
+              {availability === 'active' ? 'No active users' : 'No inactive users'}
+            </p>
             <p className="mt-1 text-sm text-text-secondary">
-              Add the first user for this tenant.
+              {availability === 'active'
+                ? 'Add the first user for this tenant.'
+                : 'Deactivated users will appear here.'}
             </p>
           </div>
         </div>
@@ -123,18 +176,34 @@ function TenantUsersPage({
                     <span aria-hidden="true">•</span>
                     <span className="shrink-0">{getRoleLabel(listedUser.role)}</span>
                   </span>
+                  {listedUser.tenantMembership?.deactivation && (
+                    <span className="mt-1 block text-xs text-text-secondary">
+                      {listedUser.tenantMembership.availability === 'active'
+                        ? `Scheduled for ${formatDate(listedUser.tenantMembership.deactivation.effectiveDate)}`
+                        : `${getReasonLabel(listedUser.tenantMembership.deactivation.reason)} · effective ${formatDate(listedUser.tenantMembership.deactivation.effectiveDate)}`}
+                    </span>
+                  )}
                 </span>
-                <UserActions
-                  tenantId={tenantId}
-                  user={listedUser}
-                  actorId={actorId}
-                  actorRole={actorRole}
-                  onDeleted={() => {
-                    if (users.data.items.length === 1 && offset > 0) {
-                      setOffset(Math.max(0, offset - pageSize))
-                    }
-                  }}
-                />
+                {availability === 'active' && (
+                  <UserActions
+                    tenantId={tenantId}
+                    timezone={timezone}
+                    user={listedUser}
+                    actorId={actorId}
+                    actorRole={actorRole}
+                  />
+                )}
+                {availability === 'inactive' && listedUser.role === 'member' && (
+                  <Button asChild type="button" variant="outline" size="icon">
+                    <Link
+                      href={`/timesheet/${listedUser.id}`}
+                      aria-label={`View ${listedUser.fullName}'s attendance history`}
+                      title="View attendance history"
+                    >
+                      <History aria-hidden="true" />
+                    </Link>
+                  </Button>
+                )}
               </li>
             ))}
           </ul>
@@ -169,13 +238,26 @@ function TenantUsersPage({
         </section>
       )}
 
-      {users.isSuccess && (
+      {users.isSuccess && availability === 'active' && (
         <Button type="button" variant="outline" className="w-full" onClick={creating.onOpen}>
           <Plus aria-hidden="true" />
           Add user
         </Button>
       )}
     </div>
+  )
+}
+
+function getReasonLabel(reason: 'resign' | 'terminated' | 'other'): string {
+  if (reason === 'resign') return 'Resigned'
+  if (reason === 'terminated') return 'Terminated'
+  return 'Other'
+}
+
+function formatDate(value: string): string {
+  const [year, month, day] = value.split('-').map(Number)
+  return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(
+    new Date(Date.UTC(year ?? 0, (month ?? 1) - 1, day ?? 1)),
   )
 }
 

@@ -71,11 +71,20 @@ export class TenantService {
   ) {}
 
   async listForUser(user: TenantActor): Promise<TenantRecord[]> {
+    const now = new Date()
+    const unavailableTenantIds = new Set(
+      user.tenantDeactivationCutoffs
+        .filter((event) => event.effectiveAt.getTime() <= now.getTime())
+        .map((event) => event.tenantId.toHexString()),
+    )
+    const availableTenantIds = user.user.tenantIds.filter(
+      (tenantId) => !unavailableTenantIds.has(tenantId.toHexString()),
+    )
     const filter =
       user.user.role === UserRole.SUPERADMIN
         ? { accountHolderId: user.userId, status: TenantStatus.ACTIVE }
         : {
-            _id: { $in: user.user.tenantIds },
+            _id: { $in: availableTenantIds },
             accountHolderId: user.user.accountHolderId,
             status: TenantStatus.ACTIVE,
           }
@@ -327,8 +336,13 @@ export class TenantService {
       const assigned = user.user.tenantIds.some((assignedTenantId) =>
         assignedTenantId.equals(tenantId),
       )
-      if (!assigned || !user.user.accountHolderId) {
-        throw new ForbiddenException('You do not have access to this tenant.')
+      const unavailable = user.tenantDeactivationCutoffs.some(
+        (event) => event.tenantId.equals(tenantId) && event.effectiveAt.getTime() <= Date.now(),
+      )
+      if (!assigned || unavailable || !user.user.accountHolderId) {
+        throw new ForbiddenException('You do not have access to this tenant.', {
+          details: { reason: 'TENANT_ACCESS_UNAVAILABLE', tenantId: tenantId.toHexString() },
+        })
       }
     }
 
@@ -385,6 +399,7 @@ export class TenantService {
                   ? remainingTenantIds[0]
                   : user.currentTenantId,
               },
+              $pull: { tenantDeactivations: { tenantId } },
               $inc: { tenantSelectionVersion: 1 },
             },
             { runValidators: true, session: databaseSession },

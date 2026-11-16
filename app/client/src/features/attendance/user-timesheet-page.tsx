@@ -72,6 +72,7 @@ function AdminUserTimesheetPage({
   const member = timesheet.data ?? summary.data?.items[0]
   const memberName = member?.fullName ?? 'Member timesheet'
   const timezone = timesheet.data?.timezone ?? summary.data?.timezone ?? 'UTC'
+  const readOnly = timesheet.data?.availability === 'inactive'
 
   const columns: DataTableColumn<TimesheetDayFieldsFragment>[] = [
     {
@@ -80,7 +81,8 @@ function AdminUserTimesheetPage({
       cell: (day) => (
         <button
           type="button"
-          className="font-bold text-text-heading outline-none hover:underline focus-visible:underline"
+          className="font-bold text-text-heading outline-none enabled:hover:underline focus-visible:underline disabled:cursor-default"
+          disabled={readOnly}
           onClick={() => setSelectedDay(day)}
         >
           {day.localDate}
@@ -118,7 +120,11 @@ function AdminUserTimesheetPage({
     <div className="mx-auto flex w-full flex-col gap-5 px-5 py-5 md:max-w-4xl md:p-6 wide:max-w-7xl">
       <PageHeader
         title="Timesheet details"
-        description="Review and adjust logged hours for the selected period."
+        description={
+          readOnly
+            ? 'Review retained attendance history. Inactive users’ timesheets are read-only.'
+            : 'Review and adjust logged hours for the selected period.'
+        }
         backHref={timesheetListHref(range)}
         backLabel="Back to timesheets"
       />
@@ -171,6 +177,7 @@ function AdminUserTimesheetPage({
                   <button
                     type="button"
                     className="w-full rounded-md p-4 text-left outline-none transition-colors hover:bg-surface-hover active:bg-surface-hover focus-visible:ring-3 focus-visible:ring-ring/30"
+                    disabled={readOnly}
                     onClick={() => setSelectedDay(day)}
                   >
                     <span className="flex items-center justify-between gap-3">

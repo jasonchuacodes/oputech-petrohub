@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import type { UserRole } from '~/generated/graphql'
+import type { UserDeactivationReason } from '~/generated/graphql'
 
 const usernameSchema = z
   .string()
@@ -41,8 +42,31 @@ export const resetPasswordFormSchema = z.object({
     .max(128, 'Use no more than 128 characters.'),
 })
 
+const deactivationReasons = [
+  'resign',
+  'terminated',
+  'other',
+] as const satisfies readonly UserDeactivationReason[]
+
+export const deactivateUserFormSchema = z
+  .object({
+    reason: z.enum(deactivationReasons),
+    details: z.string().trim().max(500, 'Use no more than 500 characters.'),
+    effectiveDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Select an effective date.'),
+  })
+  .superRefine((values, context) => {
+    if (values.reason === 'other' && !values.details) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['details'],
+        message: 'Provide details for this reason.',
+      })
+    }
+  })
+
 export type AddUserFormValues = z.infer<typeof addUserFormSchema>
 export type EditUserFormValues = z.infer<typeof editUserFormSchema>
 export type AddUserFormInput = z.input<typeof addUserFormSchema>
 export type EditUserFormInput = z.input<typeof editUserFormSchema>
 export type ResetPasswordFormValues = z.infer<typeof resetPasswordFormSchema>
+export type DeactivateUserFormValues = z.infer<typeof deactivateUserFormSchema>

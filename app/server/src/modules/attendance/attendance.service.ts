@@ -7,6 +7,11 @@ import {
   NotFoundException,
 } from '../../common/exceptions'
 import { User, UserRole, UserStatus } from '../users/schemas/user.schema'
+import {
+  activeTenantMembershipFilter,
+  isTenantMembershipActive,
+  TenantUserAvailability,
+} from '../users/user-tenant-membership'
 import { addLocalDays, assertLocalDate, currentWeek, datesBetween, localDateFor, startOfLocalDate } from './attendance-date'
 import {
   CheckInAttendanceInput,
@@ -29,7 +34,10 @@ type AttendanceScope = {
 
 type AttendanceSessionRecord = AttendanceSession & { _id: Types.ObjectId }
 type TimesheetDayRecord = TimesheetDay & { _id: Types.ObjectId }
-type MemberRecord = Pick<User, 'firstName' | 'lastName' | 'username'> & { _id: Types.ObjectId }
+type MemberRecord = Pick<
+  User,
+  'firstName' | 'lastName' | 'username' | 'status' | 'tenantDeactivations'
+> & { _id: Types.ObjectId }
 type TenantTimezoneRecord = Pick<Tenant, 'timezone'> & { _id: Types.ObjectId }
 
 export type CalculatedTimesheetDay = {
@@ -165,8 +173,9 @@ export class AttendanceService {
     const memberFilter = {
       tenantIds: tenantId,
       role: UserRole.MEMBER,
-      status: UserStatus.ACTIVE,
-      ...(filter.userId ? { _id: filter.userId } : {}),
+      ...(filter.userId
+        ? { _id: filter.userId, status: { $in: [UserStatus.ACTIVE, UserStatus.DISABLED] } }
+        : activeTenantMembershipFilter(tenantId, now)),
     }
     const [members, totalCount] = await Promise.all([
       this.users
@@ -206,7 +215,7 @@ export class AttendanceService {
 
   async days(tenantId: Types.ObjectId, timezone: string, filter: TimesheetDaysFilter) {
     await this.closeStaleSessions(new Date(), tenantId, filter.userId)
-    const member = await this.member(tenantId, filter.userId)
+    const member = await this.member(tenantId, filter.userId, false)
     const dates = datesBetween(filter.startDate, filter.endDate)
     const calculated = await this.calculateDays(
       tenantId,
@@ -221,6 +230,9 @@ export class AttendanceService {
       fullName: this.fullName(member),
       username: member.username,
       timezone,
+      availability: isTenantMembershipActive(member, tenantId)
+        ? TenantUserAvailability.ACTIVE
+        : TenantUserAvailability.INACTIVE,
       days: dates.map((date) => calculated.get(this.dayKey(filter.userId, date))!),
     }
   }
@@ -319,6 +331,21 @@ export class AttendanceService {
       endDate: input.localDate,
     })
     return result.days[0]
+  }
+
+  async closeForDeactivation(
+    tenantId: Types.ObjectId,
+    userId: Types.ObjectId,
+    endedAt: Date,
+    session: ClientSession,
+  ): Promise<void> {
+    await this.sessions
+      .updateMany(
+        { tenantId, userId, endedAt: null, startedAt: { $lt: endedAt } },
+        { $set: { endedAt } },
+        { session },
+      )
+      .exec()
   }
 
   async deleteForTenant(tenantId: Types.ObjectId, session: ClientSession) {
@@ -422,15 +449,21 @@ export class AttendanceService {
     return result
   }
 
-  private async member(tenantId: Types.ObjectId, userId: Types.ObjectId): Promise<MemberRecord> {
+  private async member(
+    tenantId: Types.ObjectId,
+    userId: Types.ObjectId,
+    requireActive = true,
+  ): Promise<MemberRecord> {
     const member = await this.users
       .findOne({
         _id: userId,
         tenantIds: tenantId,
         role: UserRole.MEMBER,
-        status: UserStatus.ACTIVE,
+        ...(requireActive
+          ? activeTenantMembershipFilter(tenantId)
+          : { status: { $in: [UserStatus.ACTIVE, UserStatus.DISABLED] } }),
       })
-      .select('firstName lastName username')
+        .select('firstName lastName username status tenantDeactivations')
       .lean<MemberRecord>()
       .exec()
     if (!member) throw new NotFoundException('User not found.')

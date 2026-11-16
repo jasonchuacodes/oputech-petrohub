@@ -1,21 +1,17 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ChevronDown, KeyRound, MoreVertical, Pencil, Trash2, X } from 'lucide-react'
+import { ChevronDown, KeyRound, MoreVertical, Pencil, UserX, X } from 'lucide-react'
 import { useCallback, useEffect, useId, useState, type ReactNode } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { createPortal } from 'react-dom'
 import { toast } from 'sonner'
 import { Button } from '~/components/ui/button'
-import { ConfirmationDialog } from '~/components/ui/confirmation-dialog'
 import { Input } from '~/components/ui/input'
 import { Spinner } from '~/components/ui/spinner'
 import type { UserRole } from '~/generated/graphql'
 import { useDisclosure } from '~/hooks/useDisclosure'
 import { isUsernameConflict } from '../user-errors'
-import {
-  useDeleteUserMutation,
-  useUpdateUserMutation,
-  type UserSummary,
-} from '../users.queries'
+import { useUpdateUserMutation, type UserSummary } from '../users.queries'
+import { DeactivateUserSheet } from './deactivate-user-sheet'
 import {
   editUserFormSchema,
   type EditUserFormInput,
@@ -28,33 +24,31 @@ const assignableRoles = ['member', 'admin'] as const satisfies readonly Manageab
 
 type UserActionsProps = {
   tenantId: string
+  timezone: string
   user: UserSummary
   actorId: string
   actorRole: UserRole
-  onDeleted: () => void
 }
 
 export function UserActions({
   tenantId,
+  timezone,
   user,
   actorId,
   actorRole,
-  onDeleted,
 }: UserActionsProps) {
   const updateUser = useUpdateUserMutation()
-  const deleteUser = useDeleteUserMutation()
   const actions = useDisclosure()
-  const deleteConfirmation = useDisclosure()
+  const deactivation = useDisclosure()
   const passwordReset = useDisclosure()
   const roleOptions = useDisclosure()
   const [view, setView] = useState<'actions' | 'edit'>('actions')
-  const [deleteError, setDeleteError] = useState<string>()
   const titleId = useId()
   const descriptionId = useId()
   const self = actorId === user.id
   const canManageRole =
     actorRole === 'superadmin' || (actorRole === 'admin' && user.role === 'member')
-  const canManage = !self && canManageRole
+  const canManage = !self && canManageRole && user.tenantMembership?.availability === 'active'
   const {
     register,
     control,
@@ -98,7 +92,6 @@ export function UserActions({
 
   const openActions = () => {
     reset(toFormValues(user))
-    setDeleteError(undefined)
     setView('actions')
     actions.onOpen()
   }
@@ -132,19 +125,6 @@ export function UserActions({
       setError('root', { message: 'Unable to update the user. Please try again.' })
     }
   })
-
-  const remove = async () => {
-    if (!canManage || deleteUser.isPending) return
-    setDeleteError(undefined)
-    try {
-      await deleteUser.mutateAsync({ tenantId, userId: user.id })
-      deleteConfirmation.onClose()
-      onDeleted()
-      toast.success('User deleted successfully')
-    } catch {
-      setDeleteError('Unable to delete the user. Please try again.')
-    }
-  }
 
   const editing = view === 'edit'
   const disabledReason = self
@@ -357,11 +337,11 @@ export function UserActions({
                     disabled={!canManage}
                     onClick={() => {
                       resetAndClose()
-                      deleteConfirmation.onOpen()
+                      deactivation.onOpen()
                     }}
                   >
-                    <Trash2 aria-hidden="true" />
-                    Delete User
+                    <UserX aria-hidden="true" />
+                    Deactivate User
                   </Button>
                 </div>
               )}
@@ -392,34 +372,13 @@ export function UserActions({
           document.body,
         )}
 
-      <ConfirmationDialog
-        open={deleteConfirmation.open}
-        title="Delete user?"
-        description="This action cannot be undone."
-        icon={Trash2}
-        variant="danger"
-        confirmText="Delete user"
-        loading={deleteUser.isPending}
-        onClose={() => {
-          if (!deleteUser.isPending) {
-            deleteConfirmation.onClose()
-            setDeleteError(undefined)
-          }
-        }}
-        onConfirm={() => void remove()}
-      >
-        <div className="rounded-md border border-destructive/20 bg-destructive/5 p-4">
-          <p className="text-sm text-text-secondary">
-            <strong className="font-medium text-text-heading">{user.fullName}</strong> will lose
-            access to this account immediately.
-          </p>
-        </div>
-        {deleteError && (
-          <p role="alert" className="mt-3 text-sm text-destructive">
-            {deleteError}
-          </p>
-        )}
-      </ConfirmationDialog>
+      <DeactivateUserSheet
+        open={deactivation.open}
+        tenantId={tenantId}
+        timezone={timezone}
+        user={user}
+        onClose={deactivation.onClose}
+      />
 
       <ResetPasswordSheet
         open={passwordReset.open}

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { InjectConnection, InjectModel } from '@nestjs/mongoose'
 import { hash } from 'argon2'
-import { Connection, Model, Types } from 'mongoose'
+import { Connection, FilterQuery, Model, Types } from 'mongoose'
 import {
   ConflictException,
   ForbiddenException,
@@ -10,15 +10,25 @@ import {
 } from '../../common/exceptions'
 import { Session } from '../auth/schemas/session.schema'
 import { AttendanceService } from '../attendance/attendance.service'
+import { assertLocalDate, localDateFor, startOfLocalDate } from '../attendance/attendance-date'
 import { User, UserDocument, UserRole, UserStatus } from './schemas/user.schema'
+import { UserTenantDeactivation } from './schemas/user-tenant-deactivation.schema'
 import {
   CreateUserInput,
+  DeactivateUserInput,
   DeleteUserInput,
   ResetUserPasswordInput,
   UpdateMyProfileInput,
   UpdateUserInput,
   UsersInput,
 } from './users.schemas'
+import {
+  activeTenantMembershipFilter,
+  getTenantDeactivation,
+  isTenantMembershipActive,
+  TenantUserAvailability,
+  tenantAvailabilityFilter,
+} from './user-tenant-membership'
 
 export type AuthenticatedUser = Pick<
   User,
@@ -58,14 +68,33 @@ type PersistUserInput =
 
 export type UserRecord = User & { _id: Types.ObjectId }
 
+export type UserManagementRecord = UserRecord & {
+  tenantMembership: {
+    tenantId: Types.ObjectId
+    availability: TenantUserAvailability
+    deactivation: null | {
+      reason: UserTenantDeactivation['reason']
+      details?: string
+      effectiveDate: string
+      timezone: string
+      effectiveAt: string
+      recordedAt: string
+      recordedById: Types.ObjectId
+      recordedByName: string
+    }
+  }
+}
+
 type TenantUserScope = {
   accountHolderId: Types.ObjectId
   tenantId: Types.ObjectId
+  timezone: string
 }
 
 type UserManagementActor = {
   userId: Types.ObjectId
   role: UserRole
+  displayName: string
 }
 
 @Injectable()
@@ -105,13 +134,29 @@ export class UsersService {
   async listUsers(
     scope: TenantUserScope,
     input: UsersInput,
-  ): Promise<{ items: UserRecord[]; totalCount: number }> {
-    const filter = {
+  ): Promise<{
+    items: UserManagementRecord[]
+    totalCount: number
+    asOf: string
+    nextTransitionAt: string | null
+  }> {
+    const asOf = new Date()
+    const filter: FilterQuery<User> = {
       accountHolderId: scope.accountHolderId,
       tenantIds: scope.tenantId,
       role: { $in: [UserRole.ADMIN, UserRole.MEMBER] },
+      ...tenantAvailabilityFilter(scope.tenantId, input.availability, asOf),
     }
-    const [items, totalCount] = await Promise.all([
+    const scheduledFilter: FilterQuery<User> = {
+      accountHolderId: scope.accountHolderId,
+      tenantIds: scope.tenantId,
+      role: { $in: [UserRole.ADMIN, UserRole.MEMBER] },
+      status: UserStatus.ACTIVE,
+      tenantDeactivations: {
+        $elemMatch: { tenantId: scope.tenantId, effectiveAt: { $gt: asOf } },
+      },
+    }
+    const [items, totalCount, scheduledUsers] = await Promise.all([
       this.users
         .find(filter)
         .sort({ username: 1, _id: 1 })
@@ -120,8 +165,22 @@ export class UsersService {
         .lean<UserRecord[]>()
         .exec(),
       this.users.countDocuments(filter).exec(),
+      this.users
+        .find(scheduledFilter)
+        .select('tenantDeactivations')
+        .lean<UserRecord[]>()
+        .exec(),
     ])
-    return { items, totalCount }
+    const nextTransitionAt = scheduledUsers
+      .map((user) => getTenantDeactivation(user, scope.tenantId)?.effectiveAt)
+      .filter((value): value is Date => Boolean(value))
+      .sort((left, right) => left.getTime() - right.getTime())[0]
+    return {
+      items: items.map((user) => this.toManagementRecord(user, scope.tenantId, asOf)),
+      totalCount,
+      asOf: asOf.toISOString(),
+      nextTransitionAt: nextTransitionAt?.toISOString() ?? null,
+    }
   }
 
   async provisionUser(
@@ -206,6 +265,7 @@ export class UsersService {
             _id: user._id,
             accountHolderId: scope.accountHolderId,
             tenantIds: scope.tenantId,
+            ...activeTenantMembershipFilter(scope.tenantId),
           },
           update,
           { new: true, runValidators: true },
@@ -228,35 +288,90 @@ export class UsersService {
     scope: TenantUserScope,
     input: DeleteUserInput,
   ): Promise<boolean> {
+    void actor
+    void scope
+    void input
+    throw new ForbiddenException('Permanent user deletion is no longer available. Deactivate the user instead.')
+  }
+
+  async deactivateUser(
+    actor: UserManagementActor,
+    scope: TenantUserScope,
+    input: DeactivateUserInput,
+  ): Promise<UserManagementRecord> {
     if (actor.userId.equals(input.userId)) {
-      throw new InvalidInputException('You cannot delete your own account.')
+      throw new InvalidInputException('You cannot deactivate your own access.')
     }
 
-    const user = await this.findUserInScope(scope, input.userId)
+    assertLocalDate(input.effectiveDate)
+    const recordedAt = new Date()
+    const today = localDateFor(scope.timezone, recordedAt)
+    if (input.effectiveDate < today) {
+      throw new InvalidInputException('Effective date cannot be in the past.')
+    }
+    const effectiveAt = startOfLocalDate(input.effectiveDate, scope.timezone)
+    const user = await this.findUserInScope(scope, input.userId, false)
     this.assertCanManageUser(actor, user)
-    const databaseSession = await this.connection.startSession()
-    let deleted = false
+    if (user.status !== UserStatus.ACTIVE) {
+      throw new ConflictException('This user is already inactive.')
+    }
+    if (getTenantDeactivation(user, scope.tenantId)) {
+      throw new ConflictException('This user already has a deactivation for this tenant.')
+    }
 
+    const databaseSession = await this.connection.startSession()
+    const result: { updated?: UserRecord } = {}
     try {
       await databaseSession.withTransaction(async () => {
-        await this.attendance.deleteForUser(scope.tenantId, user._id, databaseSession)
-        await this.sessions.deleteMany({ userId: user._id }, { session: databaseSession }).exec()
-        const result = await this.users.deleteOne(
-          {
-            _id: user._id,
-            accountHolderId: scope.accountHolderId,
-            tenantIds: scope.tenantId,
-          },
-          { session: databaseSession },
-        )
-        deleted = result.deletedCount === 1
+        const updatedDocument = await this.users
+          .findOneAndUpdate(
+            {
+              _id: user._id,
+              accountHolderId: scope.accountHolderId,
+              tenantIds: scope.tenantId,
+              role: user.role,
+              status: UserStatus.ACTIVE,
+              tenantDeactivations: { $not: { $elemMatch: { tenantId: scope.tenantId } } },
+            },
+            {
+              $push: {
+                tenantDeactivations: {
+                  tenantId: scope.tenantId,
+                  reason: input.reason,
+                  ...(input.details ? { details: input.details } : {}),
+                  effectiveDate: input.effectiveDate,
+                  timezone: scope.timezone,
+                  effectiveAt,
+                  recordedAt,
+                  recordedById: actor.userId,
+                  recordedByName: actor.displayName,
+                },
+              },
+              $inc: { revision: 1 },
+            },
+            { new: true, runValidators: true, session: databaseSession },
+          )
+          .exec()
+        if (!updatedDocument) {
+          throw new ConflictException('This user was changed. Reload and try again.')
+        }
+        result.updated = updatedDocument.toObject<UserRecord>()
+
+        if (effectiveAt.getTime() <= recordedAt.getTime()) {
+          await this.attendance.closeForDeactivation(
+            scope.tenantId,
+            user._id,
+            recordedAt,
+            databaseSession,
+          )
+        }
       })
     } finally {
       await databaseSession.endSession()
     }
 
-    if (!deleted) throw new NotFoundException('User not found.')
-    return true
+    if (!result.updated) throw new ConflictException('This user was changed. Reload and try again.')
+    return this.toManagementRecord(result.updated, scope.tenantId, recordedAt)
   }
 
   async resetUserPassword(
@@ -282,6 +397,7 @@ export class UsersService {
             accountHolderId: scope.accountHolderId,
             tenantIds: scope.tenantId,
             role: { $in: [UserRole.ADMIN, UserRole.MEMBER] },
+            ...activeTenantMembershipFilter(scope.tenantId),
           })
           .session(databaseSession)
           .exec()
@@ -295,6 +411,7 @@ export class UsersService {
               accountHolderId: scope.accountHolderId,
               tenantIds: scope.tenantId,
               role: currentUser.role,
+              ...activeTenantMembershipFilter(scope.tenantId),
             },
             { $set: { passwordHash }, $inc: { credentialVersion: 1 } },
             { new: true, runValidators: true, session: databaseSession },
@@ -325,6 +442,15 @@ export class UsersService {
   }
 
   toAuthenticatedUser(user: UserDocument): AuthenticatedUser {
+    const now = new Date()
+    const availableTenantIds = user.tenantIds.filter((tenantId) =>
+      isTenantMembershipActive(user, tenantId, now),
+    )
+    const currentTenantId = user.currentTenantId && availableTenantIds.some((tenantId) =>
+      tenantId.equals(user.currentTenantId)
+    )
+      ? user.currentTenantId
+      : availableTenantIds[0]
     return {
       id: user._id,
       firstName: user.firstName,
@@ -335,9 +461,18 @@ export class UsersService {
       role: user.role,
       accountHolderId: user.accountHolderId,
       tenantIds: user.tenantIds,
-      currentTenantId: user.currentTenantId,
+      currentTenantId,
       tenantSelectionVersion: user.tenantSelectionVersion,
     }
+  }
+
+  getTenantDeactivationCutoffs(
+    user: Pick<User, 'tenantDeactivations'>,
+  ): Array<{ tenantId: Types.ObjectId; effectiveAt: Date }> {
+    return (user.tenantDeactivations ?? []).map((event) => ({
+      tenantId: event.tenantId,
+      effectiveAt: event.effectiveAt,
+    }))
   }
 
   getFullName(user: Pick<User, 'firstName' | 'lastName' | 'username'>): string {
@@ -347,6 +482,7 @@ export class UsersService {
   private async findUserInScope(
     scope: TenantUserScope,
     userId: Types.ObjectId,
+    requireActive = true,
   ): Promise<UserDocument> {
     const user = await this.users
       .findOne({
@@ -354,6 +490,7 @@ export class UsersService {
         accountHolderId: scope.accountHolderId,
         tenantIds: scope.tenantId,
         role: { $in: [UserRole.ADMIN, UserRole.MEMBER] },
+        ...(requireActive ? activeTenantMembershipFilter(scope.tenantId) : {}),
       })
       .exec()
     if (!user) throw new NotFoundException('User not found.')
@@ -369,6 +506,35 @@ export class UsersService {
   private assertCanAssignRole(actorRole: UserRole, targetRole: UserRole): void {
     if (actorRole === UserRole.ADMIN && targetRole !== UserRole.MEMBER) {
       throw new ForbiddenException('Administrators can only manage members.')
+    }
+  }
+
+  private toManagementRecord(
+    user: UserRecord,
+    tenantId: Types.ObjectId,
+    asOf: Date,
+  ): UserManagementRecord {
+    const event = getTenantDeactivation(user, tenantId)
+    return {
+      ...user,
+      tenantMembership: {
+        tenantId,
+        availability: isTenantMembershipActive(user, tenantId, asOf)
+          ? TenantUserAvailability.ACTIVE
+          : TenantUserAvailability.INACTIVE,
+        deactivation: event
+          ? {
+              reason: event.reason,
+              details: event.details,
+              effectiveDate: event.effectiveDate,
+              timezone: event.timezone,
+              effectiveAt: event.effectiveAt.toISOString(),
+              recordedAt: event.recordedAt.toISOString(),
+              recordedById: event.recordedById,
+              recordedByName: event.recordedByName,
+            }
+          : null,
+      },
     }
   }
 }

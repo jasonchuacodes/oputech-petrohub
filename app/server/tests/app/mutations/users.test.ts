@@ -248,7 +248,7 @@ describe('user management', () => {
     })
   })
 
-  it('updates users, revokes their session on role change, and deletes them', async () => {
+  it('updates users, revokes their session on role change, and deactivates tenant access', async () => {
     const ownerToken = await login('users-owner', 'OwnerPassword123')
     const creation = await graphql(
       ownerToken,
@@ -288,14 +288,58 @@ describe('user management', () => {
       .set('Authorization', `Bearer ${userToken}`)
       .expect(401)
 
-    const deletion = await graphql(
+    const todayParts = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Asia/Manila',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).formatToParts(new Date())
+    const todayValues = Object.fromEntries(todayParts.map((part) => [part.type, part.value]))
+    const today = `${todayValues.year}-${todayValues.month}-${todayValues.day}`
+    const deactivation = await graphql(
+      ownerToken,
+      `mutation ($input: DeactivateUserInput!) {
+        deactivateUser(input: $input) {
+          id
+          tenantMembership {
+            availability
+            deactivation { reason effectiveDate }
+          }
+        }
+      }`,
+      { input: { userId, reason: 'resign', effectiveDate: today } },
+    )
+    expect(deactivation.body.errors).toBeUndefined()
+    expect(deactivation.body.data.deactivateUser).toMatchObject({
+      id: userId,
+      tenantMembership: {
+        availability: 'inactive',
+        deactivation: { reason: 'resign', effectiveDate: today },
+      },
+    })
+    expect(await app.get(UsersService).findById(userId)).not.toBeNull()
+
+    const active = await graphql(
+      ownerToken,
+      'query ($input: UsersInput!) { users(input: $input) { items { id } } }',
+      { input: { availability: 'active' } },
+    )
+    expect(active.body.data.users.items).not.toContainEqual({ id: userId })
+    const inactive = await graphql(
+      ownerToken,
+      'query ($input: UsersInput!) { users(input: $input) { items { id } } }',
+      { input: { availability: 'inactive' } },
+    )
+    expect(inactive.body.data.users.items).toContainEqual({ id: userId })
+
+    const permanentDeletion = await graphql(
       ownerToken,
       'mutation ($input: DeleteUserInput!) { deleteUser(input: $input) }',
       { input: { userId } },
     )
-    expect(deletion.body.errors).toBeUndefined()
-    expect(deletion.body.data.deleteUser).toBe(true)
-    expect(await app.get(UsersService).findById(userId)).toBeNull()
+    expect(permanentDeletion.body.errors[0].extensions.originalError).toMatchObject({
+      code: 'FORBIDDEN',
+    })
   })
 
   async function login(username: string, password: string): Promise<string> {

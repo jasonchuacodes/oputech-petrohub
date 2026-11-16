@@ -45,6 +45,7 @@ query TimesheetDays($filter: TimesheetDaysFilter!) {
     fullName
     username
     timezone
+    availability
     days { ...TimesheetDayFields }
   }
 }

@@ -103,6 +103,13 @@ export type DeactivateInventoryProductInput = {
   productId: Scalars['ObjectId']['input'];
 };
 
+export type DeactivateUserInput = {
+  details?: InputMaybe<Scalars['String']['input']>;
+  effectiveDate: Scalars['String']['input'];
+  reason: UserDeactivationReason;
+  userId: Scalars['ObjectId']['input'];
+};
+
 export type DeleteReportInput = {
   expectedDisposalRevision: Scalars['Int']['input'];
   expectedReportRevision: Scalars['Int']['input'];
@@ -309,9 +316,11 @@ export type Mutation = {
   deactivateFuelProduct: FuelProduct;
   deactivateInventoryProduct: InventoryProduct;
   deactivatePumpMeter: PumpMeter;
+  deactivateUser: User;
   deleteReport: Report;
   deleteShift: Scalars['Boolean']['output'];
   deleteTenant: Scalars['Boolean']['output'];
+  /** @deprecated Use deactivateUser */
   deleteUser: Scalars['Boolean']['output'];
   recordStockMovement: StockMovement;
   resetUserPassword: User;
@@ -392,6 +401,11 @@ export type MutationDeactivateInventoryProductArgs = {
 
 export type MutationDeactivatePumpMeterArgs = {
   input: DeactivateFuelSetupInput;
+};
+
+
+export type MutationDeactivateUserArgs = {
+  input: DeactivateUserInput;
 };
 
 
@@ -770,6 +784,10 @@ export type TenantSummary = {
   timezone: Scalars['String']['output'];
 };
 
+export type TenantUserAvailability =
+  | 'active'
+  | 'inactive';
+
 export type TimesheetDay = {
   __typename?: 'TimesheetDay';
   automaticSeconds: Scalars['Int']['output'];
@@ -878,12 +896,20 @@ export type User = {
   lastName?: Maybe<Scalars['String']['output']>;
   role: UserRole;
   status: UserStatus;
+  tenantMembership?: Maybe<UserTenantMembership>;
   username: Scalars['String']['output'];
 };
 
+export type UserDeactivationReason =
+  | 'other'
+  | 'resign'
+  | 'terminated';
+
 export type UserPage = {
   __typename?: 'UserPage';
+  asOf: Scalars['String']['output'];
   items: Array<User>;
+  nextTransitionAt?: Maybe<Scalars['String']['output']>;
   totalCount: Scalars['Int']['output'];
 };
 
@@ -896,8 +922,28 @@ export type UserStatus =
   | 'active'
   | 'disabled';
 
+export type UserTenantDeactivation = {
+  __typename?: 'UserTenantDeactivation';
+  details?: Maybe<Scalars['String']['output']>;
+  effectiveAt: Scalars['String']['output'];
+  effectiveDate: Scalars['String']['output'];
+  reason: UserDeactivationReason;
+  recordedAt: Scalars['String']['output'];
+  recordedById: Scalars['ObjectId']['output'];
+  recordedByName: Scalars['String']['output'];
+  timezone: Scalars['String']['output'];
+};
+
+export type UserTenantMembership = {
+  __typename?: 'UserTenantMembership';
+  availability: TenantUserAvailability;
+  deactivation?: Maybe<UserTenantDeactivation>;
+  tenantId: Scalars['ObjectId']['output'];
+};
+
 export type UserTimesheet = {
   __typename?: 'UserTimesheet';
+  availability: TenantUserAvailability;
   days: Array<TimesheetDay>;
   fullName: Scalars['String']['output'];
   timezone: Scalars['String']['output'];
@@ -906,6 +952,7 @@ export type UserTimesheet = {
 };
 
 export type UsersInput = {
+  availability?: InputMaybe<TenantUserAvailability>;
   limit?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -999,6 +1046,7 @@ export type ResolversTypes = {
   CreateUserInput: CreateUserInput;
   DeactivateFuelSetupInput: DeactivateFuelSetupInput;
   DeactivateInventoryProductInput: DeactivateInventoryProductInput;
+  DeactivateUserInput: DeactivateUserInput;
   Decimal: ResolverTypeWrapper<Scalars['Decimal']['output']>;
   DeleteReportInput: DeleteReportInput;
   DeleteShiftInput: DeleteShiftInput;
@@ -1059,6 +1107,7 @@ export type ResolversTypes = {
   String: ResolverTypeWrapper<Scalars['String']['output']>;
   TenantAccess: ResolverTypeWrapper<TenantAccess>;
   TenantSummary: ResolverTypeWrapper<TenantSummary>;
+  TenantUserAvailability: TenantUserAvailability;
   TimesheetDay: ResolverTypeWrapper<TimesheetDay>;
   TimesheetDaysFilter: TimesheetDaysFilter;
   TimesheetPage: ResolverTypeWrapper<TimesheetPage>;
@@ -1074,9 +1123,12 @@ export type ResolversTypes = {
   UpdateTenantInput: UpdateTenantInput;
   UpdateUserInput: UpdateUserInput;
   User: ResolverTypeWrapper<User>;
+  UserDeactivationReason: UserDeactivationReason;
   UserPage: ResolverTypeWrapper<UserPage>;
   UserRole: UserRole;
   UserStatus: UserStatus;
+  UserTenantDeactivation: ResolverTypeWrapper<UserTenantDeactivation>;
+  UserTenantMembership: ResolverTypeWrapper<UserTenantMembership>;
   UserTimesheet: ResolverTypeWrapper<UserTimesheet>;
   UsersInput: UsersInput;
 };
@@ -1099,6 +1151,7 @@ export type ResolversParentTypes = {
   CreateUserInput: CreateUserInput;
   DeactivateFuelSetupInput: DeactivateFuelSetupInput;
   DeactivateInventoryProductInput: DeactivateInventoryProductInput;
+  DeactivateUserInput: DeactivateUserInput;
   Decimal: Scalars['Decimal']['output'];
   DeleteReportInput: DeleteReportInput;
   DeleteShiftInput: DeleteShiftInput;
@@ -1167,6 +1220,8 @@ export type ResolversParentTypes = {
   UpdateUserInput: UpdateUserInput;
   User: User;
   UserPage: UserPage;
+  UserTenantDeactivation: UserTenantDeactivation;
+  UserTenantMembership: UserTenantMembership;
   UserTimesheet: UserTimesheet;
   UsersInput: UsersInput;
 };
@@ -1311,6 +1366,7 @@ export type MutationResolvers<ContextType = GraphqlContext, ParentType extends R
   deactivateFuelProduct?: Resolver<ResolversTypes['FuelProduct'], ParentType, ContextType, RequireFields<MutationDeactivateFuelProductArgs, 'input'>>;
   deactivateInventoryProduct?: Resolver<ResolversTypes['InventoryProduct'], ParentType, ContextType, RequireFields<MutationDeactivateInventoryProductArgs, 'input'>>;
   deactivatePumpMeter?: Resolver<ResolversTypes['PumpMeter'], ParentType, ContextType, RequireFields<MutationDeactivatePumpMeterArgs, 'input'>>;
+  deactivateUser?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationDeactivateUserArgs, 'input'>>;
   deleteReport?: Resolver<ResolversTypes['Report'], ParentType, ContextType, RequireFields<MutationDeleteReportArgs, 'input'>>;
   deleteShift?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteShiftArgs, 'input'>>;
   deleteTenant?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteTenantArgs, 'input'>>;
@@ -1526,15 +1582,36 @@ export type UserResolvers<ContextType = GraphqlContext, ParentType extends Resol
   lastName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   role?: Resolver<ResolversTypes['UserRole'], ParentType, ContextType>;
   status?: Resolver<ResolversTypes['UserStatus'], ParentType, ContextType>;
+  tenantMembership?: Resolver<Maybe<ResolversTypes['UserTenantMembership']>, ParentType, ContextType>;
   username?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
 export type UserPageResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['UserPage'] = ResolversParentTypes['UserPage']> = {
+  asOf?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   items?: Resolver<Array<ResolversTypes['User']>, ParentType, ContextType>;
+  nextTransitionAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   totalCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
 };
 
+export type UserTenantDeactivationResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['UserTenantDeactivation'] = ResolversParentTypes['UserTenantDeactivation']> = {
+  details?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  effectiveAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  effectiveDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  reason?: Resolver<ResolversTypes['UserDeactivationReason'], ParentType, ContextType>;
+  recordedAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  recordedById?: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
+  recordedByName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  timezone?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
+export type UserTenantMembershipResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['UserTenantMembership'] = ResolversParentTypes['UserTenantMembership']> = {
+  availability?: Resolver<ResolversTypes['TenantUserAvailability'], ParentType, ContextType>;
+  deactivation?: Resolver<Maybe<ResolversTypes['UserTenantDeactivation']>, ParentType, ContextType>;
+  tenantId?: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
+};
+
 export type UserTimesheetResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['UserTimesheet'] = ResolversParentTypes['UserTimesheet']> = {
+  availability?: Resolver<ResolversTypes['TenantUserAvailability'], ParentType, ContextType>;
   days?: Resolver<Array<ResolversTypes['TimesheetDay']>, ParentType, ContextType>;
   fullName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   timezone?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -1583,6 +1660,8 @@ export type Resolvers<ContextType = GraphqlContext> = {
   TimesheetUserSummary?: TimesheetUserSummaryResolvers<ContextType>;
   User?: UserResolvers<ContextType>;
   UserPage?: UserPageResolvers<ContextType>;
+  UserTenantDeactivation?: UserTenantDeactivationResolvers<ContextType>;
+  UserTenantMembership?: UserTenantMembershipResolvers<ContextType>;
   UserTimesheet?: UserTimesheetResolvers<ContextType>;
 };
 

@@ -113,7 +113,9 @@ export function useTenantsQuery() {
   return useQuery({
     queryKey: tenantKeys.all,
     queryFn: async () => (await graphqlClient.request(TenantsDocument)).tenants,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0,
+    refetchOnWindowFocus: true,
+    refetchInterval: 60_000,
   })
 }
 

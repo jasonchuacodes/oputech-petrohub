@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   addUserFormSchema,
+  deactivateUserFormSchema,
   editUserFormSchema,
   resetPasswordFormSchema,
 } from './user-form.schema'
@@ -40,5 +41,22 @@ describe('user form schemas', () => {
       }).newPassword,
     ).toBe('  secret  ')
     expect(resetPasswordFormSchema.safeParse({ newPassword: 'short' }).success).toBe(false)
+  })
+
+  it('requires details for an other deactivation reason', () => {
+    expect(
+      deactivateUserFormSchema.safeParse({
+        reason: 'other',
+        details: '   ',
+        effectiveDate: '2026-11-16',
+      }).success,
+    ).toBe(false)
+    expect(
+      deactivateUserFormSchema.parse({
+        reason: 'other',
+        details: 'Relocated outside the service area',
+        effectiveDate: '2026-11-16',
+      }),
+    ).toMatchObject({ reason: 'other', details: 'Relocated outside the service area' })
   })
 })

@@ -8,8 +8,22 @@ query Users($input: UsersInput!) {
       username
       role
       status
+      tenantMembership {
+        availability
+        deactivation {
+          reason
+          details
+          effectiveDate
+          timezone
+          effectiveAt
+          recordedAt
+          recordedByName
+        }
+      }
     }
     totalCount
+    asOf
+    nextTransitionAt
   }
 }
 
@@ -44,6 +58,18 @@ mutation ResetUserPassword($input: ResetUserPasswordInput!) {
   }
 }
 
-mutation DeleteUser($input: DeleteUserInput!) {
-  deleteUser(input: $input)
+mutation DeactivateUser($input: DeactivateUserInput!) {
+  deactivateUser(input: $input) {
+    id
+    username
+    tenantMembership {
+      availability
+      deactivation {
+        reason
+        details
+        effectiveDate
+        effectiveAt
+      }
+    }
+  }
 }

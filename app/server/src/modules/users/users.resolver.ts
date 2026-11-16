@@ -11,6 +11,8 @@ import { UserRole } from './schemas/user.schema'
 import {
   createUserInputSchema,
   CreateUserInput,
+  deactivateUserInputSchema,
+  DeactivateUserInput,
   deleteUserInputSchema,
   DeleteUserInput,
   resetUserPasswordInputSchema,
@@ -36,8 +38,19 @@ export class UsersResolver {
   users(
     @CurrentTenant() tenant: AuthorizedTenant,
     @Args('input', new ZodValidationPipe(usersInputSchema)) input: UsersInput,
-  ): Promise<{ items: UserRecord[]; totalCount: number }> {
+  ): ReturnType<UsersService['listUsers']> {
     return this.usersService.listUsers(this.toScope(tenant), input)
+  }
+
+  @Mutation('deactivateUser')
+  @UseGuards(...userManagementGuards)
+  @RequireRoles(UserRole.SUPERADMIN, UserRole.ADMIN)
+  deactivateUser(
+    @CurrentActor() actor: AuthenticatedActor,
+    @CurrentTenant() tenant: AuthorizedTenant,
+    @Args('input', new ZodValidationPipe(deactivateUserInputSchema)) input: DeactivateUserInput,
+  ) {
+    return this.usersService.deactivateUser(this.toActor(actor), this.toScope(tenant), input)
   }
 
   @Mutation('createUser')
@@ -112,10 +125,11 @@ export class UsersResolver {
     return {
       accountHolderId: tenant.tenant.accountHolderId,
       tenantId: tenant.tenantId,
+      timezone: tenant.tenant.timezone,
     }
   }
 
   private toActor(actor: AuthenticatedActor) {
-    return { userId: actor.userId, role: actor.user.role }
+    return { userId: actor.userId, role: actor.user.role, displayName: actor.user.fullName }
   }
 }
