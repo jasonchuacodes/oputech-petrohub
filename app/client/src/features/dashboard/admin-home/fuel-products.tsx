@@ -46,10 +46,10 @@ export function FuelProducts({ tenantId, timezone }: { tenantId: string; timezon
           {setup.isRefetchError && (
             <p className="mb-2 text-sm text-status-warning">Unable to refresh. Showing saved product data.</p>
           )}
-          <div className="overflow-hidden rounded-md bg-border/60 shadow-card">
-            <div className="grid grid-cols-[repeat(auto-fit,minmax(min(12rem,100%),1fr))] gap-px">
+          <div className="overflow-hidden rounded-md bg-border/60 shadow-card md:overflow-visible md:rounded-none md:bg-transparent md:shadow-none">
+            <div className="grid grid-cols-1 gap-px md:grid-cols-[repeat(auto-fit,minmax(min(12rem,100%),1fr))] md:gap-3">
               {activeProducts.map((product) => (
-                <article key={product.id} className="flex min-h-20 items-center gap-3 bg-card px-3 py-3">
+                <article key={product.id} className="flex min-h-20 min-w-0 items-center gap-3 bg-card px-3 py-3 md:rounded-md md:shadow-card">
                   <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
                     <Fuel aria-hidden="true" className="size-4" />
                   </span>
