@@ -12,8 +12,8 @@ import { RecurringIncomeField } from '../tenants/schemas/recurring-income-field.
 import { UserRole } from '../users/schemas/user.schema'
 import { InventoryService } from '../inventory/inventory.service'
 import { StockMovementService } from '../inventory/stock-movement.service'
-import { ChangeFuelPriceInput } from '../fuel-setup/fuel-setup.schemas'
-import { ActiveFuelProductRecord, FuelProductRecord, FuelSetupService } from '../fuel-setup/fuel-setup.service'
+import { CancelFuelPriceChangeInput, ChangeFuelPriceInput } from '../fuel-setup/fuel-setup.schemas'
+import { ActiveFuelProductRecord, FuelProductRecord, FuelProductWithPrice, FuelSetupService } from '../fuel-setup/fuel-setup.service'
 import { REPORT_CREATED_EVENT, ReportCreatedEvent } from './events/report-created.event'
 import { businessDateFor } from './report-date'
 import { displayTime, localHourToInstant, ReportInterval, shiftInterval } from './report-time'
@@ -274,6 +274,65 @@ export class ReportsService {
       await databaseSession.endSession()
     }
     if (!result) throw new ConflictException('Unable to change the fuel price.')
+    return result
+  }
+
+  async cancelFuelPriceChange(
+    tenantId: Types.ObjectId,
+    input: CancelFuelPriceChangeInput,
+  ): Promise<FuelProductWithPrice> {
+    const effectiveAt = new Date(input.effectiveAt)
+    const databaseSession = await this.connection.startSession()
+    let result: FuelProductWithPrice | undefined
+    try {
+      await databaseSession.withTransaction(async () => {
+        await this.fuelSetup.lockPricePlan(tenantId, databaseSession)
+        result = await this.fuelSetup.cancelPriceChange(
+          tenantId,
+          input,
+          effectiveAt,
+          databaseSession,
+        )
+
+        const boundaryRemains = await this.fuelSetup.hasPriceBoundary(
+          tenantId,
+          effectiveAt,
+          databaseSession,
+        )
+        const affectedInterval = {
+          tenantId,
+          effective: true,
+          $or: [
+            {
+              'interval.startAt': { $lte: effectiveAt },
+              'interval.endAt': { $gt: effectiveAt },
+            },
+            ...(!boundaryRemains
+              ? [{
+                  'interval.startAt': { $lt: effectiveAt },
+                  'interval.endAt': effectiveAt,
+                }]
+              : []),
+          ],
+        }
+        const submitted = await this.reports.exists({
+          ...affectedInterval,
+          status: ReportStatus.SUBMITTED,
+        }).session(databaseSession)
+        if (submitted) {
+          throw new ConflictException('A submitted report depends on this scheduled price change. Revert it before cancelling the change.')
+        }
+
+        await this.reports.updateMany(
+          { ...affectedInterval, status: ReportStatus.DRAFT, stale: false },
+          { $set: { stale: true }, $inc: { revision: 1 } },
+          { session: databaseSession },
+        )
+      })
+    } finally {
+      await databaseSession.endSession()
+    }
+    if (!result) throw new ConflictException('Unable to cancel the scheduled fuel price change.')
     return result
   }
 

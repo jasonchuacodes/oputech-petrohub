@@ -4,7 +4,7 @@ fragment FuelProductFields on FuelProduct {
   unitPrice
   status
   revision
-  nextPriceChange { unitPrice effectiveDate effectiveHour }
+  nextPriceChange { unitPrice effectiveDate effectiveHour effectiveAt }
 }
 fragment PumpMeterFields on PumpMeter { id label productId initialReading currentReading status revision }
 
@@ -25,6 +25,10 @@ mutation UpdateFuelProduct($input: UpdateFuelProductInput!) {
 
 mutation ChangeFuelPrice($input: ChangeFuelPriceInput!) {
   changeFuelPrice(input: $input) { ...FuelProductFields }
+}
+
+mutation CancelFuelPriceChange($input: CancelFuelPriceChangeInput!) {
+  cancelFuelPriceChange(input: $input) { ...FuelProductFields }
 }
 
 mutation DeactivateFuelProduct($input: DeactivateFuelSetupInput!) {

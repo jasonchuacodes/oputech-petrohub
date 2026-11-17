@@ -12,6 +12,8 @@ import { UserRole } from '../users/schemas/user.schema'
 import {
   createFuelProductInputSchema,
   CreateFuelProductInput,
+  cancelFuelPriceChangeInputSchema,
+  CancelFuelPriceChangeInput,
   createPumpMeterInputSchema,
   CreatePumpMeterInput,
   deactivateFuelSetupInputSchema,
@@ -82,6 +84,17 @@ export class FuelSetupResolver {
     return this.product(product)
   }
 
+  @Mutation('cancelFuelPriceChange')
+  @UseGuards(...adminGuards)
+  @RequireRoles(UserRole.SUPERADMIN, UserRole.ADMIN)
+  async cancelPriceChange(
+    @CurrentTenant() tenant: AuthorizedTenant,
+    @Args('input', new ZodValidationPipe(cancelFuelPriceChangeInputSchema)) input: CancelFuelPriceChangeInput,
+  ): Promise<GraphqlMutation['cancelFuelPriceChange']> {
+    const product = await this.reports.cancelFuelPriceChange(tenant.tenantId, input)
+    return this.product(product)
+  }
+
   @Mutation('deactivateFuelProduct')
   @UseGuards(...adminGuards)
   @RequireRoles(UserRole.SUPERADMIN, UserRole.ADMIN)
@@ -137,6 +150,7 @@ export class FuelSetupResolver {
             unitPrice: product.nextPriceChange.unitPrice.toString(),
             effectiveDate: product.nextPriceChange.effectiveDate,
             effectiveHour: product.nextPriceChange.effectiveHour,
+            effectiveAt: product.nextPriceChange.effectiveAt.toISOString(),
           }
         : null,
     }

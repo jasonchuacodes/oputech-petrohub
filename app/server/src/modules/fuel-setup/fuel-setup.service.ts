@@ -7,6 +7,7 @@ import { MeterHead } from '../disposals/schemas/meter-head.schema'
 import {
   CreateFuelProductInput,
   CreatePumpMeterInput,
+  CancelFuelPriceChangeInput,
   ChangeFuelPriceInput,
   DeactivateFuelSetupInput,
   UpdateFuelProductInput,
@@ -143,6 +144,56 @@ export class FuelSetupService {
     return { changed: true, product: current ?? updated }
   }
 
+  async cancelPriceChange(
+    tenantId: Types.ObjectId,
+    input: CancelFuelPriceChangeInput,
+    effectiveAt: Date,
+    session: ClientSession,
+  ): Promise<FuelProductWithPrice> {
+    if (effectiveAt.getTime() <= Date.now()) {
+      throw new InvalidInputException('Only future fuel price changes can be cancelled.')
+    }
+
+    const product = await this.products.findOne({
+      _id: input.productId,
+      tenantId,
+      revision: input.expectedRevision,
+      status: FuelSetupStatus.ACTIVE,
+    }).session(session).lean<FuelProductRecord>().exec()
+    if (!product) {
+      if (!await this.products.exists({ _id: input.productId, tenantId }).session(session)) {
+        throw new NotFoundException('Fuel product not found.')
+      }
+      throw new ConflictException('The fuel product changed. Refresh and try again.')
+    }
+
+    const removed = await this.priceChanges.deleteMany({
+      tenantId,
+      productId: product._id,
+      effectiveAt,
+    }, { session })
+    if (removed.deletedCount === 0) {
+      throw new ConflictException('The scheduled fuel price changed. Refresh and try again.')
+    }
+
+    const updated = await this.products.findOneAndUpdate(
+      { _id: product._id, tenantId, revision: input.expectedRevision, status: FuelSetupStatus.ACTIVE },
+      { $inc: { revision: 1 } },
+      { new: true, runValidators: true, session },
+    ).lean<FuelProductRecord>().exec()
+    if (!updated) throw new ConflictException('The fuel product changed. Refresh and try again.')
+
+    const now = new Date()
+    const [current, nextPriceChanges] = await Promise.all([
+      this.withPrices(tenantId, [updated], now, session),
+      this.nextPriceChanges(tenantId, [updated], now, session),
+    ])
+    return {
+      ...(current[0] ?? updated),
+      nextPriceChange: nextPriceChanges.get(updated._id.toHexString()),
+    }
+  }
+
   async priceBoundaries(
     tenantId: Types.ObjectId,
     startAt: Date,
@@ -156,6 +207,10 @@ export class FuelSetupService {
     if (session) query.session(session)
     const changes = await query.lean<Array<Pick<FuelPriceChangeRecord, 'effectiveAt'>>>().exec()
     return [...new Map(changes.map((change) => [change.effectiveAt.toISOString(), change.effectiveAt])).values()]
+  }
+
+  async hasPriceBoundary(tenantId: Types.ObjectId, effectiveAt: Date, session: ClientSession): Promise<boolean> {
+    return Boolean(await this.priceChanges.exists({ tenantId, effectiveAt }).session(session))
   }
 
   async lockPricePlan(tenantId: Types.ObjectId, session: ClientSession): Promise<void> {
@@ -291,17 +346,18 @@ export class FuelSetupService {
     tenantId: Types.ObjectId,
     products: FuelProductRecord[],
     after: Date,
+    session?: ClientSession,
   ): Promise<Map<string, FuelPriceChangeRecord>> {
     if (products.length === 0) return new Map()
-    const changes = await this.priceChanges
+    const query = this.priceChanges
       .find({
         tenantId,
         productId: { $in: products.map((product) => product._id) },
         effectiveAt: { $gt: after },
       })
       .sort({ effectiveAt: 1, createdAt: -1, _id: -1 })
-      .lean<FuelPriceChangeRecord[]>()
-      .exec()
+    if (session) query.session(session)
+    const changes = await query.lean<FuelPriceChangeRecord[]>().exec()
     const nextByProduct = new Map<string, FuelPriceChangeRecord>()
     for (const change of changes) {
       const productId = change.productId.toHexString()

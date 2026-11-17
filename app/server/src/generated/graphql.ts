@@ -31,6 +31,12 @@ export type AttendanceStatus = {
   trackedSeconds: Scalars['Int']['output'];
 };
 
+export type CancelFuelPriceChangeInput = {
+  effectiveAt: Scalars['String']['input'];
+  expectedRevision: Scalars['Int']['input'];
+  productId: Scalars['ObjectId']['input'];
+};
+
 export type ChangeFuelPriceInput = {
   effectiveDate: Scalars['String']['input'];
   effectiveHour: Scalars['Int']['input'];
@@ -227,6 +233,7 @@ export type FinancialSummaryInput = {
 
 export type FuelPriceChange = {
   __typename?: 'FuelPriceChange';
+  effectiveAt: Scalars['String']['output'];
   effectiveDate: Scalars['String']['output'];
   effectiveHour: Scalars['Int']['output'];
   unitPrice: Scalars['Decimal']['output'];
@@ -303,6 +310,7 @@ export type ManualStockMovementType =
 
 export type Mutation = {
   __typename?: 'Mutation';
+  cancelFuelPriceChange: FuelProduct;
   changeFuelPrice: FuelProduct;
   checkInAttendance: AttendanceStatus;
   checkOutAttendance: AttendanceStatus;
@@ -336,6 +344,11 @@ export type Mutation = {
   updateShift: Shift;
   updateTenant: TenantSummary;
   updateUser: User;
+};
+
+
+export type MutationCancelFuelPriceChangeArgs = {
+  input: CancelFuelPriceChangeInput;
 };
 
 
@@ -1070,6 +1083,7 @@ export type ResolversTypes = {
   AttendanceSessionStatus: ResolverTypeWrapper<AttendanceSessionStatus>;
   AttendanceStatus: ResolverTypeWrapper<AttendanceStatus>;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
+  CancelFuelPriceChangeInput: CancelFuelPriceChangeInput;
   ChangeFuelPriceInput: ChangeFuelPriceInput;
   CheckInAttendanceInput: CheckInAttendanceInput;
   CheckOutAttendanceInput: CheckOutAttendanceInput;
@@ -1177,6 +1191,7 @@ export type ResolversParentTypes = {
   AttendanceSessionStatus: AttendanceSessionStatus;
   AttendanceStatus: AttendanceStatus;
   Boolean: Scalars['Boolean']['output'];
+  CancelFuelPriceChangeInput: CancelFuelPriceChangeInput;
   ChangeFuelPriceInput: ChangeFuelPriceInput;
   CheckInAttendanceInput: CheckInAttendanceInput;
   CheckOutAttendanceInput: CheckOutAttendanceInput;
@@ -1349,6 +1364,7 @@ export type FinancialSummaryResolvers<ContextType = GraphqlContext, ParentType e
 };
 
 export type FuelPriceChangeResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['FuelPriceChange'] = ResolversParentTypes['FuelPriceChange']> = {
+  effectiveAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   effectiveDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   effectiveHour?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   unitPrice?: Resolver<ResolversTypes['Decimal'], ParentType, ContextType>;
@@ -1394,6 +1410,7 @@ export type LubricantSaleResolvers<ContextType = GraphqlContext, ParentType exte
 };
 
 export type MutationResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
+  cancelFuelPriceChange?: Resolver<ResolversTypes['FuelProduct'], ParentType, ContextType, RequireFields<MutationCancelFuelPriceChangeArgs, 'input'>>;
   changeFuelPrice?: Resolver<ResolversTypes['FuelProduct'], ParentType, ContextType, RequireFields<MutationChangeFuelPriceArgs, 'input'>>;
   checkInAttendance?: Resolver<ResolversTypes['AttendanceStatus'], ParentType, ContextType, RequireFields<MutationCheckInAttendanceArgs, 'input'>>;
   checkOutAttendance?: Resolver<ResolversTypes['AttendanceStatus'], ParentType, ContextType, RequireFields<MutationCheckOutAttendanceArgs, 'input'>>;

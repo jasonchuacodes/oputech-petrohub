@@ -331,7 +331,7 @@ describe('report disposal lifecycle', () => {
     expect(superadminDeleted.body.data.deleteReport.status).toBe('revoked')
   })
 
-  it('splits a scheduled shift at an hour-effective fuel price change', async () => {
+  it('splits a scheduled shift and cancels future hour-effective fuel price changes', async () => {
     const memberToken = await login('report-member', 'MemberPassword123')
     const adminToken = await login('report-admin', 'AdminPassword123')
     const context = await graphql(memberToken, `query { reportCreationContext { businessDate } }`)
@@ -426,11 +426,55 @@ describe('report disposal lifecycle', () => {
       },
     })
     expect(scheduled.body.errors).toBeUndefined()
-    const fuelSetup = await graphql(adminToken, `query { fuelSetup { products { id unitPrice nextPriceChange { unitPrice effectiveDate effectiveHour } } } }`)
+    const rescheduled = await graphql(adminToken, `mutation ($input: ChangeFuelPriceInput!) { changeFuelPrice(input: $input) { revision } }`, {
+      input: {
+        productId: fuelProductId,
+        expectedRevision: scheduled.body.data.changeFuelPrice.revision,
+        unitPrice: '16.00',
+        effectiveDate: futureDate,
+        effectiveHour: 9,
+      },
+    })
+    expect(rescheduled.body.errors).toBeUndefined()
+
+    const fuelSetup = await graphql(adminToken, `query { fuelSetup { products { id unitPrice nextPriceChange { unitPrice effectiveDate effectiveHour effectiveAt } } } }`)
     expect(fuelSetup.body.errors).toBeUndefined()
     expect(fuelSetup.body.data.fuelSetup.products.find((product: { id: string }) => product.id === fuelProductId)).toMatchObject({
       unitPrice: '14',
-      nextPriceChange: { unitPrice: '15', effectiveDate: futureDate, effectiveHour: 9 },
+      nextPriceChange: { unitPrice: '16', effectiveDate: futureDate, effectiveHour: 9 },
+    })
+    const scheduledEffectiveAt = fuelSetup.body.data.fuelSetup.products.find((product: { id: string }) => product.id === fuelProductId).nextPriceChange.effectiveAt
+    expect(Number.isNaN(Date.parse(scheduledEffectiveAt))).toBe(false)
+
+    const deniedCancellation = await graphql(memberToken, `mutation ($input: CancelFuelPriceChangeInput!) { cancelFuelPriceChange(input: $input) { id } }`, {
+      input: {
+        productId: fuelProductId,
+        expectedRevision: rescheduled.body.data.changeFuelPrice.revision,
+        effectiveAt: scheduledEffectiveAt,
+      },
+    })
+    expect(deniedCancellation.body.errors?.[0]?.extensions?.originalError).toMatchObject({ code: 'FORBIDDEN' })
+
+    const cancelled = await graphql(adminToken, `mutation ($input: CancelFuelPriceChangeInput!) {
+      cancelFuelPriceChange(input: $input) { unitPrice revision nextPriceChange { unitPrice } }
+    }`, {
+      input: {
+        productId: fuelProductId,
+        expectedRevision: rescheduled.body.data.changeFuelPrice.revision,
+        effectiveAt: scheduledEffectiveAt,
+      },
+    })
+    expect(cancelled.body.errors).toBeUndefined()
+    expect(cancelled.body.data.cancelFuelPriceChange).toMatchObject({
+      unitPrice: '14',
+      revision: rescheduled.body.data.changeFuelPrice.revision + 1,
+      nextPriceChange: null,
+    })
+
+    const afterCancellation = await graphql(adminToken, `query { fuelSetup { products { id unitPrice nextPriceChange { unitPrice } } } }`)
+    expect(afterCancellation.body.data.fuelSetup.products.find((product: { id: string }) => product.id === fuelProductId)).toMatchObject({
+      unitPrice: '14',
+      nextPriceChange: null,
     })
   })
 

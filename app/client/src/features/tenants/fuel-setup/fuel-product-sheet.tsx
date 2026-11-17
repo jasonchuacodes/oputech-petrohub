@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Fuel, X } from 'lucide-react'
-import { useRef, useState, type RefObject } from 'react'
+import { useEffect, useRef, useState, type RefObject } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { toast } from 'sonner'
 import Decimal from 'decimal.js'
@@ -9,7 +9,12 @@ import { DateTimePicker, formatDateTimeValue } from '~/components/ui/date-time-p
 import { Input } from '~/components/ui/input'
 import { Spinner } from '~/components/ui/spinner'
 import type { FuelProductFieldsFragment } from '~/generated/graphql'
-import { useChangeFuelPriceMutation, useCreateFuelProductMutation, useUpdateFuelProductMutation } from '../fuel-setup.queries'
+import {
+  useCancelFuelPriceChangeMutation,
+  useChangeFuelPriceMutation,
+  useCreateFuelProductMutation,
+  useUpdateFuelProductMutation,
+} from '../fuel-setup.queries'
 import { fuelProductFormSchema, type FuelProductFormValues } from './fuel-setup.schema'
 import { SetupSheet } from './setup-sheet'
 
@@ -33,6 +38,7 @@ export function FuelProductSheet({
   const createProduct = useCreateFuelProductMutation(tenantId)
   const updateProduct = useUpdateFuelProductMutation(tenantId)
   const changeFuelPrice = useChangeFuelPriceMutation(tenantId)
+  const cancelFuelPriceChange = useCancelFuelPriceChangeMutation(tenantId)
   const nameInputRef = useRef<HTMLInputElement>(null)
   const priceInputRef = useRef<HTMLInputElement>(null)
   const priceOnly = mode === 'price' && Boolean(product)
@@ -46,9 +52,46 @@ export function FuelProductSheet({
   const nameField = form.register('name')
   const priceField = form.register('unitPrice')
   const unitPrice = useWatch({ control: form.control, name: 'unitPrice' })
-  const pending = createProduct.isPending || updateProduct.isPending || changeFuelPrice.isPending
+  const [expiredPriceChange, setExpiredPriceChange] = useState<string>()
+  const nextPriceChange = product?.nextPriceChange
+  const persistedPriceChange = nextPriceChange?.effectiveAt !== expiredPriceChange ? nextPriceChange : undefined
+  const pending = createProduct.isPending || updateProduct.isPending || changeFuelPrice.isPending || cancelFuelPriceChange.isPending
+
+  useEffect(() => {
+    const effectiveAt = nextPriceChange?.effectiveAt
+    if (!priceOnly || !effectiveAt) return
+
+    let timeout: ReturnType<typeof setTimeout> | undefined
+    const scheduleExpiry = () => {
+      const remaining = Date.parse(effectiveAt) - Date.now()
+      if (!Number.isFinite(remaining) || remaining <= 0) {
+        timeout = setTimeout(() => setExpiredPriceChange(effectiveAt), 0)
+        return
+      }
+      timeout = setTimeout(scheduleExpiry, Math.min(remaining + 100, 2_147_483_647))
+    }
+    scheduleExpiry()
+    return () => {
+      if (timeout) clearTimeout(timeout)
+    }
+  }, [nextPriceChange?.effectiveAt, priceOnly])
+
   const close = () => {
     if (!pending) onClose()
+  }
+  const cancelScheduledPriceChange = async () => {
+    if (!product || !persistedPriceChange) return
+    form.clearErrors('root')
+    try {
+      await cancelFuelPriceChange.mutateAsync({
+        productId: product.id,
+        expectedRevision: product.revision,
+        effectiveAt: persistedPriceChange.effectiveAt,
+      })
+      toast.success('Scheduled price change cancelled')
+    } catch {
+      form.setError('root', { message: 'Unable to cancel the scheduled price change. Refresh and try again.' })
+    }
   }
   const submit = form.handleSubmit(async (values) => {
     try {
@@ -97,15 +140,28 @@ export function FuelProductSheet({
     >
       <form className="flex min-h-0 flex-1 flex-col" onSubmit={submit}>
         <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-5 pb-5">
-          {priceOnly && product?.nextPriceChange && (
-            <div className="rounded-md border border-primary/20 bg-primary/5 px-3 py-2.5 text-sm">
-              <p className="font-medium text-text-heading">Scheduled price change</p>
-              <p className="mt-1 text-text-secondary">
-                ₱{formatPrice(product.nextPriceChange.unitPrice)} effective{' '}
-                <span className="font-medium text-text-heading">
-                  {formatEffectiveHour(product.nextPriceChange.effectiveDate, product.nextPriceChange.effectiveHour)}
-                </span>
-              </p>
+          {priceOnly && persistedPriceChange && (
+            <div className="flex items-center gap-3 rounded-md border border-primary/20 bg-primary/5 px-3 py-2.5 text-sm">
+              <div className="min-w-0 flex-1">
+                <p className="font-medium text-text-heading">Scheduled price change</p>
+                <p className="mt-1 text-text-secondary">
+                  ₱{formatPrice(persistedPriceChange.unitPrice)} effective{' '}
+                  <span className="font-medium text-text-heading">
+                    {formatEffectiveHour(persistedPriceChange.effectiveDate, persistedPriceChange.effectiveHour)}
+                  </span>
+                </p>
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="-mr-2 text-primary hover:text-primary"
+                aria-label="Cancel saved scheduled price change"
+                disabled={pending}
+                onClick={() => void cancelScheduledPriceChange()}
+              >
+                <X aria-hidden="true" />
+              </Button>
             </div>
           )}
           {priceOnly && scheduledAt && (
@@ -119,8 +175,9 @@ export function FuelProductSheet({
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="-mr-2 size-9 shrink-0 text-status-warning hover:text-status-warning"
-                aria-label="Cancel scheduled price change"
+                className="-mr-2 text-status-warning hover:text-status-warning"
+                aria-label="Discard unsaved scheduled price change"
+                disabled={pending}
                 onClick={() => {
                   setScheduleEnabled(false)
                   setScheduledAt('')

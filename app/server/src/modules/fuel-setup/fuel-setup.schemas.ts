@@ -25,6 +25,13 @@ export const changeFuelPriceInputSchema = z.object({
 }).strict()
 export type ChangeFuelPriceInput = z.infer<typeof changeFuelPriceInputSchema>
 
+export const cancelFuelPriceChangeInputSchema = z.object({
+  productId: z.instanceof(Types.ObjectId),
+  expectedRevision: z.number().int().min(0),
+  effectiveAt: z.iso.datetime(),
+}).strict()
+export type CancelFuelPriceChangeInput = z.infer<typeof cancelFuelPriceChangeInputSchema>
+
 export const createPumpMeterInputSchema = z.object({
   label: z.string().trim().min(1).max(80),
   productId: z.instanceof(Types.ObjectId),

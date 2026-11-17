@@ -5,15 +5,15 @@ import { useRef, useState } from 'react'
 import { Button } from '~/components/ui/button'
 import { ContentSection } from '~/components/ui/content-section'
 import { Spinner } from '~/components/ui/spinner'
-import type { FuelProductFieldsFragment } from '~/generated/graphql'
 import { FuelProductSheet } from '../../tenants/fuel-setup/fuel-product-sheet'
 import { useFuelSetupQuery } from '../../tenants/fuel-setup.queries'
 
 export function FuelProducts({ tenantId, timezone }: { tenantId: string; timezone: string }) {
   const setup = useFuelSetupQuery(tenantId)
-  const [productEditor, setProductEditor] = useState<FuelProductFieldsFragment>()
+  const [productEditorId, setProductEditorId] = useState<string>()
   const actionButtonRef = useRef<HTMLButtonElement>(null)
   const activeProducts = setup.data?.products.filter((product) => product.status === 'active') ?? []
+  const productEditor = activeProducts.find((product) => product.id === productEditorId)
 
   return (
     <ContentSection
@@ -66,7 +66,7 @@ export function FuelProducts({ tenantId, timezone }: { tenantId: string; timezon
                     aria-label={`Edit price for ${product.name}`}
                     onClick={(event) => {
                       actionButtonRef.current = event.currentTarget
-                      setProductEditor(product)
+                      setProductEditorId(product.id)
                     }}
                   >
                     <MoreVertical aria-hidden="true" />
@@ -86,7 +86,7 @@ export function FuelProducts({ tenantId, timezone }: { tenantId: string; timezon
           mode="price"
           timezone={timezone}
           returnFocusRef={actionButtonRef}
-          onClose={() => setProductEditor(undefined)}
+          onClose={() => setProductEditorId(undefined)}
         />
       )}
     </ContentSection>
