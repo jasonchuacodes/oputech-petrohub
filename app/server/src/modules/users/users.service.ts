@@ -10,7 +10,7 @@ import {
 } from '../../common/exceptions'
 import { Session } from '../auth/schemas/session.schema'
 import { AttendanceService } from '../attendance/attendance.service'
-import { assertLocalDate, localDateFor, startOfLocalDate } from '../attendance/attendance-date'
+import { assertLocalDate, startOfLocalDate } from '../attendance/attendance-date'
 import { User, UserDocument, UserRole, UserStatus } from './schemas/user.schema'
 import { UserTenantDeactivation } from './schemas/user-tenant-deactivation.schema'
 import {
@@ -305,10 +305,6 @@ export class UsersService {
 
     assertLocalDate(input.effectiveDate)
     const recordedAt = new Date()
-    const today = localDateFor(scope.timezone, recordedAt)
-    if (input.effectiveDate < today) {
-      throw new InvalidInputException('Effective date cannot be in the past.')
-    }
     const effectiveAt = startOfLocalDate(input.effectiveDate, scope.timezone)
     const user = await this.findUserInScope(scope, input.userId, false)
     this.assertCanManageUser(actor, user)

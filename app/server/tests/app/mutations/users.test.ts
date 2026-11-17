@@ -6,6 +6,7 @@ import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import { Model, Types } from 'mongoose'
 import request from 'supertest'
 import { configureApplication } from '../../../src/configure-application'
+import { addLocalDays } from '../../../src/modules/attendance/attendance-date'
 import { TenantService } from '../../../src/modules/tenants/tenant.service'
 import { User, UserRole } from '../../../src/modules/users/schemas/user.schema'
 import { UsersService } from '../../../src/modules/users/users.service'
@@ -248,7 +249,7 @@ describe('user management', () => {
     })
   })
 
-  it('updates users, revokes their session on role change, and deactivates tenant access', async () => {
+  it('updates users, revokes their session on role change, and backdates tenant deactivation', async () => {
     const ownerToken = await login('users-owner', 'OwnerPassword123')
     const creation = await graphql(
       ownerToken,
@@ -296,6 +297,7 @@ describe('user management', () => {
     }).formatToParts(new Date())
     const todayValues = Object.fromEntries(todayParts.map((part) => [part.type, part.value]))
     const today = `${todayValues.year}-${todayValues.month}-${todayValues.day}`
+    const effectiveDate = addLocalDays(today, -1)
     const deactivation = await graphql(
       ownerToken,
       `mutation ($input: DeactivateUserInput!) {
@@ -307,14 +309,14 @@ describe('user management', () => {
           }
         }
       }`,
-      { input: { userId, reason: 'resign', effectiveDate: today } },
+      { input: { userId, reason: 'resign', effectiveDate } },
     )
     expect(deactivation.body.errors).toBeUndefined()
     expect(deactivation.body.data.deactivateUser).toMatchObject({
       id: userId,
       tenantMembership: {
         availability: 'inactive',
-        deactivation: { reason: 'resign', effectiveDate: today },
+        deactivation: { reason: 'resign', effectiveDate },
       },
     })
     expect(await app.get(UsersService).findById(userId)).not.toBeNull()

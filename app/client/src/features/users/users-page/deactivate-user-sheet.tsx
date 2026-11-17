@@ -45,6 +45,7 @@ export function DeactivateUserSheet({
   })
   const reason = useWatch({ control, name: 'reason' })
   const effectiveDate = useWatch({ control, name: 'effectiveDate' })
+  const isScheduled = effectiveDate > today
 
   useEffect(() => {
     if (open) reset({ reason: 'resign', details: '', effectiveDate: today })
@@ -54,10 +55,6 @@ export function DeactivateUserSheet({
     if (!deactivateUser.isPending) onClose()
   }
   const submit = handleSubmit(async (values) => {
-    if (values.effectiveDate < today) {
-      setError('effectiveDate', { message: 'Effective date cannot be in the past.' })
-      return
-    }
     try {
       await deactivateUser.mutateAsync({
         tenantId,
@@ -69,7 +66,7 @@ export function DeactivateUserSheet({
         },
       })
       onClose()
-      toast.success(values.effectiveDate === today ? 'User deactivated' : 'Deactivation scheduled')
+      toast.success(values.effectiveDate > today ? 'Deactivation scheduled' : 'User deactivated')
     } catch {
       setError('root', { message: 'Unable to deactivate the user. Reload and try again.' })
     }
@@ -78,7 +75,7 @@ export function DeactivateUserSheet({
   return (
     <Sheet
       open={open}
-      title={effectiveDate === today ? 'Deactivate user' : 'Schedule deactivation'}
+      title={isScheduled ? 'Schedule deactivation' : 'Deactivate user'}
       description={`${user.fullName} will lose access to this tenant only.`}
       icon={UserX}
       variant="danger"
@@ -105,13 +102,13 @@ export function DeactivateUserSheet({
             Effective date
             <Input
               type="date"
-              min={today}
               disabled={deactivateUser.isPending}
               aria-invalid={Boolean(errors.effectiveDate)}
               {...register('effectiveDate')}
             />
             <span className="text-xs font-normal text-text-tertiary">
-              Access ends at 12:00 AM in {timezone}. Selecting today takes effect immediately.
+              Future dates take effect at 12:00 AM in {timezone}. Today or past dates remove access
+              immediately.
             </span>
             {errors.effectiveDate?.message && (
               <span role="alert" className="text-sm font-normal text-destructive">
@@ -164,7 +161,7 @@ export function DeactivateUserSheet({
             disabled={!isValid || deactivateUser.isPending}
           >
             {deactivateUser.isPending && <Spinner className="size-4" />}
-            {effectiveDate === today ? 'Deactivate' : 'Schedule'}
+            {isScheduled ? 'Schedule' : 'Deactivate'}
           </Button>
         </footer>
       </form>
