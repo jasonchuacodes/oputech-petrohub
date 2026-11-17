@@ -111,6 +111,18 @@ function TenantIncomeSetup({ tenantId }: { tenantId: string }) {
         backHref="/me"
         backLabel="Back to Me"
         backVisibility="mobile"
+        action={
+          <Button
+            type="button"
+            size="sm"
+            className="hidden md:inline-flex"
+            disabled={updateConfiguration.isPending}
+            onClick={addField.onOpen}
+          >
+            <Plus aria-hidden="true" />
+            Add field
+          </Button>
+        }
       />
 
       <IncomeFieldSheet
@@ -130,7 +142,7 @@ function TenantIncomeSetup({ tenantId }: { tenantId: string }) {
         onClose={addField.onClose}
       />
 
-      <div className="flex flex-col gap-5">
+      <div className="flex w-full flex-col gap-5 md:max-w-2xl">
         <section aria-labelledby="active-income-heading" className="flex flex-col gap-3">
           <div>
             <h2 id="active-income-heading" className="font-medium text-text-heading">Active fields</h2>
@@ -156,7 +168,7 @@ function TenantIncomeSetup({ tenantId }: { tenantId: string }) {
               })}
             </ul>
           )}
-          <Button type="button" variant="outline" disabled={updateConfiguration.isPending} onClick={addField.onOpen}><Plus aria-hidden="true" />Add field</Button>
+          <Button type="button" variant="outline" className="md:hidden" disabled={updateConfiguration.isPending} onClick={addField.onOpen}><Plus aria-hidden="true" />Add field</Button>
         </section>
 
         {archivedIndexes.length > 0 && (

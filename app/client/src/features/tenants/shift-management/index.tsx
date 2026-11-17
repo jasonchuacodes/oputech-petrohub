@@ -58,6 +58,14 @@ function TenantShiftManagementPage({
         backHref="/me"
         backLabel="Back to Me"
         backVisibility="mobile"
+        action={
+          shifts.isSuccess ? (
+            <Button type="button" size="sm" className="hidden md:inline-flex" onClick={() => setEditor({})}>
+              <Plus aria-hidden="true" />
+              Add shift
+            </Button>
+          ) : undefined
+        }
       />
 
       {editor && (
@@ -129,7 +137,7 @@ function TenantShiftManagementPage({
       )}
 
       {shifts.isSuccess && (
-        <Button type="button" variant="outline" className="w-full" onClick={() => setEditor({})}>
+        <Button type="button" variant="outline" className="w-full md:hidden" onClick={() => setEditor({})}>
           <Plus aria-hidden="true" />
           Add shift
         </Button>

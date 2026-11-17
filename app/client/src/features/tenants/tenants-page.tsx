@@ -63,6 +63,14 @@ export function TenantsPage() {
         backHref="/me"
         backLabel="Back to Me"
         backVisibility="mobile"
+        action={
+          canCreate ? (
+            <Button type="button" size="sm" className="hidden md:inline-flex" onClick={() => setCreating(true)}>
+              <Plus aria-hidden="true" />
+              Add tenant
+            </Button>
+          ) : undefined
+        }
       />
 
       <AddTenantSheet
@@ -123,7 +131,7 @@ export function TenantsPage() {
       </ul>
 
       {canCreate && (
-        <Button type="button" variant="outline" className="w-full" onClick={() => setCreating(true)}>
+        <Button type="button" variant="outline" className="w-full md:hidden" onClick={() => setCreating(true)}>
           <Plus aria-hidden="true" />
           Add tenant
         </Button>

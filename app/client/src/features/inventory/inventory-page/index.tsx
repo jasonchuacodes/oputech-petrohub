@@ -147,7 +147,7 @@ function TenantInventory({ tenantId }: { tenantId: string }) {
           </Button>
         }
       />
-      <label className="relative">
+      <label className="relative w-full md:max-w-sm">
         <span className="sr-only">Search lubricant products</span>
         <Search
           aria-hidden="true"

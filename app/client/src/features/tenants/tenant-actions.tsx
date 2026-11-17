@@ -1,4 +1,4 @@
-import { ChevronRight, Pencil, Trash2, X } from 'lucide-react'
+import { MoreVertical, Pencil, Trash2, X } from 'lucide-react'
 import { useCallback, useEffect, useId, useState, type FormEvent } from 'react'
 import { createPortal } from 'react-dom'
 import { Button } from '~/components/ui/button'
@@ -106,7 +106,7 @@ export function TenantActions({
         title="Tenant actions"
         onClick={openActions}
       >
-        <ChevronRight aria-hidden="true" className="size-5" />
+        <MoreVertical aria-hidden="true" className="size-5" />
       </Button>
 
       {open &&
