@@ -9,6 +9,24 @@ import { managementNavigation } from '../layout/navigation'
 import { clearActiveTenant } from '../tenants/active-tenant'
 import { getUserInitials, getUserRoleLabel } from './account-display'
 
+const memberShortcuts = [
+  {
+    label: 'Timesheets',
+    description: 'Review your logged hours by date',
+    href: '/timesheet',
+  },
+  {
+    label: 'Reports',
+    description: 'Create and review shift reports',
+    href: '/report',
+  },
+  {
+    label: 'Delivery',
+    description: 'Record deliveries and review tank readings',
+    href: '/fuel-deliveries',
+  },
+]
+
 export function MePage() {
   const session = useSessionQuery()
   const logout = useLogoutMutation()
@@ -55,6 +73,23 @@ export function MePage() {
               </ul>
             </ContentSection>
           ))}
+
+        {user?.role === 'member' && (
+          <ContentSection label="Shortcuts">
+            <ul className="overflow-hidden rounded-md bg-card shadow-card">
+              {memberShortcuts.map((item) => (
+                <li key={item.href} className="border-b border-border/60 last:border-b-0">
+                  <Link
+                    href={item.href}
+                    className="flex min-h-18 items-center gap-3 px-4 py-3 outline-none transition-colors hover:bg-surface-hover focus-visible:ring-3 focus-visible:ring-inset focus-visible:ring-ring/30"
+                  >
+                    <ActionContent title={item.label} description={item.description} />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </ContentSection>
+        )}
 
         <section aria-label="Session">
           <Button

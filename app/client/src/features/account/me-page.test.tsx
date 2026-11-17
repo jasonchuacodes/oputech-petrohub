@@ -87,12 +87,19 @@ describe('MePage', () => {
     expect(navigation).toContainEqual(expect.objectContaining({ label: 'Timesheet', href: '/timesheet' }))
   })
 
-  it('does not render empty management sections for members', () => {
+  it('shows shortcuts instead of management sections for members', () => {
     const html = renderPage('member')
 
     expect(html).not.toContain('Station')
     expect(html).not.toContain('Administration')
     expect(html).not.toContain('/inventory')
+    expect(html).toContain('Shortcuts')
+    expect(html).toContain('Timesheets')
+    expect(html).toContain('Reports')
+    expect(html).toContain('Delivery')
+    expect(html).toContain('href="/timesheet"')
+    expect(html).toContain('href="/report"')
+    expect(html).toContain('href="/fuel-deliveries"')
     expect(html).toContain('href="/account"')
     expect(html).toContain('Sign out')
   })
