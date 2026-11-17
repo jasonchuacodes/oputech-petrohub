@@ -6,6 +6,12 @@ import { createPortal } from 'react-dom'
 import { toast } from 'sonner'
 import { Button } from '~/components/ui/button'
 import { DialogHeader } from '~/components/ui/dialog-header'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '~/components/ui/dropdown-menu'
 import { Input } from '~/components/ui/input'
 import { Spinner } from '~/components/ui/spinner'
 import type { UserRole } from '~/generated/graphql'
@@ -101,6 +107,19 @@ export function UserActions({
     if (!canManage) return
     reset(toFormValues(user))
     setView('edit')
+    actions.onOpen()
+  }
+
+  const openPasswordReset = () => {
+    if (!canManage) return
+    resetAndClose()
+    passwordReset.onOpen()
+  }
+
+  const openDeactivation = () => {
+    if (!canManage) return
+    resetAndClose()
+    deactivation.onOpen()
   }
 
   const submit = handleSubmit(async (values) => {
@@ -140,10 +159,41 @@ export function UserActions({
         size="icon"
         aria-label={`Actions for ${user.fullName}`}
         title="User actions"
+        className="wide:hidden"
         onClick={openActions}
       >
         <MoreVertical aria-hidden="true" className="size-5" />
       </Button>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            aria-label={`Actions for ${user.fullName}`}
+            title="User actions"
+            className="hidden wide:inline-flex"
+          >
+            <MoreVertical aria-hidden="true" className="size-5" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem disabled={!canManage} onSelect={openEdit}>
+            <Pencil aria-hidden="true" /> Edit
+          </DropdownMenuItem>
+          <DropdownMenuItem disabled={!canManage} onSelect={openPasswordReset}>
+            <KeyRound aria-hidden="true" /> Reset password
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            variant="destructive"
+            disabled={!canManage}
+            onSelect={openDeactivation}
+          >
+            <UserX aria-hidden="true" /> Deactivate
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
 
       {actions.open &&
         createPortal(
@@ -304,19 +354,6 @@ export function UserActions({
                     variant="outline"
                     className="w-full"
                     disabled={!canManage}
-                    onClick={() => {
-                      resetAndClose()
-                      passwordReset.onOpen()
-                    }}
-                  >
-                    <KeyRound aria-hidden="true" />
-                    Reset Password
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full"
-                    disabled={!canManage}
                     onClick={openEdit}
                   >
                     <Pencil aria-hidden="true" />
@@ -324,13 +361,20 @@ export function UserActions({
                   </Button>
                   <Button
                     type="button"
+                    variant="outline"
+                    className="w-full"
+                    disabled={!canManage}
+                    onClick={openPasswordReset}
+                  >
+                    <KeyRound aria-hidden="true" />
+                    Reset Password
+                  </Button>
+                  <Button
+                    type="button"
                     variant="destructive"
                     className="w-full"
                     disabled={!canManage}
-                    onClick={() => {
-                      resetAndClose()
-                      deactivation.onOpen()
-                    }}
+                    onClick={openDeactivation}
                   >
                     <UserX aria-hidden="true" />
                     Deactivate User
