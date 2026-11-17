@@ -9,6 +9,7 @@ import { useForm, type UseFormRegisterReturn } from 'react-hook-form'
 import { toast } from 'sonner'
 import { Button } from '~/components/ui/button'
 import { ConfirmationDialog } from '~/components/ui/confirmation-dialog'
+import { ContentSection } from '~/components/ui/content-section'
 import { Input } from '~/components/ui/input'
 import { PasswordInput } from '~/components/ui/password-input'
 import { PageHeader } from '~/components/ui/page-header'
@@ -160,134 +161,139 @@ function ProfileForm({ profile }: { profile: MyProfile }) {
 
   return (
     <form className="flex flex-col gap-6" noValidate onSubmit={submit}>
-      <section className="rounded-lg border border-border bg-card p-5 shadow-card sm:p-6">
-        <div className="flex flex-col gap-4">
-          <h2 className="text-lg font-semibold text-text-heading">Account</h2>
-          <div className="flex flex-col gap-2">
-            <label htmlFor="profile-username" className="font-medium text-text-heading">
-              Username
-            </label>
-            <div className="relative">
-              <AtSign
-                aria-hidden="true"
-                className="pointer-events-none absolute left-4 top-1/2 z-10 size-5 -translate-y-1/2 text-text-tertiary"
-              />
-              <Input
-                id="profile-username"
-                autoCapitalize="none"
-                className="h-14 cursor-default rounded-md bg-muted pl-12 text-base text-text-secondary wide:h-14 wide:text-base"
-                value={profile.username}
-                readOnly
-                aria-readonly="true"
-              />
+      <ContentSection label="Account">
+        <div className="rounded-lg border border-border bg-card p-5 shadow-card sm:p-6">
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
+              <label htmlFor="profile-username" className="font-medium text-text-heading">
+                Username
+              </label>
+              <div className="relative">
+                <AtSign
+                  aria-hidden="true"
+                  className="pointer-events-none absolute left-4 top-1/2 z-10 size-5 -translate-y-1/2 text-text-tertiary"
+                />
+                <Input
+                  id="profile-username"
+                  autoCapitalize="none"
+                  className="h-14 cursor-default rounded-md bg-muted pl-12 text-base text-text-secondary disabled:cursor-default disabled:opacity-100 wide:h-14 wide:text-base"
+                  value={profile.username}
+                  disabled
+                  readOnly
+                  aria-disabled="true"
+                  aria-readonly="true"
+                />
+              </div>
             </div>
           </div>
         </div>
-      </section>
+      </ContentSection>
 
-      <section className="rounded-lg border border-border bg-card p-5 shadow-card sm:p-6">
-        <div className="flex flex-col gap-6">
-          <h2 className="text-lg font-semibold text-text-heading">Personal information</h2>
-          <div className="flex flex-col gap-4 sm:flex-row">
-            <ProfileTextField
-              id="profile-first-name"
-              label="First name"
-              autoComplete="given-name"
-              error={errors.firstName?.message}
-              disabled={updateProfile.isPending}
-              registration={register('firstName')}
-            />
-            <ProfileTextField
-              id="profile-last-name"
-              label="Last name"
-              autoComplete="family-name"
-              error={errors.lastName?.message}
-              disabled={updateProfile.isPending}
-              registration={register('lastName')}
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <label htmlFor="profile-birthday" className="font-medium text-text-heading">
-              Birthday
-            </label>
-            <Input
-              id="profile-birthday"
-              type="date"
-              className="h-14 rounded-md text-base wide:h-14 wide:text-base"
-              disabled={updateProfile.isPending}
-              aria-invalid={Boolean(errors.birthday)}
-              aria-describedby={errors.birthday ? 'profile-birthday-error' : undefined}
-              {...register('birthday')}
-            />
-            {errors.birthday?.message && (
-              <p id="profile-birthday-error" role="alert" className="text-sm text-destructive">
-                {errors.birthday.message}
-              </p>
-            )}
-          </div>
-          <div className="flex flex-col gap-2">
-            <label htmlFor="profile-address" className="font-medium text-text-heading">
-              Address
-            </label>
-            <Textarea
-              id="profile-address"
-              maxLength={500}
-              disabled={updateProfile.isPending}
-              aria-invalid={Boolean(errors.address)}
-              aria-describedby={errors.address ? 'profile-address-error' : undefined}
-              {...register('address')}
-            />
-            {errors.address?.message && (
-              <p id="profile-address-error" role="alert" className="text-sm text-destructive">
-                {errors.address.message}
-              </p>
-            )}
+      <ContentSection label="Personal information">
+        <div className="rounded-lg border border-border bg-card p-5 shadow-card sm:p-6">
+          <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-4 sm:flex-row">
+              <ProfileTextField
+                id="profile-first-name"
+                label="First name"
+                autoComplete="given-name"
+                error={errors.firstName?.message}
+                disabled={updateProfile.isPending}
+                registration={register('firstName')}
+              />
+              <ProfileTextField
+                id="profile-last-name"
+                label="Last name"
+                autoComplete="family-name"
+                error={errors.lastName?.message}
+                disabled={updateProfile.isPending}
+                registration={register('lastName')}
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <label htmlFor="profile-birthday" className="font-medium text-text-heading">
+                Birthday
+              </label>
+              <Input
+                id="profile-birthday"
+                type="date"
+                className="h-14 rounded-md text-base wide:h-14 wide:text-base"
+                disabled={updateProfile.isPending}
+                aria-invalid={Boolean(errors.birthday)}
+                aria-describedby={errors.birthday ? 'profile-birthday-error' : undefined}
+                {...register('birthday')}
+              />
+              {errors.birthday?.message && (
+                <p id="profile-birthday-error" role="alert" className="text-sm text-destructive">
+                  {errors.birthday.message}
+                </p>
+              )}
+            </div>
+            <div className="flex flex-col gap-2">
+              <label htmlFor="profile-address" className="font-medium text-text-heading">
+                Address
+              </label>
+              <Textarea
+                id="profile-address"
+                maxLength={500}
+                disabled={updateProfile.isPending}
+                aria-invalid={Boolean(errors.address)}
+                aria-describedby={errors.address ? 'profile-address-error' : undefined}
+                {...register('address')}
+              />
+              {errors.address?.message && (
+                <p id="profile-address-error" role="alert" className="text-sm text-destructive">
+                  {errors.address.message}
+                </p>
+              )}
+            </div>
           </div>
         </div>
-      </section>
+      </ContentSection>
 
-      <section className="rounded-lg border border-border bg-card p-5 shadow-card sm:p-6">
-        <div className="flex flex-col gap-6">
-          <h2 className="text-lg font-semibold text-text-heading">Government IDs</h2>
-          <div className="flex flex-col gap-4 sm:flex-row">
-            <ProfileTextField
-              id="profile-sss"
-              label="SSS"
-              error={errors.sss?.message}
-              disabled={updateProfile.isPending}
-              registration={register('sss')}
-            />
-            <ProfileTextField
-              id="profile-pagibig"
-              label="Pag-IBIG"
-              error={errors.pagibig?.message}
-              disabled={updateProfile.isPending}
-              registration={register('pagibig')}
-            />
+      <ContentSection label="Government IDs">
+        <div className="rounded-lg border border-border bg-card p-5 shadow-card sm:p-6">
+          <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-4 sm:flex-row">
+              <ProfileTextField
+                id="profile-sss"
+                label="SSS"
+                error={errors.sss?.message}
+                disabled={updateProfile.isPending}
+                registration={register('sss')}
+              />
+              <ProfileTextField
+                id="profile-pagibig"
+                label="Pag-IBIG"
+                error={errors.pagibig?.message}
+                disabled={updateProfile.isPending}
+                registration={register('pagibig')}
+              />
+            </div>
+            <div className="flex flex-col gap-4 sm:flex-row">
+              <ProfileTextField
+                id="profile-philhealth"
+                label="PhilHealth"
+                error={errors.philhealth?.message}
+                disabled={updateProfile.isPending}
+                registration={register('philhealth')}
+              />
+              <ProfileTextField
+                id="profile-tin"
+                label="TIN"
+                error={errors.tin?.message}
+                disabled={updateProfile.isPending}
+                registration={register('tin')}
+              />
+            </div>
           </div>
-          <div className="flex flex-col gap-4 sm:flex-row">
-            <ProfileTextField
-              id="profile-philhealth"
-              label="PhilHealth"
-              error={errors.philhealth?.message}
-              disabled={updateProfile.isPending}
-              registration={register('philhealth')}
-            />
-            <ProfileTextField
-              id="profile-tin"
-              label="TIN"
-              error={errors.tin?.message}
-              disabled={updateProfile.isPending}
-              registration={register('tin')}
-            />
-          </div>
+          {errors.root?.message && (
+            <p role="alert" className="mt-4 text-sm text-destructive">
+              {errors.root.message}
+            </p>
+          )}
         </div>
-        {errors.root?.message && (
-          <p role="alert" className="mt-4 text-sm text-destructive">
-            {errors.root.message}
-          </p>
-        )}
-      </section>
+      </ContentSection>
 
       <footer className="flex gap-3">
         <Button asChild variant="outline" size="lg" className="flex-1 text-base">

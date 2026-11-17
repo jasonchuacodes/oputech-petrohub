@@ -69,6 +69,7 @@ describe('AccountSettingsPage', () => {
     const html = renderToStaticMarkup(<AccountSettingsPage />)
 
     expect(html).toMatch(/<input[^>]*id="profile-username"[^>]*readonly=""/)
+    expect(html).toMatch(/<input[^>]*id="profile-username"[^>]*disabled=""/)
     expect(html).toContain('aria-readonly="true"')
     expect(html).not.toContain('Your administrator controls this login username.')
     expect(html).toContain('Personal information')
