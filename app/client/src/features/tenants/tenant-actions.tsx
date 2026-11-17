@@ -4,6 +4,12 @@ import { createPortal } from 'react-dom'
 import { Button } from '~/components/ui/button'
 import { ConfirmationDialog } from '~/components/ui/confirmation-dialog'
 import { DialogHeader } from '~/components/ui/dialog-header'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '~/components/ui/dropdown-menu'
 import { Input } from '~/components/ui/input'
 import { Spinner } from '~/components/ui/spinner'
 import { useDeleteTenantMutation, useUpdateTenantMutation } from './tenants.queries'
@@ -68,6 +74,18 @@ export function TenantActions({
     setOpen(true)
   }
 
+  const openEdit = () => {
+    setView('edit')
+    setName(tenantName)
+    setError(undefined)
+    setOpen(true)
+  }
+
+  const openDelete = () => {
+    resetAndClose()
+    setDeleteOpen(true)
+  }
+
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const value = name.trim()
@@ -105,10 +123,41 @@ export function TenantActions({
         size="icon"
         aria-label={`Actions for ${tenantName}`}
         title="Tenant actions"
+        className="wide:hidden"
         onClick={openActions}
       >
         <MoreVertical aria-hidden="true" className="size-5" />
       </Button>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            aria-label={`Actions for ${tenantName}`}
+            title="Tenant actions"
+            className="hidden wide:inline-flex"
+          >
+            <MoreVertical aria-hidden="true" className="size-5" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onSelect={openEdit}>
+            <Pencil aria-hidden="true" /> Edit name
+          </DropdownMenuItem>
+          {canDelete && (
+            <DropdownMenuItem
+              variant="destructive"
+              disabled={deleteDisabled}
+              title={deleteDisabled ? 'You must keep at least one tenant' : `Delete ${tenantName}`}
+              onSelect={openDelete}
+            >
+              <Trash2 aria-hidden="true" /> Delete
+            </DropdownMenuItem>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
 
       {open &&
         createPortal(
@@ -180,7 +229,7 @@ export function TenantActions({
                     type="button"
                     variant="outline"
                     className="w-full"
-                    onClick={() => setView('edit')}
+                    onClick={openEdit}
                   >
                     <Pencil aria-hidden="true" />
                     Edit name
@@ -194,10 +243,7 @@ export function TenantActions({
                       title={
                         deleteDisabled ? 'You must keep at least one tenant' : `Delete ${tenantName}`
                       }
-                      onClick={() => {
-                        resetAndClose()
-                        setDeleteOpen(true)
-                      }}
+                      onClick={openDelete}
                     >
                       <Trash2 aria-hidden="true" />
                       Delete
