@@ -1,6 +1,6 @@
-# Petromate
+# Oputech Petrohub
 
-Petromate is a mobile-first, multi-tenant station operations application centered on shift report generation. Reports capture financial entries, fuel disposal readings, item sales, assigned employees, and immutable submitted totals.
+Oputech Petrohub is a mobile-first, multi-tenant station operations application centered on shift report generation. Reports capture financial entries, fuel disposal readings, item sales, assigned employees, and immutable submitted totals.
 
 ## Stack
 
