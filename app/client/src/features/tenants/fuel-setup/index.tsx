@@ -132,7 +132,16 @@ function TenantFuelSetup({ tenantId, timezone }: { tenantId: string; timezone: s
     {
       id: 'label',
       heading: 'Pump',
-      cell: (meter) => <span className="font-medium text-text-heading">{meter.label}</span>,
+      cell: (meter) => (
+        <button
+          type="button"
+          disabled={meter.status !== 'active'}
+          className="max-w-full truncate rounded-sm text-left font-medium text-text-heading underline-offset-4 outline-none enabled:cursor-pointer enabled:hover:text-primary enabled:hover:underline focus-visible:ring-3 focus-visible:ring-ring/30 disabled:cursor-default"
+          onClick={() => setMeterEditor(meter)}
+        >
+          {meter.label}
+        </button>
+      ),
     },
     {
       id: 'productId',
@@ -265,7 +274,16 @@ function TenantFuelSetup({ tenantId, timezone }: { tenantId: string; timezone: s
                         </span>
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-2">
-                            <h3 className="font-medium text-text-heading">{meter.label}</h3>
+                            <h3>
+                              <button
+                                type="button"
+                                disabled={meter.status !== 'active'}
+                                className="max-w-full truncate rounded-sm text-left font-medium text-text-heading underline-offset-4 outline-none enabled:cursor-pointer enabled:hover:text-primary enabled:hover:underline focus-visible:ring-3 focus-visible:ring-ring/30 disabled:cursor-default"
+                                onClick={() => setMeterEditor(meter)}
+                              >
+                                {meter.label}
+                              </button>
+                            </h3>
                             <Status status={meter.status} />
                           </div>
                           <p className="mt-1 text-sm text-text-secondary">{product?.name ?? 'Unknown fuel product'}</p>

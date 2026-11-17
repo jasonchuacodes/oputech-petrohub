@@ -78,7 +78,14 @@ function TenantInventory({ tenantId }: { tenantId: string }) {
       id: 'name',
       heading: 'Product',
       cell: (product) => (
-        <span className="font-medium text-text-heading">{product.name}</span>
+        <button
+          type="button"
+          disabled={product.status !== 'active'}
+          className="max-w-full truncate rounded-sm text-left font-medium text-text-heading underline-offset-4 outline-none enabled:cursor-pointer enabled:hover:text-primary enabled:hover:underline focus-visible:ring-3 focus-visible:ring-ring/30 disabled:cursor-default"
+          onClick={() => setEditor(product)}
+        >
+          {product.name}
+        </button>
       ),
     },
     {
@@ -201,7 +208,16 @@ function TenantInventory({ tenantId }: { tenantId: string }) {
                     >
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-2">
-                          <h2 className="font-medium text-text-heading">{product.name}</h2>
+                          <h2>
+                            <button
+                              type="button"
+                              disabled={product.status !== 'active'}
+                              className="max-w-full truncate rounded-sm text-left font-medium text-text-heading underline-offset-4 outline-none enabled:cursor-pointer enabled:hover:text-primary enabled:hover:underline focus-visible:ring-3 focus-visible:ring-ring/30 disabled:cursor-default"
+                              onClick={() => setEditor(product)}
+                            >
+                              {product.name}
+                            </button>
+                          </h2>
                           <ProductStatus status={product.status} />
                         </div>
                         <div className="mt-1 flex items-baseline gap-1.5">

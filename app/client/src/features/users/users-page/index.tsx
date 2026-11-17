@@ -11,9 +11,10 @@ import type { TenantUserAvailability, UserRole } from '~/generated/graphql'
 import { useDisclosure } from '~/hooks/useDisclosure'
 import { useSessionQuery } from '../../auth/auth.queries'
 import { useAppShellContext } from '../../layout/use-active-tenant'
-import { useUsersQuery } from '../users.queries'
+import { useUsersQuery, type UserSummary } from '../users.queries'
 import { AddUserSheet } from './add-user-sheet'
 import { UserActions } from './user-actions'
+import { ViewUserSheet } from './view-user-sheet'
 
 const pageSize = 20
 
@@ -60,6 +61,7 @@ function TenantUsersPage({
   actorRole: UserRole
 }) {
   const creating = useDisclosure()
+  const [selectedUser, setSelectedUser] = useState<UserSummary | null>(null)
   const [availability, setAvailability] = useState<TenantUserAvailability>('active')
   const [offset, setOffset] = useState(0)
   const users = useUsersQuery(tenantId, availability, offset, pageSize)
@@ -114,6 +116,14 @@ function TenantUsersPage({
         actorRole={actorRole}
         onClose={creating.onClose}
       />
+
+      {selectedUser && (
+        <ViewUserSheet
+          tenantId={tenantId}
+          user={selectedUser}
+          onClose={() => setSelectedUser(null)}
+        />
+      )}
 
       <div
         role="group"
@@ -181,9 +191,13 @@ function TenantUsersPage({
                 className="flex min-h-20 items-center gap-3 border-b border-border/60 px-4 py-3 last:border-b-0"
               >
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate font-medium text-text-heading">
+                  <button
+                    type="button"
+                    className="block max-w-full cursor-pointer truncate rounded-sm text-left font-medium text-text-heading underline-offset-4 outline-none hover:text-primary hover:underline focus-visible:ring-3 focus-visible:ring-ring/30"
+                    onClick={() => setSelectedUser(listedUser)}
+                  >
                     {listedUser.fullName}
-                  </span>
+                  </button>
                   <span className="mt-1 flex min-w-0 items-center gap-1.5 text-sm text-text-tertiary">
                     <span className="truncate">{listedUser.username}</span>
                     <span aria-hidden="true">•</span>
