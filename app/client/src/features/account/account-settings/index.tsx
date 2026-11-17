@@ -78,13 +78,13 @@ export function AccountSettingsPage() {
         tabs={accountTabs}
         value={activeTab}
         onValueChange={setActiveTab}
-        touchSize="large"
       />
 
       <div
         id="account-information-panel"
         role="tabpanel"
         aria-labelledby="account-information-tab"
+        className="w-full wide:max-w-2xl wide:self-start"
         hidden={activeTab !== 'information'}
       >
         <ProfilePanel />
@@ -93,6 +93,7 @@ export function AccountSettingsPage() {
         id="security-panel"
         role="tabpanel"
         aria-labelledby="security-tab"
+        className="w-full wide:max-w-2xl wide:self-start"
         hidden={activeTab !== 'security'}
       >
         <PasswordForm />
@@ -160,11 +161,11 @@ function ProfileForm({ profile }: { profile: MyProfile }) {
   })
 
   return (
-    <form className="flex flex-col gap-6" noValidate onSubmit={submit}>
+    <form className="flex flex-col gap-6 wide:text-sm" noValidate onSubmit={submit}>
       <ContentSection label="Account">
         <div className="rounded-lg border border-border bg-card p-5 shadow-card sm:p-6">
           <div className="flex flex-col gap-4">
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 wide:gap-1.5">
               <label htmlFor="profile-username" className="font-medium text-text-heading">
                 Username
               </label>
@@ -176,7 +177,7 @@ function ProfileForm({ profile }: { profile: MyProfile }) {
                 <Input
                   id="profile-username"
                   autoCapitalize="none"
-                  className="h-14 cursor-default rounded-md bg-muted pl-12 text-base text-text-secondary disabled:cursor-default disabled:opacity-100 wide:h-14 wide:text-base"
+                  className="h-14 cursor-default rounded-md bg-muted pl-12 text-base text-text-secondary disabled:cursor-default disabled:opacity-100"
                   value={profile.username}
                   disabled
                   readOnly
@@ -210,14 +211,14 @@ function ProfileForm({ profile }: { profile: MyProfile }) {
                 registration={register('lastName')}
               />
             </div>
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 wide:gap-1.5">
               <label htmlFor="profile-birthday" className="font-medium text-text-heading">
                 Birthday
               </label>
               <Input
                 id="profile-birthday"
                 type="date"
-                className="h-14 rounded-md text-base wide:h-14 wide:text-base"
+                className="h-14 rounded-md text-base"
                 disabled={updateProfile.isPending}
                 aria-invalid={Boolean(errors.birthday)}
                 aria-describedby={errors.birthday ? 'profile-birthday-error' : undefined}
@@ -229,7 +230,7 @@ function ProfileForm({ profile }: { profile: MyProfile }) {
                 </p>
               )}
             </div>
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 wide:gap-1.5">
               <label htmlFor="profile-address" className="font-medium text-text-heading">
                 Address
               </label>
@@ -367,40 +368,39 @@ function PasswordForm() {
 
   return (
     <>
-      <form className="flex flex-col gap-6" noValidate onSubmit={submit}>
-        <section className="rounded-lg border border-border bg-card p-5 shadow-card sm:p-6">
-          <div>
-            <h2 className="text-xl font-semibold text-text-heading">Password</h2>
-            <p className="mt-1 text-base text-text-secondary">
+      <form className="flex flex-col gap-6 wide:text-sm" noValidate onSubmit={submit}>
+        <ContentSection label="Password">
+          <div className="rounded-lg border border-border bg-card p-5 shadow-card sm:p-6">
+            <p className="text-base text-text-secondary wide:text-sm">
               Change your password to keep your account secure.
             </p>
-          </div>
 
-          <div className="mt-6 flex flex-col gap-4">
-            <PasswordField
-              id="account-current-password"
-              label="Current password"
-              autoComplete="current-password"
-              error={errors.currentPassword?.message}
-              disabled={changePassword.isPending}
-              registration={register('currentPassword')}
-            />
-            <PasswordField
-              id="account-new-password"
-              label="New password"
-              autoComplete="new-password"
-              error={errors.newPassword?.message}
-              disabled={changePassword.isPending}
-              registration={register('newPassword')}
-            />
+            <div className="mt-5 flex flex-col gap-4">
+              <PasswordField
+                id="account-current-password"
+                label="Current password"
+                autoComplete="current-password"
+                error={errors.currentPassword?.message}
+                disabled={changePassword.isPending}
+                registration={register('currentPassword')}
+              />
+              <PasswordField
+                id="account-new-password"
+                label="New password"
+                autoComplete="new-password"
+                error={errors.newPassword?.message}
+                disabled={changePassword.isPending}
+                registration={register('newPassword')}
+              />
 
-            {errors.root?.message && (
-              <p role="alert" className="text-sm text-destructive">
-                {errors.root.message}
-              </p>
-            )}
+              {errors.root?.message && (
+                <p role="alert" className="text-sm text-destructive">
+                  {errors.root.message}
+                </p>
+              )}
+            </div>
           </div>
-        </section>
+        </ContentSection>
 
         <footer className="flex gap-3">
           <Button asChild variant="outline" size="lg" className="flex-1 text-base">
@@ -447,7 +447,7 @@ function ProfileTextField({
   registration: UseFormRegisterReturn
 }) {
   return (
-    <div className="flex flex-1 flex-col gap-2">
+    <div className="flex flex-1 flex-col gap-2 wide:gap-1.5">
       <label htmlFor={id} className="font-medium text-text-heading">
         {label}
       </label>
@@ -455,7 +455,7 @@ function ProfileTextField({
         id={id}
         maxLength={80}
         autoComplete={autoComplete}
-        className="h-14 rounded-md text-base wide:h-14 wide:text-base"
+        className="h-14 rounded-md text-base"
         disabled={disabled}
         aria-invalid={Boolean(error)}
         aria-describedby={error ? `${id}-error` : undefined}
@@ -486,7 +486,7 @@ function PasswordField({
   registration: UseFormRegisterReturn
 }) {
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 wide:gap-1.5">
       <label htmlFor={id} className="font-medium text-text-heading">
         {label}
       </label>
@@ -498,7 +498,7 @@ function PasswordField({
         <PasswordInput
           id={id}
           autoComplete={autoComplete}
-          className="h-14 rounded-md pl-12 text-base wide:h-14 wide:text-base"
+          className="h-14 rounded-md pl-12 text-base"
           disabled={disabled}
           aria-invalid={Boolean(error)}
           aria-describedby={error ? `${id}-error` : undefined}
