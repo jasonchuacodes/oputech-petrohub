@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="theme-color" content="#17434d" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Offline · Petrohub</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        min-height: 100%;
+      }
+
+      body {
+        display: grid;
+        margin: 0;
+        padding: max(1.5rem, env(safe-area-inset-top)) max(1.5rem, env(safe-area-inset-right))
+          max(1.5rem, env(safe-area-inset-bottom)) max(1.5rem, env(safe-area-inset-left));
+        background: #f5f5f5;
+        color: #101010;
+        font-family: Manrope, ui-sans-serif, system-ui, sans-serif;
+        place-items: center;
+      }
+
+      main {
+        width: min(100%, 25rem);
+        padding: 2rem;
+        border: 1px solid rgb(16 16 16 / 12%);
+        border-radius: 1rem;
+        background: #fff;
+        box-shadow: 0 1px 3px rgb(16 16 16 / 6%);
+        text-align: center;
+      }
+
+      svg {
+        display: block;
+        width: 4rem;
+        margin: 0 auto 1.5rem;
+      }
+
+      h1 {
+        margin: 0;
+        color: #303030;
+        font-size: 1.5rem;
+        line-height: 2rem;
+      }
+
+      p {
+        margin: 0.75rem 0 1.5rem;
+        color: rgb(16 16 16 / 70%);
+        font-size: 0.9375rem;
+        line-height: 1.5rem;
+      }
+
+      button {
+        min-height: 2.75rem;
+        padding: 0.625rem 1rem;
+        border: 0;
+        border-radius: 0.5rem;
+        background: #17434d;
+        color: #fff;
+        cursor: pointer;
+        font: inherit;
+        font-weight: 600;
+      }
+
+      button:hover {
+        background: #0f343d;
+      }
+
+      button:focus-visible {
+        outline: 3px solid rgb(23 67 77 / 40%);
+        outline-offset: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <svg aria-label="Oputech Petrohub" role="img" viewBox="0 0 94 88" xmlns="http://www.w3.org/2000/svg">
+        <path fill="#00143f" d="M18 3h68c5 0 8 6 4 10l-7 9c-2 3-5 4-8 4H7c-5 0-8-6-4-10l7-9c2-3 5-4 8-4Z" />
+        <path fill="#009b93" d="M14 32h68c5 0 8 6 4 10l-7 9c-2 3-5 4-8 4H3c-5 0-8-6-4-10l7-9c2-3 5-4 8-4Z" />
+        <path fill="#00143f" d="M18 61h68c5 0 8 6 4 10l-7 9c-2 3-5 4-8 4H7c-5 0-8-6-4-10l7-9c2-3 5-4 8-4Z" />
+      </svg>
+      <h1>You're offline</h1>
+      <p>Reconnect to the internet, then try loading Petrohub again.</p>
+      <button type="button" onclick="window.location.reload()">Try again</button>
+    </main>
+  </body>
+</html>
