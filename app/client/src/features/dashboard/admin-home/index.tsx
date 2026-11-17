@@ -3,6 +3,7 @@
 import type { TenantAccess } from '../../tenants/tenants.queries'
 import { Suspense } from 'react'
 import { HomeGreeting } from '../home-greeting'
+import { CurrentTankReadings } from './current-tank-readings'
 import { FinancialSummary, FinancialSummarySkeleton } from './financial-summary'
 import { FuelProducts } from './fuel-products'
 import { SubmittedReports } from './submitted-reports'
@@ -15,6 +16,7 @@ export function AdminHomePage({ access }: { access: TenantAccess }) {
         <FinancialSummary tenantId={access.tenant.id} timezone={access.tenant.timezone} />
       </Suspense>
       <FuelProducts tenantId={access.tenant.id} timezone={access.tenant.timezone} />
+      <CurrentTankReadings tenantId={access.tenant.id} />
       <SubmittedReports tenantId={access.tenant.id} timezone={access.tenant.timezone} />
     </div>
   )

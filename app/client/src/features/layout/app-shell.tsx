@@ -14,7 +14,6 @@ import type { AuthUser } from '../auth/auth.types'
 import { setActiveTenant, useActiveTenantId } from '../tenants/active-tenant'
 import { useTenantsQuery } from '../tenants/tenants.queries'
 import {
-  desktopNavigation,
   managementNavigation,
   navigation,
   type NavigationItem,
@@ -23,6 +22,7 @@ import { SidebarTenantSwitcher } from './sidebar-tenant-switcher'
 import { AppShellContext } from './use-active-tenant'
 
 const SIDEBAR_COLLAPSED_STORAGE_KEY = 'petromate:sidebar-collapsed'
+const bottomNavigation = navigation.filter((item) => item.href !== '/timesheet')
 let sidebarCollapsedFallback = false
 const sidebarPreferenceListeners = new Set<() => void>()
 
@@ -170,6 +170,9 @@ export function AppShell({ children }: { children: ReactNode }) {
   )
   const user = session.data?.user
   const isAdmin = user?.role === 'superadmin' || user?.role === 'admin'
+  const visibleNavigation = isAdmin
+    ? navigation.filter((item) => item.href !== '/fuel-deliveries')
+    : navigation
   const isReportDetail = pathname.split('/').filter(Boolean).length === 2 && pathname.startsWith('/report/')
 
   useEffect(() => {
@@ -261,7 +264,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             className="flex min-h-0 flex-1 flex-col gap-4"
           >
             <div className="flex min-h-0 flex-1 flex-col gap-0 overflow-y-auto">
-              {desktopNavigation.map((item) => (
+              {visibleNavigation.filter((item) => item.href !== '/me').map((item) => (
                 <NavigationLink
                   key={item.href}
                   item={item}
@@ -307,7 +310,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               className="z-30 shrink-0 bg-card pt-1 pb-[calc(0.25rem+env(safe-area-inset-bottom))] shadow-[0_-2px_8px_rgba(16,16,16,0.05)] md:hidden"
             >
               <div className="mx-auto flex w-full max-w-lg px-1">
-                {navigation.map((item) => (
+                {bottomNavigation.map((item) => (
                   <div key={item.href} className="min-w-0 flex-1">
                     <NavigationLink item={item} compact />
                   </div>

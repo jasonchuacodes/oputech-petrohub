@@ -54,6 +54,7 @@ describe('MePage', () => {
       const expectedContent = [
         'Station',
         'Fuel setup',
+        'Delivery',
         'Inventory',
         'Shifts',
         'Report setup',
@@ -63,6 +64,7 @@ describe('MePage', () => {
       ]
       const expectedLinks = [
         '/fuel-setup',
+        '/fuel-deliveries',
         '/inventory',
         '/shifts',
         '/income-setup',

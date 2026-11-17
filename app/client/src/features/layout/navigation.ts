@@ -7,6 +7,7 @@ import {
   FileText,
   Fuel,
   House,
+  Truck,
   UserRound,
   Users,
   type LucideIcon,
@@ -31,11 +32,10 @@ export type ManagementNavigationSection = {
 export const navigation: NavigationItem[] = [
   { label: 'Home', href: '/home', icon: House },
   { label: 'Report', href: '/report', icon: ClipboardList },
+  { label: 'Delivery', href: '/fuel-deliveries', icon: Truck },
   { label: 'Timesheet', href: '/timesheet', icon: Clock3 },
   { label: 'Me', href: '/me', icon: UserRound, activePaths: ['/account', '/tenants', '/users', '/shifts', '/fuel-setup', '/inventory', '/income-setup'] },
 ]
-
-export const desktopNavigation = navigation.filter((item) => item.href !== '/me')
 
 export const managementNavigation: ManagementNavigationSection[] = [
   {
@@ -43,9 +43,15 @@ export const managementNavigation: ManagementNavigationSection[] = [
     items: [
       {
         label: 'Fuel setup',
-        description: 'Configure fuel prices and pump meter baselines',
+        description: 'Configure fuel products, pumps, and tanks',
         href: '/fuel-setup',
         icon: Fuel,
+      },
+      {
+        label: 'Delivery',
+        description: 'Record deliveries and review tank readings',
+        href: '/fuel-deliveries',
+        icon: Truck,
       },
       {
         label: 'Inventory',
