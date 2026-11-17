@@ -27,8 +27,8 @@ export function PumpMeterSheet({ tenantId, products, meter, onClose }: PumpMeter
   const form = useForm<PumpMeterFormValues>({
     resolver: zodResolver(pumpMeterFormSchema),
     defaultValues: meter
-      ? { label: meter.label, productId: meter.productId, initialReading: meter.initialReading }
-      : { label: '', productId: activeProducts[0]?.id ?? '', initialReading: '0.000' },
+      ? { label: meter.label, productId: meter.productId, initialReading: meter.initialReading, currentReading: meter.currentReading }
+      : { label: '', productId: activeProducts[0]?.id ?? '', initialReading: '0.000', currentReading: '0.000' },
     mode: 'onChange',
   })
   const selectedId = useWatch({ control: form.control, name: 'productId' })
@@ -44,10 +44,16 @@ export function PumpMeterSheet({ tenantId, products, meter, onClose }: PumpMeter
           meterId: meter.id,
           expectedRevision: meter.revision,
           label: values.label,
+          currentReading: values.currentReading,
+          expectedCurrentReading: meter.currentReading,
         })
         toast.success('Pump updated')
       } else {
-        await createMeter.mutateAsync(values)
+        await createMeter.mutateAsync({
+          label: values.label,
+          productId: values.productId,
+          initialReading: values.initialReading,
+        })
         toast.success('Pump meter created')
       }
       onClose()
@@ -64,7 +70,7 @@ export function PumpMeterSheet({ tenantId, products, meter, onClose }: PumpMeter
         title={meter ? 'Edit pump' : 'Add pump meter'}
         icon={Gauge}
         description={meter
-          ? 'Update the pump name. Fuel type cannot be changed.'
+          ? 'Update the pump name and current reading. Fuel type cannot be changed.'
           : 'Create one entry for each independently incrementing physical meter.'}
         onClose={close}
       >
@@ -89,9 +95,8 @@ export function PumpMeterSheet({ tenantId, products, meter, onClose }: PumpMeter
                 <span className="text-sm font-medium">Fuel type</span>
                 <Input
                   value={selectedProduct?.name ?? 'Unknown fuel product'}
-                  readOnly
-                  aria-readonly="true"
-                  className="bg-muted text-text-secondary"
+                  disabled
+                  className="bg-muted text-text-secondary disabled:cursor-default disabled:opacity-100"
                 />
               </label>
             ) : (
@@ -136,6 +141,23 @@ export function PumpMeterSheet({ tenantId, products, meter, onClose }: PumpMeter
                 <span className="text-xs text-text-tertiary">This becomes the opening reading of the first report using this meter.</span>
                 {form.formState.errors.initialReading?.message && (
                   <p className="text-sm text-destructive">{form.formState.errors.initialReading.message}</p>
+                )}
+              </label>
+            )}
+
+            {meter && (
+              <label className="flex flex-col gap-1.5">
+                <span className="text-sm font-medium">Current meter reading</span>
+                <Input
+                  inputMode="decimal"
+                  placeholder="0.000"
+                  disabled={pending}
+                  aria-invalid={Boolean(form.formState.errors.currentReading)}
+                  {...form.register('currentReading')}
+                />
+                <span className="text-xs text-text-tertiary">Used as the opening reading for reports created after this change. Existing reports keep their saved reading.</span>
+                {form.formState.errors.currentReading?.message && (
+                  <p className="text-sm text-destructive">{form.formState.errors.currentReading.message}</p>
                 )}
               </label>
             )}

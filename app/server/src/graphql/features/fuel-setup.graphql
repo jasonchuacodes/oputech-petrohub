@@ -16,7 +16,7 @@ input CreateFuelProductInput { name: String!, unitPrice: Decimal! }
 input UpdateFuelProductInput { productId: ObjectId!, expectedRevision: Int!, name: String! }
 input ChangeFuelPriceInput { productId: ObjectId!, expectedRevision: Int!, unitPrice: Decimal!, effectiveDate: String!, effectiveHour: Int! }
 input CreatePumpMeterInput { label: String!, productId: ObjectId!, initialReading: Decimal! }
-input UpdatePumpMeterInput { meterId: ObjectId!, expectedRevision: Int!, label: String! }
+input UpdatePumpMeterInput { meterId: ObjectId!, expectedRevision: Int!, label: String!, currentReading: Decimal!, expectedCurrentReading: Decimal! }
 input DeactivateFuelSetupInput { id: ObjectId!, expectedRevision: Int! }
 
 type FuelSetup { products: [FuelProduct!]!, meters: [PumpMeter!]! }

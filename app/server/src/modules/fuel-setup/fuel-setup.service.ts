@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
-import { InjectModel } from '@nestjs/mongoose'
-import { ClientSession, Model, Types } from 'mongoose'
+import { InjectConnection, InjectModel } from '@nestjs/mongoose'
+import { ClientSession, Connection, Model, Types } from 'mongoose'
 import { ConflictException, InvalidInputException, NotFoundException } from '../../common/exceptions'
 import { decimal, decimal128 } from '../../common/numeric/decimal'
 import { MeterHead } from '../disposals/schemas/meter-head.schema'
@@ -32,6 +32,7 @@ export class FuelSetupService {
     @InjectModel(FuelPriceState.name) private readonly priceStates: Model<FuelPriceState>,
     @InjectModel(PumpMeter.name) private readonly meters: Model<PumpMeter>,
     @InjectModel(MeterHead.name) private readonly heads: Model<MeterHead>,
+    @InjectConnection() private readonly connection: Connection,
   ) {}
 
   async list(tenantId: Types.ObjectId) {
@@ -178,14 +179,52 @@ export class FuelSetupService {
   }
 
   async updateMeter(tenantId: Types.ObjectId, input: UpdatePumpMeterInput) {
-    const meter = await this.meters.findOneAndUpdate(
-      { _id: input.meterId, tenantId, revision: input.expectedRevision, status: FuelSetupStatus.ACTIVE },
-      { $set: { label: input.label }, $inc: { revision: 1 } },
-      { new: true, runValidators: true },
-    ).lean<PumpMeterRecord>().exec()
-    if (meter) return meter
-    if (!await this.meters.exists({ _id: input.meterId, tenantId })) throw new NotFoundException('Pump meter not found.')
-    throw new ConflictException('Pump meter changed. Refresh and try again.')
+    const session = await this.connection.startSession()
+    let result: { meter: PumpMeterRecord; currentReading: Types.Decimal128 } | undefined
+    try {
+      await session.withTransaction(async () => {
+        const meter = await this.meters.findOne({ _id: input.meterId, tenantId }).session(session).lean<PumpMeterRecord>().exec()
+        if (!meter) throw new NotFoundException('Pump meter not found.')
+        if (meter.revision !== input.expectedRevision || meter.status !== FuelSetupStatus.ACTIVE) {
+          throw new ConflictException('Pump meter changed. Refresh and try again.')
+        }
+
+        const head = await this.heads.findOne({ tenantId, meterId: meter._id }).session(session).lean<MeterHeadRecord>().exec()
+        const currentReading = head?.reading ?? meter.initialReading
+        if (!decimal(currentReading).equals(decimal(input.expectedCurrentReading))) {
+          throw new ConflictException('Pump meter reading changed. Refresh and try again.')
+        }
+
+        const updated = await this.meters.findOneAndUpdate(
+          { _id: meter._id, tenantId, revision: input.expectedRevision, status: FuelSetupStatus.ACTIVE },
+          { $set: { label: input.label }, $inc: { revision: 1 } },
+          { new: true, runValidators: true, session },
+        ).lean<PumpMeterRecord>().exec()
+        if (!updated) throw new ConflictException('Pump meter changed. Refresh and try again.')
+
+        const nextReading = decimal128(input.currentReading)
+        if (!decimal(currentReading).equals(decimal(nextReading))) {
+          if (head) {
+            const changed = await this.heads.updateOne(
+              { _id: head._id, tenantId, meterId: meter._id, revision: head.revision, reading: head.reading },
+              { $set: { reading: nextReading }, $unset: { sourceBatchId: 1 }, $inc: { revision: 1 } },
+              { session },
+            )
+            if (changed.modifiedCount !== 1) throw new ConflictException('Pump meter reading changed. Refresh and try again.')
+          } else {
+            await this.heads.create([{ tenantId, meterId: meter._id, reading: nextReading }], { session })
+          }
+        }
+        result = { meter: updated, currentReading: nextReading }
+      })
+    } catch (error) {
+      if (isDuplicateKeyError(error)) throw new ConflictException('Pump meter reading changed. Refresh and try again.')
+      throw error
+    } finally {
+      await session.endSession()
+    }
+    if (!result) throw new ConflictException('Unable to update the pump meter.')
+    return result
   }
 
   async deactivateProduct(tenantId: Types.ObjectId, input: DeactivateFuelSetupInput) {
@@ -271,4 +310,8 @@ export class FuelSetupService {
     return nextByProduct
   }
 
+}
+
+function isDuplicateKeyError(error: unknown): error is { code: number } {
+  return typeof error === 'object' && error !== null && 'code' in error && error.code === 11000
 }

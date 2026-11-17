@@ -859,6 +859,8 @@ export type UpdateMyProfileInput = {
 };
 
 export type UpdatePumpMeterInput = {
+  currentReading: Scalars['Decimal']['input'];
+  expectedCurrentReading: Scalars['Decimal']['input'];
   expectedRevision: Scalars['Int']['input'];
   label: Scalars['String']['input'];
   meterId: Scalars['ObjectId']['input'];

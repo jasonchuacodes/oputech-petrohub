@@ -318,7 +318,7 @@ export class DisposalsService {
         { $set: { reading: reading.closingReading, sourceBatchId: batch._id }, $inc: { revision: 1 } },
         { session },
       )
-      if (result.modifiedCount !== 1) throw new ConflictException(`${reading.meterLabel} changed in another report.`)
+      if (result.modifiedCount !== 1) throw new ConflictException(`${reading.meterLabel} current reading changed. Revert and recreate this report.`)
     }
 
     const updated = await this.batches.findOneAndUpdate(

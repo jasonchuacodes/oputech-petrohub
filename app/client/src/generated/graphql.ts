@@ -259,6 +259,8 @@ export type UpdateMyProfileInput = {
 };
 
 export type UpdatePumpMeterInput = {
+  currentReading: string;
+  expectedCurrentReading: string;
   expectedRevision: number;
   label: string;
   meterId: string;

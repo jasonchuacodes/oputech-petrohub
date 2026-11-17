@@ -35,6 +35,8 @@ export type CreatePumpMeterInput = z.infer<typeof createPumpMeterInputSchema>
 export const updatePumpMeterInputSchema = createPumpMeterInputSchema.extend({
   meterId: z.instanceof(Types.ObjectId),
   expectedRevision: z.number().int().min(0),
+  currentReading: readingSchema,
+  expectedCurrentReading: readingSchema,
 }).omit({ productId: true, initialReading: true }).strict()
 export type UpdatePumpMeterInput = z.infer<typeof updatePumpMeterInputSchema>
 

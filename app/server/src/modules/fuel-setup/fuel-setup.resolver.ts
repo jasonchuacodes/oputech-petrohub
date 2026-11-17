@@ -110,8 +110,8 @@ export class FuelSetupResolver {
     @CurrentTenant() tenant: AuthorizedTenant,
     @Args('input', new ZodValidationPipe(updatePumpMeterInputSchema)) input: UpdatePumpMeterInput,
   ): Promise<GraphqlMutation['updatePumpMeter']> {
-    const meter = await this.fuelSetup.updateMeter(tenant.tenantId, input)
-    return this.meter(meter, await this.fuelSetup.currentReading(tenant.tenantId, meter))
+    const updated = await this.fuelSetup.updateMeter(tenant.tenantId, input)
+    return this.meter(updated.meter, updated.currentReading)
   }
 
   @Mutation('deactivatePumpMeter')
