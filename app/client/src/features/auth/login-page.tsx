@@ -1,20 +1,19 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Eye, EyeOff } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { useRouter } from 'next/navigation'
 import { OputechPetrohubLogo } from '~/components/brand/oputech-petrohub-logo'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
+import { PasswordInput } from '~/components/ui/password-input'
 import { Spinner } from '~/components/ui/spinner'
 import { useLoginMutation, useSessionQuery } from './auth.queries'
 import { getUserLandingPath } from './auth-routing'
 import { loginSchema, type LoginValues } from './login.schema'
 
 export function LoginPage() {
-  const [showPassword, setShowPassword] = useState(false)
   const session = useSessionQuery()
   const login = useLoginMutation()
   const router = useRouter()
@@ -82,27 +81,14 @@ export function LoginPage() {
                 <label htmlFor="password" className="text-sm font-medium">
                   Password
                 </label>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    type={showPassword ? 'text' : 'password'}
-                    autoComplete="current-password"
-                    placeholder="Enter your password"
-                    className="pr-12"
-                    aria-invalid={Boolean(errors.password)}
-                    aria-describedby={errors.password ? 'password-error' : undefined}
-                    {...register('password')}
-                  />
-                  <button
-                    type="button"
-                    aria-label={showPassword ? 'Hide password' : 'Show password'}
-                    aria-pressed={showPassword}
-                    className="absolute inset-y-0 right-0 flex w-12 items-center justify-center rounded-r-sm border-l border-input text-text-tertiary outline-none transition-colors hover:text-foreground focus-visible:ring-3 focus-visible:ring-inset focus-visible:ring-ring/40"
-                    onClick={() => setShowPassword((visible) => !visible)}
-                  >
-                    {showPassword ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
-                  </button>
-                </div>
+                <PasswordInput
+                  id="password"
+                  autoComplete="current-password"
+                  placeholder="Enter your password"
+                  aria-invalid={Boolean(errors.password)}
+                  aria-describedby={errors.password ? 'password-error' : undefined}
+                  {...register('password')}
+                />
                 {errors.password && (
                   <p id="password-error" role="alert" className="text-sm text-destructive">
                     {errors.password.message}

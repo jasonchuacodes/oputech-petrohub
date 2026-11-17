@@ -142,6 +142,7 @@ export function EditUserSheet({ tenantId, user, actorRole, onClose }: EditUserSh
                 >
                   <Input
                     id={`edit-user-username-${user.id}`}
+                    autoCapitalize="none"
                     autoComplete="off"
                     disabled={updateUser.isPending}
                     aria-invalid={Boolean(errors.username)}

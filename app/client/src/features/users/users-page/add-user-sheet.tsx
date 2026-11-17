@@ -1,12 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ChevronDown, Eye, EyeOff, UserPlus } from 'lucide-react'
-import { useCallback, useEffect, useId, useState, type ReactNode } from 'react'
+import { ChevronDown, UserPlus } from 'lucide-react'
+import { useCallback, useEffect, useId, type ReactNode } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { createPortal } from 'react-dom'
 import { toast } from 'sonner'
 import { Button } from '~/components/ui/button'
 import { DialogHeader } from '~/components/ui/dialog-header'
 import { Input } from '~/components/ui/input'
+import { PasswordInput } from '~/components/ui/password-input'
 import { Spinner } from '~/components/ui/spinner'
 import type { UserRole } from '~/generated/graphql'
 import { useDisclosure } from '~/hooks/useDisclosure'
@@ -37,7 +38,6 @@ const assignableRoles = ['member', 'admin'] as const satisfies readonly Manageab
 export function AddUserSheet({ open, tenantId, actorRole, onClose }: AddUserSheetProps) {
   const createUser = useCreateUserMutation()
   const roleOptions = useDisclosure()
-  const [showPassword, setShowPassword] = useState(false)
   const titleId = useId()
   const descriptionId = useId()
   const {
@@ -57,7 +57,6 @@ export function AddUserSheet({ open, tenantId, actorRole, onClose }: AddUserShee
 
   const resetForm = useCallback(() => {
     reset(defaultValues)
-    setShowPassword(false)
   }, [reset])
 
   const close = useCallback(() => {
@@ -156,6 +155,7 @@ export function AddUserSheet({ open, tenantId, actorRole, onClose }: AddUserShee
                 id="new-user-username"
                 autoFocus
                 autoComplete="off"
+                autoCapitalize="none"
                 placeholder="e.g. johndoe"
                 disabled={createUser.isPending}
                 aria-invalid={Boolean(errors.username)}
@@ -169,30 +169,15 @@ export function AddUserSheet({ open, tenantId, actorRole, onClose }: AddUserShee
               label="Password *"
               error={errors.password?.message}
             >
-              <div className="relative">
-                <Input
-                  id="new-user-password"
-                  type={showPassword ? 'text' : 'password'}
-                  autoComplete="new-password"
-                  className="pr-12"
-                  placeholder="Enter a password"
-                  disabled={createUser.isPending}
-                  aria-invalid={Boolean(errors.password)}
-                  aria-describedby={errors.password ? 'new-user-password-error' : undefined}
-                  {...register('password')}
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-0 top-0 text-text-tertiary"
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                  disabled={createUser.isPending}
-                  onClick={() => setShowPassword((visible) => !visible)}
-                >
-                  {showPassword ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
-                </Button>
-              </div>
+              <PasswordInput
+                id="new-user-password"
+                autoComplete="new-password"
+                placeholder="Enter a password"
+                disabled={createUser.isPending}
+                aria-invalid={Boolean(errors.password)}
+                aria-describedby={errors.password ? 'new-user-password-error' : undefined}
+                {...register('password')}
+              />
             </FormField>
 
             <FormField id="new-user-role" label="Role" error={errors.role?.message}>

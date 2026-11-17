@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { Button } from '~/components/ui/button'
 import { DialogHeader } from '~/components/ui/dialog-header'
-import { Input } from '~/components/ui/input'
+import { PasswordInput } from '~/components/ui/password-input'
 import { Spinner } from '~/components/ui/spinner'
 import { useResetUserPasswordMutation, type UserSummary } from '../users.queries'
 import {
@@ -176,9 +176,8 @@ function PasswordField({
       <label htmlFor={id} className="text-sm font-medium">
         {label}
       </label>
-      <Input
+      <PasswordInput
         id={id}
-        type="password"
         aria-invalid={Boolean(error)}
         aria-describedby={error ? errorId : undefined}
         {...props}

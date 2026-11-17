@@ -10,6 +10,7 @@ import { toast } from 'sonner'
 import { Button } from '~/components/ui/button'
 import { ConfirmationDialog } from '~/components/ui/confirmation-dialog'
 import { Input } from '~/components/ui/input'
+import { PasswordInput } from '~/components/ui/password-input'
 import { PageHeader } from '~/components/ui/page-header'
 import { SectionTabs, type SectionTabOption } from '~/components/ui/section-tabs'
 import { Spinner } from '~/components/ui/spinner'
@@ -158,6 +159,7 @@ function ProfileForm({ user }: { user: AuthUser }) {
               />
               <Input
                 id="profile-username"
+                autoCapitalize="none"
                 className="h-14 cursor-default rounded-md pl-12 text-base wide:h-14 wide:text-base"
                 value={user.username}
                 readOnly
@@ -369,9 +371,8 @@ function PasswordField({
           aria-hidden="true"
           className="pointer-events-none absolute left-4 top-1/2 z-10 size-5 -translate-y-1/2 text-text-secondary"
         />
-        <Input
+        <PasswordInput
           id={id}
-          type="password"
           autoComplete={autoComplete}
           className="h-14 rounded-md pl-12 text-base wide:h-14 wide:text-base"
           disabled={disabled}
