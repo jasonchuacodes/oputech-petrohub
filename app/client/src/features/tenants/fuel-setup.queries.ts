@@ -1,22 +1,28 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   CreateFuelProductDocument,
+  ActivateFuelTankDocument,
   CreatePumpMeterDocument,
+  CreateFuelTankDocument,
   CancelFuelPriceChangeDocument,
   ChangeFuelPriceDocument,
   DeactivateFuelProductDocument,
   DeactivatePumpMeterDocument,
+  DeactivateFuelTankDocument,
   FuelSetupDocument,
   UpdateFuelProductDocument,
   UpdatePumpMeterDocument,
+  UpdateFuelTankDocument,
   type CreateFuelProductInput,
   type CreatePumpMeterInput,
+  type CreateFuelTankInput,
   type CancelFuelPriceChangeInput,
   type ChangeFuelPriceInput,
   type DeactivateFuelSetupInput,
   type FuelSetupQuery,
   type UpdateFuelProductInput,
   type UpdatePumpMeterInput,
+  type UpdateFuelTankInput,
 } from '~/generated/graphql'
 import { graphqlClient } from '~/lib/graphql'
 import { reportKeys } from '../reports/reports.queries'
@@ -37,6 +43,7 @@ function useFuelSetupMutation<T>(tenantId: string, mutationFn: (input: T) => Pro
     onSuccess: async () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: fuelSetupKey(tenantId) }),
+        queryClient.invalidateQueries({ queryKey: ['fuel-deliveries', tenantId] }),
         queryClient.invalidateQueries({ queryKey: reportKeys.financialSummaries(tenantId) }),
       ])
     },
@@ -107,5 +114,29 @@ export function useUpdatePumpMeterMutation(tenantId: string) {
 export function useDeactivatePumpMeterMutation(tenantId: string) {
   return useFuelSetupMutation(tenantId, async (input: DeactivateFuelSetupInput) =>
     (await graphqlClient.request(DeactivatePumpMeterDocument, { input }, { tenantId })).deactivatePumpMeter,
+  )
+}
+
+export function useCreateFuelTankMutation(tenantId: string) {
+  return useFuelSetupMutation(tenantId, async (input: CreateFuelTankInput) =>
+    (await graphqlClient.request(CreateFuelTankDocument, { input }, { tenantId })).createFuelTank,
+  )
+}
+
+export function useUpdateFuelTankMutation(tenantId: string) {
+  return useFuelSetupMutation(tenantId, async (input: UpdateFuelTankInput) =>
+    (await graphqlClient.request(UpdateFuelTankDocument, { input }, { tenantId })).updateFuelTank,
+  )
+}
+
+export function useDeactivateFuelTankMutation(tenantId: string) {
+  return useFuelSetupMutation(tenantId, async (input: DeactivateFuelSetupInput) =>
+    (await graphqlClient.request(DeactivateFuelTankDocument, { input }, { tenantId })).deactivateFuelTank,
+  )
+}
+
+export function useActivateFuelTankMutation(tenantId: string) {
+  return useFuelSetupMutation(tenantId, async (input: DeactivateFuelSetupInput) =>
+    (await graphqlClient.request(ActivateFuelTankDocument, { input }, { tenantId })).activateFuelTank,
   )
 }

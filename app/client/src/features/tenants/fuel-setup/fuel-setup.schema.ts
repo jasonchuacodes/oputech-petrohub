@@ -15,3 +15,13 @@ export const pumpMeterFormSchema = z.object({
   currentReading: z.string().regex(/^(?:0|[1-9]\d*)(?:\.\d{1,3})?$/, 'Use up to 3 decimal places'),
 })
 export type PumpMeterFormValues = z.infer<typeof pumpMeterFormSchema>
+
+export const fuelTankFormSchema = z.object({
+  label: z.string().trim().min(1, 'Tank label is required').max(80),
+  productId: z.string().min(1, 'Select a fuel product'),
+  currentReading: z.union([
+    z.literal(''),
+    z.string().regex(/^(?:0|[1-9]\d*)(?:\.\d{1,3})?$/, 'Use up to 3 decimal places'),
+  ]),
+})
+export type FuelTankFormValues = z.infer<typeof fuelTankFormSchema>

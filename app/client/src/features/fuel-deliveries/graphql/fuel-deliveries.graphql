@@ -1,0 +1,33 @@
+fragment FuelDeliveryFields on FuelDelivery {
+  id
+  eventType
+  canManage
+  deliveryDate
+  lines { productId productName quantity }
+  readings { tankId tankLabel productId productName beforeReading afterReading }
+  notes
+  createdByName
+  updatedByName
+  createdAt
+  updatedAt
+  revision
+}
+
+query FuelDeliveries($input: FuelDeliveriesInput!) {
+  fuelDeliveries(input: $input) {
+    items { ...FuelDeliveryFields }
+    totalCount
+  }
+}
+
+mutation CreateFuelDelivery($input: CreateFuelDeliveryInput!) {
+  createFuelDelivery(input: $input) { ...FuelDeliveryFields }
+}
+
+mutation UpdateFuelDelivery($input: UpdateFuelDeliveryInput!) {
+  updateFuelDelivery(input: $input) { ...FuelDeliveryFields }
+}
+
+mutation DeleteFuelDelivery($input: DeleteFuelDeliveryInput!) {
+  deleteFuelDelivery(input: $input) { ...FuelDeliveryFields }
+}

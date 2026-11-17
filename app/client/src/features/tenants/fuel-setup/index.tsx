@@ -1,34 +1,43 @@
-'use client'
+'use client';
 
-import { Fuel, Gauge, MoreVertical, Pencil, Plus, Trash2 } from 'lucide-react'
-import { useState } from 'react'
-import { toast } from 'sonner'
-import { Button } from '~/components/ui/button'
-import { ConfirmationDialog } from '~/components/ui/confirmation-dialog'
-import { DataTable, type DataTableColumn } from '~/components/ui/data-table'
+import { Container, Fuel, Gauge, MoreVertical, Pencil, Plus, Power, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import { toast } from 'sonner';
+import { Button } from '~/components/ui/button';
+import { ConfirmationDialog } from '~/components/ui/confirmation-dialog';
+import { ContentSection } from '~/components/ui/content-section';
+import { DataTable, type DataTableColumn } from '~/components/ui/data-table';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '~/components/ui/dropdown-menu'
-import { PageHeader } from '~/components/ui/page-header'
-import { SectionTabs, type SectionTabOption } from '~/components/ui/section-tabs'
-import { Spinner } from '~/components/ui/spinner'
-import type { FuelProductFieldsFragment, PumpMeterFieldsFragment } from '~/generated/graphql'
-import { cn } from '~/utils/cn'
-import { FuelProductIcon } from '../../fuel-products/fuel-product-icon'
-import { useActiveTenant } from '../../layout/use-active-tenant'
+} from '~/components/ui/dropdown-menu';
+import { PageHeader } from '~/components/ui/page-header';
+import { SectionTabs, type SectionTabOption } from '~/components/ui/section-tabs';
+import { Spinner } from '~/components/ui/spinner';
+import type {
+  FuelProductFieldsFragment,
+  FuelTankFieldsFragment,
+  PumpMeterFieldsFragment,
+} from '~/generated/graphql';
+import { cn } from '~/utils/cn';
+import { FuelProductIcon } from '../../fuel-products/fuel-product-icon';
+import { FuelDeliveryHistory } from '../../fuel-deliveries/fuel-delivery-history';
+import { useActiveTenant } from '../../layout/use-active-tenant';
 import {
   useDeactivateFuelProductMutation,
   useDeactivatePumpMeterMutation,
+  useDeactivateFuelTankMutation,
+  useActivateFuelTankMutation,
   useFuelSetupQuery,
-} from '../fuel-setup.queries'
-import { FuelProductSheet } from './fuel-product-sheet'
-import { PumpMeterSheet } from './pump-meter-sheet'
-import { SetupSheet } from './setup-sheet'
+} from '../fuel-setup.queries';
+import { FuelProductSheet } from './fuel-product-sheet';
+import { PumpMeterSheet } from './pump-meter-sheet';
+import { FuelTankSheet } from './fuel-tank-sheet';
+import { SetupSheet } from './setup-sheet';
 
-type SetupTab = 'products' | 'meters'
+type SetupTab = 'products' | 'meters' | 'tanks';
 
 const setupTabs = [
   {
@@ -43,62 +52,130 @@ const setupTabs = [
     id: 'fuel-meters-tab',
     panelId: 'fuel-meters-panel',
   },
-] as const satisfies readonly SectionTabOption<SetupTab>[]
-type ProductEditor = FuelProductFieldsFragment | 'new' | null
+  {
+    value: 'tanks',
+    label: 'Tanks',
+    id: 'fuel-tanks-tab',
+    panelId: 'fuel-tanks-panel',
+  },
+] as const satisfies readonly SectionTabOption<SetupTab>[];
+type ProductEditor = FuelProductFieldsFragment | 'new' | null;
 type DeactivationTarget =
   | { kind: 'product'; item: FuelProductFieldsFragment }
   | { kind: 'meter'; item: PumpMeterFieldsFragment }
+  | { kind: 'tank'; item: FuelTankFieldsFragment };
 
 export function FuelSetupPage() {
-  const access = useActiveTenant()
-  const canManage = access.role === 'admin' || access.role === 'superadmin'
-  if (!canManage) return <div className="mx-auto max-w-xl p-6 text-sm text-text-secondary">Only administrators can manage fuel setup.</div>
-  return <TenantFuelSetup key={access.tenant.id} tenantId={access.tenant.id} timezone={access.tenant.timezone} />
+  const access = useActiveTenant();
+  const canManage = access.role === 'admin' || access.role === 'superadmin';
+  if (!canManage)
+    return (
+      <div className="mx-auto max-w-xl p-6 text-sm text-text-secondary">
+        Only administrators can manage fuel setup.
+      </div>
+    );
+  return (
+    <TenantFuelSetup
+      key={access.tenant.id}
+      tenantId={access.tenant.id}
+      timezone={access.tenant.timezone}
+    />
+  );
 }
 
 function TenantFuelSetup({ tenantId, timezone }: { tenantId: string; timezone: string }) {
-  const setup = useFuelSetupQuery(tenantId)
-  const deactivateProduct = useDeactivateFuelProductMutation(tenantId)
-  const deactivateMeter = useDeactivatePumpMeterMutation(tenantId)
-  const [tab, setTab] = useState<SetupTab>('products')
-  const [productEditor, setProductEditor] = useState<ProductEditor>(null)
-  const [addingMeter, setAddingMeter] = useState(false)
-  const [meterEditor, setMeterEditor] = useState<PumpMeterFieldsFragment>()
-  const [productActions, setProductActions] = useState<FuelProductFieldsFragment>()
-  const [meterActions, setMeterActions] = useState<PumpMeterFieldsFragment>()
-  const [deactivation, setDeactivation] = useState<DeactivationTarget>()
-  const pending = deactivateProduct.isPending || deactivateMeter.isPending
+  const setup = useFuelSetupQuery(tenantId);
+  const deactivateProduct = useDeactivateFuelProductMutation(tenantId);
+  const deactivateMeter = useDeactivatePumpMeterMutation(tenantId);
+  const deactivateTank = useDeactivateFuelTankMutation(tenantId);
+  const activateTank = useActivateFuelTankMutation(tenantId);
+  const [tab, setTab] = useState<SetupTab>('products');
+  const [productEditor, setProductEditor] = useState<ProductEditor>(null);
+  const [addingMeter, setAddingMeter] = useState(false);
+  const [meterEditor, setMeterEditor] = useState<PumpMeterFieldsFragment>();
+  const [addingTank, setAddingTank] = useState(false);
+  const [tankEditor, setTankEditor] = useState<FuelTankFieldsFragment>();
+  const [productActions, setProductActions] = useState<FuelProductFieldsFragment>();
+  const [meterActions, setMeterActions] = useState<PumpMeterFieldsFragment>();
+  const [tankActions, setTankActions] = useState<FuelTankFieldsFragment>();
+  const [deactivation, setDeactivation] = useState<DeactivationTarget>();
+  const pending =
+    deactivateProduct.isPending ||
+    deactivateMeter.isPending ||
+    deactivateTank.isPending ||
+    activateTank.isPending;
 
-  if (setup.isPending) return <div className="flex min-h-64 items-center justify-center"><Spinner className="size-6" /></div>
-  if (setup.isError) return <div className="mx-auto max-w-xl p-6"><p className="text-sm text-destructive">Unable to load fuel setup.</p><Button className="mt-3" variant="outline" onClick={() => void setup.refetch()}>Try again</Button></div>
+  if (setup.isPending)
+    return (
+      <div className="flex min-h-64 items-center justify-center">
+        <Spinner className="size-6" />
+      </div>
+    );
+  if (setup.isError)
+    return (
+      <div className="mx-auto max-w-xl p-6">
+        <p className="text-sm text-destructive">Unable to load fuel setup.</p>
+        <Button className="mt-3" variant="outline" onClick={() => void setup.refetch()}>
+          Try again
+        </Button>
+      </div>
+    );
 
   const deactivate = async () => {
-    if (!deactivation) return
+    if (!deactivation) return;
     try {
       if (deactivation.kind === 'product') {
-        await deactivateProduct.mutateAsync({ id: deactivation.item.id, expectedRevision: deactivation.item.revision })
-        toast.success('Fuel product deactivated')
+        await deactivateProduct.mutateAsync({
+          id: deactivation.item.id,
+          expectedRevision: deactivation.item.revision,
+        });
+        toast.success('Fuel product deactivated');
+      } else if (deactivation.kind === 'meter') {
+        await deactivateMeter.mutateAsync({
+          id: deactivation.item.id,
+          expectedRevision: deactivation.item.revision,
+        });
+        toast.success('Pump meter deactivated');
       } else {
-        await deactivateMeter.mutateAsync({ id: deactivation.item.id, expectedRevision: deactivation.item.revision })
-        toast.success('Pump meter deactivated')
+        await deactivateTank.mutateAsync({
+          id: deactivation.item.id,
+          expectedRevision: deactivation.item.revision,
+        });
+        toast.success('Fuel tank deactivated');
       }
-      setDeactivation(undefined)
+      setDeactivation(undefined);
     } catch {
-      toast.error(deactivation.kind === 'product' ? 'Deactivate the product’s active meters first.' : 'Unable to deactivate the pump meter.')
+      toast.error(
+        deactivation.kind === 'product'
+          ? 'Deactivate the product’s active pumps and tanks first.'
+          : `Unable to deactivate the ${deactivation.kind === 'meter' ? 'pump meter' : 'fuel tank'}.`,
+      );
     }
-  }
+  };
 
-  const selectedProduct = productEditor && productEditor !== 'new' ? productEditor : undefined
-  const deactivationDescription = deactivation
-    ? deactivation.kind === 'product'
-      ? (
-          <span className="inline-flex items-center gap-1.5">
-            <FuelProductIcon color={deactivation.item.color} className="size-4" />
-            <span>{deactivation.item.name}</span>
-          </span>
-        )
-      : deactivation.item.label
-    : undefined
+  const activate = async (tank: FuelTankFieldsFragment) => {
+    try {
+      await activateTank.mutateAsync({ id: tank.id, expectedRevision: tank.revision });
+      toast.success('Fuel tank activated');
+      setTankActions(undefined);
+    } catch {
+      toast.error(
+        'Unable to activate the fuel tank. Ensure its fuel product is active, then try again.',
+      );
+    }
+  };
+
+  const selectedProduct = productEditor && productEditor !== 'new' ? productEditor : undefined;
+  const deactivationDescription = deactivation ? (
+    deactivation.kind === 'product' ? (
+      <span className="inline-flex items-center gap-1.5">
+        <FuelProductIcon color={deactivation.item.color} className="size-4" />
+        <span>{deactivation.item.name}</span>
+      </span>
+    ) : (
+      deactivation.item.label
+    )
+  ) : undefined;
   const productColumns: DataTableColumn<FuelProductFieldsFragment>[] = [
     {
       id: 'name',
@@ -148,7 +225,7 @@ function TenantFuelSetup({ tenantId, timezone }: { tenantId: string; timezone: s
         />
       ),
     },
-  ]
+  ];
   const meterColumns: DataTableColumn<PumpMeterFieldsFragment>[] = [
     {
       id: 'label',
@@ -168,13 +245,15 @@ function TenantFuelSetup({ tenantId, timezone }: { tenantId: string; timezone: s
       id: 'productId',
       heading: 'Fuel product',
       cell: (meter) => {
-        const product = setup.data.products.find((item) => item.id === meter.productId)
+        const product = setup.data.products.find((item) => item.id === meter.productId);
         return product ? (
           <span className="inline-flex items-center gap-2">
             <FuelProductIcon color={product.color} className="size-4" />
             <span>{product.name}</span>
           </span>
-        ) : 'Unknown fuel product'
+        ) : (
+          'Unknown fuel product'
+        );
       },
     },
     {
@@ -205,23 +284,94 @@ function TenantFuelSetup({ tenantId, timezone }: { tenantId: string; timezone: s
         />
       ),
     },
-  ]
+  ];
+  const tankColumns: DataTableColumn<FuelTankFieldsFragment>[] = [
+    {
+      id: 'label',
+      heading: 'Tank',
+      cell: (tank) => (
+        <button
+          type="button"
+          disabled={tank.status !== 'active'}
+          className="max-w-full truncate rounded-sm text-left font-medium text-text-heading underline-offset-4 outline-none enabled:cursor-pointer enabled:hover:text-primary enabled:hover:underline focus-visible:ring-3 focus-visible:ring-ring/30 disabled:cursor-default"
+          onClick={() => setTankEditor(tank)}
+        >
+          {tank.label}
+        </button>
+      ),
+    },
+    {
+      id: 'productId',
+      heading: 'Fuel product',
+      cell: (tank) => {
+        const product = setup.data.products.find((item) => item.id === tank.productId);
+        return product ? (
+          <span className="inline-flex items-center gap-2">
+            <FuelProductIcon color={product.color} className="size-4" />
+            <span>{product.name}</span>
+          </span>
+        ) : (
+          'Unknown fuel product'
+        );
+      },
+    },
+    {
+      id: 'currentReading',
+      heading: 'Current reading',
+      align: 'right',
+      cell: (tank) => (
+        <span className="font-semibold tabular-nums text-text-heading">
+          {tank.currentReading === null ? '—' : formatReading(tank.currentReading)}
+        </span>
+      ),
+    },
+    {
+      id: 'lastReadingDate',
+      heading: 'Last recorded',
+      cell: (tank) => (tank.lastReadingDate ? formatDate(tank.lastReadingDate) : '—'),
+    },
+    {
+      id: 'status',
+      heading: 'Status',
+      cell: (tank) => <Status status={tank.status} />,
+    },
+    {
+      id: 'actions',
+      heading: '',
+      align: 'right',
+      width: 64,
+      cell: (tank) => (
+        <FuelTankRowActions
+          tank={tank}
+          pending={activateTank.isPending}
+          onEdit={() => setTankEditor(tank)}
+          onActivate={() => void activate(tank)}
+          onDeactivate={() => setDeactivation({ kind: 'tank', item: tank })}
+        />
+      ),
+    },
+  ];
 
   return (
     <div className="mx-auto flex w-full flex-col gap-5 px-5 py-5 md:max-w-4xl md:p-6 wide:max-w-7xl">
       <PageHeader
         title="Fuel setup"
-        description="Configure your products and view pump readings."
+        description="Configure fuel products, pumps, tanks, and tank reading visibility."
         backHref="/me"
         backLabel="Back to Me"
         backVisibility="mobile"
         action={
           tab === 'products' ? (
-            <Button type="button" size="sm" className="hidden md:inline-flex" onClick={() => setProductEditor('new')}>
+            <Button
+              type="button"
+              size="sm"
+              className="hidden md:inline-flex"
+              onClick={() => setProductEditor('new')}
+            >
               <Plus aria-hidden="true" />
               Add product
             </Button>
-          ) : (
+          ) : tab === 'meters' ? (
             <Button
               type="button"
               size="sm"
@@ -231,6 +381,17 @@ function TenantFuelSetup({ tenantId, timezone }: { tenantId: string; timezone: s
             >
               <Plus aria-hidden="true" />
               Add meter
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              size="sm"
+              className="hidden md:inline-flex"
+              disabled={setup.data.products.every((product) => product.status !== 'active')}
+              onClick={() => setAddingTank(true)}
+            >
+              <Plus aria-hidden="true" />
+              Add tank
             </Button>
           )
         }
@@ -244,18 +405,21 @@ function TenantFuelSetup({ tenantId, timezone }: { tenantId: string; timezone: s
       />
 
       {tab === 'products' ? (
-        <section
-          id="fuel-products-panel"
-          role="tabpanel"
-          aria-labelledby="fuel-products-tab"
-        >
+        <section id="fuel-products-panel" role="tabpanel" aria-labelledby="fuel-products-tab">
           {setup.data.products.length === 0 ? (
-            <EmptyCard icon={Fuel} title="No fuel products" description="Add the first fuel product and its selling price." />
+            <EmptyCard
+              icon={Fuel}
+              title="No fuel products"
+              description="Add the first fuel product and its selling price."
+            />
           ) : (
             <>
               <div className="overflow-hidden rounded-md bg-card shadow-card md:hidden">
                 {setup.data.products.map((product) => (
-                  <article key={product.id} className="flex min-h-20 items-center gap-3 border-b border-border/60 p-4 last:border-b-0">
+                  <article
+                    key={product.id}
+                    className="flex min-h-20 items-center gap-3 border-b border-border/60 p-4 last:border-b-0"
+                  >
                     <FuelProductIcon
                       color={product.color}
                       tile
@@ -276,9 +440,17 @@ function TenantFuelSetup({ tenantId, timezone }: { tenantId: string; timezone: s
                         </h3>
                         <Status status={product.status} />
                       </div>
-                      <p className="mt-1 text-sm font-medium tabular-nums">₱{formatPrice(product.unitPrice)}</p>
+                      <p className="mt-1 text-sm font-medium tabular-nums">
+                        ₱{formatPrice(product.unitPrice)}
+                      </p>
                     </div>
-                    <Button type="button" size="icon" variant="ghost" aria-label={`Actions for ${product.name}`} onClick={() => setProductActions(product)}>
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="ghost"
+                      aria-label={`Actions for ${product.name}`}
+                      onClick={() => setProductActions(product)}
+                    >
                       <MoreVertical aria-hidden="true" />
                     </Button>
                   </article>
@@ -296,19 +468,34 @@ function TenantFuelSetup({ tenantId, timezone }: { tenantId: string; timezone: s
               </div>
             </>
           )}
-          <Button type="button" variant="outline" className="mt-4 w-full md:hidden" onClick={() => setProductEditor('new')}><Plus aria-hidden="true" />Add product</Button>
+          <Button
+            type="button"
+            variant="outline"
+            className="mt-4 w-full md:hidden"
+            onClick={() => setProductEditor('new')}
+          >
+            <Plus aria-hidden="true" />
+            Add product
+          </Button>
         </section>
-      ) : (
+      ) : tab === 'meters' ? (
         <section id="fuel-meters-panel" role="tabpanel" aria-labelledby="fuel-meters-tab">
           {setup.data.meters.length === 0 ? (
-            <EmptyCard icon={Gauge} title="No pump meters" description="Add one card for each independently incrementing physical meter." />
+            <EmptyCard
+              icon={Gauge}
+              title="No pump meters"
+              description="Add one card for each independently incrementing physical meter."
+            />
           ) : (
             <>
               <div className="overflow-hidden rounded-md bg-card shadow-card md:hidden">
                 {setup.data.meters.map((meter) => {
-                  const product = setup.data.products.find((item) => item.id === meter.productId)
+                  const product = setup.data.products.find((item) => item.id === meter.productId);
                   return (
-                    <article key={meter.id} className="border-b border-border/60 p-4 last:border-b-0">
+                    <article
+                      key={meter.id}
+                      className="border-b border-border/60 p-4 last:border-b-0"
+                    >
                       <div className="flex items-start gap-3">
                         <span className="flex size-10 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
                           <Gauge aria-hidden="true" className="size-5" />
@@ -336,16 +523,26 @@ function TenantFuelSetup({ tenantId, timezone }: { tenantId: string; timezone: s
                             <p className="mt-1 text-sm text-text-secondary">Unknown fuel product</p>
                           )}
                         </div>
-                        <Button type="button" size="icon" variant="ghost" aria-label={`Actions for ${meter.label}`} onClick={() => setMeterActions(meter)}>
+                        <Button
+                          type="button"
+                          size="icon"
+                          variant="ghost"
+                          aria-label={`Actions for ${meter.label}`}
+                          onClick={() => setMeterActions(meter)}
+                        >
                           <MoreVertical aria-hidden="true" />
                         </Button>
                       </div>
                       <div className="mt-3 flex items-center justify-between gap-4 sm:ml-13">
-                        <span className="text-xs font-medium uppercase tracking-wide text-text-tertiary">Current reading</span>
-                        <span className="text-base font-semibold tabular-nums text-text-heading">{formatReading(meter.currentReading)}</span>
+                        <span className="text-xs font-medium uppercase tracking-wide text-text-tertiary">
+                          Current reading
+                        </span>
+                        <span className="text-base font-semibold tabular-nums text-text-heading">
+                          {formatReading(meter.currentReading)}
+                        </span>
                       </div>
                     </article>
-                  )
+                  );
                 })}
               </div>
               <div className="hidden md:block">
@@ -360,20 +557,321 @@ function TenantFuelSetup({ tenantId, timezone }: { tenantId: string; timezone: s
               </div>
             </>
           )}
-          <Button type="button" variant="outline" className="mt-4 w-full md:hidden" disabled={setup.data.products.every((product) => product.status !== 'active')} onClick={() => setAddingMeter(true)}><Plus aria-hidden="true" />Add meter</Button>
+          <Button
+            type="button"
+            variant="outline"
+            className="mt-4 w-full md:hidden"
+            disabled={setup.data.products.every((product) => product.status !== 'active')}
+            onClick={() => setAddingMeter(true)}
+          >
+            <Plus aria-hidden="true" />
+            Add meter
+          </Button>
+        </section>
+      ) : (
+        <section
+          id="fuel-tanks-panel"
+          role="tabpanel"
+          aria-labelledby="fuel-tanks-tab"
+          className="space-y-8"
+        >
+          <div>
+            {setup.data.tanks.length === 0 ? (
+              <EmptyCard
+                icon={Container}
+                title="No fuel tanks"
+                description="Add one entry for each physical fuel tank."
+              />
+            ) : (
+              <>
+                <div className="overflow-hidden rounded-md bg-card shadow-card md:hidden">
+                  {setup.data.tanks.map((tank) => {
+                    const product = setup.data.products.find((item) => item.id === tank.productId);
+                    return (
+                      <article
+                        key={tank.id}
+                        className="border-b border-border/60 p-4 last:border-b-0"
+                      >
+                        <div className="flex items-start gap-3">
+                          <span className="flex size-10 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+                            <Container aria-hidden="true" className="size-5" />
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <button
+                                type="button"
+                                disabled={tank.status !== 'active'}
+                                className="max-w-full truncate rounded-sm text-left font-medium text-text-heading underline-offset-4 outline-none enabled:hover:text-primary enabled:hover:underline"
+                                onClick={() => setTankEditor(tank)}
+                              >
+                                {tank.label}
+                              </button>
+                              <Status status={tank.status} />
+                            </div>
+                            <p className="mt-1 flex items-center gap-2 text-sm text-text-secondary">
+                              {product && (
+                                <FuelProductIcon color={product.color} className="size-4" />
+                              )}
+                              <span>{product?.name ?? 'Unknown fuel product'}</span>
+                            </p>
+                          </div>
+                          <Button
+                            type="button"
+                            size="icon"
+                            variant="ghost"
+                            aria-label={`Actions for ${tank.label}`}
+                            onClick={() => setTankActions(tank)}
+                          >
+                            <MoreVertical aria-hidden="true" />
+                          </Button>
+                        </div>
+                        <div className="mt-3 flex items-center justify-between gap-4 sm:ml-13">
+                          <span className="text-xs font-medium uppercase tracking-wide text-text-tertiary">
+                            Current reading
+                          </span>
+                          <span className="text-base font-semibold tabular-nums text-text-heading">
+                            {tank.currentReading === null
+                              ? '—'
+                              : formatReading(tank.currentReading)}
+                          </span>
+                        </div>
+                        {tank.lastReadingDate && (
+                          <p className="mt-1 text-right text-xs text-text-tertiary">
+                            Last recorded {formatDate(tank.lastReadingDate)}
+                          </p>
+                        )}
+                      </article>
+                    );
+                  })}
+                </div>
+                <div className="hidden md:block">
+                  <DataTable
+                    collection={DataTable.collection({
+                      items: setup.data.tanks,
+                      itemToValue: (tank) => tank.id,
+                      itemToString: (tank) => `${tank.label} fuel tank`,
+                    })}
+                    columns={tankColumns}
+                  />
+                </div>
+              </>
+            )}
+            <Button
+              type="button"
+              variant="outline"
+              className="mt-4 w-full md:hidden"
+              disabled={setup.data.products.every((product) => product.status !== 'active')}
+              onClick={() => setAddingTank(true)}
+            >
+              <Plus aria-hidden="true" />
+              Add tank
+            </Button>
+          </div>
+          <ContentSection label="Tank reading history">
+            <FuelDeliveryHistory
+              tenantId={tenantId}
+              timezone={timezone}
+              products={setup.data.products}
+              tanks={setup.data.tanks}
+            />
+          </ContentSection>
         </section>
       )}
 
-      {productEditor && <FuelProductSheet key={selectedProduct?.id ?? 'new'} tenantId={tenantId} product={selectedProduct} timezone={timezone} onClose={() => setProductEditor(null)} />}
-      {addingMeter && <PumpMeterSheet tenantId={tenantId} products={setup.data.products} onClose={() => setAddingMeter(false)} />}
-      {meterEditor && <PumpMeterSheet key={meterEditor.id} tenantId={tenantId} products={setup.data.products} meter={meterEditor} onClose={() => setMeterEditor(undefined)} />}
+      {productEditor && (
+        <FuelProductSheet
+          key={selectedProduct?.id ?? 'new'}
+          tenantId={tenantId}
+          product={selectedProduct}
+          timezone={timezone}
+          onClose={() => setProductEditor(null)}
+        />
+      )}
+      {addingMeter && (
+        <PumpMeterSheet
+          tenantId={tenantId}
+          products={setup.data.products}
+          onClose={() => setAddingMeter(false)}
+        />
+      )}
+      {meterEditor && (
+        <PumpMeterSheet
+          key={meterEditor.id}
+          tenantId={tenantId}
+          products={setup.data.products}
+          meter={meterEditor}
+          onClose={() => setMeterEditor(undefined)}
+        />
+      )}
+      {addingTank && (
+        <FuelTankSheet
+          tenantId={tenantId}
+          products={setup.data.products}
+          onClose={() => setAddingTank(false)}
+        />
+      )}
+      {tankEditor && (
+        <FuelTankSheet
+          key={tankEditor.id}
+          tenantId={tenantId}
+          products={setup.data.products}
+          tank={tankEditor}
+          onClose={() => setTankEditor(undefined)}
+        />
+      )}
 
-      {productActions && <SetupSheet open title="Fuel product actions" description={<span className="inline-flex items-center gap-1.5"><FuelProductIcon color={productActions.color} className="size-4" /><span>{productActions.name} · ₱{formatPrice(productActions.unitPrice)}</span></span>} icon={Fuel} onClose={() => setProductActions(undefined)}><div className="flex flex-col gap-2 px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]"><Button type="button" variant="outline" className="w-full" disabled={productActions.status !== 'active'} onClick={() => { setProductEditor(productActions); setProductActions(undefined) }}><Pencil aria-hidden="true" />Edit product</Button><Button type="button" variant="destructive" className="w-full" disabled={productActions.status !== 'active'} onClick={() => { setDeactivation({ kind: 'product', item: productActions }); setProductActions(undefined) }}><Trash2 aria-hidden="true" />Deactivate product</Button></div></SetupSheet>}
-      {meterActions && <SetupSheet open title="Pump meter actions" description={meterActions.label} icon={Gauge} onClose={() => setMeterActions(undefined)}><div className="flex flex-col gap-2 px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]"><Button type="button" variant="outline" className="w-full" disabled={meterActions.status !== 'active'} onClick={() => { setMeterEditor(meterActions); setMeterActions(undefined) }}><Pencil aria-hidden="true" />Edit pump</Button><Button type="button" variant="destructive" className="w-full" disabled={meterActions.status !== 'active'} onClick={() => { setDeactivation({ kind: 'meter', item: meterActions }); setMeterActions(undefined) }}><Trash2 aria-hidden="true" />Deactivate meter</Button></div></SetupSheet>}
+      {productActions && (
+        <SetupSheet
+          open
+          title="Fuel product actions"
+          description={
+            <span className="inline-flex items-center gap-1.5">
+              <FuelProductIcon color={productActions.color} className="size-4" />
+              <span>
+                {productActions.name} · ₱{formatPrice(productActions.unitPrice)}
+              </span>
+            </span>
+          }
+          icon={Fuel}
+          onClose={() => setProductActions(undefined)}
+        >
+          <div className="flex flex-col gap-2 px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              disabled={productActions.status !== 'active'}
+              onClick={() => {
+                setProductEditor(productActions);
+                setProductActions(undefined);
+              }}
+            >
+              <Pencil aria-hidden="true" />
+              Edit product
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              className="w-full"
+              disabled={productActions.status !== 'active'}
+              onClick={() => {
+                setDeactivation({ kind: 'product', item: productActions });
+                setProductActions(undefined);
+              }}
+            >
+              <Trash2 aria-hidden="true" />
+              Deactivate product
+            </Button>
+          </div>
+        </SetupSheet>
+      )}
+      {meterActions && (
+        <SetupSheet
+          open
+          title="Pump meter actions"
+          description={meterActions.label}
+          icon={Gauge}
+          onClose={() => setMeterActions(undefined)}
+        >
+          <div className="flex flex-col gap-2 px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              disabled={meterActions.status !== 'active'}
+              onClick={() => {
+                setMeterEditor(meterActions);
+                setMeterActions(undefined);
+              }}
+            >
+              <Pencil aria-hidden="true" />
+              Edit pump
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              className="w-full"
+              disabled={meterActions.status !== 'active'}
+              onClick={() => {
+                setDeactivation({ kind: 'meter', item: meterActions });
+                setMeterActions(undefined);
+              }}
+            >
+              <Trash2 aria-hidden="true" />
+              Deactivate meter
+            </Button>
+          </div>
+        </SetupSheet>
+      )}
+      {tankActions && (
+        <SetupSheet
+          open
+          title="Fuel tank actions"
+          description={tankActions.label}
+          icon={Container}
+          onClose={() => setTankActions(undefined)}
+        >
+          <div className="flex flex-col gap-2 px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
+            {tankActions.status === 'active' ? (
+              <>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => {
+                    setTankEditor(tankActions);
+                    setTankActions(undefined);
+                  }}
+                >
+                  <Pencil aria-hidden="true" />
+                  Edit tank
+                </Button>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  className="w-full"
+                  onClick={() => {
+                    setDeactivation({ kind: 'tank', item: tankActions });
+                    setTankActions(undefined);
+                  }}
+                >
+                  <Trash2 aria-hidden="true" />
+                  Deactivate tank
+                </Button>
+              </>
+            ) : (
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                disabled={activateTank.isPending}
+                onClick={() => void activate(tankActions)}
+              >
+                <Power aria-hidden="true" />
+                Activate tank
+              </Button>
+            )}
+          </div>
+        </SetupSheet>
+      )}
 
-      <ConfirmationDialog open={Boolean(deactivation)} title={`Deactivate ${deactivation?.kind === 'product' ? 'fuel product' : 'pump meter'}?`} description={deactivationDescription} icon={Trash2} variant="danger" confirmText="Deactivate" loading={pending} onClose={() => setDeactivation(undefined)} onConfirm={() => void deactivate()}><p className="text-sm text-text-secondary">Existing reports keep their saved product and meter details. Inactive setup is not included in new reports.</p></ConfirmationDialog>
+      <ConfirmationDialog
+        open={Boolean(deactivation)}
+        title={`Deactivate ${deactivation?.kind === 'product' ? 'fuel product' : deactivation?.kind === 'meter' ? 'pump meter' : 'fuel tank'}?`}
+        description={deactivationDescription}
+        icon={Trash2}
+        variant="danger"
+        confirmText="Deactivate"
+        loading={pending}
+        onClose={() => setDeactivation(undefined)}
+        onConfirm={() => void deactivate()}
+      >
+        <p className="text-sm text-text-secondary">
+          Existing history keeps its saved details. Inactive setup is not included in new records.
+        </p>
+      </ConfirmationDialog>
     </div>
-  )
+  );
 }
 
 function FuelProductRowActions({
@@ -381,11 +879,11 @@ function FuelProductRowActions({
   onEdit,
   onDeactivate,
 }: {
-  product: FuelProductFieldsFragment
-  onEdit: () => void
-  onDeactivate: () => void
+  product: FuelProductFieldsFragment;
+  onEdit: () => void;
+  onDeactivate: () => void;
 }) {
-  const inactive = product.status !== 'active'
+  const inactive = product.status !== 'active';
 
   return (
     <DropdownMenu>
@@ -404,7 +902,7 @@ function FuelProductRowActions({
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }
 
 function PumpMeterRowActions({
@@ -412,11 +910,11 @@ function PumpMeterRowActions({
   onEdit,
   onDeactivate,
 }: {
-  meter: PumpMeterFieldsFragment
-  onEdit: () => void
-  onDeactivate: () => void
+  meter: PumpMeterFieldsFragment;
+  onEdit: () => void;
+  onDeactivate: () => void;
 }) {
-  const inactive = meter.status !== 'active'
+  const inactive = meter.status !== 'active';
 
   return (
     <DropdownMenu>
@@ -435,13 +933,99 @@ function PumpMeterRowActions({
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }
 
-function EmptyCard({ icon: Icon, title, description }: { icon: typeof Fuel; title: string; description: string }) {
-  return <div className="flex min-h-52 flex-col items-center justify-center gap-3 rounded-md bg-card p-6 text-center shadow-card"><span className="flex size-12 items-center justify-center rounded-md bg-primary/10 text-primary"><Icon aria-hidden="true" className="size-5" /></span><div><p className="font-medium text-text-heading">{title}</p><p className="mt-1 max-w-sm text-sm text-text-secondary">{description}</p></div></div>
+function FuelTankRowActions({
+  tank,
+  pending,
+  onEdit,
+  onActivate,
+  onDeactivate,
+}: {
+  tank: FuelTankFieldsFragment;
+  pending: boolean;
+  onEdit: () => void;
+  onActivate: () => void;
+  onDeactivate: () => void;
+}) {
+  const inactive = tank.status !== 'active';
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        aria-label={`Actions for ${tank.label}`}
+        className="inline-flex size-9 items-center justify-center rounded-sm text-text-secondary outline-none hover:bg-surface-hover focus-visible:ring-3 focus-visible:ring-ring/30"
+      >
+        <MoreVertical aria-hidden="true" className="size-4" />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        {inactive ? (
+          <DropdownMenuItem disabled={pending} onSelect={onActivate}>
+            <Power aria-hidden="true" /> Activate tank
+          </DropdownMenuItem>
+        ) : (
+          <>
+            <DropdownMenuItem onSelect={onEdit}>
+              <Pencil aria-hidden="true" /> Edit tank
+            </DropdownMenuItem>
+            <DropdownMenuItem variant="destructive" onSelect={onDeactivate}>
+              <Trash2 aria-hidden="true" /> Deactivate tank
+            </DropdownMenuItem>
+          </>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 }
 
-function Status({ status }: { status: 'active' | 'inactive' }) { return <span className={cn('inline-flex rounded-sm px-2 py-0.5 text-xs font-medium', status === 'active' ? 'bg-status-success/10 text-status-success' : 'bg-muted text-text-tertiary')}>{status === 'active' ? 'Active' : 'Inactive'}</span> }
-function formatPrice(value: string) { const [whole, fraction = '00'] = value.split('.'); return `${whole}.${fraction.padEnd(2, '0').slice(0, 2)}` }
-function formatReading(value: string) { const [whole, fraction = ''] = value.split('.'); return `${whole}.${fraction.padEnd(3, '0').slice(0, 3)}` }
+function EmptyCard({
+  icon: Icon,
+  title,
+  description,
+}: {
+  icon: typeof Fuel;
+  title: string;
+  description: string;
+}) {
+  return (
+    <div className="flex min-h-52 flex-col items-center justify-center gap-3 rounded-md bg-card p-6 text-center shadow-card">
+      <span className="flex size-12 items-center justify-center rounded-md bg-primary/10 text-primary">
+        <Icon aria-hidden="true" className="size-5" />
+      </span>
+      <div>
+        <p className="font-medium text-text-heading">{title}</p>
+        <p className="mt-1 max-w-sm text-sm text-text-secondary">{description}</p>
+      </div>
+    </div>
+  );
+}
+
+function Status({ status }: { status: 'active' | 'inactive' }) {
+  return (
+    <span
+      className={cn(
+        'inline-flex rounded-sm px-2 py-0.5 text-xs font-medium',
+        status === 'active'
+          ? 'bg-status-success/10 text-status-success'
+          : 'bg-muted text-text-tertiary',
+      )}
+    >
+      {status === 'active' ? 'Active' : 'Inactive'}
+    </span>
+  );
+}
+function formatPrice(value: string) {
+  const [whole, fraction = '00'] = value.split('.');
+  return `${whole}.${fraction.padEnd(2, '0').slice(0, 2)}`;
+}
+function formatReading(value: string) {
+  const [whole, fraction = ''] = value.split('.');
+  return `${whole}.${fraction.padEnd(3, '0').slice(0, 3)}`;
+}
+function formatDate(value: string) {
+  return new Intl.DateTimeFormat(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  }).format(new Date(`${value}T00:00:00`));
+}
