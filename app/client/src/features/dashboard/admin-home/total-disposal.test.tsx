@@ -8,8 +8,8 @@ type DisposalTotal = FinancialSummaryQuery['financialSummary']['disposalTotals']
 describe('TotalDisposal', () => {
   it('renders text-only product cards with formatted liters', () => {
     const totals: DisposalTotal[] = [
-      { productId: 'ado', productName: 'ADO', netVolume: '30' },
-      { productId: 'xtr', productName: 'XTR', netVolume: '0' },
+      { productId: 'ado', productName: 'ADO', productColor: 'green', netVolume: '30' },
+      { productId: 'xtr', productName: 'XTR', productColor: 'orange', netVolume: '0' },
     ]
 
     const html = renderToStaticMarkup(<TotalDisposal totals={totals} />)
@@ -19,13 +19,14 @@ describe('TotalDisposal', () => {
     expect(html).toContain('30.000 L')
     expect(html).toContain('XTR')
     expect(html).toContain('0.000 L')
-    expect(html).not.toContain('<svg')
+    expect(html).toContain('text-fuel-green')
+    expect(html).toContain('text-fuel-orange')
     expect(html).not.toContain('<button')
   })
 
   it('marks incomplete product totals as unavailable', () => {
     const totals: DisposalTotal[] = [
-      { productId: 'ado', productName: 'ADO', netVolume: null },
+      { productId: 'ado', productName: 'ADO', productColor: 'gray', netVolume: null },
     ]
 
     const html = renderToStaticMarkup(<TotalDisposal totals={totals} />)

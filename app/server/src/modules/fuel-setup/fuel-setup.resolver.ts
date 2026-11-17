@@ -27,6 +27,7 @@ import {
 } from './fuel-setup.schemas'
 import { FuelProductRecord, FuelProductWithPrice, FuelSetupService, PumpMeterRecord, PumpMeterWithCurrentReading } from './fuel-setup.service'
 import { ReportsService } from '../reports/reports.service'
+import { DEFAULT_FUEL_PRODUCT_COLOR } from './schemas/fuel-product.schema'
 
 const tenantGuards = [AccessTokenGuard, TenantAccessGuard]
 const adminGuards = [...tenantGuards, RolesGuard]
@@ -142,6 +143,7 @@ export class FuelSetupResolver {
     return {
       id: product._id,
       name: product.name,
+      color: product.color ?? DEFAULT_FUEL_PRODUCT_COLOR,
       unitPrice: product.unitPrice.toString(),
       status: product.status,
       revision: product.revision,

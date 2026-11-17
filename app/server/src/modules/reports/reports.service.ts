@@ -68,6 +68,7 @@ export type FinancialSummaryResult = {
   disposalTotals: Array<{
     productId: Types.ObjectId
     productName: string
+    productColor: ActiveFuelProductRecord['color']
     netVolume: Decimal | null
   }>
 }
@@ -438,6 +439,7 @@ export class ReportsService {
       return {
         productId: product._id,
         productName: aggregate?.productName ?? product.name,
+        productColor: aggregate?.productColor ?? product.color,
         netVolume: allDisposalsUnavailable || (aggregate?.missingVolumeCount ?? 0) > 0
           ? null
           : aggregate

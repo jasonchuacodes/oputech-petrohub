@@ -60,6 +60,11 @@
   --color-status-warning: #b47b31;
   --color-status-error: #b64e4a;
   --color-status-info: #47769b;
+  --color-fuel-gray: #6b7280;
+  --color-fuel-orange: #ea580c;
+  --color-fuel-green: #16a34a;
+  --color-fuel-red: #dc2626;
+  --color-fuel-yellow: #ca8a04;
   --color-surface-hover: #eeeeee;
   --radius-sm: 8px;
   --radius-md: 12px;

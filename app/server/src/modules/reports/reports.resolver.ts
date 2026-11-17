@@ -12,6 +12,7 @@ import { TenantAccessGuard } from '../auth/guards/tenant-access.guard'
 import { AccessTokenGuard } from '../auth/session/guards/access-token.guard'
 import { DisposalBatchRecord } from '../disposals/disposals.service'
 import { UserRole } from '../users/schemas/user.schema'
+import { DEFAULT_FUEL_PRODUCT_COLOR } from '../fuel-setup/schemas/fuel-product.schema'
 import {
   createReportInputSchema,
   CreateReportInput,
@@ -241,6 +242,7 @@ export class ReportsResolver {
         meterLabel: reading.meterLabel,
         productId: reading.productId,
         productName: reading.productName,
+        productColor: reading.productColor ?? DEFAULT_FUEL_PRODUCT_COLOR,
         unitPrice: reading.unitPrice.toString(),
         openingReading: reading.openingReading.toString(),
         openingSource: reading.openingSourceBatchId ? 'previous_report' as const : 'baseline' as const,

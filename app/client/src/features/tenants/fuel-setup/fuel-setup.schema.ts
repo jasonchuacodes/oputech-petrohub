@@ -1,7 +1,9 @@
 import { z } from 'zod'
+import { fuelProductColors } from '../../fuel-products/fuel-product-colors'
 
 export const fuelProductFormSchema = z.object({
   name: z.string().trim().min(1, 'Product name is required').max(80),
+  color: z.enum(fuelProductColors),
   unitPrice: z.string().regex(/^(?:0|[1-9]\d*)(?:\.\d{1,2})?$/, 'Use up to 2 decimal places').refine((value) => Number(value) > 0, 'Price must be greater than zero'),
 })
 export type FuelProductFormValues = z.infer<typeof fuelProductFormSchema>

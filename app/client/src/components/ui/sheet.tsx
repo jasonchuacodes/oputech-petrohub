@@ -20,7 +20,7 @@ const focusableSelector =
 export type SheetProps = {
   open: boolean
   title: string
-  description?: string
+  description?: ReactNode
   icon: LucideIcon
   variant?: 'default' | 'danger'
   children: ReactNode

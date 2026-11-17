@@ -4,6 +4,7 @@ import { ClientSession, Model, Types } from 'mongoose'
 import { ConflictException, InvalidInputException, NotFoundException } from '../../common/exceptions'
 import { decimal, decimal128, money, sum } from '../../common/numeric/decimal'
 import { FuelSetupService } from '../fuel-setup/fuel-setup.service'
+import { DEFAULT_FUEL_PRODUCT_COLOR, FuelProductColor } from '../fuel-setup/schemas/fuel-product.schema'
 import { EditableDisposalInput } from './disposals.schemas'
 import { DisposalBatch, DisposalBatchStatus, DisposalReading } from './schemas/disposal-batch.schema'
 import { MeterHead } from './schemas/meter-head.schema'
@@ -12,6 +13,7 @@ export type DisposalBatchRecord = DisposalBatch & { _id: Types.ObjectId }
 export type DisposalProductRangeSummary = {
   productId: Types.ObjectId
   productName: string
+  productColor: FuelProductColor
   netVolume: Types.Decimal128
   missingVolumeCount: number
 }
@@ -30,6 +32,7 @@ type DisposalRangeAggregation = {
   products: Array<{
     _id: Types.ObjectId
     productName: string
+    productColor: FuelProductColor
     netVolume: Types.Decimal128
     missingVolumeCount: number
   }>
@@ -150,6 +153,19 @@ export class DisposalsService {
                     output: '$readings.productName',
                   },
                 },
+                productColor: {
+                  $top: {
+                    sortBy: {
+                      'report.businessDate': -1,
+                      'report.interval.startAt': -1,
+                      'report.submittedAt': -1,
+                      'report.createdAt': -1,
+                      'report._id': -1,
+                      readingIndex: -1,
+                    },
+                    output: { $ifNull: ['$readings.productColor', DEFAULT_FUEL_PRODUCT_COLOR] },
+                  },
+                },
                 netVolume: { $sum: { $ifNull: ['$readings.netVolume', zero] } },
                 missingVolumeCount: {
                   $sum: {
@@ -174,6 +190,7 @@ export class DisposalsService {
       products: (result?.products ?? []).map((product) => ({
         productId: product._id,
         productName: product.productName,
+        productColor: product.productColor ?? DEFAULT_FUEL_PRODUCT_COLOR,
         netVolume: product.netVolume,
         missingVolumeCount: product.missingVolumeCount,
       })),
@@ -224,6 +241,7 @@ export class DisposalsService {
         meterLabel: meter.label,
         productId: product._id,
         productName: product.name,
+        productColor: product.color ?? DEFAULT_FUEL_PRODUCT_COLOR,
         unitPrice: product.unitPrice,
         openingReading: head.reading,
         openingSourceBatchId: head.sourceBatchId,

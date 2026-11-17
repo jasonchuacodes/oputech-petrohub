@@ -6,6 +6,7 @@ import { useId, useRef, useState, type RefObject } from 'react';
 import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
 import { Sheet } from '~/components/ui/sheet';
+import { FuelProductIcon } from '../../fuel-products/fuel-product-icon';
 import type { ReportDetailRecord } from '../reports.queries';
 import { disposalReadingSchema } from './report-detail.schema';
 import { useReportEditor } from './report-editor-context';
@@ -131,7 +132,13 @@ export function DisposalReadingSheet({
       open
       title="Disposal Reading"
       icon={Gauge}
-      description={`${reading.meterLabel} · ${reading.productName}`}
+      description={(
+        <span className="inline-flex items-center gap-1.5">
+          <span>{reading.meterLabel} ·</span>
+          <FuelProductIcon color={reading.productColor} className="size-4" />
+          <span>{reading.productName}</span>
+        </span>
+      )}
       onClose={handleClose}
       escapeDisabled={saving}
       manageFocus

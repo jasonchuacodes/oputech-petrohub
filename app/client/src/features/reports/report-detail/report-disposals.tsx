@@ -6,6 +6,7 @@ import { useCallback, useRef, useState, type MouseEvent } from 'react';
 import { useWatch } from 'react-hook-form';
 import { Button } from '~/components/ui/button';
 import { ContentSection } from '~/components/ui/content-section';
+import { FuelProductIcon } from '../../fuel-products/fuel-product-icon';
 import { summarizeDisposalsByProduct } from '../disposal-summary';
 import { DisposalReadingSheet } from './disposal-reading-sheet';
 import { useReportEditor } from './report-editor-context';
@@ -23,6 +24,7 @@ export function ReportDisposalsPanel() {
     readings.map((reading, index) => ({
       productId: reading.productId,
       productName: reading.productName,
+      productColor: reading.productColor,
       netVolume: preview.readings[index]?.net,
     })),
   );
@@ -46,7 +48,10 @@ export function ReportDisposalsPanel() {
             <dl className="divide-y divide-border/60 rounded-md bg-card px-4 shadow-card">
               {disposalSummary.map((item) => (
                 <div key={item.productId} className="flex min-h-12 items-center justify-between gap-4 py-2">
-                  <dt className="text-text-secondary">{item.productName}</dt>
+                  <dt className="flex items-center gap-2 text-text-secondary">
+                    <FuelProductIcon color={item.productColor} className="size-4" />
+                    <span>{item.productName}</span>
+                  </dt>
                   <dd className="text-right tabular-nums text-text-heading">
                     {formatDisposalVolume(item.netVolume)}
                   </dd>
@@ -82,8 +87,9 @@ export function ReportDisposalsPanel() {
                         <h2 className="text-lg font-semibold text-text-heading wide:text-base">
                           {reading.meterLabel}
                         </h2>
-                        <p className="mt-1 text-base font-medium text-text-secondary wide:text-sm">
-                          {reading.productName}
+                        <p className="mt-1 flex items-center gap-2 text-base font-medium text-text-secondary wide:text-sm">
+                          <FuelProductIcon color={reading.productColor} className="size-4" />
+                          <span>{reading.productName}</span>
                         </p>
                       </div>
                       <Button

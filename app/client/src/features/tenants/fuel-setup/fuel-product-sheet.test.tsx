@@ -25,6 +25,7 @@ vi.mock('./setup-sheet', () => ({
 const product: FuelProductFieldsFragment = {
   id: 'product-1',
   name: 'ADO',
+  color: 'orange',
   unitPrice: '60.00',
   status: 'active',
   revision: 3,
@@ -46,6 +47,10 @@ describe('FuelProductSheet', () => {
     expect(html).toContain('Scheduled price change')
     expect(html).toContain('aria-label="Cancel saved scheduled price change"')
     expect(html).toContain('type="checkbox"')
+    expect(html).toContain('Product color')
+    expect(html).toContain('value="orange"')
+    expect(html).toContain('value="gray"')
+    expect(html).toContain('value="yellow"')
   })
 
   it('keeps a cancellation action on a saved scheduled price change', () => {
@@ -56,6 +61,8 @@ describe('FuelProductSheet', () => {
     expect(html).toContain('Scheduled price change')
     expect(html).toContain('₱61.50')
     expect(html).toContain('aria-label="Cancel saved scheduled price change"')
+    expect(html).toContain('text-fuel-orange')
+    expect(html).not.toContain('Product color')
   })
 
   it('does not show the saved cancellation action without a scheduled change', () => {

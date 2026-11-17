@@ -5,6 +5,7 @@ import { useRef, useState } from 'react'
 import { Button } from '~/components/ui/button'
 import { ContentSection } from '~/components/ui/content-section'
 import { Spinner } from '~/components/ui/spinner'
+import { FuelProductIcon } from '../../fuel-products/fuel-product-icon'
 import { FuelProductSheet } from '../../tenants/fuel-setup/fuel-product-sheet'
 import { useFuelSetupQuery } from '../../tenants/fuel-setup.queries'
 
@@ -50,9 +51,12 @@ export function FuelProducts({ tenantId, timezone }: { tenantId: string; timezon
             <div className="grid grid-cols-1 gap-px md:grid-cols-[repeat(auto-fit,minmax(min(12rem,100%),1fr))] md:gap-3">
               {activeProducts.map((product) => (
                 <article key={product.id} className="flex min-h-20 min-w-0 items-center gap-3 bg-card px-3 py-3 md:rounded-md md:shadow-card">
-                  <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
-                    <Fuel aria-hidden="true" className="size-4" />
-                  </span>
+                  <FuelProductIcon
+                    color={product.color}
+                    tile
+                    className="size-4"
+                    containerClassName="size-9"
+                  />
                   <div className="min-w-0 flex-1">
                     <h3 className="truncate text-sm font-medium text-text-heading">{product.name}</h3>
                     <p className="mt-0.5 font-semibold tabular-nums text-text-heading">

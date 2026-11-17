@@ -1,11 +1,20 @@
 import { Types } from 'mongoose'
 import { z } from 'zod'
+import { DEFAULT_FUEL_PRODUCT_COLOR, FuelProductColor } from './schemas/fuel-product.schema'
 
 const priceSchema = z.string().regex(/^(?:0|[1-9]\d*)(?:\.\d{1,2})?$/).refine((value) => Number(value) > 0)
 const readingSchema = z.string().regex(/^(?:0|[1-9]\d*)(?:\.\d{1,3})?$/)
+const fuelProductColorSchema = z.enum([
+  FuelProductColor.GRAY,
+  FuelProductColor.ORANGE,
+  FuelProductColor.GREEN,
+  FuelProductColor.RED,
+  FuelProductColor.YELLOW,
+])
 
 export const createFuelProductInputSchema = z.object({
   name: z.string().trim().min(1).max(80),
+  color: fuelProductColorSchema.default(DEFAULT_FUEL_PRODUCT_COLOR),
   unitPrice: priceSchema,
 }).strict()
 export type CreateFuelProductInput = z.infer<typeof createFuelProductInputSchema>
@@ -13,6 +22,7 @@ export type CreateFuelProductInput = z.infer<typeof createFuelProductInputSchema
 export const updateFuelProductInputSchema = createFuelProductInputSchema.extend({
   productId: z.instanceof(Types.ObjectId),
   expectedRevision: z.number().int().min(0),
+  color: fuelProductColorSchema.optional(),
 }).omit({ unitPrice: true }).strict()
 export type UpdateFuelProductInput = z.infer<typeof updateFuelProductInputSchema>
 

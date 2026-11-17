@@ -5,6 +5,7 @@ import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import request from 'supertest'
 import { configureApplication } from '../../../src/configure-application'
 import { FuelSetupService } from '../../../src/modules/fuel-setup/fuel-setup.service'
+import { FuelProductColor } from '../../../src/modules/fuel-setup/schemas/fuel-product.schema'
 import { InventoryService } from '../../../src/modules/inventory/inventory.service'
 import { TenantService } from '../../../src/modules/tenants/tenant.service'
 import { UserRole } from '../../../src/modules/users/schemas/user.schema'
@@ -50,10 +51,10 @@ describe('report disposal lifecycle', () => {
     const second = await tenants.createShift(tenant._id, { name: 'Afternoon', startTime: '13:00', endTime: '21:00' })
     firstShiftId = first.id.toHexString()
     secondShiftId = second.id.toHexString()
-    const product = await setup.createProduct(tenant._id, { name: 'ADO', unitPrice: '10.00' })
+    const product = await setup.createProduct(tenant._id, { name: 'ADO', color: FuelProductColor.GREEN, unitPrice: '10.00' })
     fuelProductId = product._id.toHexString()
     await setup.createMeter(tenant._id, { label: 'ADO 1', productId: product._id, initialReading: '100.000' })
-    const unusedProduct = await setup.createProduct(tenant._id, { name: 'XTR', unitPrice: '12.00' })
+    const unusedProduct = await setup.createProduct(tenant._id, { name: 'XTR', color: FuelProductColor.ORANGE, unitPrice: '12.00' })
     unusedFuelProductId = unusedProduct._id.toHexString()
     const lubricant = await inventory.createProduct(
       tenant._id,
@@ -149,8 +150,8 @@ describe('report disposal lifecycle', () => {
       includedReportCount: 1,
       totals: { income: '1000', expenses: '100', lubricantSales: '375' },
       disposalTotals: [
-        { productId: fuelProductId, productName: 'ADO', netVolume: '8' },
-        { productId: unusedFuelProductId, productName: 'XTR', netVolume: '0' },
+        { productId: fuelProductId, productName: 'ADO', productColor: 'green', netVolume: '8' },
+        { productId: unusedFuelProductId, productName: 'XTR', productColor: 'orange', netVolume: '0' },
       ],
       buckets: [{
         startDate: businessDate,
@@ -183,7 +184,7 @@ describe('report disposal lifecycle', () => {
       totals: { income: '1000', expenses: '100', lubricantSales: '375' },
     })
 
-    const submittedReports = await graphql(adminToken, `query ($input: ReportsInput!) { reports(input: $input) { items { id effective status totals { cashFuelSales pumpSales overShort lubricantSales } disposals { readings { productId productName netVolume } } } totalCount } }`, {
+    const submittedReports = await graphql(adminToken, `query ($input: ReportsInput!) { reports(input: $input) { items { id effective status totals { cashFuelSales pumpSales overShort lubricantSales } disposals { readings { productId productName productColor netVolume } } } totalCount } }`, {
       input: { startDate: businessDate, endDate: businessDate, submittedOnly: true, offset: 0 },
     })
     expect(submittedReports.body.errors).toBeUndefined()
@@ -194,7 +195,7 @@ describe('report disposal lifecycle', () => {
         status: 'submitted',
         totals: { cashFuelSales: '1100', pumpSales: '80', overShort: '1020', lubricantSales: '375' },
         disposals: {
-          readings: [{ productId: fuelProductId, productName: 'ADO', netVolume: '8' }],
+          readings: [{ productId: fuelProductId, productName: 'ADO', productColor: 'green', netVolume: '8' }],
         },
       }],
       totalCount: 1,
@@ -226,8 +227,8 @@ describe('report disposal lifecycle', () => {
       includedReportCount: 0,
       totals: { income: '0', expenses: '0', lubricantSales: '0' },
       disposalTotals: [
-        { productId: fuelProductId, productName: 'ADO', netVolume: '0' },
-        { productId: unusedFuelProductId, productName: 'XTR', netVolume: '0' },
+        { productId: fuelProductId, productName: 'ADO', productColor: 'green', netVolume: '0' },
+        { productId: unusedFuelProductId, productName: 'XTR', productColor: 'orange', netVolume: '0' },
       ],
       buckets: [{ amounts: { income: '0', expenses: '0', lubricantSales: '0' } }],
     })
@@ -492,8 +493,17 @@ describe('report disposal lifecycle', () => {
     expect(duplicate.body.errors?.[0]?.extensions?.originalError).toMatchObject({ code: 'INVALID_INPUT' })
 
     const memberToken = await login('report-member', 'MemberPassword123')
+    const setup = await graphql(adminToken, `query { fuelSetup { products { id name color revision } } }`)
+    const product = setup.body.data.fuelSetup.products.find((item: { id: string }) => item.id === fuelProductId)
+    const recolored = await graphql(adminToken, `mutation ($input: UpdateFuelProductInput!) {
+      updateFuelProduct(input: $input) { id color revision }
+    }`, { input: { productId: product.id, expectedRevision: product.revision, name: product.name, color: 'red' } })
+    expect(recolored.body.errors).toBeUndefined()
+    expect(recolored.body.data.updateFuelProduct.color).toBe('red')
+
     const historical = await reportDetail(memberToken, snapshottedReportId)
     expect(historical.shiftName).toBe('Morning')
+    expect(historical.disposals.readings[0].productColor).toBe('green')
   })
 
   async function login(username: string, password: string): Promise<string> {
@@ -511,7 +521,7 @@ describe('report disposal lifecycle', () => {
         startDate endDate bucketInterval includedReportCount
         totals { income expenses lubricantSales }
         buckets { startDate endDate amounts { income expenses lubricantSales } }
-        disposalTotals { productId productName netVolume }
+        disposalTotals { productId productName productColor netVolume }
       }
     }`, { input: { startDate, endDate } })
   }
@@ -580,7 +590,7 @@ const detailFields = `
   totals { cashFuelSales pumpSales overShort lubricantSales }
   disposals {
     revision status
-    readings { meterId unitPrice openingReading openingSource closingReading calibration netVolume sales }
+    readings { meterId productId productName productColor unitPrice openingReading openingSource closingReading calibration netVolume sales }
   }
 `
 

@@ -37,9 +37,9 @@ const report = {
   },
   disposals: {
     readings: [
-      { productId: 'ado', productName: 'ADO', netVolume: '8.000' },
-      { productId: 'ado', productName: 'ADO', netVolume: '22.000' },
-      { productId: 'xtr', productName: 'XTR', netVolume: '5.500' },
+      { productId: 'ado', productName: 'ADO', productColor: 'green', netVolume: '8.000' },
+      { productId: 'ado', productName: 'ADO', productColor: 'green', netVolume: '22.000' },
+      { productId: 'xtr', productName: 'XTR', productColor: 'yellow', netVolume: '5.500' },
     ],
   },
 } as unknown as ReportsQuery['reports']['items'][number]
@@ -64,6 +64,8 @@ describe('SubmittedReports', () => {
     expect(html).toContain('30.000 L')
     expect(html).toContain('XTR')
     expect(html).toContain('5.500 L')
+    expect(html).toContain('text-fuel-green')
+    expect(html).toContain('text-fuel-yellow')
     expect(html.indexOf('Disposals')).toBeGreaterThan(html.indexOf('Cash fuel sales'))
     expect(html).toContain('href="/report/report-1"')
     expect(html).toContain('wide:max-w-md')

@@ -54,6 +54,7 @@ export type CheckOutAttendanceInput = {
 };
 
 export type CreateFuelProductInput = {
+  color?: FuelProductColor;
   name: Scalars['String']['input'];
   unitPrice: Scalars['Decimal']['input'];
 };
@@ -166,6 +167,7 @@ export type DisposalReading = {
   netVolume?: Maybe<Scalars['Decimal']['output']>;
   openingReading: Scalars['Decimal']['output'];
   openingSource: DisposalOpeningSource;
+  productColor: FuelProductColor;
   productId: Scalars['ObjectId']['output'];
   productName: Scalars['String']['output'];
   sales?: Maybe<Scalars['Decimal']['output']>;
@@ -241,6 +243,7 @@ export type FuelPriceChange = {
 
 export type FuelProduct = {
   __typename?: 'FuelProduct';
+  color: FuelProductColor;
   id: Scalars['ObjectId']['output'];
   name: Scalars['String']['output'];
   nextPriceChange?: Maybe<FuelPriceChange>;
@@ -248,6 +251,13 @@ export type FuelProduct = {
   status: FuelSetupStatus;
   unitPrice: Scalars['Decimal']['output'];
 };
+
+export type FuelProductColor =
+  | 'gray'
+  | 'green'
+  | 'orange'
+  | 'red'
+  | 'yellow';
 
 export type FuelSetup = {
   __typename?: 'FuelSetup';
@@ -520,6 +530,7 @@ export type MutationUpdateUserArgs = {
 export type ProductDisposalTotal = {
   __typename?: 'ProductDisposalTotal';
   netVolume?: Maybe<Scalars['Decimal']['output']>;
+  productColor: FuelProductColor;
   productId: Scalars['ObjectId']['output'];
   productName: Scalars['String']['output'];
 };
@@ -868,6 +879,7 @@ export type TimesheetsFilter = {
 };
 
 export type UpdateFuelProductInput = {
+  color?: InputMaybe<FuelProductColor>;
   expectedRevision: Scalars['Int']['input'];
   name: Scalars['String']['input'];
   productId: Scalars['ObjectId']['input'];
@@ -1138,6 +1150,7 @@ export type ResolversTypes = {
   FinancialSummaryInput: FinancialSummaryInput;
   FuelPriceChange: ResolverTypeWrapper<FuelPriceChange>;
   FuelProduct: ResolverTypeWrapper<FuelProduct>;
+  FuelProductColor: FuelProductColor;
   FuelSetup: ResolverTypeWrapper<FuelSetup>;
   FuelSetupStatus: FuelSetupStatus;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
@@ -1348,6 +1361,7 @@ export type DisposalReadingResolvers<ContextType = GraphqlContext, ParentType ex
   netVolume?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>;
   openingReading?: Resolver<ResolversTypes['Decimal'], ParentType, ContextType>;
   openingSource?: Resolver<ResolversTypes['DisposalOpeningSource'], ParentType, ContextType>;
+  productColor?: Resolver<ResolversTypes['FuelProductColor'], ParentType, ContextType>;
   productId?: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
   productName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   sales?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>;
@@ -1394,6 +1408,7 @@ export type FuelPriceChangeResolvers<ContextType = GraphqlContext, ParentType ex
 };
 
 export type FuelProductResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['FuelProduct'] = ResolversParentTypes['FuelProduct']> = {
+  color?: Resolver<ResolversTypes['FuelProductColor'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   nextPriceChange?: Resolver<Maybe<ResolversTypes['FuelPriceChange']>, ParentType, ContextType>;
@@ -1475,6 +1490,7 @@ export interface ObjectIdScalarConfig extends GraphQLScalarTypeConfig<ResolversT
 
 export type ProductDisposalTotalResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['ProductDisposalTotal'] = ResolversParentTypes['ProductDisposalTotal']> = {
   netVolume?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>;
+  productColor?: Resolver<ResolversTypes['FuelProductColor'], ParentType, ContextType>;
   productId?: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
   productName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };

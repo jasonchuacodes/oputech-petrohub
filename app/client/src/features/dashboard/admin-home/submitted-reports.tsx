@@ -6,6 +6,7 @@ import { useId, useRef, useState, type Ref } from 'react'
 import { Button } from '~/components/ui/button'
 import { ContentSection } from '~/components/ui/content-section'
 import type { ReportsQuery } from '~/generated/graphql'
+import { FuelProductIcon } from '../../fuel-products/fuel-product-icon'
 import { formatShiftTime } from '../../reports/create-report-sheet'
 import { summarizeDisposalsByProduct } from '../../reports/disposal-summary'
 import { ReportSummaryRows } from '../../reports/report-detail/report-summary-rows'
@@ -189,7 +190,10 @@ function ReportSummaryCard({
           <dl className="mt-2 divide-y divide-border/60">
             {disposalSummary.map((item) => (
               <div key={item.productId} className="flex min-h-10 items-center justify-between gap-4 py-2">
-                <dt className="text-sm text-text-heading">{item.productName}</dt>
+                <dt className="flex items-center gap-2 text-sm text-text-heading">
+                  <FuelProductIcon color={item.productColor} className="size-4" />
+                  <span>{item.productName}</span>
+                </dt>
                 <dd className="text-right tabular-nums text-text-heading">
                   {formatDisposalVolume(item.netVolume)}
                 </dd>

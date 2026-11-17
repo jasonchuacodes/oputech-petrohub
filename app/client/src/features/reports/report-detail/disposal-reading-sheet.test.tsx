@@ -9,7 +9,7 @@ const mocks = vi.hoisted(() => ({ editor: undefined as unknown }))
 vi.mock('~/components/ui/sheet', () => ({
   Sheet: ({ title, description, children }: {
     title: string
-    description?: string
+    description?: ReactNode
     children: ReactNode
   }) => (
     <section>
@@ -29,6 +29,7 @@ const reading = {
   meterLabel: 'ADO 1',
   productId: 'ado',
   productName: 'ADO',
+  productColor: 'orange',
   unitPrice: '10.00',
   openingReading: '100.000',
   calibration: '2.000',
@@ -65,7 +66,9 @@ describe('DisposalReadingSheet', () => {
       />,
     )
 
-    expect(html).toContain('ADO 1 · ADO')
+    expect(html).toContain('ADO 1 ·')
+    expect(html).toContain('ADO')
+    expect(html).toContain('text-fuel-orange')
     expect(html).toContain('8.000 L')
     expect(html).toContain('₱80.00')
 

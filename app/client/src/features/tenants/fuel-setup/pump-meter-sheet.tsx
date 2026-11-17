@@ -7,6 +7,7 @@ import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { Spinner } from '~/components/ui/spinner'
 import type { FuelProductFieldsFragment, PumpMeterFieldsFragment } from '~/generated/graphql'
+import { FuelProductIcon } from '../../fuel-products/fuel-product-icon'
 import { useCreatePumpMeterMutation, useUpdatePumpMeterMutation } from '../fuel-setup.queries'
 import { pumpMeterFormSchema, type PumpMeterFormValues } from './fuel-setup.schema'
 import { ProductSelectSheet } from './product-select-sheet'
@@ -91,14 +92,13 @@ export function PumpMeterSheet({ tenantId, products, meter, onClose }: PumpMeter
             </label>
 
             {meter ? (
-              <label className="flex flex-col gap-1.5">
+              <div className="flex flex-col gap-1.5">
                 <span className="text-sm font-medium">Fuel type</span>
-                <Input
-                  value={selectedProduct?.name ?? 'Unknown fuel product'}
-                  disabled
-                  className="bg-muted text-text-secondary disabled:cursor-default disabled:opacity-100"
-                />
-              </label>
+                <div className="flex min-h-11 items-center gap-3 rounded-sm border border-input bg-muted px-3 text-text-secondary wide:min-h-10">
+                  {selectedProduct && <FuelProductIcon color={selectedProduct.color} className="size-4" />}
+                  <span>{selectedProduct?.name ?? 'Unknown fuel product'}</span>
+                </div>
+              </div>
             ) : (
               <div className="flex flex-col gap-1.5">
                 <span className="text-sm font-medium">Fuel product</span>
@@ -107,7 +107,9 @@ export function PumpMeterSheet({ tenantId, products, meter, onClose }: PumpMeter
                   className="flex min-h-11 items-center gap-3 rounded-sm border border-input px-3 text-left outline-none focus-visible:border-brand focus-visible:ring-3 focus-visible:ring-brand/10"
                   onClick={() => setSelectingProduct(true)}
                 >
-                  <Gauge aria-hidden="true" className="size-4 text-primary" />
+                  {selectedProduct
+                    ? <FuelProductIcon color={selectedProduct.color} className="size-4" />
+                    : <Gauge aria-hidden="true" className="size-4 text-primary" />}
                   <span className="min-w-0 flex-1">
                     {selectedProduct ? (
                       <>

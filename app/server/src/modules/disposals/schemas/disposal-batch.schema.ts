@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { HydratedDocument, Schema as MongooseSchema, Types } from 'mongoose'
+import { DEFAULT_FUEL_PRODUCT_COLOR, FuelProductColor } from '../../fuel-setup/schemas/fuel-product.schema'
 
 export enum DisposalBatchStatus {
   DRAFT = 'draft',
@@ -13,6 +14,7 @@ export class DisposalReading {
   @Prop({ required: true, trim: true, type: String }) meterLabel!: string
   @Prop({ required: true, type: Types.ObjectId }) productId!: Types.ObjectId
   @Prop({ required: true, trim: true, type: String }) productName!: string
+  @Prop({ required: true, enum: FuelProductColor, default: DEFAULT_FUEL_PRODUCT_COLOR, type: String }) productColor!: FuelProductColor
   @Prop({ required: true, type: MongooseSchema.Types.Decimal128 }) unitPrice!: Types.Decimal128
   @Prop({ required: true, type: MongooseSchema.Types.Decimal128 }) openingReading!: Types.Decimal128
   @Prop({ type: Types.ObjectId }) openingSourceBatchId?: Types.ObjectId

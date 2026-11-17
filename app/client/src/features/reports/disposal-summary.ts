@@ -1,20 +1,24 @@
 import Decimal from 'decimal.js'
+import type { FuelProductColor } from '~/generated/graphql'
 
 export type DisposalSummaryInput = {
   productId: string
   productName: string
+  productColor: FuelProductColor
   netVolume?: string | null
 }
 
 export type DisposalSummaryItem = {
   productId: string
   productName: string
+  productColor: FuelProductColor
   netVolume?: string
 }
 
 type PendingSummary = {
   productId: string
   productName: string
+  productColor: FuelProductColor
   total: Decimal
   complete: boolean
 }
@@ -28,6 +32,7 @@ export function summarizeDisposalsByProduct(
     const current = summaries.get(reading.productId) ?? {
       productId: reading.productId,
       productName: reading.productName,
+      productColor: reading.productColor,
       total: new Decimal(0),
       complete: true,
     }
@@ -37,9 +42,10 @@ export function summarizeDisposalsByProduct(
     summaries.set(reading.productId, current)
   }
 
-  return Array.from(summaries.values(), ({ productId, productName, total, complete }) => ({
+  return Array.from(summaries.values(), ({ productId, productName, productColor, total, complete }) => ({
     productId,
     productName,
+    productColor,
     netVolume: complete ? total.toFixed(3) : undefined,
   }))
 }

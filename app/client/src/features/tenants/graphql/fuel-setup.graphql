@@ -1,6 +1,7 @@
 fragment FuelProductFields on FuelProduct {
   id
   name
+  color
   unitPrice
   status
   revision

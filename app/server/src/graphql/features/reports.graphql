@@ -122,6 +122,7 @@ type FinancialSummary {
 type ProductDisposalTotal {
   productId: ObjectId!
   productName: String!
+  productColor: FuelProductColor!
   netVolume: Decimal
 }
 

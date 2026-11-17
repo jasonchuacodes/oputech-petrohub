@@ -22,6 +22,7 @@ fragment ReportFields on Report {
 fragment DisposalAmountFields on DisposalReading {
   productId
   productName
+  productColor
   netVolume
 }
 
@@ -103,7 +104,7 @@ query FinancialSummary($input: FinancialSummaryInput!) {
       endDate
       amounts { income expenses lubricantSales }
     }
-    disposalTotals { productId productName netVolume }
+    disposalTotals { productId productName productColor netVolume }
   }
 }
 

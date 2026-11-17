@@ -17,6 +17,7 @@ import { SectionTabs, type SectionTabOption } from '~/components/ui/section-tabs
 import { Spinner } from '~/components/ui/spinner'
 import type { FuelProductFieldsFragment, PumpMeterFieldsFragment } from '~/generated/graphql'
 import { cn } from '~/utils/cn'
+import { FuelProductIcon } from '../../fuel-products/fuel-product-icon'
 import { useActiveTenant } from '../../layout/use-active-tenant'
 import {
   useDeactivateFuelProductMutation,
@@ -90,7 +91,12 @@ function TenantFuelSetup({ tenantId, timezone }: { tenantId: string; timezone: s
   const selectedProduct = productEditor && productEditor !== 'new' ? productEditor : undefined
   const deactivationDescription = deactivation
     ? deactivation.kind === 'product'
-      ? deactivation.item.name
+      ? (
+          <span className="inline-flex items-center gap-1.5">
+            <FuelProductIcon color={deactivation.item.color} className="size-4" />
+            <span>{deactivation.item.name}</span>
+          </span>
+        )
       : deactivation.item.label
     : undefined
   const productColumns: DataTableColumn<FuelProductFieldsFragment>[] = [
@@ -101,10 +107,16 @@ function TenantFuelSetup({ tenantId, timezone }: { tenantId: string; timezone: s
         <button
           type="button"
           disabled={product.status !== 'active'}
-          className="max-w-full truncate rounded-sm text-left font-medium text-text-heading underline-offset-4 outline-none enabled:cursor-pointer enabled:hover:text-primary enabled:hover:underline focus-visible:ring-3 focus-visible:ring-ring/30 disabled:cursor-default"
+          className="inline-flex max-w-full items-center gap-2 rounded-sm text-left font-medium text-text-heading underline-offset-4 outline-none enabled:cursor-pointer enabled:hover:text-primary enabled:hover:underline focus-visible:ring-3 focus-visible:ring-ring/30 disabled:cursor-default"
           onClick={() => setProductEditor(product)}
         >
-          {product.name}
+          <FuelProductIcon
+            color={product.color}
+            tile
+            className="size-4"
+            containerClassName="size-9"
+          />
+          <span className="truncate">{product.name}</span>
         </button>
       ),
     },
@@ -155,7 +167,15 @@ function TenantFuelSetup({ tenantId, timezone }: { tenantId: string; timezone: s
     {
       id: 'productId',
       heading: 'Fuel product',
-      cell: (meter) => setup.data.products.find((product) => product.id === meter.productId)?.name ?? 'Unknown fuel product',
+      cell: (meter) => {
+        const product = setup.data.products.find((item) => item.id === meter.productId)
+        return product ? (
+          <span className="inline-flex items-center gap-2">
+            <FuelProductIcon color={product.color} className="size-4" />
+            <span>{product.name}</span>
+          </span>
+        ) : 'Unknown fuel product'
+      },
     },
     {
       id: 'currentReading',
@@ -236,9 +256,12 @@ function TenantFuelSetup({ tenantId, timezone }: { tenantId: string; timezone: s
               <div className="overflow-hidden rounded-md bg-card shadow-card md:hidden">
                 {setup.data.products.map((product) => (
                   <article key={product.id} className="flex min-h-20 items-center gap-3 border-b border-border/60 p-4 last:border-b-0">
-                    <span className="flex size-10 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
-                      <Fuel aria-hidden="true" className="size-5" />
-                    </span>
+                    <FuelProductIcon
+                      color={product.color}
+                      tile
+                      className="size-5"
+                      containerClassName="size-10"
+                    />
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
                         <h3>
@@ -304,7 +327,14 @@ function TenantFuelSetup({ tenantId, timezone }: { tenantId: string; timezone: s
                             </h3>
                             <Status status={meter.status} />
                           </div>
-                          <p className="mt-1 text-sm text-text-secondary">{product?.name ?? 'Unknown fuel product'}</p>
+                          {product ? (
+                            <p className="mt-1 flex items-center gap-2 text-sm text-text-secondary">
+                              <FuelProductIcon color={product.color} className="size-4" />
+                              <span>{product.name}</span>
+                            </p>
+                          ) : (
+                            <p className="mt-1 text-sm text-text-secondary">Unknown fuel product</p>
+                          )}
                         </div>
                         <Button type="button" size="icon" variant="ghost" aria-label={`Actions for ${meter.label}`} onClick={() => setMeterActions(meter)}>
                           <MoreVertical aria-hidden="true" />
@@ -338,7 +368,7 @@ function TenantFuelSetup({ tenantId, timezone }: { tenantId: string; timezone: s
       {addingMeter && <PumpMeterSheet tenantId={tenantId} products={setup.data.products} onClose={() => setAddingMeter(false)} />}
       {meterEditor && <PumpMeterSheet key={meterEditor.id} tenantId={tenantId} products={setup.data.products} meter={meterEditor} onClose={() => setMeterEditor(undefined)} />}
 
-      {productActions && <SetupSheet open title="Fuel product actions" description={`${productActions.name} · ₱${formatPrice(productActions.unitPrice)}`} icon={Fuel} onClose={() => setProductActions(undefined)}><div className="flex flex-col gap-2 px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]"><Button type="button" variant="outline" className="w-full" disabled={productActions.status !== 'active'} onClick={() => { setProductEditor(productActions); setProductActions(undefined) }}><Pencil aria-hidden="true" />Edit product</Button><Button type="button" variant="destructive" className="w-full" disabled={productActions.status !== 'active'} onClick={() => { setDeactivation({ kind: 'product', item: productActions }); setProductActions(undefined) }}><Trash2 aria-hidden="true" />Deactivate product</Button></div></SetupSheet>}
+      {productActions && <SetupSheet open title="Fuel product actions" description={<span className="inline-flex items-center gap-1.5"><FuelProductIcon color={productActions.color} className="size-4" /><span>{productActions.name} · ₱{formatPrice(productActions.unitPrice)}</span></span>} icon={Fuel} onClose={() => setProductActions(undefined)}><div className="flex flex-col gap-2 px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]"><Button type="button" variant="outline" className="w-full" disabled={productActions.status !== 'active'} onClick={() => { setProductEditor(productActions); setProductActions(undefined) }}><Pencil aria-hidden="true" />Edit product</Button><Button type="button" variant="destructive" className="w-full" disabled={productActions.status !== 'active'} onClick={() => { setDeactivation({ kind: 'product', item: productActions }); setProductActions(undefined) }}><Trash2 aria-hidden="true" />Deactivate product</Button></div></SetupSheet>}
       {meterActions && <SetupSheet open title="Pump meter actions" description={meterActions.label} icon={Gauge} onClose={() => setMeterActions(undefined)}><div className="flex flex-col gap-2 px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]"><Button type="button" variant="outline" className="w-full" disabled={meterActions.status !== 'active'} onClick={() => { setMeterEditor(meterActions); setMeterActions(undefined) }}><Pencil aria-hidden="true" />Edit pump</Button><Button type="button" variant="destructive" className="w-full" disabled={meterActions.status !== 'active'} onClick={() => { setDeactivation({ kind: 'meter', item: meterActions }); setMeterActions(undefined) }}><Trash2 aria-hidden="true" />Deactivate meter</Button></div></SetupSheet>}
 
       <ConfirmationDialog open={Boolean(deactivation)} title={`Deactivate ${deactivation?.kind === 'product' ? 'fuel product' : 'pump meter'}?`} description={deactivationDescription} icon={Trash2} variant="danger" confirmText="Deactivate" loading={pending} onClose={() => setDeactivation(undefined)} onConfirm={() => void deactivate()}><p className="text-sm text-text-secondary">Existing reports keep their saved product and meter details. Inactive setup is not included in new reports.</p></ConfirmationDialog>

@@ -9,6 +9,8 @@ import { DateTimePicker, formatDateTimeValue } from '~/components/ui/date-time-p
 import { Input } from '~/components/ui/input'
 import { Spinner } from '~/components/ui/spinner'
 import type { FuelProductFieldsFragment } from '~/generated/graphql'
+import { defaultFuelProductColor, fuelProductColorOptions } from '../../fuel-products/fuel-product-colors'
+import { FuelProductIcon } from '../../fuel-products/fuel-product-icon'
 import {
   useCancelFuelPriceChangeMutation,
   useChangeFuelPriceMutation,
@@ -47,7 +49,9 @@ export function FuelProductSheet({
   const [scheduledAt, setScheduledAt] = useState('')
   const form = useForm<FuelProductFormValues>({
     resolver: zodResolver(fuelProductFormSchema),
-    defaultValues: product ? { name: product.name, unitPrice: product.unitPrice } : { name: '', unitPrice: '' },
+    defaultValues: product
+      ? { name: product.name, color: product.color, unitPrice: product.unitPrice }
+      : { name: '', color: defaultFuelProductColor, unitPrice: '' },
     mode: 'onChange',
   })
   const nameField = form.register('name')
@@ -98,11 +102,12 @@ export function FuelProductSheet({
     try {
       if (product) {
         let expectedRevision = product.revision
-        if (!priceOnly && values.name !== product.name) {
+        if (!priceOnly && (values.name !== product.name || values.color !== product.color)) {
           await updateProduct.mutateAsync({
             productId: product.id,
             expectedRevision,
             name: values.name,
+            color: values.color,
           })
           expectedRevision += 1
         }
@@ -196,7 +201,10 @@ export function FuelProductSheet({
           {priceOnly ? (
             <label className="flex flex-col gap-1.5">
               <span className="text-sm font-medium">Product name</span>
-              <Input value={product?.name ?? ''} readOnly aria-readonly="true" className="bg-muted text-text-secondary" />
+              <div className="flex min-h-11 items-center gap-3 rounded-sm border border-input bg-muted px-3 text-text-secondary wide:min-h-10">
+                <FuelProductIcon color={product?.color} className="size-4" />
+                <span>{product?.name ?? ''}</span>
+              </div>
             </label>
           ) : (
             <label className="flex flex-col gap-1.5">
@@ -215,6 +223,25 @@ export function FuelProductSheet({
                 <p className="text-sm text-destructive">{form.formState.errors.name.message}</p>
               )}
             </label>
+          )}
+          {!priceOnly && (
+            <fieldset className="flex flex-col gap-1.5" disabled={pending}>
+              <legend className="text-sm font-medium">Product color</legend>
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                {fuelProductColorOptions.map((option) => (
+                  <label key={option.value} className="flex min-h-11 cursor-pointer items-center gap-2 rounded-sm border border-input px-3 has-checked:border-primary has-checked:bg-primary/5 has-focus-visible:ring-3 has-focus-visible:ring-ring/30 has-disabled:cursor-not-allowed has-disabled:opacity-50">
+                    <input
+                      type="radio"
+                      value={option.value}
+                      className="size-4 shrink-0 accent-primary"
+                      {...form.register('color')}
+                    />
+                    <FuelProductIcon color={option.value} className="size-4" />
+                    <span className="text-sm font-medium">{option.label}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
           )}
           <label className="flex flex-col gap-1.5">
             <span className="text-sm font-medium">Unit price</span>

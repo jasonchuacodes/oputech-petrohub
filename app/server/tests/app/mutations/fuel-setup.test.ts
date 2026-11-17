@@ -5,6 +5,7 @@ import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import request from 'supertest'
 import { configureApplication } from '../../../src/configure-application'
 import { FuelSetupService } from '../../../src/modules/fuel-setup/fuel-setup.service'
+import { FuelProductColor } from '../../../src/modules/fuel-setup/schemas/fuel-product.schema'
 import { TenantService } from '../../../src/modules/tenants/tenant.service'
 import { UserRole } from '../../../src/modules/users/schemas/user.schema'
 import { UsersService } from '../../../src/modules/users/users.service'
@@ -50,7 +51,7 @@ describe('fuel setup pump readings', () => {
     })
     const shift = await tenants.createShift(tenant._id, { name: 'Day', startTime: '06:00', endTime: '18:00' })
     shiftId = shift.id.toHexString()
-    const product = await setup.createProduct(tenant._id, { name: 'ADO', unitPrice: '10.00' })
+    const product = await setup.createProduct(tenant._id, { name: 'ADO', color: FuelProductColor.GRAY, unitPrice: '10.00' })
     const meter = await setup.createMeter(tenant._id, {
       label: 'ADO 1',
       productId: product._id,
@@ -123,6 +124,29 @@ describe('fuel setup pump readings', () => {
     expect(existingReport.body.data.report.disposals.readings).toContainEqual({ meterId, openingReading: '125.125' })
     const latest = await fuelSetup(token)
     expect(latest.body.data.fuelSetup.meters.find((item: { id: string }) => item.id === meterId).currentReading).toBe('130')
+  })
+
+  it('creates and updates a fuel product color', async () => {
+    const token = await login('fuel-setup-admin', 'AdminPassword123')
+    const created = await graphql(token, `mutation ($input: CreateFuelProductInput!) {
+      createFuelProduct(input: $input) { id name color revision }
+    }`, { input: { name: 'Premium', color: 'orange', unitPrice: '65.00' } })
+    expect(created.body.errors).toBeUndefined()
+    expect(created.body.data.createFuelProduct).toMatchObject({ name: 'Premium', color: 'orange', revision: 0 })
+
+    const product = created.body.data.createFuelProduct
+    const updated = await graphql(token, `mutation ($input: UpdateFuelProductInput!) {
+      updateFuelProduct(input: $input) { id name color revision }
+    }`, {
+      input: {
+        productId: product.id,
+        expectedRevision: product.revision,
+        name: product.name,
+        color: 'red',
+      },
+    })
+    expect(updated.body.errors).toBeUndefined()
+    expect(updated.body.data.updateFuelProduct).toMatchObject({ id: product.id, color: 'red', revision: 1 })
   })
 
   async function login(username: string, password: string): Promise<string> {

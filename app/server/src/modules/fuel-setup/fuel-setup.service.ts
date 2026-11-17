@@ -13,7 +13,7 @@ import {
   UpdateFuelProductInput,
   UpdatePumpMeterInput,
 } from './fuel-setup.schemas'
-import { FuelProduct, FuelSetupStatus } from './schemas/fuel-product.schema'
+import { DEFAULT_FUEL_PRODUCT_COLOR, FuelProduct, FuelSetupStatus } from './schemas/fuel-product.schema'
 import { FuelPriceChange, FuelPriceState } from './schemas/fuel-price-change.schema'
 import { PumpMeter } from './schemas/pump-meter.schema'
 
@@ -22,7 +22,7 @@ export type PumpMeterRecord = PumpMeter & { _id: Types.ObjectId }
 export type PumpMeterWithCurrentReading = PumpMeterRecord & { currentReading: Types.Decimal128 }
 export type FuelPriceChangeRecord = FuelPriceChange & { _id: Types.ObjectId }
 export type FuelProductWithPrice = FuelProductRecord & { nextPriceChange?: FuelPriceChangeRecord }
-export type ActiveFuelProductRecord = Pick<FuelProductRecord, '_id' | 'name'>
+export type ActiveFuelProductRecord = Pick<FuelProductRecord, '_id' | 'name' | 'color'>
 type MeterHeadRecord = MeterHead & { _id: Types.ObjectId }
 
 @Injectable()
@@ -49,6 +49,7 @@ export class FuelSetupService {
     ])
     const products = pricedProducts.map<FuelProductWithPrice>((product) => ({
       ...product,
+      color: product.color ?? DEFAULT_FUEL_PRODUCT_COLOR,
       nextPriceChange: nextPriceChanges.get(product._id.toHexString()),
     }))
     const readingsByMeter = new Map(heads.map((head) => [head.meterId.toHexString(), head.reading]))
@@ -71,21 +72,25 @@ export class FuelSetupService {
       this.products.find({ tenantId, status: FuelSetupStatus.ACTIVE }).session(session).lean<FuelProductRecord[]>().exec(),
       this.meters.find({ tenantId, status: FuelSetupStatus.ACTIVE }).sort({ label: 1 }).session(session).lean<PumpMeterRecord[]>().exec(),
     ])
-    const products = await this.withPrices(tenantId, storedProducts, asOf, session)
+    const products = (await this.withPrices(tenantId, storedProducts, asOf, session)).map((product) => ({
+      ...product,
+      color: product.color ?? DEFAULT_FUEL_PRODUCT_COLOR,
+    }))
     return { products, meters }
   }
 
   async listActiveProducts(tenantId: Types.ObjectId, session?: ClientSession) {
     const query = this.products
       .find({ tenantId, status: FuelSetupStatus.ACTIVE })
-      .select({ name: 1 })
+      .select({ name: 1, color: 1 })
       .sort({ name: 1, _id: 1 })
     if (session) query.session(session)
-    return query.lean<ActiveFuelProductRecord[]>().exec()
+    const products = await query.lean<ActiveFuelProductRecord[]>().exec()
+    return products.map((product) => ({ ...product, color: product.color ?? DEFAULT_FUEL_PRODUCT_COLOR }))
   }
 
   async createProduct(tenantId: Types.ObjectId, input: CreateFuelProductInput) {
-    const product = await this.products.create({ tenantId, name: input.name, unitPrice: decimal128(input.unitPrice) })
+    const product = await this.products.create({ tenantId, name: input.name, color: input.color, unitPrice: decimal128(input.unitPrice) })
     await this.priceStates.updateOne({ tenantId }, { $setOnInsert: { tenantId } }, { upsert: true })
     return product.toObject<FuelProductRecord>()
   }
@@ -93,7 +98,7 @@ export class FuelSetupService {
   async updateProduct(tenantId: Types.ObjectId, input: UpdateFuelProductInput) {
     const product = await this.products.findOneAndUpdate(
       { _id: input.productId, tenantId, revision: input.expectedRevision, status: FuelSetupStatus.ACTIVE },
-      { $set: { name: input.name }, $inc: { revision: 1 } },
+      { $set: { name: input.name, ...(input.color ? { color: input.color } : {}) }, $inc: { revision: 1 } },
       { new: true, runValidators: true },
     ).lean<FuelProductRecord>().exec()
     if (product) return product

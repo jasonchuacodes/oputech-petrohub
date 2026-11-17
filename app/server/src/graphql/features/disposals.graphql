@@ -15,6 +15,7 @@ type DisposalReading {
   meterLabel: String!
   productId: ObjectId!
   productName: String!
+  productColor: FuelProductColor!
   unitPrice: Decimal!
   openingReading: Decimal!
   openingSource: DisposalOpeningSource!

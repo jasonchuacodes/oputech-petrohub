@@ -1,5 +1,6 @@
 import { ContentSection } from '~/components/ui/content-section'
 import type { FinancialSummaryQuery } from '~/generated/graphql'
+import { FuelProductIcon } from '../../fuel-products/fuel-product-icon'
 import { formatDisposalVolume } from '../../reports/report-detail/utils'
 
 type DisposalTotal = FinancialSummaryQuery['financialSummary']['disposalTotals'][number]
@@ -34,16 +35,16 @@ export function TotalDisposal({
           <div className="overflow-hidden rounded-md bg-border/60 shadow-card md:overflow-visible md:rounded-none md:bg-transparent md:shadow-none">
             <div className="grid grid-cols-1 gap-px md:grid-cols-[repeat(auto-fit,minmax(min(12rem,100%),1fr))] md:gap-3">
               {totals.map((item) => (
-                <article
-                  key={item.productId}
-                  className="flex min-h-20 min-w-0 flex-col justify-center bg-card px-3 py-3 md:rounded-md md:shadow-card"
-                >
-                  <h3 title={item.productName} className="truncate text-sm font-medium text-text-heading">
-                    {item.productName}
-                  </h3>
-                  <p className="mt-0.5 font-semibold tabular-nums text-text-heading">
-                    {formatDisposalVolume(item.netVolume)}
-                  </p>
+                <article key={item.productId} className="flex min-h-20 min-w-0 items-center gap-3 bg-card px-3 py-3 md:rounded-md md:shadow-card">
+                  <FuelProductIcon color={item.productColor} tile className="size-4" containerClassName="size-9" />
+                  <div className="min-w-0 flex-1">
+                    <h3 title={item.productName} className="truncate text-sm font-medium text-text-heading">
+                      {item.productName}
+                    </h3>
+                    <p className="mt-0.5 font-semibold tabular-nums text-text-heading">
+                      {formatDisposalVolume(item.netVolume)}
+                    </p>
+                  </div>
                 </article>
               ))}
             </div>
