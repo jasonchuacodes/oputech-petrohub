@@ -1,6 +1,6 @@
 'use client';
 
-import { History, MoreVertical, PackagePlus, Pencil, Search, Trash2 } from 'lucide-react';
+import { History, MoreVertical, Package, PackagePlus, Pencil, Search, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '~/components/ui/button';
@@ -296,6 +296,7 @@ function TenantInventory({ tenantId }: { tenantId: string }) {
         <Sheet
           open
           title="Product actions"
+          icon={Package}
           description={`${actions.name} · ${actions.stockCount} ${actions.unit}`}
           manageFocus
           onClose={() => setActions(undefined)}

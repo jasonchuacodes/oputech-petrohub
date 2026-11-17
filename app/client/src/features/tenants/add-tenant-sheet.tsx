@@ -1,7 +1,8 @@
-import { X } from 'lucide-react'
+import { Building2 } from 'lucide-react'
 import { useCallback, useEffect, useId, useState, type FormEvent } from 'react'
 import { createPortal } from 'react-dom'
 import { Button } from '~/components/ui/button'
+import { DialogHeader } from '~/components/ui/dialog-header'
 import { Input } from '~/components/ui/input'
 import { Spinner } from '~/components/ui/spinner'
 import { useCreateTenantMutation, type TenantSummary } from './tenants.queries'
@@ -85,27 +86,16 @@ export function AddTenantSheet({ open, onClose, onCreated }: AddTenantSheetProps
           className="mx-auto mt-3 h-1.5 w-14 shrink-0 rounded-full bg-foreground/35 wide:hidden"
         />
 
-        <header className="flex shrink-0 items-start gap-3 p-5 pb-4">
-          <div className="min-w-0 flex-1">
-            <h2 id={titleId} className="text-xl font-semibold text-text-heading">
-              Add Tenant
-            </h2>
-            <p id={descriptionId} className="mt-0.5 text-sm text-text-secondary">
-              Create a workspace for a new station.
-            </p>
-          </div>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            aria-label="Close Add Tenant"
-            className="-mr-2 -mt-1 text-text-secondary"
-            disabled={createTenant.isPending}
-            onClick={close}
-          >
-            <X aria-hidden="true" />
-          </Button>
-        </header>
+        <DialogHeader
+          title="Add Tenant"
+          titleId={titleId}
+          description="Create a workspace for a new station."
+          descriptionId={descriptionId}
+          icon={Building2}
+          closeLabel="Close Add Tenant"
+          closeDisabled={createTenant.isPending}
+          onClose={close}
+        />
 
         <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-5">
           <div className="flex flex-col gap-1.5">

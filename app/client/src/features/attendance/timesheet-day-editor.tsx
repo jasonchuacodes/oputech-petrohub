@@ -1,6 +1,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
+import { CalendarClock } from 'lucide-react'
 import { useId } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
@@ -104,6 +105,7 @@ export function TimesheetDayEditor({
       <ConfirmationDialog
         open
         title="Edit timesheet"
+        icon={CalendarClock}
         description={`${memberName} · ${formatTimesheetDate(day.localDate)}`}
         confirmText="Save"
         cancelText="Cancel"
@@ -121,6 +123,7 @@ export function TimesheetDayEditor({
     <Sheet
       open
       title="Edit timesheet"
+      icon={CalendarClock}
       description={`${memberName} · ${formatTimesheetDate(day.localDate)}`}
       manageFocus
       escapeDisabled={mutation.isPending}

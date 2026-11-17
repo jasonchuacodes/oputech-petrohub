@@ -1,6 +1,7 @@
 'use client';
 
 import Decimal from 'decimal.js';
+import { Gauge } from 'lucide-react';
 import { useId, useRef, useState, type RefObject } from 'react';
 import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
@@ -129,6 +130,7 @@ export function DisposalReadingSheet({
     <Sheet
       open
       title="Disposal Reading"
+      icon={Gauge}
       description={`${reading.meterLabel} · ${reading.productName}`}
       onClose={handleClose}
       escapeDisabled={saving}

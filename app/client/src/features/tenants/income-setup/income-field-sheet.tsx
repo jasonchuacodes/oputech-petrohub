@@ -1,6 +1,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
+import { CirclePlus } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Button } from '~/components/ui/button'
@@ -60,6 +61,7 @@ export function IncomeFieldSheet({
     <Sheet
       open={open}
       title="Add recurring income field"
+      icon={CirclePlus}
       description="This field will start at zero in new reports."
       manageFocus
       initialFocusRef={inputRef}

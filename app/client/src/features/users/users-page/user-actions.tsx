@@ -1,10 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ChevronDown, KeyRound, MoreVertical, Pencil, UserX, X } from 'lucide-react'
+import { ChevronDown, KeyRound, MoreVertical, Pencil, UserRoundCog, UserX } from 'lucide-react'
 import { useCallback, useEffect, useId, useState, type ReactNode } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { createPortal } from 'react-dom'
 import { toast } from 'sonner'
 import { Button } from '~/components/ui/button'
+import { DialogHeader } from '~/components/ui/dialog-header'
 import { Input } from '~/components/ui/input'
 import { Spinner } from '~/components/ui/spinner'
 import type { UserRole } from '~/generated/graphql'
@@ -174,25 +175,16 @@ export function UserActions({
                 className="mx-auto mt-3 h-1.5 w-14 shrink-0 rounded-full bg-foreground/35 wide:hidden"
               />
 
-              <header className="relative flex shrink-0 flex-col gap-1 p-5 pr-16">
-                <h2 id={titleId} className="text-xl font-semibold text-text-heading">
-                  {editing ? 'Edit User' : 'User Actions'}
-                </h2>
-                <p id={descriptionId} className="text-sm text-text-secondary">
-                  {editing ? `Update ${user.fullName}'s account details.` : user.fullName}
-                </p>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  aria-label={editing ? 'Close Edit User' : 'Close user actions'}
-                  className="absolute right-3 top-4 text-text-secondary"
-                  disabled={updateUser.isPending}
-                  onClick={close}
-                >
-                  <X aria-hidden="true" />
-                </Button>
-              </header>
+              <DialogHeader
+                title={editing ? 'Edit User' : 'User Actions'}
+                titleId={titleId}
+                description={editing ? `Update ${user.fullName}'s account details.` : user.fullName}
+                descriptionId={descriptionId}
+                icon={UserRoundCog}
+                closeLabel={editing ? 'Close Edit User' : 'Close user actions'}
+                closeDisabled={updateUser.isPending}
+                onClose={close}
+              />
 
               {editing ? (
                 <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-5">

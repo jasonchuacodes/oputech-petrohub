@@ -1,7 +1,7 @@
 'use client'
 
 import * as Popover from '@radix-ui/react-popover'
-import { ChevronDown } from 'lucide-react'
+import { CalendarRange, ChevronDown } from 'lucide-react'
 import { useState, type RefObject } from 'react'
 import type { DateRange } from 'react-day-picker'
 import { useMediaQuery } from '~/hooks/useMediaQuery'
@@ -140,7 +140,7 @@ function DateRangeSheet({
   })
 
   return (
-    <Sheet open title="Custom date range" manageFocus showCloseButton={false} onClose={onClose}>
+    <Sheet open title="Custom date range" icon={CalendarRange} manageFocus showCloseButton={false} onClose={onClose}>
       <div className="flex min-h-0 flex-1 justify-center overflow-y-auto px-5 py-2">
         <Calendar
           mode="range"

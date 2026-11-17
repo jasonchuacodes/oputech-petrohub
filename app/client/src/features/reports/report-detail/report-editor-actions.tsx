@@ -1,6 +1,6 @@
 'use client';
 
-import { CheckCircle2, LoaderCircle, Trash2 } from 'lucide-react';
+import { CheckCircle2, FileCog, LoaderCircle, Trash2 } from 'lucide-react';
 import { Button } from '~/components/ui/button';
 import { ConfirmationDialog } from '~/components/ui/confirmation-dialog';
 import { Input } from '~/components/ui/input';
@@ -64,6 +64,7 @@ export function ReportEditorDialogs() {
       <Sheet
         open={reportActions.open}
         title="Report actions"
+        icon={FileCog}
         description={`${report.shiftName} · ${formatBusinessDate(report.businessDate)} · ${formatShiftTime(report.interval)}`}
         manageFocus
         onClose={reportActions.onClose}

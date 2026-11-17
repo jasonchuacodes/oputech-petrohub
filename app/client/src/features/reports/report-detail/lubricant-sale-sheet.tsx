@@ -1,7 +1,7 @@
 'use client'
 
 import Decimal from 'decimal.js'
-import { ChevronDown, Search } from 'lucide-react'
+import { ChevronDown, PackageSearch, Search, ShoppingCart } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
@@ -70,6 +70,7 @@ export function LubricantSaleSheet() {
       <Sheet
         open
         title={current ? 'Edit lubricant sale' : 'Add lubricant sale'}
+        icon={ShoppingCart}
         description="Record a lubricant product and quantity."
         escapeDisabled={selectingProduct}
         manageFocus
@@ -185,6 +186,7 @@ function LubricantProductSelectSheet({
       open
       layer="nested"
       title="Select lubricant product"
+      icon={PackageSearch}
       description="Search available lubricant products."
       manageFocus
       onClose={onClose}

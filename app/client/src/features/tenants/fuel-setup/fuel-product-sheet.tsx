@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { X } from 'lucide-react'
+import { Fuel, X } from 'lucide-react'
 import { useRef, useState, type RefObject } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { toast } from 'sonner'
@@ -87,6 +87,7 @@ export function FuelProductSheet({
     <SetupSheet
       open
       title={priceOnly ? 'Product details' : product ? 'Edit fuel product' : 'Add fuel product'}
+      icon={Fuel}
       description={priceOnly ? 'Update the price now or plan a future change.' : 'Set the product name and selling price used by new reports.'}
       onClose={close}
       escapeDisabled={pending}

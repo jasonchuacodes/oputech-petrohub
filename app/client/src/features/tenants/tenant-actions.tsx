@@ -1,8 +1,9 @@
-import { MoreVertical, Pencil, Trash2, X } from 'lucide-react'
+import { Building2, MoreVertical, Pencil, Trash2 } from 'lucide-react'
 import { useCallback, useEffect, useId, useState, type FormEvent } from 'react'
 import { createPortal } from 'react-dom'
 import { Button } from '~/components/ui/button'
 import { ConfirmationDialog } from '~/components/ui/confirmation-dialog'
+import { DialogHeader } from '~/components/ui/dialog-header'
 import { Input } from '~/components/ui/input'
 import { Spinner } from '~/components/ui/spinner'
 import { useDeleteTenantMutation, useUpdateTenantMutation } from './tenants.queries'
@@ -134,25 +135,16 @@ export function TenantActions({
                 className="mx-auto mt-3 h-1.5 w-14 shrink-0 rounded-full bg-foreground/35 wide:hidden"
               />
 
-              <header className="relative flex shrink-0 flex-col gap-1 p-5 pr-16">
-                <h2 id={titleId} className="text-xl font-semibold text-text-heading">
-                  {editing ? 'Edit tenant' : 'Tenant actions'}
-                </h2>
-                <p id={descriptionId} className="text-sm text-text-secondary">
-                  {editing ? 'Update the tenant name shown across the workspace.' : tenantName}
-                </p>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  aria-label={editing ? 'Close Edit tenant' : 'Close tenant actions'}
-                  className="absolute right-3 top-4 text-text-secondary"
-                  disabled={updateTenant.isPending}
-                  onClick={close}
-                >
-                  <X aria-hidden="true" />
-                </Button>
-              </header>
+              <DialogHeader
+                title={editing ? 'Edit tenant' : 'Tenant actions'}
+                titleId={titleId}
+                description={editing ? 'Update the tenant name shown across the workspace.' : tenantName}
+                descriptionId={descriptionId}
+                icon={Building2}
+                closeLabel={editing ? 'Close Edit tenant' : 'Close tenant actions'}
+                closeDisabled={updateTenant.isPending}
+                onClose={close}
+              />
 
               {editing ? (
                 <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-5">

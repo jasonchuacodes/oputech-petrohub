@@ -1,6 +1,6 @@
 'use client'
 
-import { X, type LucideIcon } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import {
   useCallback,
   useEffect,
@@ -11,8 +11,7 @@ import {
   type RefObject,
 } from 'react'
 import { createPortal } from 'react-dom'
-import { cn } from '~/utils/cn'
-import { Button } from './button'
+import { DialogHeader } from './dialog-header'
 
 const focusableSelector =
   'button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[href],[tabindex]:not([tabindex="-1"])'
@@ -21,7 +20,7 @@ export type SheetProps = {
   open: boolean
   title: string
   description?: string
-  icon?: LucideIcon
+  icon: LucideIcon
   variant?: 'default' | 'danger'
   children: ReactNode
   onClose: () => void
@@ -37,7 +36,7 @@ export function Sheet({
   open,
   title,
   description,
-  icon: Icon,
+  icon,
   variant = 'default',
   children,
   onClose,
@@ -120,41 +119,17 @@ export function Sheet({
           aria-hidden="true"
           className="mx-auto mt-3 h-1.5 w-14 shrink-0 rounded-full bg-foreground/35 wide:hidden"
         />
-        <header className="flex shrink-0 items-start gap-3 p-5 pb-4">
-          {Icon && (
-            <span
-              className={cn(
-                'flex size-10 shrink-0 items-center justify-center rounded-md text-primary-foreground',
-                variant === 'danger' ? 'bg-destructive' : 'bg-primary',
-              )}
-            >
-              <Icon aria-hidden="true" className="size-5" />
-            </span>
-          )}
-          <div className="min-w-0 flex-1">
-            <h2 id={titleId} className="text-xl font-semibold text-text-heading">
-              {title}
-            </h2>
-            {description && (
-              <p id={descriptionId} className="mt-0.5 text-sm text-text-secondary">
-                {description}
-              </p>
-            )}
-          </div>
-          {showCloseButton && (
-            <Button
-              ref={closeButtonRef}
-              type="button"
-              variant="ghost"
-              size="icon"
-              aria-label="Close"
-              className="-mr-2 -mt-1 text-text-secondary"
-              onClick={close}
-            >
-              <X aria-hidden="true" />
-            </Button>
-          )}
-        </header>
+        <DialogHeader
+          title={title}
+          titleId={titleId}
+          description={description}
+          descriptionId={descriptionId}
+          icon={icon}
+          variant={variant}
+          showCloseButton={showCloseButton}
+          closeButtonRef={closeButtonRef}
+          onClose={close}
+        />
         {children}
       </section>
     </div>,

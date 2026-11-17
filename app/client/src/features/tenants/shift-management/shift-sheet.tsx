@@ -1,11 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Pencil, Trash2, X } from 'lucide-react'
+import { Clock3, Pencil, Trash2 } from 'lucide-react'
 import { useCallback, useEffect, useId, useRef, useState, type KeyboardEvent } from 'react'
 import { useForm } from 'react-hook-form'
 import { createPortal } from 'react-dom'
 import { toast } from 'sonner'
 import { Button } from '~/components/ui/button'
 import { ConfirmationDialog } from '~/components/ui/confirmation-dialog'
+import { DialogHeader } from '~/components/ui/dialog-header'
 import { Input } from '~/components/ui/input'
 import { Spinner } from '~/components/ui/spinner'
 import { formatShiftTime } from '~/utils/time'
@@ -152,29 +153,18 @@ export function ShiftSheet({ open, tenantId, tenantName, shift, onClose }: Shift
       >
         <div aria-hidden="true" className="mx-auto mt-3 h-1.5 w-14 shrink-0 rounded-full bg-foreground/35 wide:hidden" />
 
-        <header className="flex shrink-0 items-start gap-3 p-5 pb-4">
-          <div className="min-w-0 flex-1">
-            <h2 id={titleId} className="text-xl font-semibold text-text-heading">
-              {shift ? (editing ? 'Edit shift' : 'Shift actions') : 'Add shift'}
-            </h2>
-            <p id={descriptionId} className="mt-0.5 text-sm text-text-secondary">
-              {shift && !editing
-                ? `${shift.name} · ${formatShiftTime(shift)}`
-                : `${shift ? 'Update' : 'Add'} a daily shift for ${tenantName}.`}
-            </p>
-          </div>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            aria-label={`Close ${shift && !editing ? 'shift actions' : shift ? 'Edit' : 'Add'} shift`}
-            className="-mr-2 -mt-1 text-text-secondary"
-            disabled={isPending}
-            onClick={close}
-          >
-            <X aria-hidden="true" />
-          </Button>
-        </header>
+        <DialogHeader
+          title={shift ? (editing ? 'Edit shift' : 'Shift actions') : 'Add shift'}
+          titleId={titleId}
+          description={shift && !editing
+            ? `${shift.name} · ${formatShiftTime(shift)}`
+            : `${shift ? 'Update' : 'Add'} a daily shift for ${tenantName}.`}
+          descriptionId={descriptionId}
+          icon={Clock3}
+          closeLabel={`Close ${shift && !editing ? 'shift actions' : shift ? 'Edit' : 'Add'} shift`}
+          closeDisabled={isPending}
+          onClose={close}
+        />
 
         {editing ? (
           <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-5">

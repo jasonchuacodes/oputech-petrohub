@@ -1,9 +1,10 @@
 'use client'
 
-import { CalendarDays, CircleAlert, X } from 'lucide-react'
+import { CalendarDays, CircleAlert, ClipboardPlus } from 'lucide-react'
 import { useEffect, useId, useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
 import { createPortal } from 'react-dom'
 import { Button } from '~/components/ui/button'
+import { DialogHeader } from '~/components/ui/dialog-header'
 import { Spinner } from '~/components/ui/spinner'
 import { cn } from '~/utils/cn'
 import { formatShiftTime } from '~/utils/time'
@@ -77,10 +78,7 @@ export function CreateReportSheet({ onClose, onOpenReport }: CreateReportSheetPr
       <button type="button" aria-label="Close create shift report sheet" tabIndex={-1} className="absolute inset-0 bg-black/55 backdrop-blur-[2px]" disabled={createReport.isPending} onClick={onClose} />
       <form ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby={titleId} aria-describedby={descriptionId} className="relative flex max-h-[90dvh] w-full flex-col overflow-hidden rounded-t-sheet bg-card shadow-2xl wide:max-w-xl wide:rounded-lg" noValidate onKeyDown={handleKeyDown} onSubmit={submit}>
         <div aria-hidden="true" className="mx-auto mt-3 h-1.5 w-14 shrink-0 rounded-full bg-foreground/35 wide:hidden" />
-        <header className="flex shrink-0 items-start gap-3 p-5 pb-4">
-          <div className="min-w-0 flex-1"><h2 id={titleId} className="text-xl font-semibold text-text-heading">Create shift report</h2><p id={descriptionId} className="mt-0.5 text-sm text-text-secondary">Choose a configured shift to create or open its report.</p></div>
-          <Button type="button" variant="ghost" size="icon" aria-label="Close create shift report sheet" className="-mr-2 -mt-1 text-text-secondary" disabled={createReport.isPending} onClick={onClose}><X aria-hidden="true" /></Button>
-        </header>
+        <DialogHeader title="Create shift report" titleId={titleId} description="Choose a configured shift to create or open its report." descriptionId={descriptionId} icon={ClipboardPlus} closeLabel="Close create shift report sheet" closeDisabled={createReport.isPending} onClose={onClose} />
         <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-4">
           {context.isPending ? <div className="flex min-h-48 items-center justify-center"><Spinner className="size-6" /></div> : context.isError ? <p role="alert" className="rounded-md bg-destructive/10 p-4 text-sm text-destructive">Unable to load tenant shifts.</p> : (
             <>

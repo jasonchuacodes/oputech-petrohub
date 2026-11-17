@@ -1,6 +1,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
+import { ArrowLeftRight } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { Button } from '~/components/ui/button'
@@ -24,7 +25,7 @@ export function StockMovementSheet({ tenantId, product, onClose }: { tenantId: s
     }
   })
   return (
-    <Sheet open title="Record stock movement" description={`${product.name} · Current stock ${product.stockCount} ${product.unit}`} manageFocus onClose={onClose}>
+    <Sheet open title="Record stock movement" description={`${product.name} · Current stock ${product.stockCount} ${product.unit}`} icon={ArrowLeftRight} manageFocus onClose={onClose}>
       <form className="flex min-h-0 flex-1 flex-col" onSubmit={submit}>
         <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-5 pb-5">
           <fieldset className="flex flex-col gap-1.5" disabled={mutation.isPending}>

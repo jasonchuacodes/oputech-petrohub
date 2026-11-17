@@ -84,6 +84,7 @@ function DateTimeSheet({
       open
       layer="nested"
       title={step === 'date' ? 'Select date' : hourOnly ? 'Select effective time' : 'Select time'}
+      icon={step === 'date' ? CalendarClock : Clock3}
       description={step === 'time' && hourOnly
         ? 'Choose any hour, including an earlier hour today. Minutes are fixed at 00.'
         : undefined}

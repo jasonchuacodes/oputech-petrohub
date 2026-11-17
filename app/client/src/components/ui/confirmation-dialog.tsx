@@ -1,8 +1,8 @@
-import { X, type LucideIcon } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { useCallback, useEffect, useId, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
-import { cn } from '~/utils/cn'
 import { Button } from './button'
+import { DialogHeader } from './dialog-header'
 import { Spinner } from './spinner'
 
 type ConfirmationDialogProps = {
@@ -10,7 +10,7 @@ type ConfirmationDialogProps = {
   title: string
   description?: ReactNode
   children?: ReactNode
-  icon?: LucideIcon
+  icon: LucideIcon
   variant?: 'default' | 'danger'
   confirmText?: string
   cancelText?: string
@@ -25,7 +25,7 @@ export function ConfirmationDialog({
   title,
   description,
   children,
-  icon: Icon,
+  icon,
   variant = 'default',
   confirmText = 'Confirm',
   cancelText = 'Cancel',
@@ -75,43 +75,20 @@ export function ConfirmationDialog({
         aria-describedby={description ? descriptionId : undefined}
         className="relative z-10 flex max-h-[90dvh] w-full max-w-md flex-col overflow-hidden rounded-lg bg-card shadow-lg"
       >
-        <header className="flex items-start gap-3 p-4">
-          {Icon && (
-            <span
-              className={cn(
-                'flex size-10 shrink-0 items-center justify-center rounded-md text-primary-foreground',
-                variant === 'danger' ? 'bg-destructive' : 'bg-primary',
-              )}
-            >
-              <Icon aria-hidden="true" className="size-5" />
-            </span>
-          )}
-          <div className="min-w-0 flex-1">
-            <h2 id={titleId} className="text-lg font-semibold text-text-heading">
-              {title}
-            </h2>
-            {description && (
-              <div id={descriptionId} className="mt-1 text-sm text-text-secondary">
-                {description}
-              </div>
-            )}
-          </div>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            aria-label="Close"
-            className="-mr-2 -mt-1 text-text-secondary"
-            disabled={loading}
-            onClick={close}
-          >
-            <X aria-hidden="true" />
-          </Button>
-        </header>
+        <DialogHeader
+          title={title}
+          titleId={titleId}
+          description={description}
+          descriptionId={descriptionId}
+          icon={icon}
+          variant={variant}
+          closeDisabled={loading}
+          onClose={close}
+        />
 
-        {children && <div className="min-h-0 overflow-y-auto px-4 pb-4">{children}</div>}
+        {children && <div className="min-h-0 overflow-y-auto px-5 pb-5">{children}</div>}
 
-        <footer className="flex items-center justify-end gap-3 border-t border-border p-4">
+        <footer className="flex items-center justify-end gap-3 border-t border-border p-5">
           <Button
             type="button"
             variant="outline"

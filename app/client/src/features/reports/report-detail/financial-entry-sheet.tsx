@@ -1,8 +1,10 @@
 'use client';
 
+import { CircleDollarSign } from 'lucide-react';
 import { useCallback, useEffect, useId, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Button } from '~/components/ui/button';
+import { DialogHeader } from '~/components/ui/dialog-header';
 import { Input } from '~/components/ui/input';
 import { reportEntrySchema } from './report-detail.schema';
 import { useReportEditor } from './report-editor-context';
@@ -75,14 +77,14 @@ export function FinancialEntrySheet({ kind, index, onClose }: FinancialEntryShee
           aria-hidden="true"
           className="mx-auto mt-3 h-1.5 w-14 shrink-0 rounded-full bg-foreground/35 wide:hidden"
         />
-        <header className="shrink-0 p-5 pb-4">
-          <h2 id={titleId} className="text-xl font-semibold text-text-heading">
-            {title}
-          </h2>
-          <p id={descriptionId} className="mt-1 text-sm text-text-secondary">
-            Enter the description and amount for this report.
-          </p>
-        </header>
+        <DialogHeader
+          title={title}
+          titleId={titleId}
+          description="Enter the description and amount for this report."
+          descriptionId={descriptionId}
+          icon={CircleDollarSign}
+          showCloseButton={false}
+        />
         <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-5 pb-5">
           <label className="flex flex-col gap-1.5">
             <span className="text-sm font-medium">Description</span>

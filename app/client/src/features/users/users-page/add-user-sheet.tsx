@@ -1,10 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ChevronDown, Eye, EyeOff, X } from 'lucide-react'
+import { ChevronDown, Eye, EyeOff, UserPlus } from 'lucide-react'
 import { useCallback, useEffect, useId, useState, type ReactNode } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { createPortal } from 'react-dom'
 import { toast } from 'sonner'
 import { Button } from '~/components/ui/button'
+import { DialogHeader } from '~/components/ui/dialog-header'
 import { Input } from '~/components/ui/input'
 import { Spinner } from '~/components/ui/spinner'
 import type { UserRole } from '~/generated/graphql'
@@ -133,27 +134,16 @@ export function AddUserSheet({ open, tenantId, actorRole, onClose }: AddUserShee
           className="mx-auto mt-3 h-1.5 w-14 shrink-0 rounded-full bg-foreground/35 wide:hidden"
         />
 
-        <header className="flex shrink-0 items-start gap-3 p-5 pb-4">
-          <div className="min-w-0 flex-1">
-            <h2 id={titleId} className="text-xl font-semibold text-text-heading">
-              Add User
-            </h2>
-            <p id={descriptionId} className="mt-0.5 text-sm text-text-secondary">
-              Create a user for the current tenant.
-            </p>
-          </div>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            aria-label="Close Add User"
-            className="-mr-2 -mt-1 text-text-secondary"
-            disabled={createUser.isPending}
-            onClick={close}
-          >
-            <X aria-hidden="true" />
-          </Button>
-        </header>
+        <DialogHeader
+          title="Add User"
+          titleId={titleId}
+          description="Create a user for the current tenant."
+          descriptionId={descriptionId}
+          icon={UserPlus}
+          closeLabel="Close Add User"
+          closeDisabled={createUser.isPending}
+          onClose={close}
+        />
 
         <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-5">
           <div className="flex flex-col gap-4">

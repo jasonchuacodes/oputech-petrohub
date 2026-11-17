@@ -1,6 +1,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
+import { PackagePlus, Pencil } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { Button } from '~/components/ui/button'
@@ -37,7 +38,7 @@ export function ProductSheet({ tenantId, product, onClose }: { tenantId: string;
   })
 
   return (
-    <Sheet open title={product ? 'Edit lubricant' : 'Add lubricant'} description="Configure the inventory unit and selling price." manageFocus onClose={onClose}>
+    <Sheet open title={product ? 'Edit lubricant' : 'Add lubricant'} description="Configure the inventory unit and selling price." icon={product ? Pencil : PackagePlus} manageFocus onClose={onClose}>
       <form className="flex min-h-0 flex-1 flex-col" onSubmit={submit}>
         <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-5 pb-5">
           <Field label="Product name" error={form.formState.errors.name?.message}><Input autoFocus disabled={pending} placeholder="Engine Oil 1L" {...form.register('name')} /></Field>

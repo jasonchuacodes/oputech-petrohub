@@ -1,5 +1,6 @@
 'use client'
 
+import { History } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '~/components/ui/button'
 import { Sheet } from '~/components/ui/sheet'
@@ -15,7 +16,7 @@ export function StockMovementHistorySheet({ tenantId, product, onClose }: { tena
   const movements = useStockMovementsQuery(tenantId, { productId: product.id, first: pageSize, after })
 
   return (
-    <Sheet open title="Stock movement history" description={product.name} manageFocus onClose={onClose}>
+    <Sheet open title="Stock movement history" description={product.name} icon={History} manageFocus onClose={onClose}>
       <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
         {movements.isPending ? (
           <div className="flex min-h-40 items-center justify-center"><Spinner className="size-5" /></div>

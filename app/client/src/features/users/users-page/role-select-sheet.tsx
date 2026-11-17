@@ -1,7 +1,7 @@
-import { Check, X } from 'lucide-react'
+import { Check, ShieldCheck } from 'lucide-react'
 import { useCallback, useEffect, useId } from 'react'
 import { createPortal } from 'react-dom'
-import { Button } from '~/components/ui/button'
+import { DialogHeader } from '~/components/ui/dialog-header'
 import type { UserRole } from '~/generated/graphql'
 
 export type ManageableUserRole = Extract<UserRole, 'admin' | 'member'>
@@ -65,24 +65,15 @@ export function RoleSelectSheet({
           aria-hidden="true"
           className="mx-auto mt-3 h-1.5 w-14 shrink-0 rounded-full bg-foreground/35 wide:hidden"
         />
-        <header className="relative flex shrink-0 flex-col gap-1 p-5 pr-16">
-          <h2 id={titleId} className="text-xl font-semibold text-text-heading">
-            Select Role
-          </h2>
-          <p id={descriptionId} className="text-sm text-text-secondary">
-            Choose the user&apos;s access level.
-          </p>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            aria-label="Close role selection"
-            className="absolute right-3 top-4 text-text-secondary"
-            onClick={close}
-          >
-            <X aria-hidden="true" />
-          </Button>
-        </header>
+        <DialogHeader
+          title="Select Role"
+          titleId={titleId}
+          description="Choose the user's access level."
+          descriptionId={descriptionId}
+          icon={ShieldCheck}
+          closeLabel="Close role selection"
+          onClose={close}
+        />
 
         <div
           role="radiogroup"

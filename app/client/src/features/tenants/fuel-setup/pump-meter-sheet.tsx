@@ -62,6 +62,7 @@ export function PumpMeterSheet({ tenantId, products, meter, onClose }: PumpMeter
         open
         escapeDisabled={selectingProduct || pending}
         title={meter ? 'Edit pump' : 'Add pump meter'}
+        icon={Gauge}
         description={meter
           ? 'Update the pump name. Fuel type cannot be changed.'
           : 'Create one entry for each independently incrementing physical meter.'}

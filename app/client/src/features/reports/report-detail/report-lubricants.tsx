@@ -1,6 +1,6 @@
 'use client'
 
-import { ChevronRight, CirclePlus } from 'lucide-react'
+import { ChevronRight, CirclePlus, ShoppingBasket } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '~/components/ui/button'
 import { Sheet } from '~/components/ui/sheet'
@@ -91,6 +91,7 @@ export function ReportLubricantsPanel() {
         <Sheet
           open
           title="Lubricant sale actions"
+          icon={ShoppingBasket}
           description={`${actionSale.productName} · ${actionSale.quantity} ${actionSale.unit}`}
           manageFocus
           onClose={() => setActionIndex(undefined)}
