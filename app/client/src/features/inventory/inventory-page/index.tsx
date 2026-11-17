@@ -20,6 +20,8 @@ import type { InventoryProductFieldsFragment } from '~/generated/graphql';
 import { cn } from '~/utils/cn';
 import { useActiveTenant } from '../../layout/use-active-tenant';
 import {
+  inventoryPageSize,
+  inventoryProductsInput,
   useDeactivateInventoryProductMutation,
   useInventoryProductsQuery,
 } from '../inventory.queries';
@@ -28,7 +30,6 @@ import { ReconcileCountSheet } from './reconcile-count-sheet';
 import { StockMovementHistorySheet } from './stock-movement-history-sheet';
 import { StockMovementSheet } from './stock-movement-sheet';
 
-const pageSize = 50;
 type ProductEditor = InventoryProductFieldsFragment | 'new' | null;
 
 export function InventoryPage() {
@@ -46,12 +47,7 @@ export function InventoryPage() {
 function TenantInventory({ tenantId }: { tenantId: string }) {
   const [search, setSearch] = useState('');
   const [offset, setOffset] = useState(0);
-  const products = useInventoryProductsQuery(tenantId, {
-    search,
-    activeOnly: false,
-    offset,
-    limit: pageSize,
-  });
+  const products = useInventoryProductsQuery(tenantId, inventoryProductsInput(search, offset));
   const deactivateProduct = useDeactivateInventoryProductMutation(tenantId);
   const [editor, setEditor] = useState<ProductEditor>(null);
   const [actions, setActions] = useState<InventoryProductFieldsFragment>();
@@ -177,7 +173,7 @@ function TenantInventory({ tenantId }: { tenantId: string }) {
         <div className="flex min-h-64 items-center justify-center">
           <Spinner className="size-6" />
         </div>
-      ) : products.isError ? (
+      ) : products.isError && !products.data ? (
         <div className="rounded-md bg-card p-5 shadow-card">
           <p className="text-sm text-destructive">Unable to load inventory.</p>
           <Button
@@ -189,8 +185,13 @@ function TenantInventory({ tenantId }: { tenantId: string }) {
             Try again
           </Button>
         </div>
-      ) : (
+      ) : products.data ? (
         <>
+          {products.isRefetchError && (
+            <p className="text-sm text-status-warning">
+              Unable to refresh. Showing the last available inventory.
+            </p>
+          )}
           <section aria-label="Lubricant products">
             {products.data.items.length === 0 ? (
               <div className="flex min-h-52 flex-col items-center justify-center gap-3 rounded-md bg-card p-6 text-center shadow-card">
@@ -263,34 +264,34 @@ function TenantInventory({ tenantId }: { tenantId: string }) {
               </>
             )}
           </section>
-          {(offset > 0 || products.data.totalCount > pageSize) && (
+          {(offset > 0 || products.data.totalCount > inventoryPageSize) && (
             <div className="flex items-center justify-between gap-3">
               <Button
                 type="button"
                 variant="outline"
                 disabled={offset === 0}
-                onClick={() => setOffset(Math.max(0, offset - pageSize))}
+                onClick={() => setOffset(Math.max(0, offset - inventoryPageSize))}
               >
                 Previous
               </Button>
               <span className="text-sm text-text-secondary">
                 {products.data.totalCount === 0
                   ? '0'
-                  : `${offset + 1}–${Math.min(offset + pageSize, products.data.totalCount)}`}{' '}
+                  : `${offset + 1}–${Math.min(offset + inventoryPageSize, products.data.totalCount)}`}{' '}
                 of {products.data.totalCount}
               </span>
               <Button
                 type="button"
                 variant="outline"
-                disabled={offset + pageSize >= products.data.totalCount}
-                onClick={() => setOffset(offset + pageSize)}
+                disabled={offset + inventoryPageSize >= products.data.totalCount}
+                onClick={() => setOffset(offset + inventoryPageSize)}
               >
                 Next
               </Button>
             </div>
           )}
         </>
-      )}
+      ) : null}
       {editor && (
         <ProductSheet
           key={selectedEditor?.id ?? 'new'}

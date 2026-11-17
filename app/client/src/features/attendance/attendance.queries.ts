@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   CheckInAttendanceDocument,
   CheckOutAttendanceDocument,
@@ -26,8 +26,8 @@ export const attendanceKeys = {
     ['attendance', tenantId, 'days', userId, startDate, endDate] as const,
 }
 
-export function useMyAttendanceQuery(tenantId: string) {
-  return useQuery({
+export function myAttendanceQueryOptions(tenantId: string) {
+  return queryOptions({
     queryKey: attendanceKeys.mine(tenantId),
     queryFn: async () =>
       (await graphqlClient.request(MyAttendanceDocument, undefined, { tenantId })).myAttendance,
@@ -35,6 +35,10 @@ export function useMyAttendanceQuery(tenantId: string) {
     refetchInterval: 30_000,
     refetchOnWindowFocus: true,
   })
+}
+
+export function useMyAttendanceQuery(tenantId: string) {
+  return useQuery(myAttendanceQueryOptions(tenantId))
 }
 
 export function useCheckInAttendanceMutation(tenantId: string) {
@@ -81,7 +85,18 @@ export function useTimesheetsQuery(
   offset: number,
   search?: string,
 ) {
-  return useQuery({
+  return useQuery(timesheetsQueryOptions(tenantId, startDate, endDate, userId, offset, search))
+}
+
+export function timesheetsQueryOptions(
+  tenantId: string,
+  startDate: string | undefined,
+  endDate: string | undefined,
+  userId: string | undefined,
+  offset: number,
+  search?: string,
+) {
+  return queryOptions({
     queryKey: attendanceKeys.list(tenantId, startDate, endDate, userId, offset, search),
     queryFn: async () =>
       (
@@ -101,7 +116,16 @@ export function useTimesheetDaysQuery(
   startDate: string,
   endDate: string,
 ) {
-  return useQuery({
+  return useQuery(timesheetDaysQueryOptions(tenantId, userId, startDate, endDate))
+}
+
+export function timesheetDaysQueryOptions(
+  tenantId: string,
+  userId: string | undefined,
+  startDate: string,
+  endDate: string,
+) {
+  return queryOptions({
     queryKey: attendanceKeys.days(tenantId, userId ?? '', startDate, endDate),
     queryFn: async () =>
       (

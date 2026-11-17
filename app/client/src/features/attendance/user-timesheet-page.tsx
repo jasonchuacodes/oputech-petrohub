@@ -159,7 +159,7 @@ function AdminUserTimesheetPage({
           <div className="flex min-h-48 items-center justify-center rounded-md bg-card shadow-card">
             <Spinner className="size-6" />
           </div>
-        ) : summary.isError || timesheet.isError ? (
+        ) : (summary.isError && !summary.data) || (timesheet.isError && !timesheet.data) ? (
           <div className="flex min-h-48 flex-col items-center justify-center gap-3 rounded-md bg-card p-6 text-center shadow-card">
             <p className="text-sm text-text-secondary">Unable to load this member’s timesheet.</p>
             <Button type="button" variant="outline" onClick={retry}>Try again</Button>
@@ -171,6 +171,11 @@ function AdminUserTimesheetPage({
           </div>
         ) : (
           <section aria-label="Daily timesheets">
+            {(summary.isRefetchError || timesheet.isRefetchError) && (
+              <p className="mb-3 text-sm text-status-warning">
+                Unable to refresh. Showing the last available timesheet.
+              </p>
+            )}
             <ul className="flex flex-col gap-3 md:hidden">
               {days.map((day) => (
                 <li key={day.localDate} className="overflow-hidden rounded-md bg-card shadow-card ring-1 ring-border/50">

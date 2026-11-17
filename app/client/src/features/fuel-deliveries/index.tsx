@@ -44,7 +44,7 @@ export function FuelDeliveriesPage() {
         <div className="flex min-h-64 items-center justify-center">
           <Spinner className="size-6" />
         </div>
-      ) : setup.isError ? (
+      ) : setup.isError && !setup.data ? (
         <div className="rounded-md bg-card p-5 shadow-card">
           <p className="text-sm text-destructive">Unable to load tanks and fuel products.</p>
           <Button
@@ -57,8 +57,13 @@ export function FuelDeliveriesPage() {
             Try again
           </Button>
         </div>
-      ) : (
+      ) : setup.data ? (
         <>
+          {setup.isRefetchError && (
+            <p className="text-sm text-status-warning">
+              Unable to refresh. Showing the last available fuel setup.
+            </p>
+          )}
           <Button
             type="button"
             size="sm"
@@ -88,7 +93,7 @@ export function FuelDeliveriesPage() {
             />
           )}
         </>
-      )}
+      ) : null}
     </div>
   );
 }

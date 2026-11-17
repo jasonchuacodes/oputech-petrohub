@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   CreateFuelProductDocument,
   ActivateFuelTankDocument,
@@ -29,11 +29,15 @@ import { reportKeys } from '../reports/reports.queries'
 
 const fuelSetupKey = (tenantId: string) => ['fuel-setup', tenantId] as const
 
-export function useFuelSetupQuery(tenantId: string) {
-  return useQuery({
+export function fuelSetupQueryOptions(tenantId: string) {
+  return queryOptions({
     queryKey: fuelSetupKey(tenantId),
     queryFn: async () => (await graphqlClient.request(FuelSetupDocument, undefined, { tenantId })).fuelSetup,
   })
+}
+
+export function useFuelSetupQuery(tenantId: string) {
+  return useQuery(fuelSetupQueryOptions(tenantId))
 }
 
 function useFuelSetupMutation<T>(tenantId: string, mutationFn: (input: T) => Promise<unknown>) {

@@ -29,11 +29,19 @@ export type ManagementNavigationSection = {
   items: ManagementNavigationItem[]
 }
 
+export const primaryRouteHrefs = {
+  home: '/home',
+  reports: '/report',
+  fuelDeliveries: '/fuel-deliveries',
+  timesheets: '/timesheet',
+  inventory: '/inventory',
+} as const
+
 export const navigation: NavigationItem[] = [
-  { label: 'Home', href: '/home', icon: House },
-  { label: 'Report', href: '/report', icon: ClipboardList },
-  { label: 'Delivery', href: '/fuel-deliveries', icon: Truck },
-  { label: 'Timesheet', href: '/timesheet', icon: Clock3 },
+  { label: 'Home', href: primaryRouteHrefs.home, icon: House },
+  { label: 'Report', href: primaryRouteHrefs.reports, icon: ClipboardList },
+  { label: 'Delivery', href: primaryRouteHrefs.fuelDeliveries, icon: Truck },
+  { label: 'Timesheet', href: primaryRouteHrefs.timesheets, icon: Clock3 },
   { label: 'Me', href: '/me', icon: UserRound, activePaths: ['/account', '/tenants', '/users', '/shifts', '/fuel-setup', '/inventory', '/income-setup'] },
 ]
 
@@ -50,13 +58,13 @@ export const managementNavigation: ManagementNavigationSection[] = [
       {
         label: 'Delivery',
         description: 'Record deliveries and review tank readings',
-        href: '/fuel-deliveries',
+        href: primaryRouteHrefs.fuelDeliveries,
         icon: Truck,
       },
       {
         label: 'Inventory',
         description: 'Manage lubricant products and stock movements',
-        href: '/inventory',
+        href: primaryRouteHrefs.inventory,
         icon: Box,
       },
       {

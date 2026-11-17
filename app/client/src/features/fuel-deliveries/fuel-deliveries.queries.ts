@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   CreateFuelDeliveryDocument,
   DeleteFuelDeliveryDocument,
@@ -16,11 +16,21 @@ export const fuelDeliveryKeys = {
   list: (tenantId: string, input: FuelDeliveriesInput) => ['fuel-deliveries', tenantId, input] as const,
 }
 
-export function useFuelDeliveriesQuery(tenantId: string, input: FuelDeliveriesInput) {
-  return useQuery({
+export const fuelDeliveryPageSize = 20
+
+export function fuelDeliveriesInput(offset = 0): FuelDeliveriesInput {
+  return { offset, limit: fuelDeliveryPageSize }
+}
+
+export function fuelDeliveriesQueryOptions(tenantId: string, input: FuelDeliveriesInput) {
+  return queryOptions({
     queryKey: fuelDeliveryKeys.list(tenantId, input),
     queryFn: async () => (await graphqlClient.request(FuelDeliveriesDocument, { input }, { tenantId })).fuelDeliveries,
   })
+}
+
+export function useFuelDeliveriesQuery(tenantId: string, input: FuelDeliveriesInput) {
+  return useQuery(fuelDeliveriesQueryOptions(tenantId, input))
 }
 
 function useFuelDeliveryMutation<T>(tenantId: string, mutationFn: (input: T) => Promise<unknown>) {

@@ -18,6 +18,7 @@ import {
   navigation,
   type NavigationItem,
 } from './navigation'
+import { usePrimaryRoutePrefetch } from './navigation-prefetch'
 import { SidebarTenantSwitcher } from './sidebar-tenant-switcher'
 import { AppShellContext } from './use-active-tenant'
 
@@ -73,10 +74,12 @@ function NavigationLink({
   item,
   compact = false,
   collapsed = false,
+  onIntent,
 }: {
   item: NavigationItem
   compact?: boolean
   collapsed?: boolean
+  onIntent?: (href: string) => void
 }) {
   const Icon = item.icon
   const pathname = usePathname()
@@ -85,8 +88,12 @@ function NavigationLink({
   return (
     <Link
       href={item.href}
+      prefetch
       aria-current={active || relatedActive ? 'page' : undefined}
       title={collapsed && !compact ? item.label : undefined}
+      onFocus={() => onIntent?.(item.href)}
+      onPointerEnter={() => onIntent?.(item.href)}
+      onTouchStart={() => onIntent?.(item.href)}
       className={cn(
         'flex items-center font-medium outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/30',
         compact
@@ -170,6 +177,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   )
   const user = session.data?.user
   const isAdmin = user?.role === 'superadmin' || user?.role === 'admin'
+  const selected = tenants.data?.find(({ tenant }) => tenant.id === activeTenantId) ?? tenants.data?.[0]
+  const prefetchPrimaryRoute = usePrimaryRoutePrefetch(selected, user?.id)
   const visibleNavigation = isAdmin
     ? navigation.filter((item) => item.href !== '/fuel-deliveries')
     : navigation
@@ -194,7 +203,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     )
   }
 
-  if (tenants.isError || !tenants.data?.length) {
+  if ((tenants.isError && !tenants.data) || !tenants.data?.length) {
     return (
       <main className="flex min-h-dvh items-center justify-center px-5 text-center">
         <div className="flex max-w-sm flex-col gap-2">
@@ -207,8 +216,8 @@ export function AppShell({ children }: { children: ReactNode }) {
     )
   }
 
-  const selected =
-    tenants.data.find(({ tenant }) => tenant.id === activeTenantId) ?? tenants.data[0]
+  if (!selected) return null
+
   return (
     <AppShellContext.Provider value={{ tenant: selected, tenants: tenants.data }}>
       <div className="flex h-dvh overflow-hidden bg-background">
@@ -227,7 +236,11 @@ export function AppShell({ children }: { children: ReactNode }) {
             {!isSidebarCollapsed && (
               <Link
                 href="/home"
+                prefetch
                 aria-label="Petrohub home"
+                onFocus={() => prefetchPrimaryRoute('/home')}
+                onPointerEnter={() => prefetchPrimaryRoute('/home')}
+                onTouchStart={() => prefetchPrimaryRoute('/home')}
                 className="shrink-0 rounded-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/30"
               >
                 <OputechPetrohubLogo
@@ -269,6 +282,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   key={item.href}
                   item={item}
                   collapsed={isSidebarCollapsed}
+                  onIntent={prefetchPrimaryRoute}
                 />
               ))}
 
@@ -291,6 +305,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                         key={item.href}
                         item={item}
                         collapsed={isSidebarCollapsed}
+                        onIntent={prefetchPrimaryRoute}
                       />
                     ))}
                   </div>
@@ -312,7 +327,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <div className="mx-auto flex w-full max-w-lg px-1">
                 {bottomNavigation.map((item) => (
                   <div key={item.href} className="min-w-0 flex-1">
-                    <NavigationLink item={item} compact />
+                    <NavigationLink item={item} compact onIntent={prefetchPrimaryRoute} />
                   </div>
                 ))}
               </div>

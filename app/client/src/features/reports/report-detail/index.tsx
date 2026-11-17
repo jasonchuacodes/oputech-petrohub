@@ -21,7 +21,7 @@ export function ReportDetailPage({ reportId }: { reportId: string }) {
     );
   }
 
-  if (reportQuery.isError || !reportQuery.data) {
+  if (!reportQuery.data) {
     return (
       <div className="mx-auto max-w-xl p-6">
         <p className="text-text-secondary">This report could not be found.</p>

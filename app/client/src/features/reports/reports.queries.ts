@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   CreateReportDocument,
   DeleteReportDocument,
@@ -36,8 +36,24 @@ export const reportKeys = {
     [...reportKeys.financialSummaries(tenantId), input] as const,
 }
 
-export function useReportCreationContextQuery(tenantId: string) {
-  return useQuery({
+export function reportsPageInput(
+  range: { startDate: string; endDate: string },
+  administrator: boolean,
+): ReportsInput {
+  return {
+    startDate: administrator ? range.startDate : undefined,
+    endDate: administrator ? range.endDate : undefined,
+    offset: 0,
+    limit: 100,
+  }
+}
+
+export function submittedReportsInput(date: string): ReportsInput {
+  return { startDate: date, endDate: date, submittedOnly: true, offset: 0, limit: 5 }
+}
+
+export function reportCreationContextQueryOptions(tenantId: string) {
+  return queryOptions({
     queryKey: reportKeys.context(tenantId),
     queryFn: async () =>
       (await graphqlClient.request(ReportCreationContextDocument, undefined, { tenantId }))
@@ -45,8 +61,12 @@ export function useReportCreationContextQuery(tenantId: string) {
   })
 }
 
-export function useReportsQuery(tenantId: string, input: ReportsInput = {}) {
-  return useQuery({
+export function useReportCreationContextQuery(tenantId: string) {
+  return useQuery(reportCreationContextQueryOptions(tenantId))
+}
+
+export function reportsQueryOptions(tenantId: string, input: ReportsInput = {}) {
+  return queryOptions({
     queryKey: reportKeys.list(tenantId, input),
     queryFn: async () =>
       (await graphqlClient.request(ReportsDocument, { input }, { tenantId }))
@@ -54,8 +74,12 @@ export function useReportsQuery(tenantId: string, input: ReportsInput = {}) {
   })
 }
 
-export function useFinancialSummaryQuery(tenantId: string, input: FinancialSummaryInput) {
-  return useQuery({
+export function useReportsQuery(tenantId: string, input: ReportsInput = {}) {
+  return useQuery(reportsQueryOptions(tenantId, input))
+}
+
+export function financialSummaryQueryOptions(tenantId: string, input: FinancialSummaryInput) {
+  return queryOptions({
     queryKey: reportKeys.financialSummary(tenantId, input),
     queryFn: async () =>
       (await graphqlClient.request(FinancialSummaryDocument, { input }, { tenantId }))
@@ -63,12 +87,20 @@ export function useFinancialSummaryQuery(tenantId: string, input: FinancialSumma
   })
 }
 
-export function useReportQuery(tenantId: string, reportId: string) {
-  return useQuery({
+export function useFinancialSummaryQuery(tenantId: string, input: FinancialSummaryInput) {
+  return useQuery(financialSummaryQueryOptions(tenantId, input))
+}
+
+export function reportQueryOptions(tenantId: string, reportId: string) {
+  return queryOptions({
     queryKey: reportKeys.detail(tenantId, reportId),
     queryFn: async () =>
       (await graphqlClient.request(ReportDocument, { input: { reportId } }, { tenantId })).report,
   })
+}
+
+export function useReportQuery(tenantId: string, reportId: string) {
+  return useQuery(reportQueryOptions(tenantId, reportId))
 }
 
 export function useCreateReportMutation(tenantId: string) {

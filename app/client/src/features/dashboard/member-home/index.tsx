@@ -8,6 +8,7 @@ import { formatShiftTime } from '~/utils/time'
 import { CreateReportSheet } from '../../reports/create-report-sheet'
 import { useReportCreationContextQuery } from '../../reports/reports.queries'
 import { useActiveTenant } from '../../layout/use-active-tenant'
+import { useReportDetailPrefetch } from '../../layout/navigation-prefetch'
 import { AttendanceCard } from './attendance-card'
 import { HomeGreeting } from '../home-greeting'
 
@@ -15,6 +16,7 @@ export function MemberHomePage() {
   const router = useRouter()
   const { tenant } = useActiveTenant()
   const reports = useReportCreationContextQuery(tenant.id)
+  const prefetchReport = useReportDetailPrefetch(tenant.id)
   const [showCreateReport, setShowCreateReport] = useState(false)
 
   const closeCreateReport = useCallback(() => setShowCreateReport(false), [])
@@ -94,7 +96,11 @@ export function MemberHomePage() {
                 {report && (
                   <Link
                     href={`/report/${report.id}`}
+                    prefetch
                     aria-label={`View ${formatShiftTime(interval)} report`}
+                    onFocus={() => prefetchReport(report.id)}
+                    onPointerEnter={() => prefetchReport(report.id)}
+                    onTouchStart={() => prefetchReport(report.id)}
                     className="group flex size-9 items-center justify-center rounded-sm text-primary outline-none hover:bg-primary/10 focus-visible:ring-3 focus-visible:ring-ring/30"
                   >
                     <ChevronRight

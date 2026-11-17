@@ -2,7 +2,9 @@
 
 import { AlertCircle, ChevronRight, RefreshCw } from 'lucide-react'
 import Link from 'next/link'
-import { useId, useRef, useState, type Ref } from 'react'
+import { useRouter } from 'next/navigation'
+import { useQueryClient } from '@tanstack/react-query'
+import { useCallback, useId, useRef, useState, type Ref } from 'react'
 import { Button } from '~/components/ui/button'
 import { ContentSection } from '~/components/ui/content-section'
 import type { ReportsQuery } from '~/generated/graphql'
@@ -11,20 +13,29 @@ import { formatShiftTime } from '../../reports/create-report-sheet'
 import { summarizeDisposalsByProduct } from '../../reports/disposal-summary'
 import { ReportSummaryRows } from '../../reports/report-detail/report-summary-rows'
 import { formatDisposalVolume } from '../../reports/report-detail/utils'
-import { useReportsQuery } from '../../reports/reports.queries'
+import { currentReportMonth } from '../../reports/report-date-range'
+import {
+  reportsPageInput,
+  reportsQueryOptions,
+  submittedReportsInput,
+  useReportsQuery,
+} from '../../reports/reports.queries'
+import { useReportDetailPrefetch } from '../../layout/navigation-prefetch'
 import { localDateFor } from './financial-range'
 
 type SummaryReport = ReportsQuery['reports']['items'][number]
 
 export function SubmittedReports({ tenantId, timezone }: { tenantId: string; timezone: string }) {
+  const queryClient = useQueryClient()
+  const router = useRouter()
   const today = localDateFor(timezone)
-  const reports = useReportsQuery(tenantId, {
-    startDate: today,
-    endDate: today,
-    submittedOnly: true,
-    offset: 0,
-    limit: 5,
-  })
+  const reports = useReportsQuery(tenantId, submittedReportsInput(today))
+  const prefetchReport = useReportDetailPrefetch(tenantId)
+  const prefetchReports = useCallback(() => {
+    const range = currentReportMonth(timezone)
+    router.prefetch('/report')
+    void queryClient.prefetchQuery(reportsQueryOptions(tenantId, reportsPageInput(range, true)))
+  }, [queryClient, router, tenantId, timezone])
 
   return (
     <ContentSection
@@ -34,6 +45,10 @@ export function SubmittedReports({ tenantId, timezone }: { tenantId: string; tim
       rightContent={
         <Link
           href="/report"
+          prefetch
+          onFocus={prefetchReports}
+          onPointerEnter={prefetchReports}
+          onTouchStart={prefetchReports}
           className="rounded-sm px-1 py-1 text-sm font-medium text-primary outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/30"
         >
           See all
@@ -59,7 +74,11 @@ export function SubmittedReports({ tenantId, timezone }: { tenantId: string; tim
             </div>
           </div>
         ) : reports.data ? (
-          <ReportSummaryCarousel reports={reports.data.items} refreshFailed={reports.isRefetchError} />
+          <ReportSummaryCarousel
+            reports={reports.data.items}
+            refreshFailed={reports.isRefetchError}
+            onReportIntent={prefetchReport}
+          />
         ) : null}
       </div>
     </ContentSection>
@@ -69,9 +88,11 @@ export function SubmittedReports({ tenantId, timezone }: { tenantId: string; tim
 function ReportSummaryCarousel({
   reports,
   refreshFailed,
+  onReportIntent,
 }: {
   reports: SummaryReport[]
   refreshFailed: boolean
+  onReportIntent: (reportId: string) => void
 }) {
   const radioName = useId()
   const carouselRef = useRef<HTMLDivElement>(null)
@@ -126,6 +147,7 @@ function ReportSummaryCarousel({
             }}
             report={report}
             fullWidth={reports.length === 1}
+            onIntent={() => onReportIntent(report.id)}
           />
         ))}
       </div>
@@ -150,10 +172,12 @@ function ReportSummaryCard({
   report,
   ref,
   fullWidth,
+  onIntent,
 }: {
   report: SummaryReport
   ref?: Ref<HTMLElement>
   fullWidth: boolean
+  onIntent: () => void
 }) {
   const disposalSummary = summarizeDisposalsByProduct(report.disposals?.readings ?? [])
 
@@ -172,7 +196,11 @@ function ReportSummaryCard({
         </div>
         <Link
           href={`/report/${report.id}`}
+          prefetch
           aria-label={`View ${formatShiftTime(report.interval)} report`}
+          onFocus={onIntent}
+          onPointerEnter={onIntent}
+          onTouchStart={onIntent}
           className="flex size-9 shrink-0 items-center justify-center rounded-sm text-primary outline-none hover:bg-primary/10 focus-visible:ring-3 focus-visible:ring-ring/30"
         >
           <ChevronRight aria-hidden="true" className="size-5" />

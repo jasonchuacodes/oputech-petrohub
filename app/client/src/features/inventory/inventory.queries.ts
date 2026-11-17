@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   CreateInventoryProductDocument,
   DeactivateInventoryProductDocument,
@@ -23,11 +23,21 @@ export const inventoryKeys = {
   movements: (tenantId: string, input: StockMovementsInput) => ['inventory', tenantId, 'movements', input] as const,
 }
 
-export function useInventoryProductsQuery(tenantId: string, input: InventoryProductsInput) {
-  return useQuery({
+export const inventoryPageSize = 50
+
+export function inventoryProductsInput(search = '', offset = 0): InventoryProductsInput {
+  return { search, activeOnly: false, offset, limit: inventoryPageSize }
+}
+
+export function inventoryProductsQueryOptions(tenantId: string, input: InventoryProductsInput) {
+  return queryOptions({
     queryKey: inventoryKeys.products(tenantId, input),
     queryFn: async () => (await graphqlClient.request(InventoryProductsDocument, { input }, { tenantId })).inventoryProducts,
   })
+}
+
+export function useInventoryProductsQuery(tenantId: string, input: InventoryProductsInput) {
+  return useQuery(inventoryProductsQueryOptions(tenantId, input))
 }
 
 export function useStockMovementsQuery(tenantId: string, input: StockMovementsInput, enabled = true) {

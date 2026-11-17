@@ -8,10 +8,13 @@ import { ConfirmationDialog } from '~/components/ui/confirmation-dialog'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '~/components/ui/dropdown-menu'
 import { Spinner } from '~/components/ui/spinner'
 import type { FuelDeliveryFieldsFragment, FuelProductFieldsFragment, FuelTankFieldsFragment } from '~/generated/graphql'
-import { useDeleteFuelDeliveryMutation, useFuelDeliveriesQuery } from './fuel-deliveries.queries'
+import {
+  fuelDeliveriesInput,
+  fuelDeliveryPageSize,
+  useDeleteFuelDeliveryMutation,
+  useFuelDeliveriesQuery,
+} from './fuel-deliveries.queries'
 import { FuelDeliverySheet } from './fuel-delivery-sheet'
-
-const pageSize = 20
 
 export function FuelDeliveryHistory({
   tenantId,
@@ -25,7 +28,7 @@ export function FuelDeliveryHistory({
   tanks: FuelTankFieldsFragment[]
 }) {
   const [offset, setOffset] = useState(0)
-  const deliveries = useFuelDeliveriesQuery(tenantId, { offset, limit: pageSize })
+  const deliveries = useFuelDeliveriesQuery(tenantId, fuelDeliveriesInput(offset))
   const deleteDelivery = useDeleteFuelDeliveryMutation(tenantId)
   const [editor, setEditor] = useState<FuelDeliveryFieldsFragment>()
   const [deleting, setDeleting] = useState<FuelDeliveryFieldsFragment>()
@@ -45,10 +48,15 @@ export function FuelDeliveryHistory({
     <section aria-label="Fuel delivery history" className="space-y-3">
         {deliveries.isPending ? (
         <div className="flex min-h-40 items-center justify-center rounded-md bg-card shadow-card"><Spinner className="size-5" /></div>
-      ) : deliveries.isError ? (
+      ) : deliveries.isError && !deliveries.data ? (
         <div className="rounded-md bg-card p-5 shadow-card"><p className="text-sm text-destructive">Unable to load fuel delivery history.</p><Button type="button" size="sm" variant="outline" className="mt-3" onClick={() => deliveries.refetch()}>Try again</Button></div>
-      ) : (
+      ) : deliveries.data ? (
         <>
+          {deliveries.isRefetchError && (
+            <p className="text-sm text-status-warning">
+              Unable to refresh. Showing the last available delivery history.
+            </p>
+          )}
           <div className="overflow-hidden rounded-md bg-card shadow-card md:hidden">
             {deliveries.data.items.map((delivery) => (
               <article key={delivery.id} className="border-b border-border/60 p-4 last:border-0">
@@ -89,15 +97,15 @@ export function FuelDeliveryHistory({
             </table>
           </div>
 
-          {(offset > 0 || offset + pageSize < deliveries.data.totalCount) && (
+          {(offset > 0 || offset + fuelDeliveryPageSize < deliveries.data.totalCount) && (
             <nav aria-label="Fuel delivery history pagination" className="flex items-center justify-between gap-3">
-              <Button type="button" size="sm" variant="outline" disabled={offset === 0 || deliveries.isFetching} onClick={() => setOffset((value) => Math.max(0, value - pageSize))}>Newer</Button>
-              <span className="text-sm text-text-secondary">{offset + 1}–{Math.min(offset + pageSize, deliveries.data.totalCount)} of {deliveries.data.totalCount}</span>
-              <Button type="button" size="sm" variant="outline" disabled={offset + pageSize >= deliveries.data.totalCount || deliveries.isFetching} onClick={() => setOffset((value) => value + pageSize)}>Older</Button>
+              <Button type="button" size="sm" variant="outline" disabled={offset === 0 || deliveries.isFetching} onClick={() => setOffset((value) => Math.max(0, value - fuelDeliveryPageSize))}>Newer</Button>
+              <span className="text-sm text-text-secondary">{offset + 1}–{Math.min(offset + fuelDeliveryPageSize, deliveries.data.totalCount)} of {deliveries.data.totalCount}</span>
+              <Button type="button" size="sm" variant="outline" disabled={offset + fuelDeliveryPageSize >= deliveries.data.totalCount || deliveries.isFetching} onClick={() => setOffset((value) => value + fuelDeliveryPageSize)}>Older</Button>
             </nav>
           )}
         </>
-        )}
+      ) : null}
 
         {editor && <FuelDeliverySheet key={editor.id} tenantId={tenantId} timezone={timezone} products={products} tanks={tanks} delivery={editor} onClose={() => setEditor(undefined)} />}
         <ConfirmationDialog open={Boolean(deleting)} title="Delete fuel delivery?" description={deleting ? formatDate(deleting.deliveryDate) : undefined} icon={Trash2} variant="danger" confirmText="Delete" loading={deleteDelivery.isPending} onClose={() => setDeleting(undefined)} onConfirm={() => void remove()}>

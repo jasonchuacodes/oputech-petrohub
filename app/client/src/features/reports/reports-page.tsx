@@ -23,6 +23,7 @@ import { cn } from '~/utils/cn'
 import { formatShiftTime } from '~/utils/time'
 import { useSessionQuery } from '../auth/auth.queries'
 import { useActiveTenant } from '../layout/use-active-tenant'
+import { useReportDetailPrefetch } from '../layout/navigation-prefetch'
 import type { TenantAccess } from '../tenants/tenants.queries'
 import { CreateReportSheet } from './create-report-sheet'
 import { currentReportMonth } from './report-date-range'
@@ -31,6 +32,7 @@ import {
   useDeleteReportMutation,
   useReportQuery,
   useReportsQuery,
+  reportsPageInput,
 } from './reports.queries'
 
 type ReportListItem = ReportsQuery['reports']['items'][number]
@@ -47,15 +49,8 @@ function TenantReportsPage({ access }: { access: TenantAccess }) {
   const [range, setRange] = useState(() => currentReportMonth(access.tenant.timezone))
   const [creating, setCreating] = useState(false)
   const [deletingReportId, setDeletingReportId] = useState<string>()
-  const reports = useReportsQuery(
-    access.tenant.id,
-    {
-      startDate: administrator ? range.startDate : undefined,
-      endDate: administrator ? range.endDate : undefined,
-      offset: 0,
-      limit: 100,
-    },
-  )
+  const prefetchReport = useReportDetailPrefetch(access.tenant.id)
+  const reports = useReportsQuery(access.tenant.id, reportsPageInput(range, administrator))
   const items = reports.data?.items ?? []
   const userId = session.data?.user.id
   const columns: DataTableColumn<ReportListItem>[] = [
@@ -103,6 +98,7 @@ function TenantReportsPage({ access }: { access: TenantAccess }) {
           report={report}
           role={access.role}
           userId={userId}
+          onIntent={() => prefetchReport(report.id)}
           onView={() => router.push(`/report/${report.id}`)}
           onDelete={() => setDeletingReportId(report.id)}
         />
@@ -144,7 +140,7 @@ function TenantReportsPage({ access }: { access: TenantAccess }) {
             <Spinner className="size-6" />
           </div>
         )}
-        {reports.isError && (
+        {reports.isError && !reports.data && (
           <p className="rounded-md bg-card p-5 text-sm text-destructive shadow-card">
             Unable to load reports.
           </p>
@@ -159,6 +155,10 @@ function TenantReportsPage({ access }: { access: TenantAccess }) {
                 <Link
                   key={report.id}
                   href={`/report/${report.id}`}
+                  prefetch
+                  onFocus={() => prefetchReport(report.id)}
+                  onPointerEnter={() => prefetchReport(report.id)}
+                  onTouchStart={() => prefetchReport(report.id)}
                   className="block min-h-24 border-b border-border/60 px-4 py-3 last:border-0 hover:bg-surface-hover"
                 >
                   <span className="block font-medium text-text-heading">
@@ -224,12 +224,14 @@ function ReportRowActions({
   report,
   role,
   userId,
+  onIntent,
   onView,
   onDelete,
 }: {
   report: ReportListItem
   role: TenantAccess['role']
   userId?: string
+  onIntent: () => void
   onView: () => void
   onDelete: () => void
 }) {
@@ -241,6 +243,9 @@ function ReportRowActions({
     <DropdownMenu>
       <DropdownMenuTrigger
         aria-label={`Actions for ${report.businessDate} report`}
+        onFocus={onIntent}
+        onPointerEnter={onIntent}
+        onTouchStart={onIntent}
         className="inline-flex size-9 items-center justify-center rounded-sm text-text-secondary outline-none hover:bg-surface-hover focus-visible:ring-3 focus-visible:ring-ring/30"
       >
         <MoreVertical aria-hidden="true" className="size-4" />

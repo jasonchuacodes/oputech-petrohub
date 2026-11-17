@@ -6,12 +6,19 @@ import { useState, type ReactNode } from 'react'
 import { Toaster } from 'sonner'
 import { AuthProvider } from '~/features/auth/auth-provider'
 
+const queryStaleTime = 30_000
+const queryCacheTime = 30 * 60_000
+
 export function AppProviders({ children }: { children: ReactNode }) {
   const [queryClient] = useState(
     () =>
       new QueryClient({
         defaultOptions: {
-          queries: { refetchOnWindowFocus: false },
+          queries: {
+            staleTime: queryStaleTime,
+            gcTime: queryCacheTime,
+            refetchOnWindowFocus: false,
+          },
           mutations: { retry: false },
         },
       }),

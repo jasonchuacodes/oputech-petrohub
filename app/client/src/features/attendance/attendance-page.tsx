@@ -11,6 +11,7 @@ import { PageHeader } from '~/components/ui/page-header'
 import { Spinner } from '~/components/ui/spinner'
 import { useSessionQuery } from '../auth/auth.queries'
 import { useActiveTenant } from '../layout/use-active-tenant'
+import { useTimesheetDetailPrefetch } from '../layout/navigation-prefetch'
 import { useTimesheetDaysQuery, useTimesheetsQuery } from './attendance.queries'
 import {
   timesheetListHref,
@@ -92,13 +93,18 @@ function MemberTimesheets({ tenantId, userId }: { tenantId: string; userId: stri
 
         {timesheets.isPending || (rangeStart && rangeEnd && days.isPending) ? (
           <div className="flex min-h-48 items-center justify-center rounded-md bg-card shadow-card"><Spinner className="size-6" /></div>
-        ) : timesheets.isError || days.isError ? (
+        ) : (timesheets.isError && !timesheets.data) || (days.isError && !days.data) ? (
           <div className="flex min-h-48 flex-col items-center justify-center gap-3 rounded-md bg-card p-6 text-center shadow-card">
             <p className="text-sm text-text-secondary">Unable to load your timesheet.</p>
             <Button type="button" variant="outline" onClick={() => { void timesheets.refetch(); void days.refetch() }}>Try again</Button>
           </div>
         ) : (
           <div className="flex flex-col gap-5">
+          {(timesheets.isRefetchError || days.isRefetchError) && (
+            <p className="text-sm text-status-warning">
+              Unable to refresh. Showing the last available timesheet.
+            </p>
+          )}
           <section aria-label="Range summary" className="rounded-md bg-primary p-5 text-primary-foreground shadow-card">
             <p className="text-sm font-medium text-white/70">Total logged hours</p>
             <p className="mt-2 text-3xl font-semibold text-white tabular-nums">{formatHours(summary?.totalHours ?? 0)} hrs</p>
@@ -167,6 +173,7 @@ function TenantTimesheets({
   const selectedRange = rangeStart && rangeEnd
     ? { startDate: rangeStart, endDate: rangeEnd }
     : undefined
+  const prefetchTimesheet = useTimesheetDetailPrefetch(tenantId, selectedRange)
   const openTimesheet = (userId: string) => {
     router.push(userTimesheetHref(userId, selectedRange))
   }
@@ -182,6 +189,10 @@ function TenantTimesheets({
       cell: (item) => (
         <Link
           href={userTimesheetHref(item.userId, selectedRange)}
+          prefetch
+          onFocus={() => prefetchTimesheet(item.userId)}
+          onPointerEnter={() => prefetchTimesheet(item.userId)}
+          onTouchStart={() => prefetchTimesheet(item.userId)}
           className="max-w-full truncate rounded-sm font-medium text-text-heading underline-offset-4 outline-none hover:text-primary hover:underline focus-visible:ring-3 focus-visible:ring-ring/30"
         >
           {item.fullName}
@@ -216,7 +227,7 @@ function TenantTimesheets({
               columns={columns}
               loading={timesheets.isPending}
               emptyMessage="No member timesheets are available for this tenant."
-              tableContainerClassName={timesheets.isError ? 'hidden' : 'hidden md:block'}
+              tableContainerClassName={timesheets.isError && !timesheets.data ? 'hidden' : 'hidden md:block'}
               search={{
                 value: search,
                 placeholder: 'Search members',
@@ -243,7 +254,7 @@ function TenantTimesheets({
               )}
             />
 
-            {timesheets.isError ? (
+            {timesheets.isError && !timesheets.data ? (
               <div className="flex min-h-48 flex-col items-center justify-center gap-3 rounded-md bg-card p-6 text-center shadow-card">
                 <p className="text-sm text-text-secondary">Unable to load timesheets.</p>
                 <Button type="button" variant="outline" onClick={() => void timesheets.refetch()}>Try again</Button>
@@ -264,6 +275,9 @@ function TenantTimesheets({
                     <button
                       type="button"
                       className="flex min-h-20 w-full items-center gap-3 px-4 py-3 text-left outline-none hover:bg-surface-hover focus-visible:ring-3 focus-visible:ring-ring/30"
+                      onFocus={() => prefetchTimesheet(item.userId)}
+                      onPointerEnter={() => prefetchTimesheet(item.userId)}
+                      onTouchStart={() => prefetchTimesheet(item.userId)}
                       onClick={() => openTimesheet(item.userId)}
                     >
                       <span className="min-w-0 flex-1">
@@ -280,7 +294,7 @@ function TenantTimesheets({
               </ul>
             )}
 
-            {!timesheets.isError && totalCount > pageSize && (
+            {(!timesheets.isError || Boolean(timesheets.data)) && totalCount > pageSize && (
               <nav aria-label="Timesheet pagination" className="flex items-center justify-between gap-3">
                 <p className="text-sm text-text-tertiary">{pageStart}–{pageEnd} of {totalCount}</p>
                 <div className="flex gap-2">
