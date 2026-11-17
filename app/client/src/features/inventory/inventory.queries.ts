@@ -3,12 +3,14 @@ import {
   CreateInventoryProductDocument,
   DeactivateInventoryProductDocument,
   InventoryProductsDocument,
+  ReconcileInventoryProductCountDocument,
   RecordStockMovementDocument,
   StockMovementsDocument,
   UpdateInventoryProductDocument,
   type CreateInventoryProductInput,
   type DeactivateInventoryProductInput,
   type InventoryProductsInput,
+  type ReconcileInventoryProductCountInput,
   type RecordStockMovementInput,
   type StockMovementsInput,
   type UpdateInventoryProductInput,
@@ -65,5 +67,11 @@ export function useDeactivateInventoryProductMutation(tenantId: string) {
 export function useRecordStockMovementMutation(tenantId: string) {
   return useInventoryMutation(tenantId, async (input: RecordStockMovementInput) =>
     (await graphqlClient.request(RecordStockMovementDocument, { input }, { tenantId })).recordStockMovement,
+  )
+}
+
+export function useReconcileInventoryProductCountMutation(tenantId: string) {
+  return useInventoryMutation(tenantId, async (input: ReconcileInventoryProductCountInput) =>
+    (await graphqlClient.request(ReconcileInventoryProductCountDocument, { input }, { tenantId })).reconcileInventoryProductCount,
   )
 }

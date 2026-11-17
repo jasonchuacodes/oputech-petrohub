@@ -1,6 +1,6 @@
 'use client';
 
-import { History, MoreVertical, Package, PackagePlus, Pencil, Search, Trash2 } from 'lucide-react';
+import { History, MoreVertical, Package, PackagePlus, Pencil, RefreshCw, Search, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '~/components/ui/button';
@@ -24,6 +24,7 @@ import {
   useInventoryProductsQuery,
 } from '../inventory.queries';
 import { ProductSheet } from './product-sheet';
+import { ReconcileCountSheet } from './reconcile-count-sheet';
 import { StockMovementHistorySheet } from './stock-movement-history-sheet';
 import { StockMovementSheet } from './stock-movement-sheet';
 
@@ -55,6 +56,7 @@ function TenantInventory({ tenantId }: { tenantId: string }) {
   const [editor, setEditor] = useState<ProductEditor>(null);
   const [actions, setActions] = useState<InventoryProductFieldsFragment>();
   const [movementProduct, setMovementProduct] = useState<InventoryProductFieldsFragment>();
+  const [reconciliationProduct, setReconciliationProduct] = useState<InventoryProductFieldsFragment>();
   const [historyProduct, setHistoryProduct] = useState<InventoryProductFieldsFragment>();
   const [deactivation, setDeactivation] = useState<InventoryProductFieldsFragment>();
 
@@ -133,6 +135,7 @@ function TenantInventory({ tenantId }: { tenantId: string }) {
           product={product}
           onEdit={() => setEditor(product)}
           onRecordMovement={() => setMovementProduct(product)}
+          onReconcileCount={() => setReconciliationProduct(product)}
           onViewHistory={() => setHistoryProduct(product)}
           onDeactivate={() => setDeactivation(product)}
         />
@@ -310,6 +313,13 @@ function TenantInventory({ tenantId }: { tenantId: string }) {
           onClose={() => setHistoryProduct(undefined)}
         />
       )}
+      {reconciliationProduct && (
+        <ReconcileCountSheet
+          tenantId={tenantId}
+          product={reconciliationProduct}
+          onClose={() => setReconciliationProduct(undefined)}
+        />
+      )}
       {actions && (
         <Sheet
           open
@@ -342,6 +352,17 @@ function TenantInventory({ tenantId }: { tenantId: string }) {
             >
               <PackagePlus aria-hidden="true" />
               Record stock movement
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setReconciliationProduct(actions);
+                setActions(undefined);
+              }}
+            >
+              <RefreshCw aria-hidden="true" />
+              Reconcile count
             </Button>
             <Button
               type="button"
@@ -407,12 +428,14 @@ function InventoryRowActions({
   product,
   onEdit,
   onRecordMovement,
+  onReconcileCount,
   onViewHistory,
   onDeactivate,
 }: {
   product: InventoryProductFieldsFragment;
   onEdit: () => void;
   onRecordMovement: () => void;
+  onReconcileCount: () => void;
   onViewHistory: () => void;
   onDeactivate: () => void;
 }) {
@@ -432,6 +455,9 @@ function InventoryRowActions({
         </DropdownMenuItem>
         <DropdownMenuItem onSelect={onRecordMovement}>
           <PackagePlus aria-hidden="true" /> Record stock movement
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={onReconcileCount}>
+          <RefreshCw aria-hidden="true" /> Reconcile count
         </DropdownMenuItem>
         <DropdownMenuItem onSelect={onViewHistory}>
           <History aria-hidden="true" /> Movement history

@@ -16,6 +16,8 @@ import {
   DeactivateInventoryProductInput,
   inventoryProductsInputSchema,
   InventoryProductsInput,
+  reconcileInventoryProductCountInputSchema,
+  ReconcileInventoryProductCountInput,
   recordStockMovementInputSchema,
   RecordStockMovementInput,
   stockMovementsInputSchema,
@@ -96,6 +98,17 @@ export class InventoryResolver {
     @Args('input', new ZodValidationPipe(recordStockMovementInputSchema)) input: RecordStockMovementInput,
   ): Promise<GraphqlMutation['recordStockMovement']> {
     return this.movement(await this.stockMovements.recordManual(tenant.tenantId, this.actor(actor), input))
+  }
+
+  @Mutation('reconcileInventoryProductCount')
+  @UseGuards(...adminGuards)
+  @RequireRoles(UserRole.SUPERADMIN, UserRole.ADMIN)
+  async reconcileProductCount(
+    @CurrentActor() actor: AuthenticatedActor,
+    @CurrentTenant() tenant: AuthorizedTenant,
+    @Args('input', new ZodValidationPipe(reconcileInventoryProductCountInputSchema)) input: ReconcileInventoryProductCountInput,
+  ): Promise<GraphqlMutation['reconcileInventoryProductCount']> {
+    return this.movement(await this.stockMovements.reconcileCount(tenant.tenantId, this.actor(actor), input))
   }
 
   private actor(actor: AuthenticatedActor) {

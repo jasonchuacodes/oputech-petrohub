@@ -7,6 +7,7 @@ export enum StockMovementType {
   STOCK_OUT = 'stock_out',
   REPORT_SALE = 'report_sale',
   REPORT_REVERSAL = 'report_reversal',
+  RECONCILE_COUNT = 'reconcile_count',
 }
 
 @Schema({ collection: 'stockMovements', timestamps: { createdAt: true, updatedAt: false }, versionKey: false })

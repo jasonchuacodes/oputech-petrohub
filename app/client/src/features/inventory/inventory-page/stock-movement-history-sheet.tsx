@@ -40,8 +40,8 @@ export function StockMovementHistorySheet({ tenantId, product, onClose }: { tena
                 <li key={movement.id} className="border-b border-border/60 p-4 last:border-0">
                   <div className="flex items-center justify-between gap-3">
                     <span className="font-medium text-text-heading">{movementLabel(movement.type)}</span>
-                    <span className={movement.quantityChange.startsWith('-') ? 'font-medium tabular-nums text-destructive' : 'font-medium tabular-nums text-status-success'}>
-                      {movement.quantityChange.startsWith('-') ? '' : '+'}{movement.quantityChange} {movement.unit}
+                    <span className={`font-medium tabular-nums ${movementChange(movement.quantityChange).tone}`}>
+                      {movementChange(movement.quantityChange).label} {movement.unit}
                     </span>
                   </div>
                   <p className="mt-1 text-sm text-text-secondary">Balance: {movement.balanceBefore} → {movement.balanceAfter}</p>
@@ -69,7 +69,7 @@ export function StockMovementHistorySheet({ tenantId, product, onClose }: { tena
                 </thead>
                 <tbody>
                   {movements.data.items.map((movement) => {
-                    const decrease = movement.quantityChange.startsWith('-')
+                    const change = movementChange(movement.quantityChange)
                     return (
                       <tr key={movement.id} className="border-b border-border/60 bg-card last:border-b-0">
                         <td className="px-4 py-3 align-top">
@@ -80,8 +80,8 @@ export function StockMovementHistorySheet({ tenantId, product, onClose }: { tena
                         <td className="px-4 py-3 align-top font-medium text-text-heading">
                           {movementLabel(movement.type)}
                         </td>
-                        <td className={`px-4 py-3 text-right align-top font-medium whitespace-nowrap tabular-nums ${decrease ? 'text-destructive' : 'text-status-success'}`}>
-                          {decrease ? '' : '+'}{movement.quantityChange} {movement.unit}
+                        <td className={`px-4 py-3 text-right align-top font-medium whitespace-nowrap tabular-nums ${change.tone}`}>
+                          {change.label} {movement.unit}
                         </td>
                         <td className="px-4 py-3 align-top break-words text-text-secondary">
                           {movement.reason || '—'}
@@ -135,5 +135,14 @@ function movementLabel(type: string) {
   if (type === 'stock_in') return 'Stock in'
   if (type === 'stock_out') return 'Stock out'
   if (type === 'report_sale') return 'Report sale'
-  return 'Report reversal'
+  if (type === 'report_reversal') return 'Report reversal'
+  if (type === 'reconcile_count') return 'Reconcile count'
+  return 'Stock movement'
+}
+
+function movementChange(value: string) {
+  const zero = /^-?0(?:\.0+)?$/.test(value)
+  if (zero) return { label: value.replace(/^-/, ''), tone: 'text-text-secondary' }
+  if (value.startsWith('-')) return { label: value, tone: 'text-destructive' }
+  return { label: `+${value}`, tone: 'text-status-success' }
 }

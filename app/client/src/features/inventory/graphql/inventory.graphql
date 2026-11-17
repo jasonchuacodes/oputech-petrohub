@@ -55,3 +55,7 @@ mutation DeactivateInventoryProduct($input: DeactivateInventoryProductInput!) {
 mutation RecordStockMovement($input: RecordStockMovementInput!) {
   recordStockMovement(input: $input) { ...StockMovementFields }
 }
+
+mutation ReconcileInventoryProductCount($input: ReconcileInventoryProductCountInput!) {
+  reconcileInventoryProductCount(input: $input) { ...StockMovementFields }
+}

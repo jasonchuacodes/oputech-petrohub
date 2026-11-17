@@ -330,6 +330,7 @@ export type Mutation = {
   deleteTenant: Scalars['Boolean']['output'];
   /** @deprecated Use deactivateUser */
   deleteUser: Scalars['Boolean']['output'];
+  reconcileInventoryProductCount: StockMovement;
   recordStockMovement: StockMovement;
   resetUserPassword: User;
   saveReportDraft: Report;
@@ -439,6 +440,11 @@ export type MutationDeleteTenantArgs = {
 
 export type MutationDeleteUserArgs = {
   input: DeleteUserInput;
+};
+
+
+export type MutationReconcileInventoryProductCountArgs = {
+  input: ReconcileInventoryProductCountInput;
 };
 
 
@@ -593,6 +599,13 @@ export type QueryUserDetailsArgs = {
 
 export type QueryUsersArgs = {
   input: UsersInput;
+};
+
+export type ReconcileInventoryProductCountInput = {
+  idempotencyKey: Scalars['String']['input'];
+  note?: InputMaybe<Scalars['String']['input']>;
+  productId: Scalars['ObjectId']['input'];
+  stockCount: Scalars['Decimal']['input'];
 };
 
 export type RecordStockMovementInput = {
@@ -779,6 +792,7 @@ export type StockMovementPageInfo = {
 
 export type StockMovementType =
   | 'opening'
+  | 'reconcile_count'
   | 'report_reversal'
   | 'report_sale'
   | 'stock_in'
@@ -1139,6 +1153,7 @@ export type ResolversTypes = {
   ProductDisposalTotal: ResolverTypeWrapper<ProductDisposalTotal>;
   PumpMeter: ResolverTypeWrapper<PumpMeter>;
   Query: ResolverTypeWrapper<Record<PropertyKey, never>>;
+  ReconcileInventoryProductCountInput: ReconcileInventoryProductCountInput;
   RecordStockMovementInput: RecordStockMovementInput;
   RecurringIncomeConfiguration: ResolverTypeWrapper<RecurringIncomeConfiguration>;
   RecurringIncomeField: ResolverTypeWrapper<RecurringIncomeField>;
@@ -1241,6 +1256,7 @@ export type ResolversParentTypes = {
   ProductDisposalTotal: ProductDisposalTotal;
   PumpMeter: PumpMeter;
   Query: Record<PropertyKey, never>;
+  ReconcileInventoryProductCountInput: ReconcileInventoryProductCountInput;
   RecordStockMovementInput: RecordStockMovementInput;
   RecurringIncomeConfiguration: RecurringIncomeConfiguration;
   RecurringIncomeField: RecurringIncomeField;
@@ -1436,6 +1452,7 @@ export type MutationResolvers<ContextType = GraphqlContext, ParentType extends R
   deleteShift?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteShiftArgs, 'input'>>;
   deleteTenant?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteTenantArgs, 'input'>>;
   deleteUser?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteUserArgs, 'input'>>;
+  reconcileInventoryProductCount?: Resolver<ResolversTypes['StockMovement'], ParentType, ContextType, RequireFields<MutationReconcileInventoryProductCountArgs, 'input'>>;
   recordStockMovement?: Resolver<ResolversTypes['StockMovement'], ParentType, ContextType, RequireFields<MutationRecordStockMovementArgs, 'input'>>;
   resetUserPassword?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationResetUserPasswordArgs, 'input'>>;
   saveReportDraft?: Resolver<ResolversTypes['Report'], ParentType, ContextType, RequireFields<MutationSaveReportDraftArgs, 'input'>>;

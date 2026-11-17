@@ -4,7 +4,7 @@ import { ClientSession, Connection, FilterQuery, Model, Types } from 'mongoose'
 import { z } from 'zod'
 import { ConflictException, InvalidInputException, NotFoundException } from '../../common/exceptions'
 import { decimal, decimal128 } from '../../common/numeric/decimal'
-import { RecordStockMovementInput, StockMovementsInput } from './inventory.schemas'
+import { ReconcileInventoryProductCountInput, RecordStockMovementInput, StockMovementsInput } from './inventory.schemas'
 import { InventoryProduct } from './schemas/inventory-product.schema'
 import { StockMovement, StockMovementType } from './schemas/stock-movement.schema'
 
@@ -85,6 +85,46 @@ export class StockMovementService {
       await session.endSession()
     }
     if (!result) throw new ConflictException('Unable to record this stock movement.')
+    return result
+  }
+
+  async reconcileCount(tenantId: Types.ObjectId, actor: InventoryActor, input: ReconcileInventoryProductCountInput) {
+    const existing = await this.movements.findOne({ tenantId, idempotencyKey: input.idempotencyKey }).lean<StockMovementRecord>().exec()
+    if (existing) return this.assertMatchingReconciliation(existing, input)
+
+    const session = await this.connection.startSession()
+    let result: StockMovementRecord | undefined
+    try {
+      await session.withTransaction(async () => {
+        const retry = await this.movements.findOne({ tenantId, idempotencyKey: input.idempotencyKey }).session(session).lean<StockMovementRecord>().exec()
+        if (retry) {
+          result = this.assertMatchingReconciliation(retry, input)
+          return
+        }
+
+        const product = await this.products.findOne({ _id: input.productId, tenantId }).session(session).lean<InventoryProductRecord>().exec()
+        if (!product) throw new NotFoundException('Inventory product not found.')
+        const quantityChange = decimal(input.stockCount).minus(decimal(product.stockCount)).toFixed()
+        result = await this.recordDelta({
+          tenantId,
+          productId: input.productId,
+          type: StockMovementType.RECONCILE_COUNT,
+          quantityChange,
+          reason: input.note,
+          actor,
+          idempotencyKey: input.idempotencyKey,
+          session,
+        })
+      })
+    } catch (error) {
+      if (!isDuplicateKeyError(error)) throw error
+      const winner = await this.movements.findOne({ tenantId, idempotencyKey: input.idempotencyKey }).lean<StockMovementRecord>().exec()
+      if (!winner) throw new ConflictException('Unable to reconcile this stock count.')
+      result = this.assertMatchingReconciliation(winner, input)
+    } finally {
+      await session.endSession()
+    }
+    if (!result) throw new ConflictException('Unable to reconcile this stock count.')
     return result
   }
 
@@ -221,6 +261,16 @@ export class StockMovementService {
     return existing
   }
 
+  private assertMatchingReconciliation(existing: StockMovementRecord, input: ReconcileInventoryProductCountInput) {
+    if (
+      !existing.productId.equals(input.productId) ||
+      existing.type !== StockMovementType.RECONCILE_COUNT ||
+      !decimal(existing.balanceAfter).equals(input.stockCount) ||
+      existing.reason !== input.note
+    ) throw new ConflictException('This idempotency key was already used for another stock movement.')
+    return existing
+  }
+
   private encodeCursor(movement: StockMovementRecord) {
     return Buffer.from(JSON.stringify({
       productId: movement.productId.toHexString(),
@@ -245,4 +295,8 @@ export class StockMovementService {
       throw new InvalidInputException('Invalid stock movement cursor.')
     }
   }
+}
+
+function isDuplicateKeyError(error: unknown): error is { code: number } {
+  return typeof error === 'object' && error !== null && 'code' in error && error.code === 11000
 }

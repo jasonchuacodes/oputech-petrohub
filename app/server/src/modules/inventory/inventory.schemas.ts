@@ -2,8 +2,13 @@ import { Types } from 'mongoose'
 import { z } from 'zod'
 
 const wholeQuantitySchema = z.string().regex(/^-?(?:0|[1-9]\d*)$/, 'Use a whole number')
+const nonnegativeWholeQuantitySchema = z.string().regex(/^(?:0|[1-9]\d*)$/, 'Use a whole number of zero or greater')
 const positiveWholeQuantitySchema = z.string().regex(/^[1-9]\d*$/, 'Use a whole number greater than zero')
 const priceSchema = z.string().regex(/^(?:0|[1-9]\d*)(?:\.\d{1,2})?$/).refine((value) => Number(value) > 0)
+const optionalNoteSchema = z.preprocess(
+  (value) => typeof value === 'string' && value.trim() === '' ? undefined : value,
+  z.string().trim().min(3).max(240).nullish(),
+).transform((value) => value ?? undefined)
 
 export const inventoryProductsInputSchema = z.object({
   search: z.string().trim().max(80).default(''),
@@ -52,6 +57,14 @@ export const recordStockMovementInputSchema = z.object({
   idempotencyKey: z.string().trim().min(8).max(100),
 }).strict()
 export type RecordStockMovementInput = z.infer<typeof recordStockMovementInputSchema>
+
+export const reconcileInventoryProductCountInputSchema = z.object({
+  productId: z.instanceof(Types.ObjectId),
+  stockCount: nonnegativeWholeQuantitySchema,
+  note: optionalNoteSchema,
+  idempotencyKey: z.string().trim().min(8).max(100),
+}).strict()
+export type ReconcileInventoryProductCountInput = z.infer<typeof reconcileInventoryProductCountInputSchema>
 
 export const lubricantSaleInputSchema = z.object({
   id: z.string().trim().min(1).max(64),

@@ -8,6 +8,7 @@ extend type Mutation {
   updateInventoryProduct(input: UpdateInventoryProductInput!): InventoryProduct!
   deactivateInventoryProduct(input: DeactivateInventoryProductInput!): InventoryProduct!
   recordStockMovement(input: RecordStockMovementInput!): StockMovement!
+  reconcileInventoryProductCount(input: ReconcileInventoryProductCountInput!): StockMovement!
 }
 
 input InventoryProductsInput {
@@ -49,6 +50,13 @@ input RecordStockMovementInput {
   type: ManualStockMovementType!
   quantity: Decimal!
   reason: String!
+  idempotencyKey: String!
+}
+
+input ReconcileInventoryProductCountInput {
+  productId: ObjectId!
+  stockCount: Decimal!
+  note: String
   idempotencyKey: String!
 }
 
@@ -94,4 +102,4 @@ type StockMovement {
 
 enum InventoryProductStatus { active inactive }
 enum ManualStockMovementType { stock_in stock_out }
-enum StockMovementType { opening stock_in stock_out report_sale report_reversal }
+enum StockMovementType { opening stock_in stock_out report_sale report_reversal reconcile_count }
