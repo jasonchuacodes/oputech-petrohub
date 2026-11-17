@@ -23,7 +23,10 @@ export function ContentSection({
       <div className="flex min-h-10 items-center justify-between gap-3">
         <h2
           id={headingId}
-          className={cn('text-card-title font-medium text-text-heading', headingClassName)}
+          className={cn(
+            'font-sans text-sm font-semibold uppercase tracking-[0.14em] text-text-heading',
+            headingClassName,
+          )}
         >
           {label}
         </h2>

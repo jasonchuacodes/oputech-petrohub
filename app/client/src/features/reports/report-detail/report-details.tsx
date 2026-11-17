@@ -286,7 +286,9 @@ export function SummaryCard({ compact = false }: { compact?: boolean }) {
       <div className={compact ? 'p-3' : 'p-4'}>
         {!compact && (
           <div className="flex items-center justify-between gap-3">
-            <h2 className="text-lg font-semibold text-text-heading wide:text-base">Summary</h2>
+            <h2 className="font-sans text-sm font-semibold uppercase tracking-[0.14em] text-text-heading">
+              Summary
+            </h2>
             <ReportStatusBadge status={report.status} />
           </div>
         )}

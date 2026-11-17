@@ -132,7 +132,7 @@ export function EditUserSheet({ tenantId, user, actorRole, onClose }: EditUserSh
           onSubmit={submit}
         >
           <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-5 pb-5">
-            <FormSection title="Account" description="Sign-in and tenant access settings.">
+            <FormSection title="Account">
               <div className="flex flex-col gap-4 md:flex-row">
                 <FormField
                   id={`edit-user-username-${user.id}`}
@@ -188,7 +188,7 @@ export function EditUserSheet({ tenantId, user, actorRole, onClose }: EditUserSh
               </div>
             </FormSection>
 
-            <FormSection title="Personal information" description="Optional profile details.">
+            <FormSection title="Personal information">
               <div className="flex flex-col gap-4 md:flex-row">
                 <TextField
                   id={`edit-user-first-name-${user.id}`}
@@ -239,7 +239,7 @@ export function EditUserSheet({ tenantId, user, actorRole, onClose }: EditUserSh
               </FormField>
             </FormSection>
 
-            <FormSection title="Government IDs" description="Optional identifiers used for records.">
+            <FormSection title="Government IDs">
               <div className="flex flex-col gap-4 md:flex-row">
                 <TextField
                   id={`edit-user-sss-${user.id}`}
@@ -331,20 +331,19 @@ function toFormValues(user: UserDetails): EditUserFormValues {
 
 function FormSection({
   title,
-  description,
   children,
 }: {
   title: string
-  description: string
   children: ReactNode
 }) {
   return (
-    <section className="space-y-4">
-      <div>
-        <h3 className="text-sm font-semibold text-text-heading">{title}</h3>
-        <p className="mt-0.5 text-xs text-text-tertiary">{description}</p>
+    <section>
+      <h3 className="mb-3 font-sans text-sm font-semibold uppercase tracking-[0.14em] text-text-heading">
+        {title}
+      </h3>
+      <div className="space-y-4 rounded-md border border-border/70 bg-surface-subtle p-4">
+        {children}
       </div>
-      {children}
     </section>
   )
 }

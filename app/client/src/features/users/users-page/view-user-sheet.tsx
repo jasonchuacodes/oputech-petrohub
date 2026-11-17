@@ -79,7 +79,9 @@ export function ViewUserSheet({ tenantId, user, onClose }: ViewUserSheetProps) {
 function DetailsSection({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section>
-      <h3 className="mb-3 text-sm font-semibold text-text-heading">{title}</h3>
+      <h3 className="mb-3 font-sans text-sm font-semibold uppercase tracking-[0.14em] text-text-heading">
+        {title}
+      </h3>
       <dl className="grid grid-cols-1 gap-x-6 gap-y-4 rounded-md border border-border/70 bg-surface-subtle p-4 md:grid-cols-2">
         {children}
       </dl>
