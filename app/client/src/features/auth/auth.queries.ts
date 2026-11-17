@@ -5,9 +5,12 @@ export function useSessionQuery() {
   const auth = useAuth()
   return {
     isPending: auth.status === 'bootstrapping',
-    isError: auth.status === 'anonymous' || auth.status === 'unavailable',
+    isError: auth.status === 'unavailable',
+    isUnavailable: auth.status === 'unavailable',
+    isAnonymous: auth.status === 'anonymous',
     isSuccess: auth.session !== null,
     data: auth.session ?? undefined,
+    retry: auth.retrySession,
   }
 }
 

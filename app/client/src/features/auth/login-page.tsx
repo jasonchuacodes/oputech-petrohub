@@ -12,6 +12,7 @@ import { Spinner } from '~/components/ui/spinner'
 import { useLoginMutation, useSessionQuery } from './auth.queries'
 import { getUserLandingPath } from './auth-routing'
 import { loginSchema, type LoginValues } from './login.schema'
+import { SessionUnavailable } from './session-unavailable'
 
 export function LoginPage() {
   const session = useSessionQuery()
@@ -37,6 +38,10 @@ export function LoginPage() {
         <Spinner className="size-6" />
       </div>
     )
+  }
+
+  if (session.isUnavailable) {
+    return <SessionUnavailable retry={session.retry} />
   }
 
   const submit = handleSubmit((values) => {

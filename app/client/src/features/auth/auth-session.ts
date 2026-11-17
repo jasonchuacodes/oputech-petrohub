@@ -40,7 +40,7 @@ const SERVER_SNAPSHOT: AuthSessionSnapshot = {
   sessionError: null,
 }
 
-class AuthSession {
+export class AuthSession {
   private snapshot: AuthSessionSnapshot = SERVER_SNAPSHOT
   private credential: Credential | null = null
   private listeners = new Set<() => void>()
@@ -98,9 +98,29 @@ class AuthSession {
     this.invalidate()
   }
 
-  retryBootstrap = async () => {
-    this.update({ ...this.snapshot, status: 'bootstrapping', session: null, sessionError: null })
-    await this.rotateCredential('bootstrap')
+  resume = async (): Promise<void> => {
+    if (
+      this.snapshot.status === 'anonymous' ||
+      this.snapshot.status === 'authenticating' ||
+      this.snapshot.status === 'signing-out'
+    ) {
+      return
+    }
+    if (this.refreshPromise) {
+      await this.refreshPromise
+      return
+    }
+    if (
+      this.credential &&
+      this.credential.expiresAt > Date.now() + EXPIRY_SKEW_MILLISECONDS
+    ) {
+      if (this.snapshot.status === 'unavailable' && this.snapshot.session) {
+        this.update({ ...this.snapshot, status: 'authenticated' })
+      }
+      return
+    }
+
+    await this.rotateCredential(this.snapshot.session ? 'refresh' : 'bootstrap')
   }
 
   activateTenant(tenantId: string): void {
@@ -147,7 +167,7 @@ class AuthSession {
     ) {
       return this.credential.accessToken
     }
-    if (!this.credential && this.snapshot.status !== 'authenticated') {
+    if (!this.credential && !this.snapshot.session) {
       throw new AuthenticationRequiredError()
     }
     return this.rotateCredential('refresh')
@@ -172,7 +192,10 @@ class AuthSession {
   private rotateCredential(mode: 'bootstrap' | 'refresh'): Promise<string> {
     if (this.refreshPromise) return this.refreshPromise
     const operationEpoch = this.operationEpoch
-    if (mode === 'refresh') this.update({ ...this.snapshot, status: 'refreshing' })
+    this.update({
+      ...this.snapshot,
+      status: mode === 'refresh' ? 'refreshing' : 'bootstrapping',
+    })
 
     this.refreshPromise = this.enqueueCookieMutation(() => refreshSession())
       .then((response) => {
@@ -182,13 +205,12 @@ class AuthSession {
       })
       .catch((error: unknown) => {
         if (operationEpoch !== this.operationEpoch) throw error
-        const status =
-          error instanceof AuthApiError && error.status === 401 ? 'anonymous' : 'unavailable'
-        this.clearCredential(
-          status,
-          this.snapshot.session !== null,
-          status === 'anonymous' ? 'invalid-session' : null,
-        )
+        if (error instanceof AuthApiError && error.status === 401) {
+          this.clearCredential('anonymous', this.snapshot.session !== null, 'invalid-session')
+        } else {
+          this.credential = null
+          this.update({ ...this.snapshot, status: 'unavailable', sessionError: null })
+        }
         throw error
       })
       .finally(() => {

@@ -5,6 +5,7 @@ import { useEffect, type ReactNode } from 'react'
 import { Spinner } from '~/components/ui/spinner'
 import { useSessionQuery } from './auth.queries'
 import { getAuthenticatedRedirect } from './auth-routing'
+import { SessionUnavailable } from './session-unavailable'
 
 export function AuthGate({ children }: { children: ReactNode }) {
   const session = useSessionQuery()
@@ -12,13 +13,17 @@ export function AuthGate({ children }: { children: ReactNode }) {
   const router = useRouter()
   const destination = session.data
     ? getAuthenticatedRedirect(session.data, pathname)
-    : session.isPending
+    : session.isPending || session.isUnavailable
       ? null
       : '/login'
 
   useEffect(() => {
     if (destination) router.replace(destination)
   }, [destination, router])
+
+  if (session.isUnavailable && !session.data) {
+    return <SessionUnavailable retry={session.retry} />
+  }
 
   if (session.isPending || destination) {
     return (
