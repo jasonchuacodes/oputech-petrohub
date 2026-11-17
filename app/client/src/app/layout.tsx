@@ -4,17 +4,17 @@ import { AppProviders } from '~/providers/app-providers'
 import '~/styles/base.css'
 
 export const metadata: Metadata = {
-  applicationName: 'Petromate',
+  applicationName: 'Petrohub',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'Petromate',
+    title: 'Petrohub',
   },
   description: 'Mobile-first station operations and shift reporting.',
   other: { 'mobile-web-app-capable': 'yes' },
   title: {
-    default: 'Petromate',
-    template: '%s · Petromate',
+    default: 'Petrohub',
+    template: '%s · Petrohub',
   },
 }
 

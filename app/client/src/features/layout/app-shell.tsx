@@ -224,7 +224,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             {!isSidebarCollapsed && (
               <Link
                 href="/home"
-                aria-label="Petromate home"
+                aria-label="Petrohub home"
                 className="shrink-0 rounded-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/30"
               >
                 <OputechPetrohubLogo
