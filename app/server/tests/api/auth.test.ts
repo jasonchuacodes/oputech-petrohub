@@ -337,7 +337,11 @@ describe('authentication', () => {
       .set('origin', 'http://localhost:5173')
       .send({ username: 'owner', password: 'OwnerPassword123' })
       .expect(200)
-    expect(login.body.user.role).toBe('superadmin')
+    expect(login.body.user).toMatchObject({
+      role: 'superadmin',
+      tenantIds: [],
+      currentTenantId: tenantId.toHexString(),
+    })
     expect(login.body.tenantAccess).toEqual([
       { tenantId: secondTenantId.toHexString(), role: 'superadmin' },
       { tenantId: tenantId.toHexString(), role: 'superadmin' },

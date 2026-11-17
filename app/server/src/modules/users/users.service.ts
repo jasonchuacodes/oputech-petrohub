@@ -446,11 +446,13 @@ export class UsersService {
     const availableTenantIds = user.tenantIds.filter((tenantId) =>
       isTenantMembershipActive(user, tenantId, now),
     )
-    const currentTenantId = user.currentTenantId && availableTenantIds.some((tenantId) =>
-      tenantId.equals(user.currentTenantId)
-    )
+    const currentTenantId = user.role === UserRole.SUPERADMIN
       ? user.currentTenantId
-      : availableTenantIds[0]
+      : user.currentTenantId && availableTenantIds.some((tenantId) =>
+        tenantId.equals(user.currentTenantId)
+      )
+        ? user.currentTenantId
+        : availableTenantIds[0]
     return {
       id: user._id,
       firstName: user.firstName,

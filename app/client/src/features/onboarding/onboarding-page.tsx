@@ -10,6 +10,7 @@ import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { Spinner } from '~/components/ui/spinner'
 import { useAuth } from '../auth/auth-context'
+import { getUserLandingPath } from '../auth/auth-routing'
 import { useLogoutMutation } from '../auth/auth.queries'
 import { setActiveTenant } from '../tenants/active-tenant'
 import { useCreateTenantMutation } from '../tenants/tenants.queries'
@@ -31,14 +32,15 @@ export function OnboardingPage() {
     mode: 'onChange',
   })
 
-  const user = auth.session?.user
-  if (!user || user.currentTenantId) {
+  const session = auth.session
+  if (!session || getUserLandingPath(session) !== '/onboarding') {
     return (
       <div className="flex min-h-dvh items-center justify-center">
         <Spinner className="size-6" />
       </div>
     )
   }
+  const { user } = session
 
   const submit = handleSubmit(async ({ name }) => {
     try {

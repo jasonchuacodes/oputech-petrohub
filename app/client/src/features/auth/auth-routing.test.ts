@@ -3,9 +3,15 @@ import type { Session } from './auth.types'
 import { getAuthenticatedRedirect, getUserLandingPath } from './auth-routing'
 
 const createSession = (
-  overrides: Partial<Session['user']> = {},
+  {
+    user: userOverrides = {},
+    tenantAccess = [],
+  }: {
+    user?: Partial<Session['user']>
+    tenantAccess?: Session['tenantAccess']
+  } = {},
 ): Session => ({
-  tenantAccess: [],
+  tenantAccess,
   user: {
     id: 'user-id',
     fullName: 'operator',
@@ -14,7 +20,7 @@ const createSession = (
     role: 'member',
     tenantIds: [],
     tenantSelectionVersion: 0,
-    ...overrides,
+    ...userOverrides,
   },
 })
 
@@ -27,11 +33,23 @@ describe('authentication routing', () => {
     expect(getAuthenticatedRedirect(session, '/onboarding')).toBeNull()
   })
 
-  it('sends fully configured users to the private application', () => {
-    const session = createSession({ currentTenantId: 'tenant-id' })
+  it('sends users with tenant access to the private application', () => {
+    const session = createSession({
+      tenantAccess: [{ tenantId: 'tenant-id', role: 'superadmin' }],
+      user: { role: 'superadmin', tenantIds: [] },
+    })
 
     expect(getUserLandingPath(session)).toBe('/home')
     expect(getAuthenticatedRedirect(session, '/home')).toBeNull()
+    expect(getAuthenticatedRedirect(session, '/reports')).toBeNull()
     expect(getAuthenticatedRedirect(session, '/onboarding')).toBe('/home')
+  })
+
+  it('does not use a stale tenant selection as proof of access', () => {
+    const session = createSession({ user: { currentTenantId: 'stale-tenant-id' } })
+
+    expect(getUserLandingPath(session)).toBe('/onboarding')
+    expect(getAuthenticatedRedirect(session, '/home')).toBe('/onboarding')
+    expect(getAuthenticatedRedirect(session, '/onboarding')).toBeNull()
   })
 })
