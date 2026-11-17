@@ -42,6 +42,7 @@ export function FuelProductSheet({
   const nameInputRef = useRef<HTMLInputElement>(null)
   const priceInputRef = useRef<HTMLInputElement>(null)
   const priceOnly = mode === 'price' && Boolean(product)
+  const canSchedulePriceChange = Boolean(product)
   const [scheduleEnabled, setScheduleEnabled] = useState(false)
   const [scheduledAt, setScheduledAt] = useState('')
   const form = useForm<FuelProductFormValues>({
@@ -59,7 +60,7 @@ export function FuelProductSheet({
 
   useEffect(() => {
     const effectiveAt = nextPriceChange?.effectiveAt
-    if (!priceOnly || !effectiveAt) return
+    if (!canSchedulePriceChange || !effectiveAt) return
 
     let timeout: ReturnType<typeof setTimeout> | undefined
     const scheduleExpiry = () => {
@@ -74,7 +75,7 @@ export function FuelProductSheet({
     return () => {
       if (timeout) clearTimeout(timeout)
     }
-  }, [nextPriceChange?.effectiveAt, priceOnly])
+  }, [canSchedulePriceChange, nextPriceChange?.effectiveAt])
 
   const close = () => {
     if (!pending) onClose()
@@ -131,7 +132,11 @@ export function FuelProductSheet({
       open
       title={priceOnly ? 'Product details' : product ? 'Edit fuel product' : 'Add fuel product'}
       icon={Fuel}
-      description={priceOnly ? 'Update the price now or plan a future change.' : 'Set the product name and selling price used by new reports.'}
+      description={priceOnly
+        ? 'Update the price now or plan a future change.'
+        : product
+          ? 'Update the product name and price now or plan a future price change.'
+          : 'Set the product name and selling price used by new reports.'}
       onClose={close}
       escapeDisabled={pending}
       manageFocus
@@ -140,7 +145,7 @@ export function FuelProductSheet({
     >
       <form className="flex min-h-0 flex-1 flex-col" onSubmit={submit}>
         <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-5 pb-5">
-          {priceOnly && persistedPriceChange && (
+          {canSchedulePriceChange && persistedPriceChange && (
             <div className="flex items-center gap-3 rounded-md border border-primary/20 bg-primary/5 px-3 py-2.5 text-sm">
               <div className="min-w-0 flex-1">
                 <p className="font-medium text-text-heading">Scheduled price change</p>
@@ -164,7 +169,7 @@ export function FuelProductSheet({
               </Button>
             </div>
           )}
-          {priceOnly && scheduledAt && (
+          {canSchedulePriceChange && scheduledAt && (
             <div className="flex items-center gap-3 rounded-md border border-status-warning/25 bg-status-warning/10 px-3 py-2.5 text-sm text-text-secondary">
               <p className="min-w-0 flex-1">
                 Price update to{' '}
@@ -228,7 +233,7 @@ export function FuelProductSheet({
               <p className="text-sm text-destructive">{form.formState.errors.unitPrice.message}</p>
             )}
           </label>
-          {priceOnly && (
+          {canSchedulePriceChange && (
             <div className="space-y-3">
               <label className="flex cursor-pointer items-center gap-3">
                 <input

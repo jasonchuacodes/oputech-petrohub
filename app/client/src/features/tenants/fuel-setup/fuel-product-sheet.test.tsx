@@ -37,6 +37,17 @@ const product: FuelProductFieldsFragment = {
 }
 
 describe('FuelProductSheet', () => {
+  it('allows a future price change while editing the fuel product', () => {
+    const html = renderToStaticMarkup(
+      <FuelProductSheet tenantId="tenant-1" product={product} timezone="Asia/Manila" onClose={vi.fn()} />,
+    )
+
+    expect(html).toContain('Edit fuel product')
+    expect(html).toContain('Scheduled price change')
+    expect(html).toContain('aria-label="Cancel saved scheduled price change"')
+    expect(html).toContain('type="checkbox"')
+  })
+
   it('keeps a cancellation action on a saved scheduled price change', () => {
     const html = renderToStaticMarkup(
       <FuelProductSheet tenantId="tenant-1" product={product} mode="price" timezone="Asia/Manila" onClose={vi.fn()} />,
