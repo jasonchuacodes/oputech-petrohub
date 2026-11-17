@@ -97,6 +97,14 @@ describe('MePage', () => {
     expect(html).toContain('Sign out')
   })
 
+  it('starts with the account card without a page header', () => {
+    const html = renderPage()
+
+    expect(html).not.toContain('<h1')
+    expect(html).not.toContain('Manage your account and station settings.')
+    expect(html.indexOf('href="/account"')).toBeLessThan(html.indexOf('Station'))
+  })
+
   it('preserves the pending sign-out state', () => {
     authMocks.logout.isPending = true
     const html = renderPage()
