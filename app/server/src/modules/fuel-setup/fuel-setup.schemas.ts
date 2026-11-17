@@ -57,6 +57,21 @@ export const updatePumpMeterInputSchema = createPumpMeterInputSchema.extend({
 }).omit({ productId: true, initialReading: true }).strict()
 export type UpdatePumpMeterInput = z.infer<typeof updatePumpMeterInputSchema>
 
+export const createFuelTankInputSchema = z.object({
+  label: z.string().trim().min(1).max(80),
+  productId: z.instanceof(Types.ObjectId),
+}).strict()
+export type CreateFuelTankInput = z.infer<typeof createFuelTankInputSchema>
+
+export const updateFuelTankInputSchema = z.object({
+  tankId: z.instanceof(Types.ObjectId),
+  expectedRevision: z.number().int().min(0),
+  label: z.string().trim().min(1).max(80),
+  currentReading: readingSchema.nullish().transform((value) => value ?? null),
+  expectedCurrentReading: readingSchema.nullish().transform((value) => value ?? null),
+}).strict()
+export type UpdateFuelTankInput = z.infer<typeof updateFuelTankInputSchema>
+
 export const deactivateFuelSetupInputSchema = z.object({
   id: z.instanceof(Types.ObjectId),
   expectedRevision: z.number().int().min(0),

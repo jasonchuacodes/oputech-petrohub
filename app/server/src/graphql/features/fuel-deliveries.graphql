@@ -1,0 +1,84 @@
+extend type Query {
+  fuelDeliveries(input: FuelDeliveriesInput!): FuelDeliveryPage!
+}
+
+extend type Mutation {
+  createFuelDelivery(input: CreateFuelDeliveryInput!): FuelDelivery!
+  updateFuelDelivery(input: UpdateFuelDeliveryInput!): FuelDelivery!
+  deleteFuelDelivery(input: DeleteFuelDeliveryInput!): FuelDelivery!
+}
+
+input FuelDeliveriesInput {
+  offset: Int = 0
+  limit: Int = 20
+}
+
+input FuelDeliveryLineInput {
+  productId: ObjectId!
+  quantity: Decimal!
+}
+
+input FuelTankReadingInput {
+  tankId: ObjectId!
+  beforeReading: Decimal!
+  afterReading: Decimal!
+}
+
+input CreateFuelDeliveryInput {
+  deliveryDate: String!
+  lines: [FuelDeliveryLineInput!]!
+  readings: [FuelTankReadingInput!]!
+  notes: String
+  idempotencyKey: String!
+}
+
+input UpdateFuelDeliveryInput {
+  deliveryId: ObjectId!
+  expectedRevision: Int!
+  deliveryDate: String!
+  lines: [FuelDeliveryLineInput!]!
+  readings: [FuelTankReadingInput!]!
+  notes: String
+}
+
+input DeleteFuelDeliveryInput {
+  deliveryId: ObjectId!
+  expectedRevision: Int!
+}
+
+type FuelDeliveryPage {
+  items: [FuelDelivery!]!
+  totalCount: Int!
+}
+
+type FuelDelivery {
+  id: ObjectId!
+  eventType: FuelDeliveryEventType!
+  canManage: Boolean!
+  deliveryDate: String!
+  lines: [FuelDeliveryLine!]!
+  readings: [FuelTankReading!]!
+  notes: String
+  createdByName: String!
+  updatedByName: String
+  createdAt: String!
+  updatedAt: String!
+  revision: Int!
+}
+
+type FuelDeliveryLine {
+  productId: ObjectId!
+  productName: String!
+  quantity: Decimal!
+}
+
+type FuelTankReading {
+  tankId: ObjectId!
+  tankLabel: String!
+  productId: ObjectId!
+  productName: String!
+  beforeReading: Decimal
+  afterReading: Decimal!
+}
+
+enum FuelDeliveryEventType { delivery manual_override }

@@ -18,6 +18,8 @@ const collectionFlags = {
   '--fuel-price-changes': 'fuelPriceChanges',
   '--fuel-price-states': 'fuelPriceStates',
   '--pump-meters': 'pumpMeters',
+  '--fuel-tanks': 'fuelTanks',
+  '--fuel-deliveries': 'fuelDeliveries',
   '--inventory-products': 'inventoryProducts',
   '--stock-movements': 'stockMovements',
   '--attendance-sessions': 'attendanceSessions',
@@ -161,6 +163,8 @@ async function clearTenants(
     'fuelPriceChanges',
     'fuelPriceStates',
     'pumpMeters',
+    'fuelTanks',
+    'fuelDeliveries',
     'inventoryProducts',
     'stockMovements',
     'memberActivities',
@@ -195,7 +199,7 @@ function parseCollectionFlags(args: string[]): Set<CollectionName> {
 }
 
 function deletionOrder(selected: Set<CollectionName>): CollectionName[] {
-  return (['stockMovements', 'disposalBatches', 'meterHeads', 'reports', 'inventoryProducts', 'fuelPriceChanges', 'fuelPriceStates', 'fuelProducts', 'pumpMeters', 'attendanceSessions', 'timesheetDays', 'memberActivities', 'sessions', 'tenants', 'users'] as const).filter((name) =>
+  return (['stockMovements', 'disposalBatches', 'meterHeads', 'reports', 'inventoryProducts', 'fuelDeliveries', 'fuelTanks', 'fuelPriceChanges', 'fuelPriceStates', 'fuelProducts', 'pumpMeters', 'attendanceSessions', 'timesheetDays', 'memberActivities', 'sessions', 'tenants', 'users'] as const).filter((name) =>
     selected.has(name),
   )
 }
@@ -204,7 +208,7 @@ function displayOrder(
   selected: Set<CollectionName>,
   results: Map<CollectionName, number>,
 ): CollectionName[] {
-  return (['users', 'tenants', 'reports', 'disposalBatches', 'meterHeads', 'inventoryProducts', 'stockMovements', 'fuelProducts', 'fuelPriceChanges', 'fuelPriceStates', 'pumpMeters', 'attendanceSessions', 'timesheetDays', 'sessions', 'memberActivities'] as const).filter(
+  return (['users', 'tenants', 'reports', 'disposalBatches', 'meterHeads', 'inventoryProducts', 'stockMovements', 'fuelProducts', 'fuelPriceChanges', 'fuelPriceStates', 'pumpMeters', 'fuelTanks', 'fuelDeliveries', 'attendanceSessions', 'timesheetDays', 'sessions', 'memberActivities'] as const).filter(
     (name) => selected.has(name) || results.has(name),
   )
 }
@@ -218,7 +222,7 @@ function addResult(
 }
 
 function usage(): string {
-  return 'Use --users, --tenants, --reports, --disposal-batches, --meter-heads, --inventory-products, --stock-movements, --fuel-products, --fuel-price-changes, --fuel-price-states, --pump-meters, --sessions, --member-activities, or --all.'
+  return 'Use --users, --tenants, --reports, --disposal-batches, --meter-heads, --inventory-products, --stock-movements, --fuel-products, --fuel-price-changes, --fuel-price-states, --pump-meters, --fuel-tanks, --fuel-deliveries, --sessions, --member-activities, or --all.'
 }
 
 clearDatabase().catch((error: unknown) => {

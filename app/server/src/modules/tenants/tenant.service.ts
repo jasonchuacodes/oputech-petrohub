@@ -49,6 +49,8 @@ export type TenantDeletionResult = {
   meterHeads: number
   fuelProducts: number
   pumpMeters: number
+  fuelTanks: number
+  fuelDeliveries: number
   inventoryProducts: number
   stockMovements: number
   attendanceSessions: number
@@ -464,6 +466,8 @@ export class TenantService {
         nextResult.meterHeads = reportDeletion.meterHeads
         nextResult.fuelProducts = setupDeletion.products
         nextResult.pumpMeters = setupDeletion.meters
+        nextResult.fuelTanks = setupDeletion.tanks
+        nextResult.fuelDeliveries = setupDeletion.deliveries
         nextResult.inventoryProducts = inventoryDeletion.products
         nextResult.stockMovements = inventoryDeletion.movements
         nextResult.attendanceSessions = attendanceDeletion.sessions
@@ -539,6 +543,8 @@ function emptyDeletionResult(): TenantDeletionResult {
     meterHeads: 0,
     fuelProducts: 0,
     pumpMeters: 0,
+    fuelTanks: 0,
+    fuelDeliveries: 0,
     inventoryProducts: 0,
     stockMovements: 0,
     attendanceSessions: 0,

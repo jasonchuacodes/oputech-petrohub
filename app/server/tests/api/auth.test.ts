@@ -559,6 +559,8 @@ describe('authentication', () => {
       meterHeads: 0,
       fuelProducts: 0,
       pumpMeters: 0,
+      fuelTanks: 0,
+      fuelDeliveries: 0,
       inventoryProducts: 0,
       stockMovements: 0,
       attendanceSessions: 1,

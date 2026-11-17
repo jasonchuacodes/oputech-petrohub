@@ -11,6 +11,10 @@ extend type Mutation {
   createPumpMeter(input: CreatePumpMeterInput!): PumpMeter!
   updatePumpMeter(input: UpdatePumpMeterInput!): PumpMeter!
   deactivatePumpMeter(input: DeactivateFuelSetupInput!): PumpMeter!
+  createFuelTank(input: CreateFuelTankInput!): FuelTank!
+  updateFuelTank(input: UpdateFuelTankInput!): FuelTank!
+  deactivateFuelTank(input: DeactivateFuelSetupInput!): FuelTank!
+  activateFuelTank(input: DeactivateFuelSetupInput!): FuelTank!
 }
 
 input CreateFuelProductInput { name: String!, color: FuelProductColor! = gray, unitPrice: Decimal! }
@@ -19,11 +23,14 @@ input ChangeFuelPriceInput { productId: ObjectId!, expectedRevision: Int!, unitP
 input CancelFuelPriceChangeInput { productId: ObjectId!, expectedRevision: Int!, effectiveAt: String! }
 input CreatePumpMeterInput { label: String!, productId: ObjectId!, initialReading: Decimal! }
 input UpdatePumpMeterInput { meterId: ObjectId!, expectedRevision: Int!, label: String!, currentReading: Decimal!, expectedCurrentReading: Decimal! }
+input CreateFuelTankInput { label: String!, productId: ObjectId! }
+input UpdateFuelTankInput { tankId: ObjectId!, expectedRevision: Int!, label: String!, currentReading: Decimal, expectedCurrentReading: Decimal }
 input DeactivateFuelSetupInput { id: ObjectId!, expectedRevision: Int! }
 
-type FuelSetup { products: [FuelProduct!]!, meters: [PumpMeter!]! }
+type FuelSetup { products: [FuelProduct!]!, meters: [PumpMeter!]!, tanks: [FuelTank!]! }
 type FuelProduct { id: ObjectId!, name: String!, color: FuelProductColor!, unitPrice: Decimal!, status: FuelSetupStatus!, revision: Int!, nextPriceChange: FuelPriceChange }
 type FuelPriceChange { unitPrice: Decimal!, effectiveDate: String!, effectiveHour: Int!, effectiveAt: String! }
 type PumpMeter { id: ObjectId!, label: String!, productId: ObjectId!, initialReading: Decimal!, currentReading: Decimal!, status: FuelSetupStatus!, revision: Int! }
+type FuelTank { id: ObjectId!, label: String!, productId: ObjectId!, currentReading: Decimal, lastReadingDate: String, status: FuelSetupStatus!, revision: Int! }
 enum FuelSetupStatus { active, inactive }
 enum FuelProductColor { gray, orange, green, red, yellow }

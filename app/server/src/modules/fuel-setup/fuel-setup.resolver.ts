@@ -24,10 +24,15 @@ import {
   ChangeFuelPriceInput,
   updatePumpMeterInputSchema,
   UpdatePumpMeterInput,
+  createFuelTankInputSchema,
+  CreateFuelTankInput,
+  updateFuelTankInputSchema,
+  UpdateFuelTankInput,
 } from './fuel-setup.schemas'
-import { FuelProductRecord, FuelProductWithPrice, FuelSetupService, PumpMeterRecord, PumpMeterWithCurrentReading } from './fuel-setup.service'
+import { FuelProductRecord, FuelProductWithPrice, FuelSetupService, FuelTankRecord, FuelTankWithCurrentReading, PumpMeterRecord, PumpMeterWithCurrentReading } from './fuel-setup.service'
 import { ReportsService } from '../reports/reports.service'
 import { DEFAULT_FUEL_PRODUCT_COLOR } from './schemas/fuel-product.schema'
+import { localDateFor } from '../attendance/attendance-date'
 
 const tenantGuards = [AccessTokenGuard, TenantAccessGuard]
 const adminGuards = [...tenantGuards, RolesGuard]
@@ -46,6 +51,7 @@ export class FuelSetupResolver {
     return {
       products: setup.products.map((product) => this.product(product)),
       meters: setup.meters.map((meter) => this.meter(meter)),
+      tanks: setup.tanks.map((tank) => this.tank(tank)),
     }
   }
 
@@ -139,6 +145,52 @@ export class FuelSetupResolver {
     return this.meter(meter, await this.fuelSetup.currentReading(tenant.tenantId, meter))
   }
 
+  @Mutation('createFuelTank')
+  @UseGuards(...adminGuards)
+  @RequireRoles(UserRole.SUPERADMIN, UserRole.ADMIN)
+  async createTank(
+    @CurrentTenant() tenant: AuthorizedTenant,
+    @Args('input', new ZodValidationPipe(createFuelTankInputSchema)) input: CreateFuelTankInput,
+  ): Promise<GraphqlMutation['createFuelTank']> {
+    return this.tank(await this.fuelSetup.createTank(tenant.tenantId, input))
+  }
+
+  @Mutation('updateFuelTank')
+  @UseGuards(...adminGuards)
+  @RequireRoles(UserRole.SUPERADMIN, UserRole.ADMIN)
+  async updateTank(
+    @CurrentActor() actor: AuthenticatedActor,
+    @CurrentTenant() tenant: AuthorizedTenant,
+    @Args('input', new ZodValidationPipe(updateFuelTankInputSchema)) input: UpdateFuelTankInput,
+  ): Promise<GraphqlMutation['updateFuelTank']> {
+    return this.tank(await this.fuelSetup.updateTank(
+      tenant.tenantId,
+      { userId: actor.userId, name: actor.user.fullName || actor.user.username },
+      localDateFor(tenant.tenant.timezone),
+      input,
+    ))
+  }
+
+  @Mutation('deactivateFuelTank')
+  @UseGuards(...adminGuards)
+  @RequireRoles(UserRole.SUPERADMIN, UserRole.ADMIN)
+  async deactivateTank(
+    @CurrentTenant() tenant: AuthorizedTenant,
+    @Args('input', new ZodValidationPipe(deactivateFuelSetupInputSchema)) input: DeactivateFuelSetupInput,
+  ): Promise<GraphqlMutation['deactivateFuelTank']> {
+    return this.tank(await this.fuelSetup.deactivateTank(tenant.tenantId, input))
+  }
+
+  @Mutation('activateFuelTank')
+  @UseGuards(...adminGuards)
+  @RequireRoles(UserRole.SUPERADMIN, UserRole.ADMIN)
+  async activateTank(
+    @CurrentTenant() tenant: AuthorizedTenant,
+    @Args('input', new ZodValidationPipe(deactivateFuelSetupInputSchema)) input: DeactivateFuelSetupInput,
+  ): Promise<GraphqlMutation['activateFuelTank']> {
+    return this.tank(await this.fuelSetup.activateTank(tenant.tenantId, input))
+  }
+
   private product(product: FuelProductRecord | FuelProductWithPrice) {
     return {
       id: product._id,
@@ -160,5 +212,17 @@ export class FuelSetupResolver {
 
   private meter(meter: PumpMeterRecord | PumpMeterWithCurrentReading, currentReading = 'currentReading' in meter ? meter.currentReading : meter.initialReading) {
     return { id: meter._id, label: meter.label, productId: meter.productId, initialReading: meter.initialReading.toString(), currentReading: currentReading.toString(), status: meter.status, revision: meter.revision }
+  }
+
+  private tank(tank: FuelTankRecord | FuelTankWithCurrentReading) {
+    return {
+      id: tank._id,
+      label: tank.label,
+      productId: tank.productId,
+      currentReading: 'currentReading' in tank ? tank.currentReading?.toString() : null,
+      lastReadingDate: 'lastReadingDate' in tank ? tank.lastReadingDate : null,
+      status: tank.status,
+      revision: tank.revision,
+    }
   }
 }

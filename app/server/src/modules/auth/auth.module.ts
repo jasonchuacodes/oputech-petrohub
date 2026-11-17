@@ -14,6 +14,7 @@ import { ReportsModule } from '../reports/reports.module'
 import { ReportsResolver } from '../reports/reports.resolver'
 import { FuelSetupModule } from '../fuel-setup/fuel-setup.module'
 import { FuelSetupResolver } from '../fuel-setup/fuel-setup.resolver'
+import { FuelDeliveryResolver } from '../fuel-setup/fuel-delivery.resolver'
 import { InventoryModule } from '../inventory/inventory.module'
 import { InventoryResolver } from '../inventory/inventory.resolver'
 import { AttendanceModule } from '../attendance/attendance.module'
@@ -40,6 +41,7 @@ import { AttendanceResolver } from '../attendance/attendance.resolver'
     UsersResolver,
     ReportsResolver,
     FuelSetupResolver,
+    FuelDeliveryResolver,
     InventoryResolver,
     AttendanceResolver,
   ],

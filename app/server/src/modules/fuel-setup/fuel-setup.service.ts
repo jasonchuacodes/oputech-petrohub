@@ -12,18 +12,26 @@ import {
   DeactivateFuelSetupInput,
   UpdateFuelProductInput,
   UpdatePumpMeterInput,
+  CreateFuelTankInput,
+  UpdateFuelTankInput,
 } from './fuel-setup.schemas'
 import { DEFAULT_FUEL_PRODUCT_COLOR, FuelProduct, FuelSetupStatus } from './schemas/fuel-product.schema'
 import { FuelPriceChange, FuelPriceState } from './schemas/fuel-price-change.schema'
 import { PumpMeter } from './schemas/pump-meter.schema'
+import { FuelTank } from './schemas/fuel-tank.schema'
+import { FuelDelivery, FuelDeliveryEventType } from './schemas/fuel-delivery.schema'
 
 export type FuelProductRecord = FuelProduct & { _id: Types.ObjectId }
 export type PumpMeterRecord = PumpMeter & { _id: Types.ObjectId }
 export type PumpMeterWithCurrentReading = PumpMeterRecord & { currentReading: Types.Decimal128 }
+export type FuelTankRecord = FuelTank & { _id: Types.ObjectId }
+export type FuelTankWithCurrentReading = FuelTankRecord & { currentReading?: Types.Decimal128; lastReadingDate?: string }
+export type FuelTankActor = { userId: Types.ObjectId; name: string }
 export type FuelPriceChangeRecord = FuelPriceChange & { _id: Types.ObjectId }
 export type FuelProductWithPrice = FuelProductRecord & { nextPriceChange?: FuelPriceChangeRecord }
 export type ActiveFuelProductRecord = Pick<FuelProductRecord, '_id' | 'name' | 'color'>
 type MeterHeadRecord = MeterHead & { _id: Types.ObjectId }
+type FuelDeliveryRecord = FuelDelivery & { _id: Types.ObjectId }
 
 @Injectable()
 export class FuelSetupService {
@@ -32,15 +40,24 @@ export class FuelSetupService {
     @InjectModel(FuelPriceChange.name) private readonly priceChanges: Model<FuelPriceChange>,
     @InjectModel(FuelPriceState.name) private readonly priceStates: Model<FuelPriceState>,
     @InjectModel(PumpMeter.name) private readonly meters: Model<PumpMeter>,
+    @InjectModel(FuelTank.name) private readonly tanks: Model<FuelTank>,
+    @InjectModel(FuelDelivery.name) private readonly deliveries: Model<FuelDelivery>,
     @InjectModel(MeterHead.name) private readonly heads: Model<MeterHead>,
     @InjectConnection() private readonly connection: Connection,
   ) {}
 
   async list(tenantId: Types.ObjectId) {
-    const [storedProducts, meters, heads] = await Promise.all([
+    const [storedProducts, meters, tanks, heads, tankReadings] = await Promise.all([
       this.products.find({ tenantId }).sort({ status: 1, name: 1 }).lean<FuelProductRecord[]>().exec(),
       this.meters.find({ tenantId }).sort({ status: 1, label: 1 }).lean<PumpMeterRecord[]>().exec(),
+      this.tanks.find({ tenantId }).sort({ status: 1, label: 1 }).lean<FuelTankRecord[]>().exec(),
       this.heads.find({ tenantId }).lean<MeterHeadRecord[]>().exec(),
+      this.deliveries.aggregate<{ _id: Types.ObjectId; reading: Types.Decimal128; deliveryDate: string }>([
+        { $match: { tenantId, deletedAt: { $exists: false } } },
+        { $unwind: '$readings' },
+        { $sort: { createdAt: -1, _id: -1 } },
+        { $group: { _id: '$readings.tankId', reading: { $first: '$readings.afterReading' }, deliveryDate: { $first: '$deliveryDate' } } },
+      ]).exec(),
     ])
     const now = new Date()
     const [pricedProducts, nextPriceChanges] = await Promise.all([
@@ -53,11 +70,17 @@ export class FuelSetupService {
       nextPriceChange: nextPriceChanges.get(product._id.toHexString()),
     }))
     const readingsByMeter = new Map(heads.map((head) => [head.meterId.toHexString(), head.reading]))
+    const readingsByTank = new Map(tankReadings.map((reading) => [reading._id.toHexString(), reading]))
     return {
       products,
       meters: meters.map<PumpMeterWithCurrentReading>((meter) => ({
         ...meter,
         currentReading: readingsByMeter.get(meter._id.toHexString()) ?? meter.initialReading,
+      })),
+      tanks: tanks.map<FuelTankWithCurrentReading>((tank) => ({
+        ...tank,
+        currentReading: readingsByTank.get(tank._id.toHexString())?.reading,
+        lastReadingDate: readingsByTank.get(tank._id.toHexString())?.deliveryDate,
       })),
     }
   }
@@ -238,6 +261,82 @@ export class FuelSetupService {
     return meter.toObject<PumpMeterRecord>()
   }
 
+  async createTank(tenantId: Types.ObjectId, input: CreateFuelTankInput) {
+    const product = await this.products.exists({ _id: input.productId, tenantId, status: FuelSetupStatus.ACTIVE })
+    if (!product) throw new InvalidInputException('Select an active fuel product.')
+    const tank = await this.tanks.create({ tenantId, label: input.label, productId: input.productId })
+    return tank.toObject<FuelTankRecord>()
+  }
+
+  async updateTank(
+    tenantId: Types.ObjectId,
+    actor: FuelTankActor,
+    overrideDate: string,
+    input: UpdateFuelTankInput,
+  ): Promise<FuelTankWithCurrentReading> {
+    const session = await this.connection.startSession()
+    let result: FuelTankWithCurrentReading | undefined
+    try {
+      await session.withTransaction(async () => {
+        const tank = await this.tanks.findOne({ _id: input.tankId, tenantId }).session(session).lean<FuelTankRecord>().exec()
+        if (!tank) throw new NotFoundException('Fuel tank not found.')
+        if (tank.revision !== input.expectedRevision || tank.status !== FuelSetupStatus.ACTIVE) {
+          throw new ConflictException('Fuel tank changed. Refresh and try again.')
+        }
+
+        const latest = await this.latestTankReading(tenantId, tank._id, session)
+        const currentReading = latest?.reading
+        const expectedReading = input.expectedCurrentReading
+        if (
+          (currentReading === undefined && expectedReading !== null) ||
+          (currentReading !== undefined && (expectedReading === null || !decimal(currentReading).equals(expectedReading)))
+        ) throw new ConflictException('Fuel tank reading changed. Refresh and try again.')
+
+        const updated = await this.tanks.findOneAndUpdate(
+          { _id: tank._id, tenantId, revision: input.expectedRevision, status: FuelSetupStatus.ACTIVE },
+          { $set: { label: input.label }, $inc: { revision: 1 } },
+          { new: true, runValidators: true, session },
+        ).lean<FuelTankRecord>().exec()
+        if (!updated) throw new ConflictException('Fuel tank changed. Refresh and try again.')
+
+        const nextReading = input.currentReading
+        const readingChanged = nextReading !== null && (
+          currentReading === undefined || !decimal(currentReading).equals(nextReading)
+        )
+        if (readingChanged) {
+          const product = await this.products.findOne({ _id: tank.productId, tenantId }).session(session).lean<FuelProductRecord>().exec()
+          if (!product) throw new NotFoundException('Fuel product not found.')
+          await this.deliveries.create([{
+            tenantId,
+            deliveryDate: overrideDate,
+            eventType: FuelDeliveryEventType.MANUAL_OVERRIDE,
+            lines: [],
+            readings: [{
+              tankId: tank._id,
+              tankLabel: updated.label,
+              productId: product._id,
+              productName: product.name,
+              ...(currentReading === undefined ? {} : { beforeReading: currentReading }),
+              afterReading: decimal128(nextReading),
+            }],
+            createdById: actor.userId,
+            createdByName: actor.name,
+            idempotencyKey: `tank-reading-override:${tank._id.toHexString()}:${input.expectedRevision}`,
+          }], { session })
+        }
+        result = {
+          ...updated,
+          currentReading: nextReading === null ? currentReading : decimal128(nextReading),
+          lastReadingDate: readingChanged ? overrideDate : latest?.deliveryDate,
+        }
+      })
+    } finally {
+      await session.endSession()
+    }
+    if (!result) throw new ConflictException('Unable to update the fuel tank.')
+    return result
+  }
+
   async updateMeter(tenantId: Types.ObjectId, input: UpdatePumpMeterInput) {
     const session = await this.connection.startSession()
     let result: { meter: PumpMeterRecord; currentReading: Types.Decimal128 } | undefined
@@ -290,6 +389,8 @@ export class FuelSetupService {
   async deactivateProduct(tenantId: Types.ObjectId, input: DeactivateFuelSetupInput) {
     const activeMeter = await this.meters.exists({ tenantId, productId: input.id, status: FuelSetupStatus.ACTIVE })
     if (activeMeter) throw new InvalidInputException('Deactivate this product’s meters first.')
+    const activeTank = await this.tanks.exists({ tenantId, productId: input.id, status: FuelSetupStatus.ACTIVE })
+    if (activeTank) throw new InvalidInputException('Deactivate this product’s tanks first.')
     const product = await this.products.findOneAndUpdate(
       { _id: input.id, tenantId, revision: input.expectedRevision, status: FuelSetupStatus.ACTIVE },
       { $set: { status: FuelSetupStatus.INACTIVE }, $inc: { revision: 1 } },
@@ -311,19 +412,67 @@ export class FuelSetupService {
     throw new ConflictException('Pump meter changed. Refresh and try again.')
   }
 
+  async deactivateTank(tenantId: Types.ObjectId, input: DeactivateFuelSetupInput) {
+    const tank = await this.tanks.findOneAndUpdate(
+      { _id: input.id, tenantId, revision: input.expectedRevision, status: FuelSetupStatus.ACTIVE },
+      { $set: { status: FuelSetupStatus.INACTIVE }, $inc: { revision: 1 } },
+      { new: true, runValidators: true },
+    ).lean<FuelTankRecord>().exec()
+    if (tank) return tank
+    if (!await this.tanks.exists({ _id: input.id, tenantId })) throw new NotFoundException('Fuel tank not found.')
+    throw new ConflictException('Fuel tank changed. Refresh and try again.')
+  }
+
+  async activateTank(tenantId: Types.ObjectId, input: DeactivateFuelSetupInput) {
+    const existing = await this.tanks.findOne({ _id: input.id, tenantId }).lean<FuelTankRecord>().exec()
+    if (!existing) throw new NotFoundException('Fuel tank not found.')
+    if (existing.revision !== input.expectedRevision || existing.status !== FuelSetupStatus.INACTIVE) {
+      throw new ConflictException('Fuel tank changed. Refresh and try again.')
+    }
+    const product = await this.products.exists({
+      _id: existing.productId,
+      tenantId,
+      status: FuelSetupStatus.ACTIVE,
+    })
+    if (!product) throw new InvalidInputException('Activate the tank’s fuel product first.')
+    const tank = await this.tanks.findOneAndUpdate(
+      { _id: input.id, tenantId, revision: input.expectedRevision, status: FuelSetupStatus.INACTIVE },
+      { $set: { status: FuelSetupStatus.ACTIVE }, $inc: { revision: 1 } },
+      { new: true, runValidators: true },
+    ).lean<FuelTankRecord>().exec()
+    if (!tank) throw new ConflictException('Fuel tank changed. Refresh and try again.')
+    return tank
+  }
+
   async deleteForTenant(tenantId: Types.ObjectId, session: ClientSession) {
-    const [products, meters, priceChanges, priceStates] = await Promise.all([
+    const [products, meters, tanks, deliveries, priceChanges, priceStates] = await Promise.all([
       this.products.deleteMany({ tenantId }, { session }),
       this.meters.deleteMany({ tenantId }, { session }),
+      this.tanks.deleteMany({ tenantId }, { session }),
+      this.deliveries.deleteMany({ tenantId }, { session }),
       this.priceChanges.deleteMany({ tenantId }, { session }),
       this.priceStates.deleteMany({ tenantId }, { session }),
     ])
     return {
       products: products.deletedCount,
       meters: meters.deletedCount,
+      tanks: tanks.deletedCount,
+      deliveries: deliveries.deletedCount,
       priceChanges: priceChanges.deletedCount,
       priceStates: priceStates.deletedCount,
     }
+  }
+
+  private async latestTankReading(tenantId: Types.ObjectId, tankId: Types.ObjectId, session?: ClientSession) {
+    const query = this.deliveries
+      .findOne({ tenantId, deletedAt: { $exists: false }, 'readings.tankId': tankId })
+      .sort({ createdAt: -1, _id: -1 })
+    if (session) query.session(session)
+    const event = await query.lean<FuelDeliveryRecord>().exec()
+    const reading = event?.readings.find((item) => item.tankId.equals(tankId))
+    return event && reading
+      ? { reading: reading.afterReading, deliveryDate: event.deliveryDate }
+      : undefined
   }
 
   private async withPrices(
