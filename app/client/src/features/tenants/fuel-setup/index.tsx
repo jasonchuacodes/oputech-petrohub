@@ -97,7 +97,16 @@ function TenantFuelSetup({ tenantId, timezone }: { tenantId: string; timezone: s
     {
       id: 'name',
       heading: 'Product',
-      cell: (product) => <span className="font-medium text-text-heading">{product.name}</span>,
+      cell: (product) => (
+        <button
+          type="button"
+          disabled={product.status !== 'active'}
+          className="max-w-full truncate rounded-sm text-left font-medium text-text-heading underline-offset-4 outline-none enabled:cursor-pointer enabled:hover:text-primary enabled:hover:underline focus-visible:ring-3 focus-visible:ring-ring/30 disabled:cursor-default"
+          onClick={() => setProductEditor(product)}
+        >
+          {product.name}
+        </button>
+      ),
     },
     {
       id: 'unitPrice',
@@ -232,7 +241,16 @@ function TenantFuelSetup({ tenantId, timezone }: { tenantId: string; timezone: s
                     </span>
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="font-medium text-text-heading">{product.name}</h3>
+                        <h3>
+                          <button
+                            type="button"
+                            disabled={product.status !== 'active'}
+                            className="max-w-full truncate rounded-sm text-left font-medium text-text-heading underline-offset-4 outline-none enabled:cursor-pointer enabled:hover:text-primary enabled:hover:underline focus-visible:ring-3 focus-visible:ring-ring/30 disabled:cursor-default"
+                            onClick={() => setProductEditor(product)}
+                          >
+                            {product.name}
+                          </button>
+                        </h3>
                         <Status status={product.status} />
                       </div>
                       <p className="mt-1 text-sm font-medium tabular-nums">₱{formatPrice(product.unitPrice)}</p>
