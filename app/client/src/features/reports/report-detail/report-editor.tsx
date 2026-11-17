@@ -52,7 +52,7 @@ function ReportEditorLayout() {
 
   return (
     <form
-      className="mx-auto flex min-h-full w-full flex-col px-5 py-5 md:max-w-4xl md:p-6 wide:max-w-7xl"
+      className="mx-auto flex min-h-full w-full flex-col px-5 py-5 md:max-w-4xl md:p-6 wide:max-w-7xl wide:text-sm"
       onSubmit={(event) => event.preventDefault()}
     >
       <PageHeader

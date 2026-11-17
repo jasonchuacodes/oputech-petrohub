@@ -137,6 +137,7 @@ export function DisposalReadingSheet({
       manageFocus
       initialFocusRef={canEdit ? currentReadingRef : undefined}
       returnFocusRef={returnFocusRef}
+      panelClassName="wide:text-sm"
     >
       <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-5">
         <dl className="divide-y divide-border/60 border-y border-border/60">

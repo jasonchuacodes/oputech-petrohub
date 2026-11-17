@@ -79,10 +79,10 @@ export function ReportDisposalsPanel() {
                   <div className="pointer-events-none relative z-10">
                     <div className="flex items-start gap-3">
                       <div className="min-w-0 flex-1">
-                        <h2 className="text-lg font-semibold text-text-heading">
+                        <h2 className="text-lg font-semibold text-text-heading wide:text-base">
                           {reading.meterLabel}
                         </h2>
-                        <p className="mt-1 text-base font-medium text-text-secondary">
+                        <p className="mt-1 text-base font-medium text-text-secondary wide:text-sm">
                           {reading.productName}
                         </p>
                       </div>
@@ -165,7 +165,7 @@ function Metric({
   return (
     <div className={`flex items-center justify-between gap-2 py-1 ${emphasis === 'primary' ? 'min-h-10' : 'min-h-9'}`}>
       <span className="text-sm text-text-secondary">{label}</span>
-      <span className={`text-right tabular-nums ${valueClass}`}>{value}</span>
+      <span className={`text-right tabular-nums wide:text-sm ${valueClass}`}>{value}</span>
     </div>
   );
 }
