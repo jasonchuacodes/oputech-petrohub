@@ -3,7 +3,7 @@
 import { CircleAlert, MoreVertical } from 'lucide-react';
 import { Button } from '~/components/ui/button';
 import { PageHeader } from '~/components/ui/page-header';
-import { cn } from '~/utils/cn';
+import { SectionTabs, type SectionTabOption } from '~/components/ui/section-tabs';
 import { formatBusinessDate, formatShiftTime } from '../create-report-sheet';
 import type { ReportDetailRecord } from '../reports.queries';
 import { ReportDisposalsPanel } from './report-disposals';
@@ -19,6 +19,24 @@ type ReportEditorProps = {
   userId?: string;
   role: 'member' | 'admin' | 'superadmin';
 };
+
+type ReportTab = 'detail' | 'lubricants' | 'disposals';
+
+const reportTabs = [
+  { value: 'detail', label: 'Details', id: 'report-detail-tab', panelId: 'report-detail-panel' },
+  {
+    value: 'lubricants',
+    label: 'Lubes',
+    id: 'report-lubricants-tab',
+    panelId: 'report-lubricants-panel',
+  },
+  {
+    value: 'disposals',
+    label: 'Disposals',
+    id: 'report-disposals-tab',
+    panelId: 'report-disposals-panel',
+  },
+] as const satisfies readonly SectionTabOption<ReportTab>[];
 
 export function ReportEditor(props: ReportEditorProps) {
   return (
@@ -68,54 +86,13 @@ function ReportEditorLayout() {
 
       <ReportNotices />
 
-      <div
-        role="tablist"
-        aria-label="Report sections"
-        className="mt-5 flex rounded-md bg-muted p-1"
-      >
-        <button
-          type="button"
-          role="tab"
-          aria-selected={tab === 'detail'}
-          className={cn(
-            'min-h-11 flex-1 rounded-sm px-3 text-sm font-medium',
-            tab === 'detail'
-              ? 'bg-primary text-primary-foreground shadow-sm'
-              : 'text-text-secondary',
-          )}
-          onClick={() => setTab('detail')}
-        >
-          Details
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={tab === 'lubricants'}
-          className={cn(
-            'min-h-11 flex-1 rounded-sm px-3 text-sm font-medium',
-            tab === 'lubricants'
-              ? 'bg-primary text-primary-foreground shadow-sm'
-              : 'text-text-secondary',
-          )}
-          onClick={() => setTab('lubricants')}
-        >
-          Lubes
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={tab === 'disposals'}
-          className={cn(
-            'min-h-11 flex-1 rounded-sm px-3 text-sm font-medium',
-            tab === 'disposals'
-              ? 'bg-primary text-primary-foreground shadow-sm'
-              : 'text-text-secondary',
-          )}
-          onClick={() => setTab('disposals')}
-        >
-          Disposals
-        </button>
-      </div>
+      <SectionTabs
+        ariaLabel="Report sections"
+        tabs={reportTabs}
+        value={tab}
+        onValueChange={setTab}
+        className="mt-5"
+      />
 
       <div className="flex flex-1 flex-col">
         {tab === 'detail' ? <ReportDetailsPanel /> : tab === 'lubricants' ? <ReportLubricantsPanel /> : <ReportDisposalsPanel />}

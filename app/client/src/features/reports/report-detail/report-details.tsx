@@ -18,7 +18,12 @@ export function ReportDetailsPanel() {
     useReportEditor();
 
   return (
-    <div role="tabpanel" className="mt-5 flex flex-col gap-5 pb-5">
+    <div
+      id="report-detail-panel"
+      role="tabpanel"
+      aria-labelledby="report-detail-tab"
+      className="mt-5 flex flex-col gap-5 pb-5"
+    >
       <SummaryCard />
       {canEdit && <FinancialShortcuts />}
       <FinancialSection kind="income" />

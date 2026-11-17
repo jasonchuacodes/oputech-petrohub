@@ -4,13 +4,14 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { AtSign, KeyRound, UserRound } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { useForm, type UseFormRegisterReturn } from 'react-hook-form'
 import { toast } from 'sonner'
 import { Button } from '~/components/ui/button'
 import { ConfirmationDialog } from '~/components/ui/confirmation-dialog'
 import { Input } from '~/components/ui/input'
 import { PageHeader } from '~/components/ui/page-header'
+import { SectionTabs, type SectionTabOption } from '~/components/ui/section-tabs'
 import { Spinner } from '~/components/ui/spinner'
 import { useDisclosure } from '~/hooks/useDisclosure'
 import type { AuthUser } from '../../auth/auth.types'
@@ -24,6 +25,21 @@ import { useUpdateMyProfileMutation } from '../account.queries'
 import { profileFormSchema, type ProfileFormValues } from './profile-form.schema'
 
 type AccountTab = 'information' | 'security'
+
+const accountTabs = [
+  {
+    id: 'account-information-tab',
+    panelId: 'account-information-panel',
+    label: 'Account',
+    value: 'information',
+  },
+  {
+    id: 'security-tab',
+    panelId: 'security-panel',
+    label: 'Security',
+    value: 'security',
+  },
+] as const satisfies readonly SectionTabOption<AccountTab>[]
 
 export function AccountSettingsPage() {
   const session = useSessionQuery()
@@ -47,12 +63,18 @@ export function AccountSettingsPage() {
         backLabel="Back to Me"
       />
 
-      <AccountTabs activeTab={activeTab} onSelect={setActiveTab} />
+      <SectionTabs
+        ariaLabel="Account settings"
+        tabs={accountTabs}
+        value={activeTab}
+        onValueChange={setActiveTab}
+        touchSize="large"
+      />
 
       <div
         id="account-information-panel"
         role="tabpanel"
-        aria-labelledby="account-tab"
+        aria-labelledby="account-information-tab"
         hidden={activeTab !== 'information'}
       >
         <ProfileForm key={user.id} user={user} />
@@ -65,76 +87,6 @@ export function AccountSettingsPage() {
       >
         <PasswordForm />
       </div>
-    </div>
-  )
-}
-
-function AccountTabs({
-  activeTab,
-  onSelect,
-}: {
-  activeTab: AccountTab
-  onSelect: (tab: AccountTab) => void
-}) {
-  const informationTab = useRef<HTMLButtonElement>(null)
-  const securityTab = useRef<HTMLButtonElement>(null)
-  const tabs = [
-    {
-      id: 'account-tab',
-      panelId: 'account-information-panel',
-      label: 'Account',
-      value: 'information' as const,
-      ref: informationTab,
-    },
-    {
-      id: 'security-tab',
-      panelId: 'security-panel',
-      label: 'Security',
-      value: 'security' as const,
-      ref: securityTab,
-    },
-  ]
-
-  const selectAndFocus = (tab: AccountTab) => {
-    onSelect(tab)
-    const target = tab === 'information' ? informationTab : securityTab
-    target.current?.focus()
-  }
-
-  return (
-    <div
-      role="tablist"
-      aria-label="Account settings"
-      className="flex rounded-md bg-muted p-1"
-    >
-      {tabs.map((tab) => {
-        const selected = activeTab === tab.value
-        return (
-          <button
-            key={tab.value}
-            ref={tab.ref}
-            id={tab.id}
-            type="button"
-            role="tab"
-            aria-selected={selected}
-            aria-controls={tab.panelId}
-            tabIndex={selected ? 0 : -1}
-            className={`flex h-12 flex-1 items-center justify-center rounded-sm px-3 text-base font-medium outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/30 ${
-              selected
-                ? 'bg-primary text-primary-foreground shadow-sm'
-                : 'text-text-secondary hover:bg-surface-hover hover:text-text-heading'
-            }`}
-            onClick={() => onSelect(tab.value)}
-            onKeyDown={(event) => {
-              if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return
-              event.preventDefault()
-              selectAndFocus(tab.value === 'information' ? 'security' : 'information')
-            }}
-          >
-            {tab.label}
-          </button>
-        )
-      })}
     </div>
   )
 }

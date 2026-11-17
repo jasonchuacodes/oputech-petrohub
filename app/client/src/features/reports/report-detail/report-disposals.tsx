@@ -34,7 +34,12 @@ export function ReportDisposalsPanel() {
   const closeReading = useCallback(() => setSelectedMeterId(undefined), []);
 
   return (
-    <div role="tabpanel" className="mt-5">
+    <div
+      id="report-disposals-panel"
+      role="tabpanel"
+      aria-labelledby="report-disposals-tab"
+      className="mt-5"
+    >
       {readings.length > 0 ? (
         <div className="flex flex-col gap-5">
           <ContentSection label="Disposal summary">

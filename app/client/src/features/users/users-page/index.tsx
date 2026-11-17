@@ -98,6 +98,14 @@ function TenantUsersPage({
         backHref="/me"
         backLabel="Back to Me"
         backVisibility="mobile"
+        action={
+          users.isSuccess && availability === 'active' ? (
+            <Button type="button" size="sm" className="hidden md:inline-flex" onClick={creating.onOpen}>
+              <Plus aria-hidden="true" />
+              Add user
+            </Button>
+          ) : undefined
+        }
       />
 
       <AddUserSheet
@@ -107,26 +115,31 @@ function TenantUsersPage({
         onClose={creating.onClose}
       />
 
-      <div role="tablist" aria-label="User availability" className="flex rounded-md bg-muted p-1">
-        {(['active', 'inactive'] as const).map((value) => (
-          <button
-            key={value}
-            type="button"
-            role="tab"
-            aria-selected={availability === value}
-            className={`flex h-11 flex-1 items-center justify-center rounded-sm px-3 text-sm font-medium outline-none focus-visible:ring-3 focus-visible:ring-ring/30 ${
-              availability === value
-                ? 'bg-primary text-primary-foreground shadow-sm'
-                : 'text-text-secondary hover:bg-surface-hover'
-            }`}
-            onClick={() => {
-              setAvailability(value)
-              setOffset(0)
-            }}
-          >
-            {value === 'active' ? 'Active' : 'Inactive'}
-          </button>
-        ))}
+      <div
+        role="group"
+        aria-label="User availability"
+        className="w-full rounded-md bg-muted p-1 wide:rounded-none wide:border-b wide:border-border wide:bg-transparent wide:p-0"
+      >
+        <div className="flex w-full wide:max-w-md">
+          {(['active', 'inactive'] as const).map((value) => (
+            <button
+              key={value}
+              type="button"
+              aria-pressed={availability === value}
+              className={`flex min-h-11 flex-1 items-center justify-center rounded-sm px-3 text-sm font-medium outline-none transition-colors focus-visible:z-10 focus-visible:ring-3 focus-visible:ring-ring/30 wide:-mb-px wide:min-h-10 wide:flex-none wide:justify-start wide:rounded-none wide:border-b-2 wide:px-4 wide:text-left wide:text-control ${
+                availability === value
+                  ? 'bg-primary text-primary-foreground shadow-sm wide:border-primary wide:bg-transparent wide:text-primary wide:shadow-none'
+                  : 'text-text-secondary hover:bg-surface-hover wide:border-transparent wide:hover:bg-transparent wide:hover:text-text-heading'
+              }`}
+              onClick={() => {
+                setAvailability(value)
+                setOffset(0)
+              }}
+            >
+              {value === 'active' ? 'Active' : 'Inactive'}
+            </button>
+          ))}
+        </div>
       </div>
 
       {users.isPending ? (
@@ -239,7 +252,7 @@ function TenantUsersPage({
       )}
 
       {users.isSuccess && availability === 'active' && (
-        <Button type="button" variant="outline" className="w-full" onClick={creating.onOpen}>
+        <Button type="button" variant="outline" className="w-full md:hidden" onClick={creating.onOpen}>
           <Plus aria-hidden="true" />
           Add user
         </Button>

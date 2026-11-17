@@ -13,7 +13,12 @@ export function ReportLubricantsPanel() {
   const actionSale = actionIndex === undefined ? undefined : lubricants.fields[actionIndex]
 
   return (
-    <div role="tabpanel" className="mt-5 flex flex-col gap-5 pb-5">
+    <div
+      id="report-lubricants-panel"
+      role="tabpanel"
+      aria-labelledby="report-lubricants-tab"
+      className="mt-5 flex flex-col gap-5 pb-5"
+    >
       <section>
         <div className="flex min-h-10 items-center justify-between">
           <h2 className="font-sans text-sm font-semibold tracking-[0.14em] text-text-heading uppercase">

@@ -186,6 +186,14 @@ Period selectors in content headers use a lightweight, borderless treatment:
 - Period selectors and sort toggles must use the same size, weight, and color.
 - Do not pair period and sort as two equally prominent full-width selects.
 
+### Section tabs
+
+- On phone and tablet, section tabs use a full-width segmented control with equal-width, touch-sized triggers.
+- At the 1200px wide-desktop breakpoint, the subtle bottom divider spans the full row while content-sized triggers are grouped from the left within a `max-w-md` region.
+- The selected desktop tab uses primary text and a 2px underline rather than a filled button surface.
+- Binary filters may share this responsive visual treatment but retain group and pressed-button semantics rather than tab semantics.
+- Tab lists support Left/Right navigation with wrapping and Home/End navigation.
+
 ## 9. Cards and lists
 
 - Use surface, spacing, and subtle shadow before adding borders.

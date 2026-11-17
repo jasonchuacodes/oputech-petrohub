@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu'
 import { PageHeader } from '~/components/ui/page-header'
+import { SectionTabs, type SectionTabOption } from '~/components/ui/section-tabs'
 import { Spinner } from '~/components/ui/spinner'
 import type { FuelProductFieldsFragment, PumpMeterFieldsFragment } from '~/generated/graphql'
 import { cn } from '~/utils/cn'
@@ -27,6 +28,21 @@ import { PumpMeterSheet } from './pump-meter-sheet'
 import { SetupSheet } from './setup-sheet'
 
 type SetupTab = 'products' | 'meters'
+
+const setupTabs = [
+  {
+    value: 'products',
+    label: 'Products',
+    id: 'fuel-products-tab',
+    panelId: 'fuel-products-panel',
+  },
+  {
+    value: 'meters',
+    label: 'Pumps',
+    id: 'fuel-meters-tab',
+    panelId: 'fuel-meters-panel',
+  },
+] as const satisfies readonly SectionTabOption<SetupTab>[]
 type ProductEditor = FuelProductFieldsFragment | 'new' | null
 type DeactivationTarget =
   | { kind: 'product'; item: FuelProductFieldsFragment }
@@ -161,15 +177,40 @@ function TenantFuelSetup({ tenantId, timezone }: { tenantId: string; timezone: s
         backHref="/me"
         backLabel="Back to Me"
         backVisibility="mobile"
+        action={
+          tab === 'products' ? (
+            <Button type="button" size="sm" className="hidden md:inline-flex" onClick={() => setProductEditor('new')}>
+              <Plus aria-hidden="true" />
+              Add product
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              size="sm"
+              className="hidden md:inline-flex"
+              disabled={setup.data.products.every((product) => product.status !== 'active')}
+              onClick={() => setAddingMeter(true)}
+            >
+              <Plus aria-hidden="true" />
+              Add meter
+            </Button>
+          )
+        }
       />
 
-      <div role="tablist" aria-label="Fuel setup sections" className="flex rounded-md bg-muted p-1">
-        <button type="button" role="tab" aria-selected={tab === 'products'} className={cn('min-h-11 flex-1 rounded-sm px-3 text-sm font-medium', tab === 'products' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-text-secondary')} onClick={() => setTab('products')}>Products</button>
-        <button type="button" role="tab" aria-selected={tab === 'meters'} className={cn('min-h-11 flex-1 rounded-sm px-3 text-sm font-medium', tab === 'meters' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-text-secondary')} onClick={() => setTab('meters')}>Pumps</button>
-      </div>
+      <SectionTabs
+        ariaLabel="Fuel setup sections"
+        tabs={setupTabs}
+        value={tab}
+        onValueChange={setTab}
+      />
 
       {tab === 'products' ? (
-        <section role="tabpanel" aria-label="Fuel products">
+        <section
+          id="fuel-products-panel"
+          role="tabpanel"
+          aria-labelledby="fuel-products-tab"
+        >
           {setup.data.products.length === 0 ? (
             <EmptyCard icon={Fuel} title="No fuel products" description="Add the first fuel product and its selling price." />
           ) : (
@@ -205,10 +246,10 @@ function TenantFuelSetup({ tenantId, timezone }: { tenantId: string; timezone: s
               </div>
             </>
           )}
-          <Button type="button" variant="outline" className="mt-4 w-full" onClick={() => setProductEditor('new')}><Plus aria-hidden="true" />Add product</Button>
+          <Button type="button" variant="outline" className="mt-4 w-full md:hidden" onClick={() => setProductEditor('new')}><Plus aria-hidden="true" />Add product</Button>
         </section>
       ) : (
-        <section role="tabpanel" aria-label="Pump meters">
+        <section id="fuel-meters-panel" role="tabpanel" aria-labelledby="fuel-meters-tab">
           {setup.data.meters.length === 0 ? (
             <EmptyCard icon={Gauge} title="No pump meters" description="Add one card for each independently incrementing physical meter." />
           ) : (
@@ -253,7 +294,7 @@ function TenantFuelSetup({ tenantId, timezone }: { tenantId: string; timezone: s
               </div>
             </>
           )}
-          <Button type="button" variant="outline" className="mt-4 w-full" disabled={setup.data.products.every((product) => product.status !== 'active')} onClick={() => setAddingMeter(true)}><Plus aria-hidden="true" />Add meter</Button>
+          <Button type="button" variant="outline" className="mt-4 w-full md:hidden" disabled={setup.data.products.every((product) => product.status !== 'active')} onClick={() => setAddingMeter(true)}><Plus aria-hidden="true" />Add meter</Button>
         </section>
       )}
 
