@@ -1,6 +1,6 @@
 'use client'
 
-import { X } from 'lucide-react'
+import { X, type LucideIcon } from 'lucide-react'
 import {
   useCallback,
   useEffect,
@@ -11,6 +11,7 @@ import {
   type RefObject,
 } from 'react'
 import { createPortal } from 'react-dom'
+import { cn } from '~/utils/cn'
 import { Button } from './button'
 
 const focusableSelector =
@@ -20,6 +21,8 @@ export type SheetProps = {
   open: boolean
   title: string
   description?: string
+  icon?: LucideIcon
+  variant?: 'default' | 'danger'
   children: ReactNode
   onClose: () => void
   layer?: 'default' | 'nested'
@@ -34,6 +37,8 @@ export function Sheet({
   open,
   title,
   description,
+  icon: Icon,
+  variant = 'default',
   children,
   onClose,
   layer = 'default',
@@ -116,6 +121,16 @@ export function Sheet({
           className="mx-auto mt-3 h-1.5 w-14 shrink-0 rounded-full bg-foreground/35 wide:hidden"
         />
         <header className="flex shrink-0 items-start gap-3 p-5 pb-4">
+          {Icon && (
+            <span
+              className={cn(
+                'flex size-10 shrink-0 items-center justify-center rounded-md text-primary-foreground',
+                variant === 'danger' ? 'bg-destructive' : 'bg-primary',
+              )}
+            >
+              <Icon aria-hidden="true" className="size-5" />
+            </span>
+          )}
           <div className="min-w-0 flex-1">
             <h2 id={titleId} className="text-xl font-semibold text-text-heading">
               {title}

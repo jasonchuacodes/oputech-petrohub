@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { UserX } from 'lucide-react'
 import { useEffect } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { toast } from 'sonner'
@@ -79,6 +80,8 @@ export function DeactivateUserSheet({
       open={open}
       title={effectiveDate === today ? 'Deactivate user' : 'Schedule deactivation'}
       description={`${user.fullName} will lose access to this tenant only.`}
+      icon={UserX}
+      variant="danger"
       escapeDisabled={deactivateUser.isPending}
       manageFocus
       onClose={close}
