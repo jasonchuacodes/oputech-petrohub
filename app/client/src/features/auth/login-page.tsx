@@ -55,7 +55,7 @@ export function LoginPage() {
             <p className="text-base text-text-secondary">Sign in to manage today’s business.</p>
           </header>
 
-          <form className="mt-7 flex flex-col gap-5" noValidate onSubmit={submit}>
+          <form className="mt-7 flex flex-col gap-5 md:mx-auto md:max-w-md" noValidate onSubmit={submit}>
             <div className="flex flex-col gap-3">
               <div className="flex flex-col gap-2">
                 <label htmlFor="username" className="text-sm font-medium">
