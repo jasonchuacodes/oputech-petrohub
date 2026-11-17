@@ -54,6 +54,14 @@ export class UsersResolver {
     return this.usersService.getUserDetails(this.toScope(tenant), input)
   }
 
+  @Query('myProfile')
+  @UseGuards(AccessTokenGuard)
+  myProfile(
+    @CurrentActor() actor: AuthenticatedActor,
+  ): ReturnType<UsersService['getMyProfile']> {
+    return this.usersService.getMyProfile(actor.userId)
+  }
+
   @Mutation('deactivateUser')
   @UseGuards(...userManagementGuards)
   @RequireRoles(UserRole.SUPERADMIN, UserRole.ADMIN)

@@ -196,7 +196,7 @@ describe('user management', () => {
     expect(forbidden.body.errors[0].extensions.originalError).toMatchObject({ code: 'FORBIDDEN' })
   })
 
-  it('allows an authenticated user to update their own name', async () => {
+  it('allows an authenticated user to view and update their own profile', async () => {
     const memberToken = await login('users-member', 'MemberPassword123')
     const profileUpdate = await request(app.getHttpServer())
       .post('/graphql')
@@ -207,7 +207,18 @@ describe('user management', () => {
             updateMyProfile(input: $input) { firstName lastName fullName username }
           }
         `,
-        variables: { input: { firstName: '  Updated  ', lastName: '  Member  ' } },
+        variables: {
+          input: {
+            firstName: '  Updated  ',
+            lastName: '  Member  ',
+            birthday: '2000-02-29',
+            address: '  Line 1\nLine 2  ',
+            sss: ' 00-123 ',
+            pagibig: ' 01-234 ',
+            philhealth: ' 02-345 ',
+            tin: ' 000-111 ',
+          },
+        },
       })
       .expect(200)
 
@@ -217,6 +228,30 @@ describe('user management', () => {
       lastName: 'Member',
       fullName: 'Updated Member',
       username: 'users-member',
+    })
+
+    const profile = await graphql(
+      memberToken,
+      `query {
+        myProfile {
+          firstName lastName fullName username role birthday address sss pagibig philhealth tin
+        }
+      }`,
+      {},
+    )
+    expect(profile.body.errors).toBeUndefined()
+    expect(profile.body.data.myProfile).toEqual({
+      firstName: 'Updated',
+      lastName: 'Member',
+      fullName: 'Updated Member',
+      username: 'users-member',
+      role: 'member',
+      birthday: '2000-02-29',
+      address: 'Line 1\nLine 2',
+      sss: '00-123',
+      pagibig: '01-234',
+      philhealth: '02-345',
+      tin: '000-111',
     })
 
     await request(app.getHttpServer())

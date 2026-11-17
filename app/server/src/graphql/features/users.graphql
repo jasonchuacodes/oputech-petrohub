@@ -1,6 +1,7 @@
 extend type Query {
   users(input: UsersInput!): UserPage!
   userDetails(input: UserDetailsInput!): UserDetails!
+  myProfile: UserDetails!
 }
 
 extend type Mutation {
@@ -31,6 +32,12 @@ input CreateUserInput {
 input UpdateMyProfileInput {
   firstName: String
   lastName: String
+  sss: String
+  pagibig: String
+  philhealth: String
+  tin: String
+  birthday: String
+  address: String
 }
 
 input UpdateUserInput {

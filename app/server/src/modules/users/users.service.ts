@@ -105,6 +105,8 @@ export type UserDetailsRecord = Pick<
   tenantMembership: UserManagementRecord['tenantMembership']
 }
 
+export type MyProfileRecord = Omit<UserDetailsRecord, 'tenantMembership'>
+
 type TenantUserScope = {
   accountHolderId: Types.ObjectId
   tenantId: Types.ObjectId
@@ -238,6 +240,31 @@ export class UsersService {
     }
   }
 
+  async getMyProfile(userId: Types.ObjectId): Promise<MyProfileRecord> {
+    const user = await this.users
+      .findOne({ _id: userId, status: UserStatus.ACTIVE })
+      .select('+sss +pagibig +philhealth +tin +birthday +address')
+      .lean<UserRecord>()
+      .exec()
+    if (!user) throw new NotFoundException('User not found.')
+
+    return {
+      id: user._id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      fullName: this.getFullName(user),
+      username: user.username,
+      role: user.role,
+      status: user.status,
+      sss: user.sss,
+      pagibig: user.pagibig,
+      philhealth: user.philhealth,
+      tin: user.tin,
+      birthday: user.birthday,
+      address: user.address,
+    }
+  }
+
   async provisionUser(
     actor: UserManagementActor,
     scope: TenantUserScope,
@@ -262,18 +289,26 @@ export class UsersService {
   }
 
   async updateMyProfile(userId: Types.ObjectId, input: UpdateMyProfileInput): Promise<UserDocument> {
+    const setFields: Record<string, string> = {
+      ...(input.firstName ? { firstName: input.firstName } : {}),
+      ...(input.lastName ? { lastName: input.lastName } : {}),
+    }
+    const unsetFields: Record<string, 1> = {
+      ...(input.firstName ? {} : { firstName: 1 as const }),
+      ...(input.lastName ? {} : { lastName: 1 as const }),
+    }
+    for (const field of ['sss', 'pagibig', 'philhealth', 'tin', 'birthday', 'address'] as const) {
+      const value = input[field]
+      if (value === null) unsetFields[field] = 1
+      else if (value !== undefined) setFields[field] = value
+    }
+
     const user = await this.users
       .findOneAndUpdate(
         { _id: userId, status: UserStatus.ACTIVE },
         {
-          $set: {
-            ...(input.firstName ? { firstName: input.firstName } : {}),
-            ...(input.lastName ? { lastName: input.lastName } : {}),
-          },
-          $unset: {
-            ...(input.firstName ? {} : { firstName: 1 }),
-            ...(input.lastName ? {} : { lastName: 1 }),
-          },
+          $set: setFields,
+          $unset: unsetFields,
         },
         { new: true, runValidators: true },
       )

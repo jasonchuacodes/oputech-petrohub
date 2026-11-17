@@ -63,6 +63,12 @@ export const updateMyProfileInputSchema = z
   .object({
     firstName: optionalNameSchema,
     lastName: optionalNameSchema,
+    sss: optionalIdentifierSchema,
+    pagibig: optionalIdentifierSchema,
+    philhealth: optionalIdentifierSchema,
+    tin: optionalIdentifierSchema,
+    birthday: optionalBirthdaySchema,
+    address: optionalAddressSchema,
   })
   .strict()
 

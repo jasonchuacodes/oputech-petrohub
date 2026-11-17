@@ -536,6 +536,7 @@ export type Query = {
   fuelSetup: FuelSetup;
   inventoryProducts: InventoryProductPage;
   myAttendance: AttendanceStatus;
+  myProfile: UserDetails;
   recurringIncomeConfiguration: RecurringIncomeConfiguration;
   report: Report;
   reportCreationContext: ReportCreationContext;
@@ -867,8 +868,14 @@ export type UpdateInventoryProductInput = {
 };
 
 export type UpdateMyProfileInput = {
+  address?: InputMaybe<Scalars['String']['input']>;
+  birthday?: InputMaybe<Scalars['String']['input']>;
   firstName?: InputMaybe<Scalars['String']['input']>;
   lastName?: InputMaybe<Scalars['String']['input']>;
+  pagibig?: InputMaybe<Scalars['String']['input']>;
+  philhealth?: InputMaybe<Scalars['String']['input']>;
+  sss?: InputMaybe<Scalars['String']['input']>;
+  tin?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type UpdatePumpMeterInput = {
@@ -1471,6 +1478,7 @@ export type QueryResolvers<ContextType = GraphqlContext, ParentType extends Reso
   fuelSetup?: Resolver<ResolversTypes['FuelSetup'], ParentType, ContextType>;
   inventoryProducts?: Resolver<ResolversTypes['InventoryProductPage'], ParentType, ContextType, RequireFields<QueryInventoryProductsArgs, 'input'>>;
   myAttendance?: Resolver<ResolversTypes['AttendanceStatus'], ParentType, ContextType>;
+  myProfile?: Resolver<ResolversTypes['UserDetails'], ParentType, ContextType>;
   recurringIncomeConfiguration?: Resolver<ResolversTypes['RecurringIncomeConfiguration'], ParentType, ContextType>;
   report?: Resolver<ResolversTypes['Report'], ParentType, ContextType, RequireFields<QueryReportArgs, 'input'>>;
   reportCreationContext?: Resolver<ResolversTypes['ReportCreationContext'], ParentType, ContextType>;

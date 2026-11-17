@@ -1,7 +1,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { AtSign, KeyRound, UserRound } from 'lucide-react'
+import { AtSign, KeyRound } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -14,16 +14,24 @@ import { PasswordInput } from '~/components/ui/password-input'
 import { PageHeader } from '~/components/ui/page-header'
 import { SectionTabs, type SectionTabOption } from '~/components/ui/section-tabs'
 import { Spinner } from '~/components/ui/spinner'
+import { Textarea } from '~/components/ui/textarea'
 import { useDisclosure } from '~/hooks/useDisclosure'
-import type { AuthUser } from '../../auth/auth.types'
 import { useChangePasswordMutation, useSessionQuery } from '../../auth/auth.queries'
 import { AuthApiError } from '../../auth/auth.api'
 import {
   changePasswordSchema,
   type ChangePasswordValues,
 } from '../../auth/change-password.schema'
-import { useUpdateMyProfileMutation } from '../account.queries'
-import { profileFormSchema, type ProfileFormValues } from './profile-form.schema'
+import {
+  useMyProfileQuery,
+  useUpdateMyProfileMutation,
+  type MyProfile,
+} from '../account.queries'
+import {
+  profileFormSchema,
+  type ProfileFormInput,
+  type ProfileFormValues,
+} from './profile-form.schema'
 
 type AccountTab = 'information' | 'security'
 
@@ -78,7 +86,7 @@ export function AccountSettingsPage() {
         aria-labelledby="account-information-tab"
         hidden={activeTab !== 'information'}
       >
-        <ProfileForm key={user.id} user={user} />
+        <ProfilePanel />
       </div>
       <div
         id="security-panel"
@@ -92,7 +100,32 @@ export function AccountSettingsPage() {
   )
 }
 
-function ProfileForm({ user }: { user: AuthUser }) {
+function ProfilePanel() {
+  const profile = useMyProfileQuery()
+
+  if (profile.isPending) {
+    return (
+      <div className="flex min-h-48 items-center justify-center">
+        <Spinner className="size-6" />
+      </div>
+    )
+  }
+
+  if (profile.isError) {
+    return (
+      <div className="flex min-h-48 flex-col items-center justify-center gap-3 text-center">
+        <p className="text-sm text-text-secondary">Unable to load your account details.</p>
+        <Button type="button" variant="outline" size="sm" onClick={() => void profile.refetch()}>
+          Try again
+        </Button>
+      </div>
+    )
+  }
+
+  return <ProfileForm key={profile.data.id} profile={profile.data} />
+}
+
+function ProfileForm({ profile }: { profile: MyProfile }) {
   const updateProfile = useUpdateMyProfileMutation()
   const {
     register,
@@ -100,11 +133,8 @@ function ProfileForm({ user }: { user: AuthUser }) {
     reset,
     setError,
     formState: { errors, isDirty, isValid },
-  } = useForm<ProfileFormValues>({
-    defaultValues: {
-      firstName: user.firstName ?? '',
-      lastName: user.lastName ?? '',
-    },
+  } = useForm<ProfileFormInput, unknown, ProfileFormValues>({
+    defaultValues: toProfileFormValues(profile),
     mode: 'onChange',
     resolver: zodResolver(profileFormSchema),
   })
@@ -114,11 +144,14 @@ function ProfileForm({ user }: { user: AuthUser }) {
       const profile = await updateProfile.mutateAsync({
         firstName: values.firstName || null,
         lastName: values.lastName || null,
+        birthday: values.birthday || null,
+        address: values.address || null,
+        sss: values.sss || null,
+        pagibig: values.pagibig || null,
+        philhealth: values.philhealth || null,
+        tin: values.tin || null,
       })
-      reset({
-        firstName: profile.firstName ?? '',
-        lastName: profile.lastName ?? '',
-      })
+      reset({ ...values, firstName: profile.firstName ?? '', lastName: profile.lastName ?? '' })
       toast.success('Profile updated successfully')
     } catch {
       setError('root', { message: 'Unable to update your profile. Please try again.' })
@@ -128,9 +161,35 @@ function ProfileForm({ user }: { user: AuthUser }) {
   return (
     <form className="flex flex-col gap-6" noValidate onSubmit={submit}>
       <section className="rounded-lg border border-border bg-card p-5 shadow-card sm:p-6">
+        <div className="flex flex-col gap-4">
+          <h2 className="text-lg font-semibold text-text-heading">Account</h2>
+          <div className="flex flex-col gap-2">
+            <label htmlFor="profile-username" className="font-medium text-text-heading">
+              Username
+            </label>
+            <div className="relative">
+              <AtSign
+                aria-hidden="true"
+                className="pointer-events-none absolute left-4 top-1/2 z-10 size-5 -translate-y-1/2 text-text-tertiary"
+              />
+              <Input
+                id="profile-username"
+                autoCapitalize="none"
+                className="h-14 cursor-default rounded-md bg-muted pl-12 text-base text-text-secondary wide:h-14 wide:text-base"
+                value={profile.username}
+                readOnly
+                aria-readonly="true"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="rounded-lg border border-border bg-card p-5 shadow-card sm:p-6">
         <div className="flex flex-col gap-6">
+          <h2 className="text-lg font-semibold text-text-heading">Personal information</h2>
           <div className="flex flex-col gap-4 sm:flex-row">
-            <NameField
+            <ProfileTextField
               id="profile-first-name"
               label="First name"
               autoComplete="given-name"
@@ -138,7 +197,7 @@ function ProfileForm({ user }: { user: AuthUser }) {
               disabled={updateProfile.isPending}
               registration={register('firstName')}
             />
-            <NameField
+            <ProfileTextField
               id="profile-last-name"
               label="Last name"
               autoComplete="family-name"
@@ -147,31 +206,82 @@ function ProfileForm({ user }: { user: AuthUser }) {
               registration={register('lastName')}
             />
           </div>
-
           <div className="flex flex-col gap-2">
-            <label htmlFor="profile-username" className="font-medium text-text-heading">
-              Username
+            <label htmlFor="profile-birthday" className="font-medium text-text-heading">
+              Birthday
             </label>
-            <div className="relative">
-              <AtSign
-                aria-hidden="true"
-                className="pointer-events-none absolute left-4 top-1/2 z-10 size-5 -translate-y-1/2 text-text-secondary"
-              />
-              <Input
-                id="profile-username"
-                autoCapitalize="none"
-                className="h-14 cursor-default rounded-md pl-12 text-base wide:h-14 wide:text-base"
-                value={user.username}
-                readOnly
-                aria-describedby="profile-username-description"
-              />
-            </div>
-            <p id="profile-username-description" className="text-sm text-text-secondary">
-              Your administrator controls this login username.
-            </p>
+            <Input
+              id="profile-birthday"
+              type="date"
+              className="h-14 rounded-md text-base wide:h-14 wide:text-base"
+              disabled={updateProfile.isPending}
+              aria-invalid={Boolean(errors.birthday)}
+              aria-describedby={errors.birthday ? 'profile-birthday-error' : undefined}
+              {...register('birthday')}
+            />
+            {errors.birthday?.message && (
+              <p id="profile-birthday-error" role="alert" className="text-sm text-destructive">
+                {errors.birthday.message}
+              </p>
+            )}
+          </div>
+          <div className="flex flex-col gap-2">
+            <label htmlFor="profile-address" className="font-medium text-text-heading">
+              Address
+            </label>
+            <Textarea
+              id="profile-address"
+              maxLength={500}
+              disabled={updateProfile.isPending}
+              aria-invalid={Boolean(errors.address)}
+              aria-describedby={errors.address ? 'profile-address-error' : undefined}
+              {...register('address')}
+            />
+            {errors.address?.message && (
+              <p id="profile-address-error" role="alert" className="text-sm text-destructive">
+                {errors.address.message}
+              </p>
+            )}
           </div>
         </div>
+      </section>
 
+      <section className="rounded-lg border border-border bg-card p-5 shadow-card sm:p-6">
+        <div className="flex flex-col gap-6">
+          <h2 className="text-lg font-semibold text-text-heading">Government IDs</h2>
+          <div className="flex flex-col gap-4 sm:flex-row">
+            <ProfileTextField
+              id="profile-sss"
+              label="SSS"
+              error={errors.sss?.message}
+              disabled={updateProfile.isPending}
+              registration={register('sss')}
+            />
+            <ProfileTextField
+              id="profile-pagibig"
+              label="Pag-IBIG"
+              error={errors.pagibig?.message}
+              disabled={updateProfile.isPending}
+              registration={register('pagibig')}
+            />
+          </div>
+          <div className="flex flex-col gap-4 sm:flex-row">
+            <ProfileTextField
+              id="profile-philhealth"
+              label="PhilHealth"
+              error={errors.philhealth?.message}
+              disabled={updateProfile.isPending}
+              registration={register('philhealth')}
+            />
+            <ProfileTextField
+              id="profile-tin"
+              label="TIN"
+              error={errors.tin?.message}
+              disabled={updateProfile.isPending}
+              registration={register('tin')}
+            />
+          </div>
+        </div>
         {errors.root?.message && (
           <p role="alert" className="mt-4 text-sm text-destructive">
             {errors.root.message}
@@ -195,6 +305,19 @@ function ProfileForm({ user }: { user: AuthUser }) {
       </footer>
     </form>
   )
+}
+
+function toProfileFormValues(profile: MyProfile): ProfileFormValues {
+  return {
+    firstName: profile.firstName ?? '',
+    lastName: profile.lastName ?? '',
+    birthday: profile.birthday ?? '',
+    address: profile.address ?? '',
+    sss: profile.sss ?? '',
+    pagibig: profile.pagibig ?? '',
+    philhealth: profile.philhealth ?? '',
+    tin: profile.tin ?? '',
+  }
 }
 
 function PasswordForm() {
@@ -302,7 +425,7 @@ function PasswordForm() {
   )
 }
 
-function NameField({
+function ProfileTextField({
   id,
   label,
   autoComplete,
@@ -312,7 +435,7 @@ function NameField({
 }: {
   id: string
   label: string
-  autoComplete: string
+  autoComplete?: string
   error?: string
   disabled: boolean
   registration: UseFormRegisterReturn
@@ -322,21 +445,16 @@ function NameField({
       <label htmlFor={id} className="font-medium text-text-heading">
         {label}
       </label>
-      <div className="relative">
-        <UserRound
-          aria-hidden="true"
-          className="pointer-events-none absolute left-4 top-1/2 z-10 size-5 -translate-y-1/2 text-text-secondary"
-        />
-        <Input
-          id={id}
-          autoComplete={autoComplete}
-          className="h-14 rounded-md pl-12 text-base wide:h-14 wide:text-base"
-          disabled={disabled}
-          aria-invalid={Boolean(error)}
-          aria-describedby={error ? `${id}-error` : undefined}
-          {...registration}
-        />
-      </div>
+      <Input
+        id={id}
+        maxLength={80}
+        autoComplete={autoComplete}
+        className="h-14 rounded-md text-base wide:h-14 wide:text-base"
+        disabled={disabled}
+        aria-invalid={Boolean(error)}
+        aria-describedby={error ? `${id}-error` : undefined}
+        {...registration}
+      />
       {error && (
         <p id={`${id}-error`} role="alert" className="text-sm text-destructive">
           {error}

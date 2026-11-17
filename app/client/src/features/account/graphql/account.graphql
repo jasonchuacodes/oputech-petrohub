@@ -1,3 +1,20 @@
+query MyProfile {
+  myProfile {
+    id
+    firstName
+    lastName
+    fullName
+    username
+    role
+    sss
+    pagibig
+    philhealth
+    tin
+    birthday
+    address
+  }
+}
+
 mutation UpdateMyProfile($input: UpdateMyProfileInput!) {
   updateMyProfile(input: $input) {
     firstName
