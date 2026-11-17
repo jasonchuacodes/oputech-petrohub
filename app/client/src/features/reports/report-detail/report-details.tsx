@@ -182,7 +182,7 @@ function FinancialSection({ kind }: { kind: 'income' | 'expense' }) {
             <div
               key={field.fieldKey}
               className={cn(
-                'grid items-center gap-3 border-b border-border/60 py-3',
+                'grid items-center gap-3 border-b border-border/60 py-3 wide:py-1',
                 recurring
                   ? 'grid-cols-[minmax(0,1fr)_minmax(7rem,0.8fr)]'
                   : 'grid-cols-[minmax(0,1fr)_minmax(7rem,0.8fr)_2.75rem]',
@@ -238,7 +238,7 @@ function FinancialSection({ kind }: { kind: 'income' | 'expense' }) {
           ) : (
             <div
               key={field.fieldKey}
-              className="flex min-h-14 items-center justify-between gap-4 border-b border-border/60 py-3"
+              className="flex min-h-14 items-center justify-between gap-4 border-b border-border/60 py-3 wide:min-h-9 wide:py-1"
             >
               <span className="min-w-0 text-text-heading">{field.description}</span>
               <span className="shrink-0 text-right font-medium tabular-nums text-text-heading">

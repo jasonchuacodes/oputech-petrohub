@@ -23,6 +23,7 @@ type ShiftSheetProps = {
   tenantId: string
   tenantName: string
   shift?: ShiftRecord
+  initialView?: 'actions' | 'edit'
   onClose: () => void
 }
 
@@ -30,11 +31,11 @@ const defaultValues: AddShiftFormValues = { name: '', startTime: '05:00', endTim
 const focusableSelector =
   'button:not([disabled]),input:not([disabled]),[href],[tabindex]:not([tabindex="-1"])'
 
-export function ShiftSheet({ open, tenantId, tenantName, shift, onClose }: ShiftSheetProps) {
+export function ShiftSheet({ open, tenantId, tenantName, shift, initialView, onClose }: ShiftSheetProps) {
   const createShift = useCreateShiftMutation(tenantId)
   const updateShift = useUpdateShiftMutation(tenantId)
   const deleteShift = useDeleteShiftMutation(tenantId)
-  const [view, setView] = useState<'actions' | 'edit'>(shift ? 'actions' : 'edit')
+  const [view, setView] = useState<'actions' | 'edit'>(initialView ?? (shift ? 'actions' : 'edit'))
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [deleteError, setDeleteError] = useState<string>()
   const dialogRef = useRef<HTMLFormElement>(null)
