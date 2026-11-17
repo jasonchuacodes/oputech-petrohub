@@ -20,7 +20,8 @@ export const attendanceKeys = {
     endDate: string | undefined,
     userId: string | undefined,
     offset: number,
-  ) => [...attendanceKeys.lists(tenantId), { startDate, endDate, userId, offset }] as const,
+    search: string | undefined,
+  ) => [...attendanceKeys.lists(tenantId), { startDate, endDate, userId, offset, search }] as const,
   days: (tenantId: string, userId: string, startDate: string, endDate: string) =>
     ['attendance', tenantId, 'days', userId, startDate, endDate] as const,
 }
@@ -78,14 +79,15 @@ export function useTimesheetsQuery(
   endDate: string | undefined,
   userId: string | undefined,
   offset: number,
+  search?: string,
 ) {
   return useQuery({
-    queryKey: attendanceKeys.list(tenantId, startDate, endDate, userId, offset),
+    queryKey: attendanceKeys.list(tenantId, startDate, endDate, userId, offset, search),
     queryFn: async () =>
       (
         await graphqlClient.request(
           TimesheetsDocument,
-          { filter: { startDate, endDate, userId, offset, limit: 20 } },
+          { filter: { startDate, endDate, userId, search, offset, limit: 20 } },
           { tenantId },
         )
       ).timesheets,

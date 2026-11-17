@@ -157,10 +157,11 @@ function TenantTimesheets({
   initialRange?: TimesheetDateRange
 }) {
   const router = useRouter()
+  const [search, setSearch] = useState('')
   const [offset, setOffset] = useState(0)
   const [startDate, setStartDate] = useState<string | undefined>(initialRange?.startDate)
   const [endDate, setEndDate] = useState<string | undefined>(initialRange?.endDate)
-  const timesheets = useTimesheetsQuery(tenantId, startDate, endDate, undefined, offset)
+  const timesheets = useTimesheetsQuery(tenantId, startDate, endDate, undefined, offset, search)
   const rangeStart = timesheets.data?.startDate ?? startDate ?? ''
   const rangeEnd = timesheets.data?.endDate ?? endDate ?? ''
   const selectedRange = rangeStart && rangeEnd
@@ -205,58 +206,7 @@ function TenantTimesheets({
       <PageHeader title="Timesheets" description="Review and adjust member hours." />
 
       <div className="flex flex-col gap-1">
-        <section aria-label="Timesheet date range" className="flex min-h-12 items-center justify-end">
-          <DateRangePicker
-            startDate={rangeStart}
-            endDate={rangeEnd}
-            timezone={timesheets.data?.timezone ?? 'UTC'}
-            maxDate={timesheets.data ? localDateAt(timesheets.data.asOf, timesheets.data.timezone) : undefined}
-            disabled={timesheets.isFetching}
-            onApply={(nextStart, nextEnd) => {
-              setOffset(0)
-              setStartDate(nextStart)
-              setEndDate(nextEnd)
-              router.replace(timesheetListHref({ startDate: nextStart, endDate: nextEnd }), { scroll: false })
-            }}
-          />
-        </section>
-
-        {timesheets.isPending ? (
-          <div className="flex min-h-48 items-center justify-center rounded-md bg-card shadow-card"><Spinner className="size-6" /></div>
-        ) : timesheets.isError ? (
-          <div className="flex min-h-48 flex-col items-center justify-center gap-3 rounded-md bg-card p-6 text-center shadow-card">
-            <p className="text-sm text-text-secondary">Unable to load timesheets.</p>
-            <Button type="button" variant="outline" onClick={() => void timesheets.refetch()}>Try again</Button>
-          </div>
-        ) : timesheets.data.items.length === 0 ? (
-          <div className="flex min-h-48 flex-col items-center justify-center gap-3 rounded-md bg-card p-6 text-center shadow-card">
-            <span className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary"><Clock3 aria-hidden="true" /></span>
-            <div><p className="font-medium text-text-heading">No members</p><p className="mt-1 text-sm text-text-secondary">No member timesheets are available for this tenant.</p></div>
-          </div>
-        ) : (
-          <section aria-label="Member timesheets" className="flex flex-col gap-3">
-          <ul className="overflow-hidden rounded-md bg-card shadow-card md:hidden">
-            {timesheets.data.items.map((item) => (
-              <li key={item.userId} className="border-b border-border/60 last:border-b-0">
-                <button
-                  type="button"
-                  className="flex min-h-20 w-full items-center gap-3 px-4 py-3 text-left outline-none hover:bg-surface-hover focus-visible:ring-3 focus-visible:ring-ring/30"
-                  onClick={() => openTimesheet(item.userId)}
-                >
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate font-medium text-text-heading">{item.fullName}</span>
-                    <span className="mt-1 block truncate text-sm text-text-tertiary">@{item.username}</span>
-                  </span>
-                  <span className="text-right">
-                    <span className="block text-lg font-semibold text-text-heading tabular-nums">{formatHours(item.totalHours)}</span>
-                    <span className="text-xs text-text-tertiary">hours</span>
-                  </span>
-                </button>
-              </li>
-            ))}
-          </ul>
-
-          <div className="hidden md:block">
+        <section aria-label="Member timesheets" className="flex flex-col gap-3">
             <DataTable
               collection={DataTable.collection({
                 items,
@@ -264,20 +214,82 @@ function TenantTimesheets({
                 itemToString: (item) => `${item.fullName} timesheet`,
               })}
               columns={columns}
+              loading={timesheets.isPending}
+              emptyMessage="No member timesheets are available for this tenant."
+              tableContainerClassName={timesheets.isError ? 'hidden' : 'hidden md:block'}
+              search={{
+                value: search,
+                placeholder: 'Search members',
+                ariaLabel: 'Search members',
+                onChange: (value) => {
+                  setSearch(value)
+                  setOffset(0)
+                },
+              }}
+              actions={(
+                <DateRangePicker
+                  startDate={rangeStart}
+                  endDate={rangeEnd}
+                  timezone={timesheets.data?.timezone ?? 'UTC'}
+                  maxDate={timesheets.data ? localDateAt(timesheets.data.asOf, timesheets.data.timezone) : undefined}
+                  disabled={timesheets.isFetching}
+                  onApply={(nextStart, nextEnd) => {
+                    setOffset(0)
+                    setStartDate(nextStart)
+                    setEndDate(nextEnd)
+                    router.replace(timesheetListHref({ startDate: nextStart, endDate: nextEnd }), { scroll: false })
+                  }}
+                />
+              )}
             />
-          </div>
 
-          {totalCount > pageSize && (
-            <nav aria-label="Timesheet pagination" className="flex items-center justify-between gap-3">
-              <p className="text-sm text-text-tertiary">{pageStart}–{pageEnd} of {totalCount}</p>
-              <div className="flex gap-2">
-                <Button type="button" variant="outline" size="sm" disabled={offset === 0 || timesheets.isFetching} onClick={() => setOffset(Math.max(0, offset - pageSize))}>Previous</Button>
-                <Button type="button" variant="outline" size="sm" disabled={offset + pageSize >= totalCount || timesheets.isFetching} onClick={() => setOffset(offset + pageSize)}>Next</Button>
+            {timesheets.isError ? (
+              <div className="flex min-h-48 flex-col items-center justify-center gap-3 rounded-md bg-card p-6 text-center shadow-card">
+                <p className="text-sm text-text-secondary">Unable to load timesheets.</p>
+                <Button type="button" variant="outline" onClick={() => void timesheets.refetch()}>Try again</Button>
               </div>
-            </nav>
-          )}
-          </section>
-        )}
+            ) : timesheets.isPending ? (
+              <div className="flex min-h-48 items-center justify-center rounded-md bg-card shadow-card md:hidden">
+                <Spinner className="size-6" />
+              </div>
+            ) : items.length === 0 ? (
+              <div className="flex min-h-48 flex-col items-center justify-center gap-3 rounded-md bg-card p-6 text-center shadow-card md:hidden">
+                <span className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary"><Clock3 aria-hidden="true" /></span>
+                <div><p className="font-medium text-text-heading">No members</p><p className="mt-1 text-sm text-text-secondary">No member timesheets are available for this tenant.</p></div>
+              </div>
+            ) : (
+              <ul className="overflow-hidden rounded-md bg-card shadow-card md:hidden">
+                {items.map((item) => (
+                  <li key={item.userId} className="border-b border-border/60 last:border-b-0">
+                    <button
+                      type="button"
+                      className="flex min-h-20 w-full items-center gap-3 px-4 py-3 text-left outline-none hover:bg-surface-hover focus-visible:ring-3 focus-visible:ring-ring/30"
+                      onClick={() => openTimesheet(item.userId)}
+                    >
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate font-medium text-text-heading">{item.fullName}</span>
+                        <span className="mt-1 block truncate text-sm text-text-tertiary">@{item.username}</span>
+                      </span>
+                      <span className="text-right">
+                        <span className="block text-lg font-semibold text-text-heading tabular-nums">{formatHours(item.totalHours)}</span>
+                        <span className="text-xs text-text-tertiary">hours</span>
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {!timesheets.isError && totalCount > pageSize && (
+              <nav aria-label="Timesheet pagination" className="flex items-center justify-between gap-3">
+                <p className="text-sm text-text-tertiary">{pageStart}–{pageEnd} of {totalCount}</p>
+                <div className="flex gap-2">
+                  <Button type="button" variant="outline" size="sm" disabled={offset === 0 || timesheets.isFetching} onClick={() => setOffset(Math.max(0, offset - pageSize))}>Previous</Button>
+                  <Button type="button" variant="outline" size="sm" disabled={offset + pageSize >= totalCount || timesheets.isFetching} onClick={() => setOffset(offset + pageSize)}>Next</Button>
+                </div>
+              </nav>
+            )}
+        </section>
       </div>
 
     </div>

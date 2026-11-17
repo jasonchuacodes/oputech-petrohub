@@ -1,6 +1,7 @@
-import { ChevronDown, ChevronUp } from 'lucide-react'
+import { ChevronDown, ChevronUp, Search } from 'lucide-react'
 import { useMemo, useState, type ReactNode } from 'react'
 import { cn } from '~/utils/cn'
+import { Input } from './input'
 import { Spinner } from './spinner'
 
 type SortDirection = 'asc' | 'desc'
@@ -22,6 +23,13 @@ export interface DataTableCollection<T> {
   itemToString: (item: T) => string
 }
 
+export interface DataTableSearch {
+  value: string
+  onChange: (value: string) => void
+  placeholder?: string
+  ariaLabel?: string
+}
+
 type DataTableProps<T> = {
   id?: string
   collection: DataTableCollection<T>
@@ -31,6 +39,9 @@ type DataTableProps<T> = {
   emptyMessage?: string
   footer?: ReactNode
   compact?: boolean
+  search?: DataTableSearch
+  actions?: ReactNode
+  tableContainerClassName?: string
 }
 
 const alignClass = {
@@ -57,6 +68,9 @@ function DataTableComponent<T>({
   emptyMessage = 'No data available',
   footer,
   compact = false,
+  search,
+  actions,
+  tableContainerClassName,
 }: DataTableProps<T>) {
   const [sortConfig, setSortConfig] = useState<SortConfig>(null)
   const sortedItems = useMemo(() => {
@@ -82,8 +96,34 @@ function DataTableComponent<T>({
   }
 
   return (
-    <div className="overflow-x-auto rounded-md bg-card shadow-card ring-1 ring-border/60">
-      <table id={id} className="w-full min-w-190 text-sm">
+    <div className="flex flex-col gap-3">
+      {(search || actions) && (
+        <div className="flex min-h-12 items-center gap-3">
+          {search && (
+            <label className="relative min-w-0 flex-1 md:max-w-sm">
+              <span className="sr-only">{search.ariaLabel ?? 'Search table'}</span>
+              <Search
+                aria-hidden="true"
+                className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-tertiary"
+              />
+              <Input
+                value={search.value}
+                className="pl-9"
+                placeholder={search.placeholder ?? 'Search'}
+                onChange={(event) => search.onChange(event.target.value)}
+              />
+            </label>
+          )}
+          {actions && <div className="ml-auto shrink-0">{actions}</div>}
+        </div>
+      )}
+      <div
+        className={cn(
+          'overflow-x-auto rounded-md bg-card shadow-card ring-1 ring-border/60',
+          tableContainerClassName,
+        )}
+      >
+        <table id={id} className="w-full min-w-190 text-sm">
         <thead>
           <tr className="border-b border-border bg-card">
             {columns.map((column, index) => (
@@ -201,8 +241,9 @@ function DataTableComponent<T>({
             </tr>
           </tfoot>
         )}
-      </table>
-      {footer}
+        </table>
+        {footer}
+      </div>
     </div>
   )
 }

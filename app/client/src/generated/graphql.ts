@@ -234,6 +234,7 @@ export type TimesheetsFilter = {
   endDate?: string | null | undefined;
   limit?: number | null | undefined;
   offset?: number | null | undefined;
+  search?: string | null | undefined;
   startDate?: string | null | undefined;
   userId?: string | null | undefined;
 };

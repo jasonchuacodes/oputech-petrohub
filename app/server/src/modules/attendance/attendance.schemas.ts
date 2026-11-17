@@ -23,6 +23,7 @@ export const timesheetsFilterSchema = z
     startDate: localDateSchema.nullish(),
     endDate: localDateSchema.nullish(),
     userId: z.instanceof(Types.ObjectId).nullish(),
+    search: z.string().trim().max(80).default(''),
     offset: z.number().int().min(0).default(0),
     limit: z.number().int().min(1).max(100).default(20),
   })

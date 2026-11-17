@@ -176,6 +176,16 @@ export class AttendanceService {
       ...(filter.userId
         ? { _id: filter.userId, status: { $in: [UserStatus.ACTIVE, UserStatus.DISABLED] } }
         : activeTenantMembershipFilter(tenantId, now)),
+      ...(filter.search
+        ? {
+            $and: filter.search.split(/\s+/).map((term) => ({
+              $or: [
+                { firstName: { $regex: escapeRegex(term), $options: 'i' } },
+                { lastName: { $regex: escapeRegex(term), $options: 'i' } },
+              ],
+            })),
+          }
+        : {}),
     }
     const [members, totalCount] = await Promise.all([
       this.users
@@ -498,4 +508,8 @@ function hoursForMilliseconds(milliseconds: number): Decimal {
 
 function isDuplicateKeyError(error: unknown): error is { code: number } {
   return typeof error === 'object' && error !== null && 'code' in error && error.code === 11_000
+}
+
+function escapeRegex(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }

@@ -828,6 +828,7 @@ export type TimesheetsFilter = {
   endDate?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
+  search?: InputMaybe<Scalars['String']['input']>;
   startDate?: InputMaybe<Scalars['String']['input']>;
   userId?: InputMaybe<Scalars['ObjectId']['input']>;
 };

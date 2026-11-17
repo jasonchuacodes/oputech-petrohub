@@ -18,6 +18,7 @@ describe('attendance and timesheets', () => {
   let app: INestApplication
   let tenantId: string
   let memberId: string
+  let searchableMemberId: string
 
   beforeAll(async () => {
     replicaSet = await MongoMemoryReplSet.create({ replSet: { count: 1 } })
@@ -58,6 +59,16 @@ describe('attendance and timesheets', () => {
       tenantIds: [tenant._id],
     })
     memberId = member._id.toHexString()
+    const searchableMember = await users.create({
+      username: 'searchable-member',
+      passwordHash: await hash('SearchablePassword123'),
+      firstName: 'Casey',
+      lastName: 'Reviewer',
+      role: UserRole.MEMBER,
+      accountHolderId: owner._id,
+      tenantIds: [tenant._id],
+    })
+    searchableMemberId = searchableMember._id.toHexString()
   }, 60_000)
 
   afterAll(async () => {
@@ -182,6 +193,21 @@ describe('attendance and timesheets', () => {
     expect(result.body.data.timesheetDays).toEqual({
       timezone: 'Asia/Manila',
       days: [{ checkInAt: firstCheckIn.toISOString(), checkOutAt: finalCheckOut.toISOString() }],
+    })
+  })
+
+  it('filters timesheets by member name', async () => {
+    const adminToken = await login('attendance-admin', 'AdminPassword123')
+    const result = await graphql(
+      adminToken,
+      'query ($filter: TimesheetsFilter!) { timesheets(filter: $filter) { totalCount items { userId fullName } } }',
+      { filter: { search: 'caSEy reVIEW', offset: 0, limit: 20 } },
+    )
+
+    expect(result.body.errors).toBeUndefined()
+    expect(result.body.data.timesheets).toEqual({
+      totalCount: 1,
+      items: [{ userId: searchableMemberId, fullName: 'Casey Reviewer' }],
     })
   })
 
