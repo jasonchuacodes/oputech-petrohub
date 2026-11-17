@@ -182,7 +182,7 @@ function TenantTimesheets({
       cell: (item) => (
         <Link
           href={userTimesheetHref(item.userId, selectedRange)}
-          className="font-bold text-text-heading outline-none hover:underline focus-visible:underline"
+          className="max-w-full truncate rounded-sm font-medium text-text-heading underline-offset-4 outline-none hover:text-primary hover:underline focus-visible:ring-3 focus-visible:ring-ring/30"
         >
           {item.fullName}
         </Link>
