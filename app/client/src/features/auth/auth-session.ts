@@ -200,7 +200,9 @@ export class AuthSession {
     this.refreshPromise = this.enqueueCookieMutation(() => refreshSession())
       .then((response) => {
         if (operationEpoch !== this.operationEpoch) throw new AuthenticationRequiredError()
-        this.installSession(response, mode === 'bootstrap')
+        // The query cache is already fresh during bootstrap, so this is not an
+        // identity transition that needs to invalidate it.
+        this.installSession(response, false)
         return response.accessToken
       })
       .catch((error: unknown) => {

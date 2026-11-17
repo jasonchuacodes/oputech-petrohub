@@ -30,6 +30,7 @@ describe('AuthSession persistence', () => {
     expect(session.getSnapshot()).toMatchObject({
       status: 'authenticated',
       session: { user: { username: 'member' } },
+      generation: 0,
     })
   })
 
