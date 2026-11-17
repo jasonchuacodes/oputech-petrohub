@@ -94,7 +94,7 @@ function ReportEditorLayout() {
         className="mt-5"
       />
 
-      <div className="flex flex-1 flex-col">
+      <div className="flex w-full flex-1 flex-col wide:max-w-2xl wide:self-start">
         {tab === 'detail' ? <ReportDetailsPanel /> : tab === 'lubricants' ? <ReportLubricantsPanel /> : <ReportDisposalsPanel />}
 
         {actionError && (
