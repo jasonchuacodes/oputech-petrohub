@@ -27,7 +27,7 @@ import { ProductSheet } from './product-sheet';
 import { StockMovementHistorySheet } from './stock-movement-history-sheet';
 import { StockMovementSheet } from './stock-movement-sheet';
 
-const pageSize = 20;
+const pageSize = 50;
 type ProductEditor = InventoryProductFieldsFragment | 'new' | null;
 
 export function InventoryPage() {
@@ -260,30 +260,32 @@ function TenantInventory({ tenantId }: { tenantId: string }) {
               </>
             )}
           </section>
-          <div className="flex items-center justify-between gap-3">
-            <Button
-              type="button"
-              variant="outline"
-              disabled={offset === 0}
-              onClick={() => setOffset(Math.max(0, offset - pageSize))}
-            >
-              Previous
-            </Button>
-            <span className="text-sm text-text-secondary">
-              {products.data.totalCount === 0
-                ? '0'
-                : `${offset + 1}–${Math.min(offset + pageSize, products.data.totalCount)}`}{' '}
-              of {products.data.totalCount}
-            </span>
-            <Button
-              type="button"
-              variant="outline"
-              disabled={offset + pageSize >= products.data.totalCount}
-              onClick={() => setOffset(offset + pageSize)}
-            >
-              Next
-            </Button>
-          </div>
+          {(offset > 0 || products.data.totalCount > pageSize) && (
+            <div className="flex items-center justify-between gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                disabled={offset === 0}
+                onClick={() => setOffset(Math.max(0, offset - pageSize))}
+              >
+                Previous
+              </Button>
+              <span className="text-sm text-text-secondary">
+                {products.data.totalCount === 0
+                  ? '0'
+                  : `${offset + 1}–${Math.min(offset + pageSize, products.data.totalCount)}`}{' '}
+                of {products.data.totalCount}
+              </span>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={offset + pageSize >= products.data.totalCount}
+                onClick={() => setOffset(offset + pageSize)}
+              >
+                Next
+              </Button>
+            </div>
+          )}
         </>
       )}
       {editor && (

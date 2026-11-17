@@ -11,6 +11,7 @@ import {
   type RefObject,
 } from 'react'
 import { createPortal } from 'react-dom'
+import { cn } from '~/utils/cn'
 import { DialogHeader } from './dialog-header'
 
 const focusableSelector =
@@ -30,6 +31,7 @@ export type SheetProps = {
   initialFocusRef?: RefObject<HTMLElement | null>
   returnFocusRef?: RefObject<HTMLElement | null>
   showCloseButton?: boolean
+  panelClassName?: string
 }
 
 export function Sheet({
@@ -46,6 +48,7 @@ export function Sheet({
   initialFocusRef,
   returnFocusRef,
   showCloseButton = true,
+  panelClassName,
 }: SheetProps) {
   const titleId = useId()
   const descriptionId = useId()
@@ -112,7 +115,10 @@ export function Sheet({
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={description ? descriptionId : undefined}
-        className="relative flex max-h-[90dvh] w-full flex-col overflow-hidden rounded-t-sheet bg-card shadow-2xl wide:max-w-xl wide:rounded-lg"
+        className={cn(
+          'relative flex max-h-[90dvh] w-full flex-col overflow-hidden rounded-t-sheet bg-card shadow-2xl wide:max-w-xl wide:rounded-lg',
+          panelClassName,
+        )}
         onKeyDown={handleKeyDown}
       >
         <div

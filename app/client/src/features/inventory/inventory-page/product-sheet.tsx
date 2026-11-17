@@ -38,12 +38,14 @@ export function ProductSheet({ tenantId, product, onClose }: { tenantId: string;
   })
 
   return (
-    <Sheet open title={product ? 'Edit lubricant' : 'Add lubricant'} description="Configure the inventory unit and selling price." icon={product ? Pencil : PackagePlus} manageFocus onClose={onClose}>
+    <Sheet open title={product ? 'Edit product' : 'Add lubricant'} description="Configure the inventory unit and selling price." icon={product ? Pencil : PackagePlus} manageFocus onClose={onClose}>
       <form className="flex min-h-0 flex-1 flex-col" onSubmit={submit}>
         <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-5 pb-5">
           <Field label="Product name" error={form.formState.errors.name?.message}><Input autoFocus disabled={pending} placeholder="Engine Oil 1L" {...form.register('name')} /></Field>
-          <Field label="Unit" error={form.formState.errors.unit?.message}><Input disabled={pending} placeholder="bottle" {...form.register('unit')} /></Field>
-          <Field label="Unit price" error={form.formState.errors.unitPrice?.message}><Input inputMode="decimal" disabled={pending} placeholder="0.00" {...form.register('unitPrice')} /></Field>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Unit price" error={form.formState.errors.unitPrice?.message}><Input inputMode="decimal" disabled={pending} placeholder="0.00" {...form.register('unitPrice')} /></Field>
+            <Field label="Unit" error={form.formState.errors.unit?.message}><Input disabled={pending} placeholder="bottle" {...form.register('unit')} /></Field>
+          </div>
           {!product && <Field label="Opening stock" error={form.formState.errors.openingStock?.message}><Input inputMode="numeric" disabled={pending} {...form.register('openingStock')} /></Field>}
           {form.formState.errors.root?.message && <p role="alert" className="text-sm text-destructive">{form.formState.errors.root.message}</p>}
         </div>
