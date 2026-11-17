@@ -197,15 +197,6 @@ function TenantUsersPage({
                     </span>
                   )}
                 </span>
-                {availability === 'active' && (
-                  <UserActions
-                    tenantId={tenantId}
-                    timezone={timezone}
-                    user={listedUser}
-                    actorId={actorId}
-                    actorRole={actorRole}
-                  />
-                )}
                 {availability === 'inactive' && listedUser.role === 'member' && (
                   <Button asChild type="button" variant="outline" size="icon">
                     <Link
@@ -217,6 +208,13 @@ function TenantUsersPage({
                     </Link>
                   </Button>
                 )}
+                <UserActions
+                  tenantId={tenantId}
+                  timezone={timezone}
+                  user={listedUser}
+                  actorId={actorId}
+                  actorRole={actorRole}
+                />
               </li>
             ))}
           </ul>

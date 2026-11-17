@@ -27,6 +27,36 @@ query Users($input: UsersInput!) {
   }
 }
 
+query UserDetails($input: UserDetailsInput!) {
+  userDetails(input: $input) {
+    id
+    firstName
+    lastName
+    fullName
+    username
+    role
+    status
+    tenantMembership {
+      availability
+      deactivation {
+        reason
+        details
+        effectiveDate
+        timezone
+        effectiveAt
+        recordedAt
+        recordedByName
+      }
+    }
+    sss
+    pagibig
+    philhealth
+    tin
+    birthday
+    address
+  }
+}
+
 mutation CreateUser($input: CreateUserInput!) {
   createUser(input: $input) {
     id

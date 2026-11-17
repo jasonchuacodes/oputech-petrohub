@@ -1,33 +1,20 @@
-import { zodResolver } from '@hookform/resolvers/zod'
-import { ChevronDown, KeyRound, MoreVertical, Pencil, UserRoundCog, UserX } from 'lucide-react'
-import { useCallback, useEffect, useId, useState, type ReactNode } from 'react'
-import { useForm, useWatch } from 'react-hook-form'
-import { createPortal } from 'react-dom'
-import { toast } from 'sonner'
+import { Eye, KeyRound, MoreVertical, Pencil, UserRoundCog, UserX } from 'lucide-react'
+import { useState } from 'react'
 import { Button } from '~/components/ui/button'
-import { DialogHeader } from '~/components/ui/dialog-header'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu'
-import { Input } from '~/components/ui/input'
-import { Spinner } from '~/components/ui/spinner'
+import { Sheet } from '~/components/ui/sheet'
 import type { UserRole } from '~/generated/graphql'
 import { useDisclosure } from '~/hooks/useDisclosure'
-import { isUsernameConflict } from '../user-errors'
-import { useUpdateUserMutation, type UserSummary } from '../users.queries'
+import type { UserSummary } from '../users.queries'
 import { DeactivateUserSheet } from './deactivate-user-sheet'
-import {
-  editUserFormSchema,
-  type EditUserFormInput,
-  type EditUserFormValues,
-} from './user-form.schema'
-import { getRoleLabel, RoleSelectSheet, type ManageableUserRole } from './role-select-sheet'
+import { EditUserSheet } from './edit-user-sheet'
 import { ResetPasswordSheet } from './reset-password-sheet'
-
-const assignableRoles = ['member', 'admin'] as const satisfies readonly ManageableUserRole[]
+import { ViewUserSheet } from './view-user-sheet'
 
 type UserActionsProps = {
   tenantId: string
@@ -44,112 +31,37 @@ export function UserActions({
   actorId,
   actorRole,
 }: UserActionsProps) {
-  const updateUser = useUpdateUserMutation()
   const actions = useDisclosure()
   const deactivation = useDisclosure()
   const passwordReset = useDisclosure()
-  const roleOptions = useDisclosure()
-  const [view, setView] = useState<'actions' | 'edit'>('actions')
-  const titleId = useId()
-  const descriptionId = useId()
+  const [detailsView, setDetailsView] = useState<'view' | 'edit' | null>(null)
   const self = actorId === user.id
+  const active = user.tenantMembership?.availability === 'active'
   const canManageRole =
     actorRole === 'superadmin' || (actorRole === 'admin' && user.role === 'member')
-  const canManage = !self && canManageRole && user.tenantMembership?.availability === 'active'
-  const {
-    register,
-    control,
-    handleSubmit,
-    reset,
-    setError,
-    setValue,
-    formState: { errors, isDirty, isValid },
-  } = useForm<EditUserFormInput, unknown, EditUserFormValues>({
-    defaultValues: toFormValues(user),
-    mode: 'onChange',
-    resolver: zodResolver(editUserFormSchema),
-  })
-  const selectedRole = useWatch({ control, name: 'role' }) ?? 'member'
+  const canManage = !self && canManageRole && active
 
-  const resetAndClose = useCallback(() => {
+  const openDetails = (view: 'view' | 'edit') => {
+    if (view === 'edit' && !canManage) return
     actions.onClose()
-    roleOptions.onClose()
-    setView('actions')
-    reset(toFormValues(user))
-  }, [actions, reset, roleOptions, user])
-
-  const close = useCallback(() => {
-    if (!updateUser.isPending) resetAndClose()
-  }, [resetAndClose, updateUser.isPending])
-
-  useEffect(() => {
-    if (!actions.open) return
-    const originalOverflow = document.body.style.overflow
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') close()
-    }
-
-    document.body.style.overflow = 'hidden'
-    document.addEventListener('keydown', handleKeyDown)
-    return () => {
-      document.body.style.overflow = originalOverflow
-      document.removeEventListener('keydown', handleKeyDown)
-    }
-  }, [actions.open, close])
-
-  const openActions = () => {
-    reset(toFormValues(user))
-    setView('actions')
-    actions.onOpen()
+    setDetailsView(view)
   }
-
-  const openEdit = () => {
-    if (!canManage) return
-    reset(toFormValues(user))
-    setView('edit')
-    actions.onOpen()
-  }
-
   const openPasswordReset = () => {
     if (!canManage) return
-    resetAndClose()
+    actions.onClose()
     passwordReset.onOpen()
   }
-
   const openDeactivation = () => {
     if (!canManage) return
-    resetAndClose()
+    actions.onClose()
     deactivation.onOpen()
   }
 
-  const submit = handleSubmit(async (values) => {
-    if (!canManage) return
-    try {
-      await updateUser.mutateAsync({
-        tenantId,
-        input: {
-          userId: user.id,
-          username: values.username.trim().toLowerCase(),
-          firstName: values.firstName.trim() || null,
-          lastName: values.lastName.trim() || null,
-          role: actorRole === 'admin' ? 'member' : values.role,
-        },
-      })
-      resetAndClose()
-      toast.success('User updated successfully')
-    } catch (error) {
-      if (isUsernameConflict(error)) {
-        setError('username', { message: 'This username is already in use.' }, { shouldFocus: true })
-        return
-      }
-      setError('root', { message: 'Unable to update the user. Please try again.' })
-    }
-  })
-
-  const editing = view === 'edit'
   const disabledReason = self
     ? 'You cannot manage your own account here.'
-    : 'Only super administrators can manage administrator accounts.'
+    : !active
+      ? 'Inactive users can only be viewed.'
+      : 'Only super administrators can manage administrator accounts.'
 
   return (
     <>
@@ -160,7 +72,7 @@ export function UserActions({
         aria-label={`Actions for ${user.fullName}`}
         title="User actions"
         className="wide:hidden"
-        onClick={openActions}
+        onClick={actions.onOpen}
       >
         <MoreVertical aria-hidden="true" className="size-5" />
       </Button>
@@ -179,7 +91,10 @@ export function UserActions({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem disabled={!canManage} onSelect={openEdit}>
+          <DropdownMenuItem onSelect={() => openDetails('view')}>
+            <Eye aria-hidden="true" /> View
+          </DropdownMenuItem>
+          <DropdownMenuItem disabled={!canManage} onSelect={() => openDetails('edit')}>
             <Pencil aria-hidden="true" /> Edit
           </DropdownMenuItem>
           <DropdownMenuItem disabled={!canManage} onSelect={openPasswordReset}>
@@ -195,218 +110,71 @@ export function UserActions({
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {actions.open &&
-        createPortal(
-          <div
-            aria-hidden={roleOptions.open || undefined}
-            className={`fixed inset-0 z-50 flex items-end justify-center wide:items-center wide:p-6${
-              roleOptions.open ? ' invisible pointer-events-none' : ''
-            }`}
-          >
-            <button
+      {actions.open && (
+        <Sheet
+          open
+          title="User actions"
+          description={user.fullName}
+          icon={UserRoundCog}
+          manageFocus
+          onClose={actions.onClose}
+        >
+          <div className="flex min-h-0 flex-col gap-2 overflow-y-auto px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
+            {!canManage && <p className="pb-2 text-sm text-text-secondary">{disabledReason}</p>}
+            <Button
               type="button"
-              aria-label={editing ? 'Close Edit User sheet' : 'Close user actions'}
-              tabIndex={-1}
-              className="absolute inset-0 bg-black/55 backdrop-blur-[2px]"
-              disabled={updateUser.isPending}
-              onClick={close}
-            />
-            <form
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby={titleId}
-              aria-describedby={descriptionId}
-              className="relative flex max-h-[90dvh] w-full flex-col overflow-hidden rounded-t-sheet bg-card shadow-2xl wide:max-w-xl wide:rounded-lg"
-              noValidate
-              onSubmit={submit}
+              variant="outline"
+              className="w-full"
+              onClick={() => openDetails('view')}
             >
-              <div
-                aria-hidden="true"
-                className="mx-auto mt-3 h-1.5 w-14 shrink-0 rounded-full bg-foreground/35 wide:hidden"
-              />
+              <Eye aria-hidden="true" />
+              View User
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              disabled={!canManage}
+              onClick={() => openDetails('edit')}
+            >
+              <Pencil aria-hidden="true" />
+              Edit User
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              disabled={!canManage}
+              onClick={openPasswordReset}
+            >
+              <KeyRound aria-hidden="true" />
+              Reset Password
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              className="w-full"
+              disabled={!canManage}
+              onClick={openDeactivation}
+            >
+              <UserX aria-hidden="true" />
+              Deactivate User
+            </Button>
+          </div>
+        </Sheet>
+      )}
 
-              <DialogHeader
-                title={editing ? 'Edit User' : 'User Actions'}
-                titleId={titleId}
-                description={editing ? `Update ${user.fullName}'s account details.` : user.fullName}
-                descriptionId={descriptionId}
-                icon={UserRoundCog}
-                closeLabel={editing ? 'Close Edit User' : 'Close user actions'}
-                closeDisabled={updateUser.isPending}
-                onClose={close}
-              />
-
-              {editing ? (
-                <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-5">
-                  <div className="flex flex-col gap-4">
-                    <FormField
-                      id={`edit-user-username-${user.id}`}
-                      label="Username *"
-                      error={errors.username?.message}
-                    >
-                      <Input
-                        id={`edit-user-username-${user.id}`}
-                        autoFocus
-                        autoComplete="off"
-                        disabled={updateUser.isPending}
-                        aria-invalid={Boolean(errors.username)}
-                        aria-describedby={
-                          errors.username ? `edit-user-username-${user.id}-error` : undefined
-                        }
-                        {...register('username')}
-                      />
-                    </FormField>
-
-                    <div className="flex flex-col gap-4 wide:flex-row">
-                      <FormField
-                        id={`edit-user-first-name-${user.id}`}
-                        label="First name"
-                        error={errors.firstName?.message}
-                        className="flex-1"
-                      >
-                        <Input
-                          id={`edit-user-first-name-${user.id}`}
-                          autoComplete="off"
-                          disabled={updateUser.isPending}
-                          aria-invalid={Boolean(errors.firstName)}
-                          aria-describedby={
-                            errors.firstName ? `edit-user-first-name-${user.id}-error` : undefined
-                          }
-                          {...register('firstName')}
-                        />
-                      </FormField>
-                      <FormField
-                        id={`edit-user-last-name-${user.id}`}
-                        label="Last name"
-                        error={errors.lastName?.message}
-                        className="flex-1"
-                      >
-                        <Input
-                          id={`edit-user-last-name-${user.id}`}
-                          autoComplete="off"
-                          disabled={updateUser.isPending}
-                          aria-invalid={Boolean(errors.lastName)}
-                          aria-describedby={
-                            errors.lastName ? `edit-user-last-name-${user.id}-error` : undefined
-                          }
-                          {...register('lastName')}
-                        />
-                      </FormField>
-                    </div>
-
-                    <FormField
-                      id={`edit-user-role-${user.id}`}
-                      label="Role"
-                      error={errors.role?.message}
-                    >
-                      <input type="hidden" {...register('role')} />
-                      {actorRole === 'superadmin' ? (
-                        <Button
-                          id={`edit-user-role-${user.id}`}
-                          type="button"
-                          variant="outline"
-                          className="w-full justify-between px-3 font-normal"
-                          disabled={updateUser.isPending}
-                          aria-haspopup="dialog"
-                          aria-expanded={roleOptions.open}
-                          onClick={roleOptions.onOpen}
-                        >
-                          {getRoleLabel(selectedRole)}
-                          <ChevronDown aria-hidden="true" className="text-text-tertiary" />
-                        </Button>
-                      ) : (
-                        <Button
-                          id={`edit-user-role-${user.id}`}
-                          type="button"
-                          variant="outline"
-                          className="w-full justify-start px-3 font-normal"
-                          disabled
-                        >
-                          Member
-                        </Button>
-                      )}
-                    </FormField>
-
-                    <RoleSelectSheet
-                      open={roleOptions.open}
-                      value={selectedRole}
-                      roles={assignableRoles}
-                      onSelect={(role) =>
-                        setValue('role', role, { shouldDirty: true, shouldValidate: true })
-                      }
-                      onClose={roleOptions.onClose}
-                    />
-
-                    {errors.root?.message && (
-                      <p role="alert" className="text-sm text-destructive">
-                        {errors.root.message}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <div className="flex min-h-0 flex-col gap-2 overflow-y-auto px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
-                  {!canManage && (
-                    <p className="pb-2 text-sm text-text-secondary">{disabledReason}</p>
-                  )}
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full"
-                    disabled={!canManage}
-                    onClick={openEdit}
-                  >
-                    <Pencil aria-hidden="true" />
-                    Edit User
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full"
-                    disabled={!canManage}
-                    onClick={openPasswordReset}
-                  >
-                    <KeyRound aria-hidden="true" />
-                    Reset Password
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    className="w-full"
-                    disabled={!canManage}
-                    onClick={openDeactivation}
-                  >
-                    <UserX aria-hidden="true" />
-                    Deactivate User
-                  </Button>
-                </div>
-              )}
-
-              {editing && (
-                <footer className="flex shrink-0 gap-3 border-t border-border p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="flex-1"
-                    disabled={updateUser.isPending}
-                    onClick={close}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    className="flex-1"
-                    disabled={!isDirty || !isValid || updateUser.isPending}
-                  >
-                    {updateUser.isPending && <Spinner className="size-4" />}
-                    {updateUser.isPending ? 'Saving…' : 'Save'}
-                  </Button>
-                </footer>
-              )}
-            </form>
-          </div>,
-          document.body,
-        )}
+      {detailsView === 'view' && (
+        <ViewUserSheet tenantId={tenantId} user={user} onClose={() => setDetailsView(null)} />
+      )}
+      {detailsView === 'edit' && (
+        <EditUserSheet
+          tenantId={tenantId}
+          user={user}
+          actorRole={actorRole}
+          onClose={() => setDetailsView(null)}
+        />
+      )}
 
       <DeactivateUserSheet
         open={deactivation.open}
@@ -423,42 +191,5 @@ export function UserActions({
         onClose={passwordReset.onClose}
       />
     </>
-  )
-}
-
-function toFormValues(user: UserSummary): EditUserFormValues {
-  return {
-    username: user.username,
-    firstName: user.firstName ?? '',
-    lastName: user.lastName ?? '',
-    role: user.role === 'admin' ? 'admin' : 'member',
-  }
-}
-
-function FormField({
-  id,
-  label,
-  error,
-  className,
-  children,
-}: {
-  id: string
-  label: string
-  error?: string
-  className?: string
-  children: ReactNode
-}) {
-  return (
-    <div className={`flex flex-col gap-1.5${className ? ` ${className}` : ''}`}>
-      <label htmlFor={id} className="text-sm font-medium">
-        {label}
-      </label>
-      {children}
-      {error && (
-        <p id={`${id}-error`} role="alert" className="text-sm text-destructive">
-          {error}
-        </p>
-      )}
-    </div>
   )
 }

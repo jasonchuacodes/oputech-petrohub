@@ -532,6 +532,7 @@ export type Query = {
   tenants: Array<TenantAccess>;
   timesheetDays: UserTimesheet;
   timesheets: TimesheetPage;
+  userDetails: UserDetails;
   users: UserPage;
 };
 
@@ -568,6 +569,11 @@ export type QueryTimesheetDaysArgs = {
 
 export type QueryTimesheetsArgs = {
   filter: TimesheetsFilter;
+};
+
+
+export type QueryUserDetailsArgs = {
+  input: UserDetailsInput;
 };
 
 
@@ -882,9 +888,15 @@ export type UpdateTenantInput = {
 };
 
 export type UpdateUserInput = {
+  address?: InputMaybe<Scalars['String']['input']>;
+  birthday?: InputMaybe<Scalars['String']['input']>;
   firstName?: InputMaybe<Scalars['String']['input']>;
   lastName?: InputMaybe<Scalars['String']['input']>;
+  pagibig?: InputMaybe<Scalars['String']['input']>;
+  philhealth?: InputMaybe<Scalars['String']['input']>;
   role: UserRole;
+  sss?: InputMaybe<Scalars['String']['input']>;
+  tin?: InputMaybe<Scalars['String']['input']>;
   userId: Scalars['ObjectId']['input'];
   username: Scalars['String']['input'];
 };
@@ -905,6 +917,28 @@ export type UserDeactivationReason =
   | 'other'
   | 'resign'
   | 'terminated';
+
+export type UserDetails = {
+  __typename?: 'UserDetails';
+  address?: Maybe<Scalars['String']['output']>;
+  birthday?: Maybe<Scalars['String']['output']>;
+  firstName?: Maybe<Scalars['String']['output']>;
+  fullName: Scalars['String']['output'];
+  id: Scalars['ObjectId']['output'];
+  lastName?: Maybe<Scalars['String']['output']>;
+  pagibig?: Maybe<Scalars['String']['output']>;
+  philhealth?: Maybe<Scalars['String']['output']>;
+  role: UserRole;
+  sss?: Maybe<Scalars['String']['output']>;
+  status: UserStatus;
+  tenantMembership?: Maybe<UserTenantMembership>;
+  tin?: Maybe<Scalars['String']['output']>;
+  username: Scalars['String']['output'];
+};
+
+export type UserDetailsInput = {
+  userId: Scalars['ObjectId']['input'];
+};
 
 export type UserPage = {
   __typename?: 'UserPage';
@@ -1125,6 +1159,8 @@ export type ResolversTypes = {
   UpdateUserInput: UpdateUserInput;
   User: ResolverTypeWrapper<User>;
   UserDeactivationReason: UserDeactivationReason;
+  UserDetails: ResolverTypeWrapper<UserDetails>;
+  UserDetailsInput: UserDetailsInput;
   UserPage: ResolverTypeWrapper<UserPage>;
   UserRole: UserRole;
   UserStatus: UserStatus;
@@ -1220,6 +1256,8 @@ export type ResolversParentTypes = {
   UpdateTenantInput: UpdateTenantInput;
   UpdateUserInput: UpdateUserInput;
   User: User;
+  UserDetails: UserDetails;
+  UserDetailsInput: UserDetailsInput;
   UserPage: UserPage;
   UserTenantDeactivation: UserTenantDeactivation;
   UserTenantMembership: UserTenantMembership;
@@ -1423,6 +1461,7 @@ export type QueryResolvers<ContextType = GraphqlContext, ParentType extends Reso
   tenants?: Resolver<Array<ResolversTypes['TenantAccess']>, ParentType, ContextType>;
   timesheetDays?: Resolver<ResolversTypes['UserTimesheet'], ParentType, ContextType, RequireFields<QueryTimesheetDaysArgs, 'filter'>>;
   timesheets?: Resolver<ResolversTypes['TimesheetPage'], ParentType, ContextType, RequireFields<QueryTimesheetsArgs, 'filter'>>;
+  userDetails?: Resolver<ResolversTypes['UserDetails'], ParentType, ContextType, RequireFields<QueryUserDetailsArgs, 'input'>>;
   users?: Resolver<ResolversTypes['UserPage'], ParentType, ContextType, RequireFields<QueryUsersArgs, 'input'>>;
 };
 
@@ -1587,6 +1626,23 @@ export type UserResolvers<ContextType = GraphqlContext, ParentType extends Resol
   username?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
+export type UserDetailsResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['UserDetails'] = ResolversParentTypes['UserDetails']> = {
+  address?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  birthday?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  firstName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  fullName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ObjectId'], ParentType, ContextType>;
+  lastName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  pagibig?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  philhealth?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  role?: Resolver<ResolversTypes['UserRole'], ParentType, ContextType>;
+  sss?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  status?: Resolver<ResolversTypes['UserStatus'], ParentType, ContextType>;
+  tenantMembership?: Resolver<Maybe<ResolversTypes['UserTenantMembership']>, ParentType, ContextType>;
+  tin?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  username?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
 export type UserPageResolvers<ContextType = GraphqlContext, ParentType extends ResolversParentTypes['UserPage'] = ResolversParentTypes['UserPage']> = {
   asOf?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   items?: Resolver<Array<ResolversTypes['User']>, ParentType, ContextType>;
@@ -1660,6 +1716,7 @@ export type Resolvers<ContextType = GraphqlContext> = {
   TimesheetPage?: TimesheetPageResolvers<ContextType>;
   TimesheetUserSummary?: TimesheetUserSummaryResolvers<ContextType>;
   User?: UserResolvers<ContextType>;
+  UserDetails?: UserDetailsResolvers<ContextType>;
   UserPage?: UserPageResolvers<ContextType>;
   UserTenantDeactivation?: UserTenantDeactivationResolvers<ContextType>;
   UserTenantMembership?: UserTenantMembershipResolvers<ContextType>;

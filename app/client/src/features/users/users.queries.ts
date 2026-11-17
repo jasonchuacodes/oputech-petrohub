@@ -3,23 +3,45 @@ import {
   CreateUserDocument,
   DeactivateUserDocument,
   ResetUserPasswordDocument,
+  UserDetailsDocument,
   UpdateUserDocument,
   UsersDocument,
   type CreateUserInput,
   type DeactivateUserInput,
   type ResetUserPasswordInput,
   type UpdateUserInput,
+  type UserDetailsQuery,
   type UsersQuery,
   type TenantUserAvailability,
 } from '~/generated/graphql'
 import { graphqlClient } from '~/lib/graphql'
 
 export type UserSummary = UsersQuery['users']['items'][number]
+export type UserDetails = UserDetailsQuery['userDetails']
 
 const userKeys = {
   tenant: (tenantId: string) => ['users', tenantId] as const,
+  detail: (tenantId: string, userId: string) =>
+    [...userKeys.tenant(tenantId), 'detail', userId] as const,
   list: (tenantId: string, availability: TenantUserAvailability, offset: number, limit: number) =>
     [...userKeys.tenant(tenantId), { availability, offset, limit }] as const,
+}
+
+export function useUserDetailsQuery(tenantId: string, userId: string) {
+  return useQuery({
+    queryKey: userKeys.detail(tenantId, userId),
+    queryFn: async () =>
+      (
+        await graphqlClient.request(
+          UserDetailsDocument,
+          { input: { userId } },
+          { tenantId },
+        )
+      ).userDetails,
+    gcTime: 0,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  })
 }
 
 export function useUsersQuery(

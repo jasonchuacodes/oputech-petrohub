@@ -34,6 +34,40 @@ describe('user form schemas', () => {
     ).toBe(false)
   })
 
+  it('validates and trims optional personal details', () => {
+    expect(
+      editUserFormSchema.parse({
+        username: 'new-user',
+        firstName: '',
+        lastName: '',
+        role: 'member',
+        sss: '  00-123  ',
+        pagibig: '',
+        philhealth: ' 01-234 ',
+        tin: ' 000-111 ',
+        birthday: '2000-02-29',
+        address: '  Line 1\nLine 2  ',
+      }),
+    ).toMatchObject({
+      sss: '00-123',
+      pagibig: '',
+      philhealth: '01-234',
+      tin: '000-111',
+      birthday: '2000-02-29',
+      address: 'Line 1\nLine 2',
+    })
+
+    expect(
+      editUserFormSchema.safeParse({
+        username: 'new-user',
+        firstName: '',
+        lastName: '',
+        role: 'member',
+        birthday: '2001-02-29',
+      }).success,
+    ).toBe(false)
+  })
+
   it('validates reset passwords without trimming them', () => {
     expect(
       resetPasswordFormSchema.parse({

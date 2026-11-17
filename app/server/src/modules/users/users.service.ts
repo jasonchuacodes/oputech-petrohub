@@ -18,6 +18,7 @@ import {
   DeactivateUserInput,
   DeleteUserInput,
   ResetUserPasswordInput,
+  UserDetailsInput,
   UpdateMyProfileInput,
   UpdateUserInput,
   UsersInput,
@@ -83,6 +84,25 @@ export type UserManagementRecord = UserRecord & {
       recordedByName: string
     }
   }
+}
+
+export type UserDetailsRecord = Pick<
+  User,
+  | 'firstName'
+  | 'lastName'
+  | 'username'
+  | 'role'
+  | 'status'
+  | 'sss'
+  | 'pagibig'
+  | 'philhealth'
+  | 'tin'
+  | 'birthday'
+  | 'address'
+> & {
+  id: Types.ObjectId
+  fullName: string
+  tenantMembership: UserManagementRecord['tenantMembership']
 }
 
 type TenantUserScope = {
@@ -183,6 +203,41 @@ export class UsersService {
     }
   }
 
+  async getUserDetails(
+    scope: TenantUserScope,
+    input: UserDetailsInput,
+  ): Promise<UserDetailsRecord> {
+    const user = await this.users
+      .findOne({
+        _id: input.userId,
+        accountHolderId: scope.accountHolderId,
+        tenantIds: scope.tenantId,
+        role: { $in: [UserRole.ADMIN, UserRole.MEMBER] },
+      })
+      .select('+sss +pagibig +philhealth +tin +birthday +address')
+      .lean<UserRecord>()
+      .exec()
+    if (!user) throw new NotFoundException('User not found.')
+
+    const record = this.toManagementRecord(user, scope.tenantId, new Date())
+    return {
+      id: record._id,
+      firstName: record.firstName,
+      lastName: record.lastName,
+      fullName: this.getFullName(record),
+      username: record.username,
+      role: record.role,
+      status: record.status,
+      tenantMembership: record.tenantMembership,
+      sss: record.sss,
+      pagibig: record.pagibig,
+      philhealth: record.philhealth,
+      tin: record.tin,
+      birthday: record.birthday,
+      address: record.address,
+    }
+  }
+
   async provisionUser(
     actor: UserManagementActor,
     scope: TenantUserScope,
@@ -243,17 +298,24 @@ export class UsersService {
     }
 
     const roleChanged = user.role !== input.role
+    const setFields: Record<string, string> = {
+      username: input.username,
+      role: input.role,
+      ...(input.firstName ? { firstName: input.firstName } : {}),
+      ...(input.lastName ? { lastName: input.lastName } : {}),
+    }
+    const unsetFields: Record<string, 1> = {
+      ...(input.firstName ? {} : { firstName: 1 as const }),
+      ...(input.lastName ? {} : { lastName: 1 as const }),
+    }
+    for (const field of ['sss', 'pagibig', 'philhealth', 'tin', 'birthday', 'address'] as const) {
+      const value = input[field]
+      if (value === null) unsetFields[field] = 1
+      else if (value !== undefined) setFields[field] = value
+    }
     const update = {
-      $set: {
-        username: input.username,
-        role: input.role,
-        ...(input.firstName ? { firstName: input.firstName } : {}),
-        ...(input.lastName ? { lastName: input.lastName } : {}),
-      },
-      $unset: {
-        ...(input.firstName ? {} : { firstName: 1 }),
-        ...(input.lastName ? {} : { lastName: 1 }),
-      },
+      $set: setFields,
+      $unset: unsetFields,
       ...(roleChanged ? { $inc: { credentialVersion: 1 } } : {}),
     }
 

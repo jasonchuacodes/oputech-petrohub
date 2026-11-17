@@ -23,6 +23,8 @@ import {
   UpdateMyProfileInput,
   usersInputSchema,
   UsersInput,
+  userDetailsInputSchema,
+  UserDetailsInput,
 } from './users.schemas'
 import { UserRecord, UsersService } from './users.service'
 
@@ -40,6 +42,16 @@ export class UsersResolver {
     @Args('input', new ZodValidationPipe(usersInputSchema)) input: UsersInput,
   ): ReturnType<UsersService['listUsers']> {
     return this.usersService.listUsers(this.toScope(tenant), input)
+  }
+
+  @Query('userDetails')
+  @UseGuards(...userManagementGuards)
+  @RequireRoles(UserRole.SUPERADMIN, UserRole.ADMIN)
+  userDetails(
+    @CurrentTenant() tenant: AuthorizedTenant,
+    @Args('input', new ZodValidationPipe(userDetailsInputSchema)) input: UserDetailsInput,
+  ): ReturnType<UsersService['getUserDetails']> {
+    return this.usersService.getUserDetails(this.toScope(tenant), input)
   }
 
   @Mutation('deactivateUser')

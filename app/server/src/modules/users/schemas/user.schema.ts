@@ -24,6 +24,24 @@ export class User {
   @Prop({ trim: true, type: String })
   lastName?: string
 
+  @Prop({ select: false, trim: true, type: String })
+  sss?: string
+
+  @Prop({ select: false, trim: true, type: String })
+  pagibig?: string
+
+  @Prop({ select: false, trim: true, type: String })
+  philhealth?: string
+
+  @Prop({ select: false, trim: true, type: String })
+  tin?: string
+
+  @Prop({ select: false, trim: true, type: String })
+  birthday?: string
+
+  @Prop({ select: false, trim: true, type: String })
+  address?: string
+
   @Prop({ required: true, lowercase: true, trim: true, type: String })
   username!: string
 

@@ -168,6 +168,34 @@ describe('user management', () => {
     expect(memberListing.body.errors[0].extensions.originalError).toMatchObject({ code: 'FORBIDDEN' })
   })
 
+  it('allows administrators to view tenant-scoped user details but blocks members', async () => {
+    const adminToken = await login('users-admin', 'AdminPassword123')
+    const memberToken = await login('users-member', 'MemberPassword123')
+    const query = `
+      query ($input: UserDetailsInput!) {
+        userDetails(input: $input) { id username role sss birthday address }
+      }
+    `
+
+    const details = await graphql(adminToken, query, {
+      input: { userId: anotherAdminId.toHexString() },
+    })
+    expect(details.body.errors).toBeUndefined()
+    expect(details.body.data.userDetails).toMatchObject({
+      id: anotherAdminId.toHexString(),
+      username: 'users-admin-two',
+      role: 'admin',
+      sss: null,
+      birthday: null,
+      address: null,
+    })
+
+    const forbidden = await graphql(memberToken, query, {
+      input: { userId: anotherAdminId.toHexString() },
+    })
+    expect(forbidden.body.errors[0].extensions.originalError).toMatchObject({ code: 'FORBIDDEN' })
+  })
+
   it('allows an authenticated user to update their own name', async () => {
     const memberToken = await login('users-member', 'MemberPassword123')
     const profileUpdate = await request(app.getHttpServer())
@@ -274,6 +302,12 @@ describe('user management', () => {
           firstName: 'Edited',
           lastName: 'Administrator',
           role: 'admin',
+          sss: '00-1234567-8',
+          pagibig: '0000-1111-2222',
+          philhealth: '01-234567890-1',
+          tin: '000-111-222-333',
+          birthday: '2000-02-29',
+          address: '123 Test Street\nManila',
         },
       },
     )
@@ -282,6 +316,54 @@ describe('user management', () => {
       username: 'edited-user',
       fullName: 'Edited Administrator',
       role: 'admin',
+    })
+
+    const detailsQuery = `
+      query ($input: UserDetailsInput!) {
+        userDetails(input: $input) {
+          id sss pagibig philhealth tin birthday address
+        }
+      }
+    `
+    const details = await graphql(ownerToken, detailsQuery, { input: { userId } })
+    expect(details.body.errors).toBeUndefined()
+    expect(details.body.data.userDetails).toMatchObject({
+      id: userId,
+      sss: '00-1234567-8',
+      pagibig: '0000-1111-2222',
+      philhealth: '01-234567890-1',
+      tin: '000-111-222-333',
+      birthday: '2000-02-29',
+      address: '123 Test Street\nManila',
+    })
+
+    const usersModel = app.get<Model<User>>(getModelToken(User.name))
+    const defaultSelection = await usersModel.findById(userId).lean().exec()
+    expect(defaultSelection).not.toHaveProperty('sss')
+    expect(defaultSelection).not.toHaveProperty('address')
+
+    const partialUpdate = await graphql(
+      ownerToken,
+      `mutation ($input: UpdateUserInput!) { updateUser(input: $input) { id } }`,
+      {
+        input: {
+          userId,
+          username: 'edited-user',
+          firstName: 'Edited',
+          lastName: 'Administrator',
+          role: 'admin',
+          sss: null,
+          address: '   ',
+        },
+      },
+    )
+    expect(partialUpdate.body.errors).toBeUndefined()
+    const partiallyCleared = await graphql(ownerToken, detailsQuery, { input: { userId } })
+    expect(partiallyCleared.body.data.userDetails).toMatchObject({
+      sss: null,
+      address: null,
+      pagibig: '0000-1111-2222',
+      birthday: '2000-02-29',
     })
 
     await request(app.getHttpServer())
