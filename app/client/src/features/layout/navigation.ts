@@ -11,6 +11,7 @@ import {
   UserRound,
   Users,
   type LucideIcon,
+  Cylinder,
 } from 'lucide-react'
 
 export type NavigationItem = {
@@ -56,10 +57,10 @@ export const managementNavigation: ManagementNavigationSection[] = [
         icon: Fuel,
       },
       {
-        label: 'Delivery',
+        label: 'Tanks',
         description: 'Record deliveries and review tank readings',
         href: primaryRouteHrefs.fuelDeliveries,
-        icon: Truck,
+        icon: Cylinder,
       },
       {
         label: 'Inventory',

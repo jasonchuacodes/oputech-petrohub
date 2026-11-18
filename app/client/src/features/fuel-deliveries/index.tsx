@@ -17,11 +17,8 @@ export function FuelDeliveriesPage() {
   return (
     <div className="mx-auto flex w-full flex-col gap-5 px-5 py-5 md:max-w-5xl md:p-6 wide:max-w-7xl">
       <PageHeader
-        title="Delivery"
+        title="Tank Readings"
         description="Record tanker deliveries and before-and-after tank readings."
-        backHref="/home"
-        backLabel="Back to Home"
-        backVisibility="mobile"
         action={
           setup.data ? (
             <Button
@@ -35,7 +32,7 @@ export function FuelDeliveriesPage() {
               onClick={() => setCreating(true)}
             >
               <Plus aria-hidden="true" />
-              Record delivery
+              Record Reading
             </Button>
           ) : undefined
         }
@@ -75,7 +72,7 @@ export function FuelDeliveriesPage() {
             onClick={() => setCreating(true)}
           >
             <Plus aria-hidden="true" />
-            Record delivery
+            Record Reading
           </Button>
           <FuelDeliveryHistory
             tenantId={access.tenant.id}
