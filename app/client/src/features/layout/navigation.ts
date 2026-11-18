@@ -12,23 +12,23 @@ import {
   Users,
   type LucideIcon,
   Cylinder,
-} from 'lucide-react'
+} from 'lucide-react';
 
 export type NavigationItem = {
-  label: string
-  href: string
-  icon: LucideIcon
-  activePaths?: string[]
-}
+  label: string;
+  href: string;
+  icon: LucideIcon;
+  activePaths?: string[];
+};
 
 export type ManagementNavigationItem = NavigationItem & {
-  description: string
-}
+  description: string;
+};
 
 export type ManagementNavigationSection = {
-  label: string
-  items: ManagementNavigationItem[]
-}
+  label: string;
+  items: ManagementNavigationItem[];
+};
 
 export const primaryRouteHrefs = {
   home: '/home',
@@ -36,15 +36,28 @@ export const primaryRouteHrefs = {
   fuelDeliveries: '/fuel-deliveries',
   timesheets: '/timesheet',
   inventory: '/inventory',
-} as const
+} as const;
 
 export const navigation: NavigationItem[] = [
   { label: 'Home', href: primaryRouteHrefs.home, icon: House },
   { label: 'Report', href: primaryRouteHrefs.reports, icon: ClipboardList },
   { label: 'Delivery', href: primaryRouteHrefs.fuelDeliveries, icon: Truck },
   { label: 'Timesheet', href: primaryRouteHrefs.timesheets, icon: Clock3 },
-  { label: 'Me', href: '/me', icon: UserRound, activePaths: ['/account', '/tenants', '/users', '/shifts', '/fuel-setup', '/inventory', '/income-setup'] },
-]
+  {
+    label: 'Me',
+    href: '/me',
+    icon: UserRound,
+    activePaths: [
+      '/account',
+      '/tenants',
+      '/users',
+      '/shifts',
+      '/fuel-setup',
+      '/inventory',
+      '/income-setup',
+    ],
+  },
+];
 
 export const managementNavigation: ManagementNavigationSection[] = [
   {
@@ -91,6 +104,12 @@ export const managementNavigation: ManagementNavigationSection[] = [
         href: '/users',
         icon: Users,
       },
+      {
+        label: 'Timesheets',
+        description: 'Review and adjust member timesheets',
+        href: '/timesheet',
+        icon: Clock3,
+      },
     ],
   },
-]
+];
