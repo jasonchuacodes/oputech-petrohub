@@ -2,7 +2,7 @@ import { Types } from 'mongoose'
 import { z } from 'zod'
 
 const decimalSchema = z.string().regex(/^(?:0|[1-9]\d*)(?:\.\d{1,3})?$/)
-const positiveDecimalSchema = decimalSchema.refine((value) => Number(value) > 0)
+const positiveDecimalSchema = decimalSchema.refine((value) => Number(value) >= 0)
 const localDateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine((value) => {
   const parsed = new Date(`${value}T00:00:00.000Z`)
   return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value

@@ -124,7 +124,7 @@ export function FuelDeliverySheet({
       return setError('Select at least one delivered fuel product.');
     if (
       lineEntries.some(
-        ([, quantity]) => !positiveDecimalPattern.test(quantity) || Number(quantity) <= 0,
+        ([, quantity]) => !positiveDecimalPattern.test(quantity) || Number(quantity) < 0,
       )
     ) {
       return setError('Enter a delivery quantity greater than zero using up to 3 decimal places.');
