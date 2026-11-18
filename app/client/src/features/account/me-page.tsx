@@ -58,9 +58,11 @@ export function MePage() {
           <ChevronRight aria-hidden="true" className="size-5 shrink-0 text-text-tertiary" />
         </Link>
 
-        <ContentSection label="Tenant">
-          <TenantSelector />
-        </ContentSection>
+        {isAdmin && (
+          <ContentSection label="Tenant">
+            <TenantSelector />
+          </ContentSection>
+        )}
 
         {isAdmin &&
           managementNavigation.map((section) => (
