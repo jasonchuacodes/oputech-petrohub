@@ -1,13 +1,15 @@
-'use client'
+'use client';
 
-import { ChevronRight, LogOut } from 'lucide-react'
-import Link from 'next/link'
-import { Button } from '~/components/ui/button'
-import { ContentSection } from '~/components/ui/content-section'
-import { useLogoutMutation, useSessionQuery } from '../auth/auth.queries'
-import { managementNavigation } from '../layout/navigation'
-import { clearActiveTenant } from '../tenants/active-tenant'
-import { getUserInitials, getUserRoleLabel } from './account-display'
+import { ChevronRight, LogOut } from 'lucide-react';
+import Link from 'next/link';
+import { Button } from '~/components/ui/button';
+import { ContentSection } from '~/components/ui/content-section';
+import { useLogoutMutation, useSessionQuery } from '../auth/auth.queries';
+import { managementNavigation } from '../layout/navigation';
+import { clearActiveTenant } from '../tenants/active-tenant';
+import { getUserInitials, getUserRoleLabel } from './account-display';
+import { SidebarTenantSwitcher } from '../layout/sidebar-tenant-switcher';
+import { TenantSelector } from './components/TenantSelector';
 
 const memberShortcuts = [
   {
@@ -25,13 +27,13 @@ const memberShortcuts = [
     description: 'Record deliveries and review tank readings',
     href: '/fuel-deliveries',
   },
-]
+];
 
 export function MePage() {
-  const session = useSessionQuery()
-  const logout = useLogoutMutation()
-  const user = session.data?.user
-  const isAdmin = user?.role === 'superadmin' || user?.role === 'admin'
+  const session = useSessionQuery();
+  const logout = useLogoutMutation();
+  const user = session.data?.user;
+  const isAdmin = user?.role === 'superadmin' || user?.role === 'admin';
 
   return (
     <div className="mx-auto flex min-h-full w-full flex-col px-5 py-5 md:max-w-4xl md:p-6 wide:max-w-7xl">
@@ -55,6 +57,10 @@ export function MePage() {
           </div>
           <ChevronRight aria-hidden="true" className="size-5 shrink-0 text-text-tertiary" />
         </Link>
+
+        <ContentSection label="Tenant">
+          <TenantSelector />
+        </ContentSection>
 
         {isAdmin &&
           managementNavigation.map((section) => (
@@ -98,8 +104,8 @@ export function MePage() {
             className="w-full gap-2"
             disabled={logout.isPending}
             onClick={() => {
-              clearActiveTenant()
-              logout.mutate()
+              clearActiveTenant();
+              logout.mutate();
             }}
           >
             <LogOut aria-hidden="true" />
@@ -108,7 +114,7 @@ export function MePage() {
         </section>
       </div>
     </div>
-  )
+  );
 }
 
 function ActionContent({ title, description }: { title: string; description: string }) {
@@ -120,5 +126,5 @@ function ActionContent({ title, description }: { title: string; description: str
       </span>
       <ChevronRight aria-hidden="true" className="size-5 shrink-0 text-text-tertiary" />
     </>
-  )
+  );
 }

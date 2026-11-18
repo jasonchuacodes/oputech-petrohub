@@ -91,12 +91,6 @@ export const managementNavigation: ManagementNavigationSection[] = [
         href: '/users',
         icon: Users,
       },
-      {
-        label: 'Tenants',
-        description: 'Manage workspaces and choose the active station',
-        href: '/tenants',
-        icon: Building2,
-      },
     ],
   },
 ]
